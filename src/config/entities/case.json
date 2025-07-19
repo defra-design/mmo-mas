@@ -1,0 +1,15 @@
+{
+  "displayName": "Case",
+  "icon": "Ticket",
+  "list": {
+    "columns": [
+      { "key": "reference",  "name": "Reference",  "width": 100, "bold": true },
+      { "key": "project",    "name": "Project",    "width": 220 },
+      { "key": "applicant",  "name": "Applicant",  "width": 180 },
+      { "key": "owner",      "name": "Assigned to","width": 160 },
+      { "key": "submitted",  "name": "Submitted",  "width": 140 },
+      { "key": "status",     "name": "Status",     "width": 120, "tag": true }
+    ],
+    "defaultSort": { "key": "submitted", "direction": "desc" }
+  }
+}

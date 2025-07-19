@@ -1,0 +1,42 @@
+[
+  {
+    "reference": "EXE/2025/00001",
+    "project": "Tower Bridge refurbishment",
+    "applicant": "Port of London Authority",
+    "owner": "Alex Morrison",
+    "submitted": "2025-07-01T10:14:00Z",
+    "status": "Scheduled"
+  },
+  {
+    "reference": "EXE/2025/00002",
+    "project": "South coast sea-sampling campaign",
+    "applicant": "South Coast Marine Surveys Ltd",
+    "owner": "Priya Patel",
+    "submitted": "2025-06-30T15:42:00Z",
+    "status": "Active"
+  },
+  {
+    "reference": "EXE/2025/00003",
+    "project": "Westhaven Bay pipe maintenance",
+    "applicant": "Westhaven Harbour Board",
+    "owner": "Daniel O’Sullivan",
+    "submitted": "2025-06-28T09:20:00Z",
+    "status": "Active"
+  },
+  {
+    "reference": "EXE/2025/00004",
+    "project": "Tynemouth – replacement of single pile",
+    "applicant": "Tynemouth Port Services",
+    "owner": "Sadia Khan",
+    "submitted": "2025-06-27T11:05:00Z",
+    "status": "Finished"
+  },
+  {
+    "reference": "EXE/2025/00005",
+    "project": "Hebrides wave-monitoring buoys",
+    "applicant": "Scottish Coastal Authority",
+    "owner": "Michael Grant",
+    "submitted": "2025-06-26T13:47:00Z",
+    "status": "Scheduled"
+  }
+]
