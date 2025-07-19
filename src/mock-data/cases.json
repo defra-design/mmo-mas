@@ -4,7 +4,7 @@
     "project": "Tower Bridge refurbishment",
     "applicant": "Port of London Authority",
     "owner": "Alex Morrison",
-    "submitted": "2025-07-01T10:14:00Z",
+    "submitted": "2025-07-01 10:14",
     "status": "Scheduled"
   },
   {
@@ -12,31 +12,47 @@
     "project": "South coast sea-sampling campaign",
     "applicant": "South Coast Marine Surveys Ltd",
     "owner": "Priya Patel",
-    "submitted": "2025-06-30T15:42:00Z",
+    "submitted": "2025-06-30 15:42",
     "status": "Active"
   },
   {
     "reference": "EXE/2025/00003",
     "project": "Westhaven Bay pipe maintenance",
     "applicant": "Westhaven Harbour Board",
-    "owner": "Daniel O’Sullivan",
-    "submitted": "2025-06-28T09:20:00Z",
+    "owner": "Daniel O'Sullivan",
+    "submitted": "2025-06-28 09:20",
     "status": "Active"
   },
   {
     "reference": "EXE/2025/00004",
-    "project": "Tynemouth – replacement of single pile",
+    "project": "Replacement of single pile",
     "applicant": "Tynemouth Port Services",
     "owner": "Sadia Khan",
-    "submitted": "2025-06-27T11:05:00Z",
+    "submitted": "2025-06-27 11:05",
     "status": "Finished"
   },
   {
     "reference": "EXE/2025/00005",
-    "project": "Hebrides wave-monitoring buoys",
-    "applicant": "Scottish Coastal Authority",
+    "project": "Worthing dive sites marker buoys",
+    "applicant": "Worthing Diving Club",
     "owner": "Michael Grant",
-    "submitted": "2025-06-26T13:47:00Z",
+    "submitted": "2025-06-26 13:47",
     "status": "Scheduled"
+  },
+  {
+	"reference": "EXE/2025/00006",
+	"project": "King Point Marina mooring piles removal",
+	"applicant": "Portsmouth Marine Services",
+	"owner": "Emma Thompson",
+	"submitted": "2025-06-25 14:30",
+	"status": "Active"
+  },
+  {
+	"reference": "EXE/2025/00007",
+	"project": "Dead seal removal",
+	"applicant": "Dover Port Authority",
+	"owner": "James Carter",
+	"submitted": "2025-06-24 16:15",
+	"status": "Active"
   }
 ]
