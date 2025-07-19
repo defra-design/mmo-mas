@@ -1,25 +1,27 @@
 // src/App.tsx
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import Shell from './components/Shell';
-import HeaderRow from './components/HeaderRow';
-import CommandBar from './components/CommandBar';
 import ListView from './components/ListView';
-import './App.css';
+import caseEntity from './config/entities/case.json';
+import caseData from './mock-data/cases.json';
 
-export default function App() {
+function App() {
   return (
     <FluentProvider theme={webLightTheme}>
-      <Shell>
-
-        {/* NEW: title and command bar share one flex row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 className="pageTitle">Active cases</h1>
-          <CommandBar />
-        </div>
-
-        <HeaderRow />
-        <ListView />
-      </Shell>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <Shell>
+          <div style={{ maxWidth: 1280 }}>
+            <ListView
+              entityConfig={caseEntity}
+              items={caseData}
+              title="Active cases"
+              view="active"
+            />
+          </div>
+        </Shell>
+      </div>
     </FluentProvider>
   );
 }
+
+export default App;

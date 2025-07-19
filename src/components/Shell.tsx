@@ -1,91 +1,53 @@
 // src/components/Shell.tsx
-import { PropsWithChildren } from 'react';
-import { Nav, getTheme } from '@fluentui/react';          // runtime code only
-import type { INavStyles, INavLinkGroup } from '@fluentui/react'; // ← types only
+import type { PropsWithChildren } from 'react';
 import TopBar from './TopBar';
-
-/* ---------- Styles ----------------------------------------------------- */
-
-const theme = getTheme();
-
-const navStyles: Partial<INavStyles> = {
-  root: {
-    width: 230,
-    height: '100%',
-    background: 'linear-gradient(#f5f4f3 0%, #f3f2f1 60%)',
-    borderRight: '1px solid #ddd',
-    paddingTop: 4,
-    selectors: {
-      '.ms-Nav-groupHeader': {
-        fontSize: 11,
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        color: '#616161',
-        padding: '12px 16px 4px',
-        borderBottom: '1px solid #e1dfdd',
-      },
-    },
-  },
-  link: {
-    height: 32,
-    padding: '0 12px 0 20px',
-    fontSize: 14,
-    color: '#605E5C',
-    selectors: {
-      ':hover': {
-        color: '#201F1E',
-        background: '#edebe9',
-        borderLeft: '3px solid #edebe9',
-      },
-      '.ms-Nav-compositeLink:hover .ms-Nav-icon': { color: '#201F1E' },
-    },
-  },
-  linkIsSelected: {
-    background: '#ffffff',
-    borderLeft: '3px solid #0078d4',
-    color: theme.palette.neutralPrimary,
-    selectors: {
-      '.ms-Nav-icon': { color: theme.palette.themePrimary },
-    },
-  },
-  chevronButton: {
-    selectors: {
-      '.ms-Button-icon': { color: '#616161' },
-      ':hover .ms-Button-icon': { color: '#201F1E' },
-    },
-  },
-};
+import Nav from './Nav';
+import '../App.css';
 
 /* ---------- Navigation groups ----------------------------------------- */
 
-const groups: INavLinkGroup[] = [
+const navGroups = [
   {
-    links: [
+    // First group - no header
+    items: [
       { name: 'Home', key: 'home', url: '#', icon: 'Home' },
-      { name: 'Recent', key: 'recent', url: '#', icon: 'Clock' },
-      { name: 'Pinned', key: 'pinned', url: '#', icon: 'Pinned' },
+      {
+        name: 'Recent',
+        key: 'recent',
+        icon: 'Clock',
+        children: [
+          { name: 'Recent Item 1', key: 'recent1', url: '#' },
+          { name: 'Recent Item 2', key: 'recent2', url: '#' },
+        ],
+      },
+      {
+        name: 'Pinned',
+        key: 'pinned',
+        icon: 'Pinned',
+        children: [
+          { name: 'Pinned Item 1', key: 'pinned1', url: '#' },
+          { name: 'Pinned Item 2', key: 'pinned2', url: '#' },
+        ],
+      },
     ],
   },
   {
     name: 'My Work',
-    collapseByDefault: false,
-    links: [
+    items: [
       { name: 'Tier 1 Dashboard', key: 'dashboard', url: '#', icon: 'BIDashboard' },
     ],
   },
   {
     name: 'Customers',
-    collapseByDefault: false,
-    links: [
+    items: [
       { name: 'Organisations', key: 'orgs', url: '#', icon: 'CompanyDirectory' },
       { name: 'Applicants', key: 'applicants', url: '#', icon: 'Contact' },
     ],
   },
   {
     name: 'Service',
-    collapseByDefault: false,
-    links: [
-      { name: 'Cases', key: 'cases', url: '#', icon: 'CaseWrapped' },
+    items: [
+      { name: 'Cases', key: 'cases', url: '#', icon: 'Repair' },
     ],
   },
 ];
@@ -94,18 +56,25 @@ const groups: INavLinkGroup[] = [
 
 export default function Shell({ children }: PropsWithChildren) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <TopBar />
 
-      <div style={{ display: 'flex', flex: 1 }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <Nav
+          groups={navGroups}
           selectedKey="cases"
-          ariaLabel="Main navigation"
-          styles={navStyles}
-          groups={groups}
+          onLinkClick={(key: string) => console.log('Clicked:', key)}
         />
 
-        <main style={{ flexGrow: 1, padding: 24 }}>{children}</main>
+        <main style={{ 
+          flexGrow: 1, 
+          padding: '0 28px', 
+          backgroundColor: '#fff',
+          overflow: 'auto',
+          minHeight: 0
+        }}>
+          {children}
+        </main>
       </div>
     </div>
   );

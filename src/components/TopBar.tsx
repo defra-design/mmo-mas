@@ -10,7 +10,7 @@ const classes = mergeStyleSets({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 12px',
+    padding: '0 20px',
   },
   left: { display: 'flex', alignItems: 'center', gap: 12 },
   right: { display: 'flex', alignItems: 'center', gap: 16 },

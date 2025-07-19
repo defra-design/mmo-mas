@@ -1,5 +1,12 @@
-# .github/copilot.yml
-version: 1
+# .github/copilot.  - name: coding-conventions
+    message: |
+      * Use functional components + hooks only.
+      * Import types with **`import type { … } from '@fluentui/react'`** so Vite's runtime bundle stays clean.
+      * Icon font: assume initializeIcons() already runs in src/main.tsx.
+      * Keep row components small: ListView.tsx (grid), RecordForm.tsx (single record), etc.
+      * Navigation: Use Nav.tsx component with expandable sections, proper D365 styling in Nav.css.
+      * Selected colour tokens: #0078d4 (blue) for active, #edebe9 for hover, #f3f2f1 rail background.
+      * CSS: Component-specific CSS files are allowed (Nav.css), otherwise use inline styles or mergeStyleSets.sion: 1
 rules:
   # ------------------------------------------------------------
   # 0. What this project is
@@ -8,9 +15,10 @@ rules:
     message: |
       You are working in a React + TypeScript prototype that mimics a Dynamics 365 (model-driven) app for internal Marine Management Organisation staff.
       * Design system: Fluent UI (v8 + v9) – @fluentui/react and @fluentui/react-components.
-      * Layout: TopBar (navy header) ▸ Left Nav rail ▸ Main content.
+      * Layout: TopBar (navy header) ▸ Custom Left Nav rail ▸ Main content.
+      * Navigation: Custom Nav.tsx component with Nav.css styling that matches D365 interface (expandable sections, chevrons, proper spacing).
       * Data is mocked from JSON under src/mock-data; entity configs live in src/config/entities.
-      * Styling uses inline JS objects or mergeStyleSets – **no external CSS frameworks**.
+      * Styling uses CSS files for components (Nav.css) or inline JS objects/mergeStyleSets – **no external CSS frameworks**.
 
   # ------------------------------------------------------------
   # 1. General coding conventions
@@ -52,6 +60,17 @@ rules:
     message: |
       Allowed: @fluentui/*, date-fns, uuid, faker.
       Avoid: moment.js, lodash (tree-shakes poorly), any CSS-in-JS lib besides mergeStyleSets.
+
+  # ------------------------------------------------------------
+  # 6. Navigation component
+  # ------------------------------------------------------------
+  - name: navigation-component
+    message: |
+      * Navigation uses custom Nav.tsx component (not Fluent UI Nav) for precise D365 styling.
+      * Nav.css contains all navigation styling - expandable sections, chevrons, hover states.
+      * Chevrons: point down (V) when closed, point up (^) when expanded.
+      * Structure: Home, Recent (expandable), Pinned (expandable), then section headers with items.
+      * Selected items get white background + blue left border (#0078d4).
 
   # ------------------------------------------------------------
   # 5. Commit hygiene
