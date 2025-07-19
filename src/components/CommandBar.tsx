@@ -19,14 +19,14 @@ const items: ICommandBarItemProps[] = [
     text: 'Show As',
     iconProps: { iconName: 'View' },
     buttonStyles,
-    submenuProps: {
+    subMenuProps: {
       items: [
         { key: 'read', text: 'Read view', iconProps: { iconName: 'ReadingMode' } },
         { key: 'edit', text: 'Editable grid', iconProps: { iconName: 'Edit' } },
       ],
     },
   },
-  { key: 'new', text: 'New Case', iconProps: { iconName: 'Add' }, buttonStyles },
+  { key: 'new', text: 'New case', iconProps: { iconName: 'Add' }, buttonStyles },
   { key: 'delete', text: 'Delete', iconProps: { iconName: 'Delete' }, buttonStyles },
   { key: 'refresh', text: 'Refresh', iconProps: { iconName: 'Refresh' }, buttonStyles },
 ];

@@ -1,0 +1,65 @@
+# .github/copilot.yml
+version: 1
+rules:
+  # ------------------------------------------------------------
+  # 0. What this project is
+  # ------------------------------------------------------------
+  - name: project-context
+    message: |
+      You are working in a React + TypeScript prototype that mimics a Dynamics 365 (model-driven) app for internal Marine Management Organisation staff.
+      * Design system: Fluent UI (v8 + v9) – @fluentui/react and @fluentui/react-components.
+      * Layout: TopBar (navy header) ▸ Left Nav rail ▸ Main content.
+      * Data is mocked from JSON under src/mock-data; entity configs live in src/config/entities.
+      * Styling uses inline JS objects or mergeStyleSets – **no external CSS frameworks**.
+
+  # ------------------------------------------------------------
+  # 1. General coding conventions
+  # ------------------------------------------------------------
+  - name: coding-conventions
+    message: |
+      * Use functional components + hooks only.
+      * Import types with **`import type { … } from '@fluentui/react'`** so Vite’s runtime bundle stays clean.
+      * Icon font: assume initializeIcons() already runs in src/main.tsx.
+      * Keep row components small: ListView.tsx (grid), RecordForm.tsx (single record), etc.
+      * Selected colour tokens: #0078d4 (blue) for active, #edebe9 for hover, #f3f2f1 rail background.
+
+  # ------------------------------------------------------------
+  # 2. Pattern for **creating a new page**
+  # ------------------------------------------------------------
+  - name: new-page-template
+    message: |
+      To scaffold a *new entity view*:
+        1. Add mock rows → src/mock-data/<entityPlural>.json.
+        2. Describe columns + form layout → src/config/entities/<entity>.json.
+        3. Create <Entity>ListView.tsx inside src/components (wrap Fluent DetailsList).
+        4. Register a left-nav link in Shell.tsx groups array.
+        5. Add a route + page component stub in App.tsx (or React Router switch).
+      Keep each PR focussed on ONE entity or page.
+
+  # ------------------------------------------------------------
+  # 3. File-naming & folder rules
+  # ------------------------------------------------------------
+  - name: file-structure
+    message: |
+      * Components live in src/components – PascalCase file names.
+      * Non-React helpers go in src/utils.
+      * No absolute imports; use relative paths (VS Code will auto-alias later).
+
+  # ------------------------------------------------------------
+  # 4. Preferred libraries / avoid
+  # ------------------------------------------------------------
+  - name: allowed-libs
+    message: |
+      Allowed: @fluentui/*, date-fns, uuid, faker.
+      Avoid: moment.js, lodash (tree-shakes poorly), any CSS-in-JS lib besides mergeStyleSets.
+
+  # ------------------------------------------------------------
+  # 5. Commit hygiene
+  # ------------------------------------------------------------
+  - name: commit-style
+    message: |
+      Use Conventional Commits:
+        feat: …      for new screens/components
+        fix: …       for bug fixes
+        chore: …     for tooling / lint / deps
+      Keep PRs under 300 lines where possible.
