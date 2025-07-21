@@ -1,6 +1,7 @@
 [
   {
     "reference": "EXE/2025/00001",
+    "type": "Exempt activity notification",
     "project": "Tower Bridge refurbishment",
     "applicant": "Port of London Authority",
     "owner": "Alex Morrison",
@@ -9,6 +10,7 @@
   },
   {
     "reference": "EXE/2025/00002",
+    "type": "Exempt activity notification",
     "project": "South coast sea-sampling campaign",
     "applicant": "South Coast Marine Surveys Ltd",
     "owner": "Priya Patel",
@@ -17,6 +19,7 @@
   },
   {
     "reference": "EXE/2025/00003",
+    "type": "Exempt activity notification",
     "project": "Westhaven Bay pipe maintenance",
     "applicant": "Westhaven Harbour Board",
     "owner": "Daniel O'Sullivan",
@@ -25,6 +28,7 @@
   },
   {
     "reference": "EXE/2025/00004",
+    "type": "Exempt activity notification",
     "project": "Replacement of single pile",
     "applicant": "Tynemouth Port Services",
     "owner": "Sadia Khan",
@@ -33,6 +37,7 @@
   },
   {
     "reference": "EXE/2025/00005",
+    "type": "Exempt activity notification",
     "project": "Worthing dive sites marker buoys",
     "applicant": "Worthing Diving Club",
     "owner": "Michael Grant",
@@ -41,6 +46,7 @@
   },
   {
 	"reference": "EXE/2025/00006",
+	"type": "Exempt activity notification",
 	"project": "King Point Marina mooring piles removal",
 	"applicant": "Portsmouth Marine Services",
 	"owner": "Emma Thompson",
@@ -49,6 +55,7 @@
   },
   {
 	"reference": "EXE/2025/00007",
+	"type": "Exempt activity notification",
 	"project": "Dead seal removal",
 	"applicant": "Dover Port Authority",
 	"owner": "James Carter",
