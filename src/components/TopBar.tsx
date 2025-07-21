@@ -29,7 +29,7 @@ export default function TopBar() {
       {/* left section: waffle & product title */}
       <div className={classes.left}>
         <IconButton iconProps={{ iconName: 'GlobalNavButton' }} styles={buttonStyles} />
-        <span className={classes.title}>Get permission for marine work</span>
+        <span className={classes.title}>Dynamics 365 | Get permission for marine work</span>
       </div>
 
       {/* right section: placeholder actions */}

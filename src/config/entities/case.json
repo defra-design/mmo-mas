@@ -4,7 +4,7 @@
   "list": {
     "columns": [
       { "key": "reference",  "name": "Reference",  "width": 100, "bold": true },
-      { "key": "type",    "name": "Type",    "width": 120, "tag": true },
+      { "key": "type",    "name": "Type",    "width": 190, "tag": true },
       { "key": "project",    "name": "Project",    "width": 220 },
       { "key": "applicant",  "name": "Applicant",  "width": 180 },
       { "key": "owner",      "name": "Assigned to","width": 160 },
