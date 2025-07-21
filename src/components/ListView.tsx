@@ -54,7 +54,7 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
       <DetailsList
         items={items}
         columns={columns}
-        layoutMode={DetailsListLayoutMode.justified}
+        layoutMode={DetailsListLayoutMode.fixedColumns}
         selectionMode={SelectionMode.none}
       />
     </>
