@@ -62,7 +62,7 @@ rules:
       Avoid: moment.js, lodash (tree-shakes poorly), any CSS-in-JS lib besides mergeStyleSets.
 
   # ------------------------------------------------------------
-  # 6. Navigation component
+  # 5. Navigation component
   # ------------------------------------------------------------
   - name: navigation-component
     message: |
@@ -71,9 +71,10 @@ rules:
       * Chevrons: point down (V) when closed, point up (^) when expanded.
       * Structure: Home, Recent (expandable), Pinned (expandable), then section headers with items.
       * Selected items get white background + blue left border (#0078d4).
+      * Navigation full height with proper responsive behavior.
 
   # ------------------------------------------------------------
-  # 5. Commit hygiene
+  # 6. Commit hygiene
   # ------------------------------------------------------------
   - name: commit-style
     message: |
