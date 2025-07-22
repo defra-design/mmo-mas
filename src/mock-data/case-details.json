@@ -1,0 +1,187 @@
+{
+  "EXE/2025/00001": {
+    "reference": "EXE/2025/00001",
+    "title": "Tower Bridge refurbishment",
+    "status": "Scheduled",
+    "applicant": "Port of London Authority",
+    "assignedTo": "Alex Morrison",
+    "submitted": "2025-07-01 10:14",
+    "summary": "Application for temporary exemption during bridge maintenance work. The Port of London Authority requires permission to conduct underwater inspections and minor repairs to the Tower Bridge foundation structures.",
+    "sections": {
+      "general": {
+        "caseNumber": "EXE/2025/00001",
+        "caseType": "Exempt activity notification",
+        "priority": "Normal",
+        "source": "Web Portal",
+        "description": "Routine maintenance and inspection of bridge underwater structures"
+      },
+      "timeline": [
+        { "date": "2025-07-01", "action": "Case created", "user": "System" },
+        { "date": "2025-07-02", "action": "Assigned to Alex Morrison", "user": "Case Manager" },
+        { "date": "2025-07-03", "action": "Initial review completed", "user": "Alex Morrison" }
+      ],
+      "notes": [
+        { "date": "2025-07-03", "note": "Initial review completed. All documentation appears to be in order.", "author": "Alex Morrison" },
+        { "date": "2025-07-02", "note": "Case assigned for processing.", "author": "Case Manager" }
+      ]
+    }
+  },
+  "EXE/2025/00002": {
+    "reference": "EXE/2025/00002",
+    "title": "South coast sea-sampling campaign",
+    "status": "Active",
+    "applicant": "South Coast Marine Surveys Ltd",
+    "assignedTo": "Priya Patel",
+    "submitted": "2025-06-30 15:42",
+    "summary": "Marine sampling operation off the south coast for environmental monitoring purposes. Survey includes water quality testing and marine life assessment.",
+    "sections": {
+      "general": {
+        "caseNumber": "EXE/2025/00002",
+        "caseType": "Exempt activity notification",
+        "priority": "High",
+        "source": "Email",
+        "description": "Environmental monitoring and water quality assessment"
+      },
+      "timeline": [
+        { "date": "2025-06-30", "action": "Case created", "user": "System" },
+        { "date": "2025-07-01", "action": "Assigned to Priya Patel", "user": "Case Manager" },
+        { "date": "2025-07-05", "action": "Site visit scheduled", "user": "Priya Patel" }
+      ],
+      "notes": [
+        { "date": "2025-07-05", "note": "Site visit scheduled for next week. Coordination with local authorities required.", "author": "Priya Patel" },
+        { "date": "2025-07-01", "note": "High priority case due to time-sensitive nature of sampling.", "author": "Priya Patel" }
+      ]
+    }
+  },
+  "EXE/2025/00003": {
+    "reference": "EXE/2025/00003",
+    "title": "Westhaven Bay pipe maintenance",
+    "status": "Active",
+    "applicant": "Westhaven Harbour Board",
+    "assignedTo": "Daniel O'Sullivan",
+    "submitted": "2025-06-28 09:20",
+    "summary": "Routine maintenance of underwater pipes in Westhaven Bay area. Work includes inspection, cleaning, and minor repairs as needed.",
+    "sections": {
+      "general": {
+        "caseNumber": "EXE/2025/00003",
+        "caseType": "Exempt activity notification",
+        "priority": "Normal",
+        "source": "Web Portal",
+        "description": "Underwater pipe maintenance and inspection"
+      },
+      "timeline": [
+        { "date": "2025-06-28", "action": "Case created", "user": "System" },
+        { "date": "2025-06-29", "action": "Assigned to Daniel O'Sullivan", "user": "Case Manager" }
+      ],
+      "notes": [
+        { "date": "2025-06-29", "note": "Case under review. Awaiting additional technical documentation.", "author": "Daniel O'Sullivan" }
+      ]
+    }
+  },
+  "EXE/2025/00004": {
+    "reference": "EXE/2025/00004",
+    "title": "Replacement of single pile",
+    "status": "Finished",
+    "applicant": "Tynemouth Port Services",
+    "assignedTo": "Sadia Khan",
+    "submitted": "2025-06-27 11:05",
+    "summary": "Replacement of a single deteriorated pile in Tynemouth port area. Work completed successfully with minimal environmental impact.",
+    "sections": {
+      "general": {
+        "caseNumber": "EXE/2025/00004",
+        "caseType": "Exempt activity notification",
+        "priority": "Normal",
+        "source": "Phone",
+        "description": "Single pile replacement due to structural deterioration"
+      },
+      "timeline": [
+        { "date": "2025-06-27", "action": "Case created", "user": "System" },
+        { "date": "2025-06-27", "action": "Assigned to Sadia Khan", "user": "Case Manager" },
+        { "date": "2025-06-28", "action": "Approved for work", "user": "Sadia Khan" },
+        { "date": "2025-07-15", "action": "Work completed", "user": "Sadia Khan" },
+        { "date": "2025-07-16", "action": "Case closed", "user": "Sadia Khan" }
+      ],
+      "notes": [
+        { "date": "2025-07-16", "note": "Work completed successfully. Site inspection confirms minimal environmental impact.", "author": "Sadia Khan" },
+        { "date": "2025-06-28", "note": "Application approved. Work can proceed as planned.", "author": "Sadia Khan" }
+      ]
+    }
+  },
+  "EXE/2025/00005": {
+    "reference": "EXE/2025/00005",
+    "title": "Worthing dive sites marker buoys",
+    "status": "Scheduled",
+    "applicant": "Worthing Diving Club",
+    "assignedTo": "Michael Grant",
+    "submitted": "2025-06-26 13:47",
+    "summary": "Installation of marker buoys at designated dive sites near Worthing. Buoys will help identify safe diving areas and protect marine environment.",
+    "sections": {
+      "general": {
+        "caseNumber": "EXE/2025/00005",
+        "caseType": "Exempt activity notification",
+        "priority": "Low",
+        "source": "Web Portal",
+        "description": "Installation of dive site marker buoys"
+      },
+      "timeline": [
+        { "date": "2025-06-26", "action": "Case created", "user": "System" },
+        { "date": "2025-06-27", "action": "Assigned to Michael Grant", "user": "Case Manager" }
+      ],
+      "notes": [
+        { "date": "2025-06-27", "note": "Case scheduled for review. Coordinating with local diving authorities.", "author": "Michael Grant" }
+      ]
+    }
+  },
+  "EXE/2025/00006": {
+    "reference": "EXE/2025/00006",
+    "title": "King Point Marina mooring piles removal",
+    "status": "Active",
+    "applicant": "Portsmouth Marine Services",
+    "assignedTo": "Emma Thompson",
+    "submitted": "2025-06-25 14:30",
+    "summary": "Removal of old mooring piles at King Point Marina. Work includes safe extraction and disposal of deteriorated structures.",
+    "sections": {
+      "general": {
+        "caseNumber": "EXE/2025/00006",
+        "caseType": "Exempt activity notification",
+        "priority": "Normal",
+        "source": "Email",
+        "description": "Removal of deteriorated mooring pile structures"
+      },
+      "timeline": [
+        { "date": "2025-06-25", "action": "Case created", "user": "System" },
+        { "date": "2025-06-26", "action": "Assigned to Emma Thompson", "user": "Case Manager" }
+      ],
+      "notes": [
+        { "date": "2025-06-26", "note": "Environmental impact assessment required before proceeding.", "author": "Emma Thompson" }
+      ]
+    }
+  },
+  "EXE/2025/00007": {
+    "reference": "EXE/2025/00007",
+    "title": "Dead seal removal",
+    "status": "Active",
+    "applicant": "Dover Port Authority",
+    "assignedTo": "James Carter",
+    "submitted": "2025-06-24 16:15",
+    "summary": "Urgent removal of deceased marine mammal from Dover port area. Coordination with marine wildlife authorities required.",
+    "sections": {
+      "general": {
+        "caseNumber": "EXE/2025/00007",
+        "caseType": "Exempt activity notification",
+        "priority": "Urgent",
+        "source": "Phone",
+        "description": "Emergency removal of deceased marine mammal"
+      },
+      "timeline": [
+        { "date": "2025-06-24", "action": "Case created", "user": "System" },
+        { "date": "2025-06-24", "action": "Assigned to James Carter", "user": "Case Manager" },
+        { "date": "2025-06-25", "action": "Coordinated with wildlife authorities", "user": "James Carter" }
+      ],
+      "notes": [
+        { "date": "2025-06-25", "note": "Wildlife authorities contacted. Removal scheduled for tomorrow morning.", "author": "James Carter" },
+        { "date": "2025-06-24", "note": "Urgent priority due to health and safety concerns.", "author": "James Carter" }
+      ]
+    }
+  }
+}
