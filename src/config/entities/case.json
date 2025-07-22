@@ -3,7 +3,7 @@
   "icon": "Ticket",
   "list": {
     "columns": [
-      { "key": "reference",  "name": "Reference",  "width": 100, "bold": true },
+      { "key": "reference",  "name": "Reference",  "width": 110, "bold": true },
       { "key": "type",    "name": "Type",    "width": 190, "tag": true },
       { "key": "project",    "name": "Project",    "width": 220 },
       { "key": "applicant",  "name": "Applicant",  "width": 180 },
