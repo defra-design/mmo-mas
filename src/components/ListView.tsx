@@ -1,4 +1,6 @@
 // src/components/ListView.tsx
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from '@fluentui/react';
 import type { IColumn } from '@fluentui/react';
 import CommandBar from './CommandBar';
@@ -12,6 +14,21 @@ interface ListViewProps {
 }
 
 export default function ListView({ entityConfig, items, title }: ListViewProps) {
+  const navigate = useNavigate();
+
+  // Set page title when component mounts or title changes
+  useEffect(() => {
+    document.title = `${title} - Marine Management`;
+  }, [title]);
+
+  // Handle case detail navigation
+  const navigateToCase = (caseReference: string) => {
+    console.log('Navigate to case:', caseReference);
+    // URL encode the case reference to handle slashes
+    const encodedReference = encodeURIComponent(caseReference);
+    navigate(`/cases/${encodedReference}`);
+  };
+
   // Helper function to get tag CSS class
   const getTagClass = (columnKey: string, value: string) => {
     if (columnKey === 'type') {
@@ -34,14 +51,31 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
     fieldName: c.key,
     minWidth: c.width,
     isResizable: true,
-    onRender: (item: any) =>
-      c.tag ? (
-        <span className={getTagClass(c.key, item[c.key])}>
-          {item[c.key]}
-        </span>
-      ) : (
-        item[c.key]
-      ),
+    onRender: (item: any) => {
+      // Handle different column types with clickable links
+      if (c.key === 'project') {
+        return (
+          <button
+            onClick={() => navigateToCase(item.reference)}
+            className="link-button"
+          >
+            {item[c.key]}
+          </button>
+        );
+      }
+      
+      // Handle tags (status, type)
+      if (c.tag) {
+        return (
+          <span className={getTagClass(c.key, item[c.key])}>
+            {item[c.key]}
+          </span>
+        );
+      }
+      
+      // Default rendering for other columns (applicant, owner, etc.)
+      return item[c.key];
+    },
   }));
 
   return (
