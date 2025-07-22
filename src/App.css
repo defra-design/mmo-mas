@@ -105,3 +105,27 @@
   color: #282d30;
 }
 
+/* Clickable Link Styles */
+.link-button {
+  background: none !important;
+  border: none !important;
+  color: #0078d4 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  padding: 0 !important;
+  font-family: 'Segoe UI', sans-serif !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  font-weight: 400 !important;
+}
+
+.link-button:hover {
+  color: #106ebe !important;
+  text-decoration: underline !important;
+}
+
+.link-button:focus {
+  outline: 1px solid #005a9e !important;
+  outline-offset: 1px !important;
+}
+
