@@ -2,6 +2,7 @@
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import Shell from './components/Shell';
+import IndexPage from './components/IndexPage';
 import ListView from './components/ListView';
 import CaseView from './components/CaseView';
 import caseEntity from './config/entities/case.json';
@@ -12,27 +13,40 @@ function App() {
     <FluentProvider theme={webLightTheme}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         <Router>
-          <Shell>
-            <div style={{ maxWidth: 1280 }}>
-              <Routes>
-                <Route 
-                  path="/" 
-                  element={
+          <Routes>
+            {/* Clean index page without Shell */}
+            <Route 
+              path="/" 
+              element={<IndexPage />} 
+            />
+            
+            {/* D365 prototype pages with Shell */}
+            <Route 
+              path="/iteration1" 
+              element={
+                <Shell>
+                  <div style={{ maxWidth: 1280 }}>
                     <ListView
                       entityConfig={caseEntity}
                       items={caseData}
                       title="Active cases"
                       view="active"
                     />
-                  } 
-                />
-                <Route 
-                  path="/cases/:caseId" 
-                  element={<CaseViewWrapper />} 
-                />
-              </Routes>
-            </div>
-          </Shell>
+                  </div>
+                </Shell>
+              } 
+            />
+            <Route 
+              path="/cases/:caseId" 
+              element={
+                <Shell>
+                  <div style={{ maxWidth: 1280 }}>
+                    <CaseViewWrapper />
+                  </div>
+                </Shell>
+              } 
+            />
+          </Routes>
         </Router>
       </div>
     </FluentProvider>
