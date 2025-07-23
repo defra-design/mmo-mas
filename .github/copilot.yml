@@ -1,4 +1,6 @@
-# .github/copilot.  - name: coding-conventions
+version: 1
+rules:
+  - name: project-context
     message: |
       * Use functional components + hooks only.
       * Import types with **`import type { … } from '@fluentui/react'`** so Vite's runtime bundle stays clean.
@@ -17,7 +19,7 @@ rules:
       * Design system: Fluent UI (v8 + v9) – @fluentui/react and @fluentui/react-components.
       * Layout: TopBar (navy header) ▸ Custom Left Nav rail ▸ Main content.
       * Navigation: Custom Nav.tsx component with Nav.css styling that matches D365 interface (expandable sections, chevrons, proper spacing).
-      * Data is mocked from JSON under src/mock-data; entity configs live in src/config/entities.
+      * Data is mocked from JSON under src/mock-data; entifety configs live in src/config/entities.
       * Styling uses CSS files for components (Nav.css) or inline JS objects/mergeStyleSets – **no external CSS frameworks**.
 
   # ------------------------------------------------------------
