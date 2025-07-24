@@ -15,7 +15,7 @@ import FilterControls from './FilterControls';
 // Styles to match the elevated case list panel and title
 const useStyles = makeStyles({
   pageContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: tokens.colorNeutralBackground2,
   },
   headerPanel: {
     backgroundColor: tokens.colorNeutralBackground1,

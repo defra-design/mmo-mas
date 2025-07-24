@@ -68,7 +68,7 @@ export default function Shell({ children }: PropsWithChildren) {
 
         <main style={{ 
           flexGrow: 1, 
-          backgroundColor: '#fff',
+          backgroundColor: '#fafafa',
           overflow: 'auto',
           minHeight: 0,
           paddingLeft: '20px',

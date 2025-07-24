@@ -18,12 +18,12 @@ import {
   TabList,
   Tab
 } from '@fluentui/react-components';
-import { ArrowLeftRegular, GlobeRegular, PersonRegular } from '@fluentui/react-icons';
+import { ArrowLeftRegular, GlobeRegular, PersonRegular, ShareRegular, ArrowClockwiseRegular } from '@fluentui/react-icons';
 import caseDetailsData from '../mock-data/case-details.json';
 
 const useStyles = makeStyles({
   pageContainer: {
-    backgroundColor: tokens.colorNeutralBackground1,
+    backgroundColor: tokens.colorNeutralBackground2,
     padding: `${tokens.spacingHorizontalXL} ${tokens.spacingHorizontalXS}`,
     display: 'flex',
     flexDirection: 'column',
@@ -120,6 +120,34 @@ const useStyles = makeStyles({
   boldText: {
     fontWeight: tokens.fontWeightSemibold,
   },
+  navPanel: {
+    ...shorthands.padding(tokens.spacingHorizontalL, tokens.spacingVerticalL),
+  },
+  navPanelContent: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  navLeftGroup: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalXS,
+  },
+  verticalDivider: {
+    width: '1px',
+    height: '20px',
+    backgroundColor: tokens.colorNeutralStroke2,
+    margin: `0 ${tokens.spacingHorizontalXS}`,
+  },
+  avatarDivider: {
+    width: '1px',
+    height: '48px',
+    backgroundColor: tokens.colorNeutralStroke2,
+    marginRight: tokens.spacingHorizontalM,
+  },
 });
 
 // CaseHeader component
@@ -129,18 +157,35 @@ function CaseHeader({ caseData }: { caseData: any }) {
 
   return (
     <>
-      {/* Back navigation above the card */}
-      <Button 
-        appearance="subtle"
-        icon={<ArrowLeftRegular />}
-        onClick={() => navigate('/iteration1')}
-        style={{ marginBottom: tokens.spacingVerticalS, alignSelf: 'flex-start' }}
-      >
-        Cases
-      </Button>
+      {/* Navigation panel */}
+      <Card className={styles.navPanel}>
+        <div className={styles.navPanelContent}>
+          <div className={styles.navLeftGroup}>
+            <Button 
+              appearance="subtle"
+              icon={<ArrowLeftRegular />}
+              onClick={() => navigate('/iteration1')}
+            />
+            <div className={styles.verticalDivider}></div>
+            <Button 
+              appearance="subtle"
+              icon={<ArrowClockwiseRegular />}
+            >
+              Refresh
+            </Button>
+          </div>
+          <Button
+            appearance="subtle"
+            icon={<ShareRegular />}
+          >
+            Share
+          </Button>
+        </div>
+      </Card>
       
       <Card className={styles.headerCard}>
         <div className={styles.headerContent}>
+          
           <Avatar 
             name={caseData.title} 
             size={48}
@@ -155,6 +200,7 @@ function CaseHeader({ caseData }: { caseData: any }) {
               <Body2 className={styles.boldText}>Completed</Body2>
               <Body1>Status</Body1>
             </div>
+            <div className={styles.avatarDivider}></div>
             <Avatar 
               name={caseData.assignedTo} 
               size={32}
