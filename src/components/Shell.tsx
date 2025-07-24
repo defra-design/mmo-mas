@@ -80,7 +80,7 @@ export default function Shell({ children }: PropsWithChildren) {
         {/* Right sidebar panel matching D365 */}
         <aside style={{
           width: '30px',
-          backgroundColor: '#f8f8f8',
+          backgroundColor: '#f3f2f1',
           borderLeft: '1px solid #e1e1e1',
           flexShrink: 0
         }}>
