@@ -1,16 +1,301 @@
 // src/components/CaseView.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pivot, PivotItem, Text } from '@fluentui/react';
+import { 
+  makeStyles,
+  shorthands,
+  tokens,
+  Avatar,
+  Card,
+  CardHeader,
+  Button,
+  Link,
+  Body1,
+  Body2,
+  Caption1,
+  Title3,
+  Subtitle2,
+  TabList,
+  Tab
+} from '@fluentui/react-components';
+import { ArrowLeftRegular, GlobeRegular, PersonRegular } from '@fluentui/react-icons';
 import caseDetailsData from '../mock-data/case-details.json';
+
+const useStyles = makeStyles({
+  pageContainer: {
+    backgroundColor: tokens.colorNeutralBackground1,
+    padding: `${tokens.spacingHorizontalXL} ${tokens.spacingHorizontalXS}`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalM,
+  },
+  headerCard: {
+    ...shorthands.padding(tokens.spacingHorizontalL, tokens.spacingVerticalL),
+  },
+  headerContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+    marginBottom: tokens.spacingVerticalM,
+  },
+  headerInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  statusInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+  },
+  statusItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  detailsGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: tokens.spacingHorizontalXXL,
+    marginTop: tokens.spacingVerticalM,
+  },
+  fieldGrid: {
+    display: 'grid',
+    gridTemplateColumns: '160px 1fr',
+    gap: tokens.spacingVerticalM,
+    alignItems: 'center',
+  },
+  fieldRow: {
+    display: 'contents',
+  },
+  fieldLabel: {
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  fieldValue: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+    borderRadius: tokens.borderRadiusSmall,
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+  },
+  fieldValueWithIcon: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+    borderRadius: tokens.borderRadiusSmall,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: tokens.spacingHorizontalS,
+  },
+  dateTimeRow: {
+    display: 'flex',
+    gap: tokens.spacingHorizontalM,
+  },
+  dateTimeField: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+    borderRadius: tokens.borderRadiusSmall,
+    flex: 1,
+  },
+  descriptionContent: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    padding: tokens.spacingVerticalXL,
+    borderRadius: tokens.borderRadiusSmall,
+    margin: tokens.spacingHorizontalS,
+    minHeight: '200px',
+  },
+  truncatedText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '300px',
+  },
+  tabList: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  boldText: {
+    fontWeight: tokens.fontWeightSemibold,
+  },
+});
+
+// CaseHeader component
+function CaseHeader({ caseData }: { caseData: any }) {
+  const navigate = useNavigate();
+  const styles = useStyles();
+
+  return (
+    <>
+      {/* Back navigation above the card */}
+      <Button 
+        appearance="subtle"
+        icon={<ArrowLeftRegular />}
+        onClick={() => navigate('/iteration1')}
+        style={{ marginBottom: tokens.spacingVerticalS, alignSelf: 'flex-start' }}
+      >
+        Cases
+      </Button>
+      
+      <Card className={styles.headerCard}>
+        <div className={styles.headerContent}>
+          <Avatar 
+            name={caseData.title} 
+            size={48}
+            color="colorful"
+          />
+          <div className={styles.headerInfo}>
+            <Title3>{caseData.title}</Title3>
+            <Body1>Case</Body1>
+          </div>
+          <div className={styles.statusInfo}>
+            <div className={styles.statusItem}>
+              <Body2 className={styles.boldText}>Completed</Body2>
+              <Body1>Status</Body1>
+            </div>
+            <Avatar 
+              name={caseData.assignedTo} 
+              size={32}
+              color="colorful"
+            />
+            <div className={styles.statusItem}>
+              <Body2>{caseData.assignedTo}</Body2>
+              <Body1>Assigned to</Body1>
+            </div>
+          </div>
+        </div>
+        
+        {/* Tab navigation */}
+        <TabList defaultSelectedValue="summary" className={styles.tabList}>
+          <Tab value="summary">Summary</Tab>
+          <Tab value="related">Related</Tab>
+        </TabList>
+      </Card>
+    </>
+  );
+}
+
+// CaseDetails component
+function CaseDetails({ caseData }: { caseData: any }) {
+  const styles = useStyles();
+
+  return (
+    <Card>
+      <CardHeader header={<Subtitle2>CASE DETAILS</Subtitle2>} />
+      
+      <div className={styles.detailsGrid}>
+        <div>
+          <div className={styles.fieldGrid}>
+            <div className={styles.fieldRow}>
+              <div className={styles.fieldLabel}>
+                <Body1>Reference</Body1>
+              </div>
+              <div className={styles.fieldValue}>
+                <Body1>{caseData.reference}</Body1>
+              </div>
+            </div>
+            
+            <div className={styles.fieldRow}>
+              <div className={styles.fieldLabel}>
+                <Body1>Type</Body1>
+              </div>
+              <div className={styles.fieldValue}>
+                <Body1>Exempt activity</Body1>
+              </div>
+            </div>
+            
+            <div className={styles.fieldRow}>
+              <div className={styles.fieldLabel}>
+                <Body1>Assigned to</Body1>
+              </div>
+              <div className={styles.fieldValue}>
+                <Avatar 
+                  name={caseData.assignedTo} 
+                  size={20}
+                  color="colorful"
+                />
+                <Link href="#" style={{ fontSize: tokens.fontSizeBase300 }}>{caseData.assignedTo}</Link>
+              </div>
+            </div>
+            
+            <div className={styles.fieldRow}>
+              <div className={styles.fieldLabel}>
+                <Body1>Application URL</Body1>
+              </div>
+              <div className={styles.fieldValueWithIcon}>
+                <Link href="#" className={styles.truncatedText} style={{ fontSize: tokens.fontSizeBase300 }}>
+                  https://marine-licensing-prototype-5b7b33ca29e1.herokuapp.com/versions/multiple...
+                </Link>
+                <GlobeRegular fontSize={20} />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <div className={styles.fieldGrid}>
+                        <div className={styles.fieldRow}>
+              <div className={styles.fieldLabel}>
+                <Body1>Project Name</Body1>
+              </div>
+              <div className={styles.fieldValue}>
+                <Body1>{caseData.title}</Body1>
+              </div>
+            </div>
+            
+            <div className={styles.fieldRow}>
+              <div className={styles.fieldLabel}>
+                <Body1>Applicant</Body1>
+              </div>
+              <div className={styles.fieldValue}>
+                <PersonRegular fontSize={20} />
+                <Link href="#" style={{ fontSize: tokens.fontSizeBase300 }}>{caseData.applicant}</Link>
+              </div>
+            </div>
+            
+            <div className={styles.fieldRow}>
+              <div className={styles.fieldLabel}>
+                <Body1>Submitted Date</Body1>
+              </div>
+              <div className={styles.dateTimeRow}>
+                <div className={styles.dateTimeField}>
+                  <Body1>{new Date(caseData.submitted).toLocaleDateString('en-GB')}</Body1>
+                </div>
+                <div className={styles.dateTimeField}>
+                  <Body1>{new Date(caseData.submitted).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</Body1>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// Description component
+function Description() {
+  const styles = useStyles();
+  
+  return (
+    <Card>
+      <CardHeader header={<Subtitle2>DESCRIPTION</Subtitle2>} />
+      <div className={styles.descriptionContent}>
+        {/* Empty content area with grey background matching case details */}
+      </div>
+    </Card>
+  );
+}
 
 interface CaseViewProps {
   caseId: string;
 }
 
 export default function CaseView({ caseId }: CaseViewProps) {
-  const navigate = useNavigate();
   const [caseData, setCaseData] = useState<any>(null);
+  const styles = useStyles();
 
   useEffect(() => {
     console.log('CaseView - received caseId:', caseId);
@@ -29,212 +314,22 @@ export default function CaseView({ caseId }: CaseViewProps) {
 
   if (!caseData) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <Text variant="large">Case not found: {caseId}</Text>
-        <div style={{ marginTop: '10px' }}>
-          <Text variant="small">Available case IDs: {Object.keys(caseDetailsData).join(', ')}</Text>
-        </div>
+      <div className={styles.pageContainer}>
+        <Card style={{ textAlign: 'center' }}>
+          <Body1>Case not found: {caseId}</Body1>
+          <Caption1>
+            Available case IDs: {Object.keys(caseDetailsData).join(', ')}
+          </Caption1>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 28px' }}>
-      {/* Header section matching D365 style */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'flex-start',
-        marginBottom: '20px',
-        borderBottom: '1px solid #edebe9',
-        paddingBottom: '16px'
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <button 
-              onClick={() => navigate('/iteration1')}
-              style={{ 
-                background: 'none', 
-                border: 'none', 
-                cursor: 'pointer',
-                fontSize: '16px',
-                color: '#0078d4',
-                padding: '0'
-              }}
-            >
-              ← Cases
-            </button>
-          </div>
-          <h1 style={{ fontSize: '24px', fontWeight: 600, margin: 0 }}>
-            {caseData.reference}
-          </h1>
-          <Text variant="large" style={{ color: '#605e5c' }}>
-            {caseData.title}
-          </Text>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button style={{ 
-            padding: '8px 16px', 
-            border: '1px solid #ccc',
-            backgroundColor: '#fff',
-            cursor: 'pointer'
-          }}>
-            Edit
-          </button>
-          <button style={{ 
-            padding: '8px 16px', 
-            border: '1px solid #ccc',
-            backgroundColor: '#fff',
-            cursor: 'pointer'
-          }}>
-            Delete
-          </button>
-          <button style={{ 
-            padding: '8px 16px', 
-            backgroundColor: '#0078d4', 
-            color: 'white', 
-            border: 'none',
-            cursor: 'pointer'
-          }}>
-            Save
-          </button>
-        </div>
-      </div>
-
-      {/* Tab navigation */}
-      <Pivot>
-        <PivotItem headerText="General">
-          <div style={{ padding: '20px 0' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-              <div>
-                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-                  Case Information
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '12px', alignItems: 'center' }}>
-                  <Text style={{ fontWeight: 500 }}>Case Number:</Text>
-                  <Text>{caseData.sections.general.caseNumber}</Text>
-                  <Text style={{ fontWeight: 500 }}>Case Type:</Text>
-                  <Text>{caseData.sections.general.caseType}</Text>
-                  <Text style={{ fontWeight: 500 }}>Priority:</Text>
-                  <Text>{caseData.sections.general.priority}</Text>
-                  <Text style={{ fontWeight: 500 }}>Status:</Text>
-                  <span className={`tag tag-status-${caseData.status.toLowerCase()}`}>
-                    {caseData.status}
-                  </span>
-                  <Text style={{ fontWeight: 500 }}>Source:</Text>
-                  <Text>{caseData.sections.general.source}</Text>
-                </div>
-              </div>
-              
-              <div>
-                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-                  Assignment
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '12px', alignItems: 'center' }}>
-                  <Text style={{ fontWeight: 500 }}>Assigned to:</Text>
-                  <Text>{caseData.assignedTo}</Text>
-                  <Text style={{ fontWeight: 500 }}>Applicant:</Text>
-                  <Text>{caseData.applicant}</Text>
-                  <Text style={{ fontWeight: 500 }}>Submitted:</Text>
-                  <Text>{caseData.submitted}</Text>
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ marginTop: '30px' }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-                Description
-              </h3>
-              <Text>{caseData.sections.general.description}</Text>
-            </div>
-
-            <div style={{ marginTop: '30px' }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-                Summary
-              </h3>
-              <Text>{caseData.summary}</Text>
-            </div>
-          </div>
-        </PivotItem>
-        
-        <PivotItem headerText="Timeline">
-          <div style={{ padding: '20px 0' }}>
-            {caseData.sections.timeline?.map((item: any, index: number) => (
-              <div key={index} style={{ 
-                padding: '16px 0', 
-                borderBottom: index < caseData.sections.timeline.length - 1 ? '1px solid #edebe9' : 'none',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start'
-              }}>
-                <div>
-                  <Text style={{ fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                    {item.action}
-                  </Text>
-                  <Text variant="small" style={{ color: '#605e5c' }}>
-                    by {item.user}
-                  </Text>
-                </div>
-                <Text variant="small" style={{ color: '#605e5c' }}>
-                  {item.date}
-                </Text>
-              </div>
-            ))}
-          </div>
-        </PivotItem>
-        
-        <PivotItem headerText="Notes">
-          <div style={{ padding: '20px 0' }}>
-            {caseData.sections.notes?.map((note: any, index: number) => (
-              <div key={index} style={{ 
-                padding: '16px 0', 
-                borderBottom: index < caseData.sections.notes.length - 1 ? '1px solid #edebe9' : 'none'
-              }}>
-                <Text style={{ display: 'block', marginBottom: '8px' }}>
-                  {note.note}
-                </Text>
-                <Text variant="small" style={{ color: '#605e5c' }}>
-                  by {note.author} on {note.date}
-                </Text>
-              </div>
-            ))}
-            
-            {/* Add new note section */}
-            <div style={{ 
-              marginTop: '20px', 
-              padding: '16px', 
-              border: '1px solid #edebe9',
-              borderRadius: '4px'
-            }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>Add Note</h4>
-              <textarea 
-                placeholder="Enter your note here..."
-                style={{ 
-                  width: '100%', 
-                  minHeight: '80px', 
-                  padding: '8px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  resize: 'vertical'
-                }}
-              />
-              <div style={{ marginTop: '8px', textAlign: 'right' }}>
-                <button style={{ 
-                  padding: '6px 16px', 
-                  backgroundColor: '#0078d4', 
-                  color: 'white', 
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}>
-                  Add Note
-                </button>
-              </div>
-            </div>
-          </div>
-        </PivotItem>
-      </Pivot>
+    <div className={styles.pageContainer}>
+      <CaseHeader caseData={caseData} />
+      <CaseDetails caseData={caseData} />
+      <Description />
     </div>
   );
 }
