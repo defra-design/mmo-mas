@@ -129,3 +129,8 @@
   outline-offset: 1px !important;
 }
 
+/* Elevated Panel Styles */
+.elevated-panel {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.14) !important;
+}
+

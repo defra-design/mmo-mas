@@ -25,14 +25,12 @@ function App() {
               path="/iteration1" 
               element={
                 <Shell>
-                  <div style={{ maxWidth: 1280 }}>
-                    <ListView
-                      entityConfig={caseEntity}
-                      items={caseData}
-                      title="Active cases"
-                      view="active"
-                    />
-                  </div>
+                  <ListView
+                    entityConfig={caseEntity}
+                    items={caseData}
+                    title="Active cases"
+                    view="active"
+                  />
                 </Shell>
               } 
             />
@@ -40,9 +38,7 @@ function App() {
               path="/cases/:caseId" 
               element={
                 <Shell>
-                  <div style={{ maxWidth: 1280 }}>
-                    <CaseViewWrapper />
-                  </div>
+                  <CaseViewWrapper />
                 </Shell>
               } 
             />

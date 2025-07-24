@@ -5,10 +5,13 @@
   height: 100%;
   background: #f3f2f1;
   border-right: 1px solid #e1dfdd;
+  box-shadow: inset -5px 0 8px rgba(0, 0, 0, 0.09);
   overflow-y: auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding-top: 4px;
   flex-shrink: 0;
+  z-index: 1;
+  position: relative;
 }
 
 .d365-nav-group {

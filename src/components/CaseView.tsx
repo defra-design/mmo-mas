@@ -39,7 +39,7 @@ export default function CaseView({ caseId }: CaseViewProps) {
   }
 
   return (
-    <>
+    <div style={{ padding: '0 28px' }}>
       {/* Header section matching D365 style */}
       <div style={{ 
         display: 'flex', 
@@ -52,7 +52,7 @@ export default function CaseView({ caseId }: CaseViewProps) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <button 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/iteration1')}
               style={{ 
                 background: 'none', 
                 border: 'none', 
@@ -235,6 +235,6 @@ export default function CaseView({ caseId }: CaseViewProps) {
           </div>
         </PivotItem>
       </Pivot>
-    </>
+    </div>
   );
 }

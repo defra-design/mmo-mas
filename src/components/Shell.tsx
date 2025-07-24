@@ -68,13 +68,24 @@ export default function Shell({ children }: PropsWithChildren) {
 
         <main style={{ 
           flexGrow: 1, 
-          padding: '0 28px', 
           backgroundColor: '#fff',
           overflow: 'auto',
-          minHeight: 0
+          minHeight: 0,
+          paddingLeft: '20px',
+          paddingRight: '20px'
         }}>
           {children}
         </main>
+
+        {/* Right sidebar panel matching D365 */}
+        <aside style={{
+          width: '30px',
+          backgroundColor: '#f8f8f8',
+          borderLeft: '1px solid #e1e1e1',
+          flexShrink: 0
+        }}>
+          {/* Right panel content could go here */}
+        </aside>
       </div>
     </div>
   );
