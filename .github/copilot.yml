@@ -1,6 +1,13 @@
 version: 1
 rules:
-  - name: project-context
+  - name:  - name: coding-conventions
+    message: |
+      * Use functional components + hooks only.
+      * Import types with **`import type { … } from '@fluentui/react'`** so Vite's runtime bundle stays clean.
+      * Icon font: assume initializeIcons() already runs in src/main.tsx.
+      * Keep row components small: ListView.tsx (grid), RecordForm.tsx (single record), etc.
+      * Selected colour tokens: #0078d4 (blue) for active, #edebe9 for hover, #f3f2f1 rail background.
+      * CSS: Shared styles go in App.css (elevated panels, common UI elements), component-specific CSS files are allowed (Nav.css), otherwise use inline styles or mergeStyleSets.t-context
     message: |
       * Use functional components + hooks only.
       * Import types with **`import type { … } from '@fluentui/react'`** so Vite's runtime bundle stays clean.
