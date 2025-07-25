@@ -1,29 +1,14 @@
 version: 1
 rules:
-  - name:  - name: coding-conventions
-    message: |
-      * Use functional components + hooks only.
-      * Import types with **`import type { … } from '@fluentui/react'`** so Vite's runtime bundle stays clean.
-      * Icon font: assume initializeIcons() already runs in src/main.tsx.
-      * Keep row components small: ListView.tsx (grid), RecordForm.tsx (single record), etc.
-      * Selected colour tokens: #0078d4 (blue) for active, #edebe9 for hover, #f3f2f1 rail background.
-      * CSS: Shared styles go in App.css (elevated panels, common UI elements), component-specific CSS files are allowed (Nav.css), otherwise use inline styles or mergeStyleSets.t-context
-    message: |
-      * Use functional components + hooks only.
-      * Import types with **`import type { … } from '@fluentui/react'`** so Vite's runtime bundle stays clean.
-      * Icon font: assume initializeIcons() already runs in src/main.tsx.
-      * Keep row components small: ListView.tsx (grid), RecordForm.tsx (single record), etc.
-      * Navigation: Use Nav.tsx component with expandable sections, proper D365 styling in Nav.css.
-      * Selected colour tokens: #0078d4 (blue) for active, #edebe9 for hover, #f3f2f1 rail background.
-      * CSS: Component-specific CSS files are allowed (Nav.css), otherwise use inline styles or mergeStyleSets.sion: 1
-rules:
   # ------------------------------------------------------------
   # 0. What this project is
   # ------------------------------------------------------------
   - name: project-context
     message: |
       You are working in a React + TypeScript prototype that mimics a Dynamics 365 (model-driven) app for internal Marine Management Organisation staff.
-      * Design system: Fluent UI (v8 + v9) – @fluentui/react and @fluentui/react-components.
+      * Design system: Fluent UI (v8 + v9) – @fluentui/react and @fluentui/react-components (prefer v9 for new components, tables, and menus).
+      * ListView.tsx now uses Fluent UI v9 Table.
+      * Use Fluent UI v9 Popover/Menu for header and cell hover menus (see ListView.tsx Title hover menu pattern).
       * Layout: TopBar (navy header) ▸ Custom Left Nav rail ▸ Main content.
       * Navigation: Custom Nav.tsx component with Nav.css styling that matches D365 interface (expandable sections, chevrons, proper spacing).
       * Data is mocked from JSON under src/mock-data; entifety configs live in src/config/entities.
@@ -37,7 +22,9 @@ rules:
       * Use functional components + hooks only.
       * Import types with **`import type { … } from '@fluentui/react'`** so Vite’s runtime bundle stays clean.
       * Icon font: assume initializeIcons() already runs in src/main.tsx.
-      * Keep row components small: ListView.tsx (grid), RecordForm.tsx (single record), etc.
+      * Keep row components small: ListView.tsx (grid, now uses Fluent UI v9 Table), RecordForm.tsx (single record), etc.
+      * Use makeStyles/mergeClasses for v9 styling.
+      * Table columns: Use fixed/min/max widths for key columns (checkbox, reference, project) to match D365 layout.
       * Selected colour tokens: #0078d4 (blue) for active, #edebe9 for hover, #f3f2f1 rail background.
 
   # ------------------------------------------------------------
