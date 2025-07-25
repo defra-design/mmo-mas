@@ -284,7 +284,7 @@ function CaseDetails({ caseData }: { caseData: any }) {
           <div className={styles.fieldGrid}>
                         <div className={styles.fieldRow}>
               <div className={styles.fieldLabel}>
-                <Body1>Project Name</Body1>
+                <Body1>Project name</Body1>
               </div>
               <div className={styles.fieldValue}>
                 <Body1>{caseData.title}</Body1>
@@ -303,7 +303,7 @@ function CaseDetails({ caseData }: { caseData: any }) {
             
             <div className={styles.fieldRow}>
               <div className={styles.fieldLabel}>
-                <Body1>Submitted Date</Body1>
+                <Body1>Submitted date</Body1>
               </div>
               <div className={styles.dateTimeRow}>
                 <div className={styles.dateTimeField}>
