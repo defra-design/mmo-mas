@@ -25,6 +25,11 @@ import CommandBar from './CommandBar';
 import FilterControls from './FilterControls';
 import {
   ChevronDownRegular,
+  ArrowUpRegular,
+  ArrowDownRegular,
+  ArrowRightRegular,
+  ArrowLeftRegular,
+  FilterRegular,
   PersonRegular,
   CheckmarkRegular,
   SettingsRegular,
@@ -67,7 +72,8 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase400,
   },
   popoverSurface: {
-    minWidth: '320px',
+    minWidth: '180px',
+    maxWidth: '220px',
     boxShadow: tokens.shadow16,
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
@@ -161,14 +167,17 @@ function HeaderPanelMenu({ selectedKey, onSelect, styles }: HeaderPanelMenuProps
         <Button
           appearance="transparent"
           className={styles.headerMenuTrigger}
-          icon={<ChevronDownRegular className={styles.chevron} />}
+          icon={null}
         >
-          <Text as="h1" className={styles.header} style={{ margin: 0 }}>
-            Active cases
-          </Text>
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <Text as="h1" className={styles.header} style={{ margin: 0 }}>
+              Active cases
+            </Text>
+            <ChevronDownRegular className={styles.chevron} />
+          </span>
         </Button>
       </PopoverTrigger>
-      <PopoverSurface className={styles.popoverSurface}>
+      <PopoverSurface style={{ minWidth: 320, maxWidth: 400 }}>
         <Input
           className={styles.searchInput}
           contentBefore={<SearchRegular />}
@@ -290,6 +299,64 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
     })
   ];
 
+  // Generic column header menu
+  function ColumnHeaderMenu({ label, menuType }: { label: string, menuType: 'default' | 'status' }) {
+    const [open, setOpen] = useState(false);
+    // Menu options based on column type
+    const baseOptions = [
+      { key: 'aToZ', label: 'A to Z', icon: <ArrowUpRegular /> },
+      { key: 'zToA', label: 'Z to A', icon: <ArrowDownRegular /> },
+      { key: 'groupBy', label: 'Group by', icon: <DocumentRegular /> },
+      { key: 'filterBy', label: 'Filter by', icon: <FilterRegular /> },
+      { key: 'columnWidth', label: 'Column width', icon: <SettingsRegular /> },
+    ];
+    let menuOptions = [...baseOptions];
+    if (menuType === 'status') {
+      menuOptions.push({ key: 'moveLeft', label: 'Move left', icon: <ArrowLeftRegular /> });
+    } else {
+      menuOptions.push({ key: 'moveLeft', label: 'Move left', icon: <ArrowLeftRegular /> });
+      menuOptions.push({ key: 'moveRight', label: 'Move right', icon: <ArrowRightRegular /> });
+    }
+    // Keep menu open when mouse is over button or menu
+    const handleToggle = () => setOpen(o => !o);
+    const handleClose = () => setOpen(false);
+    // Use smaller popover for all table header menus
+    const popoverClass = styles.popoverSurface;
+    const popoverStyle = undefined;
+    return (
+      <Popover open={open} trapFocus onOpenChange={(_, data) => setOpen(data.open)}>
+        <PopoverTrigger>
+          <Button
+            appearance="transparent"
+            className={styles.headerMenuTrigger}
+            aria-label={label + ' column menu'}
+            tabIndex={0}
+            icon={null}
+            style={{ width: '100%', paddingLeft: 0, justifyContent: 'flex-start' }}
+            onClick={handleToggle}
+          >
+            <Text style={{ margin: 0, fontWeight: tokens.fontWeightSemibold }}>{label}</Text>
+            <ChevronDownRegular className={styles.chevron} />
+          </Button>
+        </PopoverTrigger>
+        <PopoverSurface
+          className={popoverClass}
+          style={popoverStyle}
+          onMouseLeave={handleClose}
+        >
+          <MenuList className={styles.menuList}>
+            {menuOptions.map(opt => (
+              <MenuItem key={opt.key} className={styles.menuItem}>
+                <span className={styles.menuIconStart}>{opt.icon}</span>
+                <Text>{opt.label}</Text>
+              </MenuItem>
+            ))}
+          </MenuList>
+        </PopoverSurface>
+      </Popover>
+    );
+  }
+
   return (
     <div className={styles.pageContainer}>
       {/* Header panel with title, search and filters */}
@@ -332,6 +399,20 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                       }}
                       aria-label="Select all"
                     />
+                  ) : col.key === 'reference' ? (
+                    <ColumnHeaderMenu label="Reference" menuType="default" />
+                  ) : col.key === 'type' ? (
+                    <ColumnHeaderMenu label="Type" menuType="default" />
+                  ) : col.key === 'project' ? (
+                    <ColumnHeaderMenu label="Project" menuType="default" />
+                  ) : col.key === 'status' ? (
+                    <ColumnHeaderMenu label="Status" menuType="status" />
+                  ) : col.key === 'assignedTo' ? (
+                    <ColumnHeaderMenu label="Assigned to" menuType="default" />
+                  ) : col.key === 'applicant' ? (
+                    <ColumnHeaderMenu label="Applicant" menuType="default" />
+                  ) : col.key === 'submitted' ? (
+                    <ColumnHeaderMenu label="Submitted" menuType="default" />
                   ) : col.name}
                 </TableCell>
               ))}
@@ -376,13 +457,13 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                       </TableCell>
                     );
                   }
+                  // ...existing code...
                   // Project column: fixed width and clickable link
                   if (c.key === 'project') {
                     return (
                       <TableCell
                         key={c.key}
                         className={isCellHovered ? styles.tableCellHovered : styles.tableCell}
-                        style={{ width: 220, minWidth: 220, maxWidth: 220 }}
                         onMouseEnter={() => setHoveredCell({row: item.reference, col: c.key})}
                         onMouseLeave={() => setHoveredCell(null)}
                       >
@@ -395,6 +476,7 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                       </TableCell>
                     );
                   }
+                  // ...existing code...
                   // Type column: render as normal text
                   if (c.key === 'type') {
                     return (
@@ -408,6 +490,7 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                       </TableCell>
                     );
                   }
+                  // ...existing code...
                   // Tag columns (except type)
                   if (c.tag && c.key !== 'type') {
                     return (
@@ -421,6 +504,7 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                       </TableCell>
                     );
                   }
+                  // ...existing code...
                   // Assigned to column: avatar with consistent color
                   if (c.key === 'assignedTo') {
                     const name = item[c.key];
@@ -444,6 +528,7 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                       </TableCell>
                     );
                   }
+                  // ...existing code...
                   // Default rendering
                   return (
                     <TableCell

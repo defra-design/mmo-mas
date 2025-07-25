@@ -25,6 +25,7 @@ rules:
       * Keep row components small: ListView.tsx (grid, now uses Fluent UI v9 Table), RecordForm.tsx (single record), etc.
       * Use makeStyles/mergeClasses for v9 styling.
       * Table columns: Use fixed/min/max widths for key columns (checkbox, reference, project) to match D365 layout.
+      * Table header menus: Use narrow popover (180-220px), chevron immediately after label (not right-aligned), no left padding, bold label text, and open on click (not hover).
       * Selected colour tokens: #0078d4 (blue) for active, #edebe9 for hover, #f3f2f1 rail background.
 
   # ------------------------------------------------------------
