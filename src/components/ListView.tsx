@@ -36,6 +36,7 @@ import {
   DocumentRegular,
   SearchRegular
 } from '@fluentui/react-icons';
+import { getAssigneeAvatarColor } from '../utils/avatarColors';
 // Remove IColumn import, not needed for v9 Table
 const useStyles = makeStyles({
   pageContainer: {
@@ -260,24 +261,6 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
 
   // Helper for avatar color based on assignee name
   // Hardcoded color array for avatar backgrounds
-  const avatarColors = [
-    '#E57373', // red
-    '#81C784', // green
-    '#64B5F6', // blue
-    '#FFB74D', // orange
-    '#BA68C8', // purple
-    '#4DD0E1', // teal
-    '#F06292', // pink
-    '#A1887F', // brown
-  ];
-  const getAvatarColor = (name: string) => {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const idx = Math.abs(hash) % avatarColors.length;
-    return avatarColors[idx];
-  };
 
   // Compose columns for v9 Table with improved widths
   const tableColumns = [
@@ -509,6 +492,7 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                   if (c.key === 'assignedTo') {
                     const name = item[c.key];
                     const initials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
+                    const avatarColor = getAssigneeAvatarColor(name);
                     return (
                       <TableCell
                         key={c.key}
@@ -521,7 +505,8 @@ export default function ListView({ entityConfig, items, title }: ListViewProps) 
                             name={name}
                             initials={initials}
                             size={28}
-                            style={{ marginRight: 8, background: getAvatarColor(name) }}
+                            color="colorful"
+                            style={{ marginRight: 8, backgroundColor: avatarColor }}
                           />
                           {name}
                         </div>

@@ -18,6 +18,7 @@ import {
   TabList,
   Tab
 } from '@fluentui/react-components';
+import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { ArrowLeftRegular, GlobeRegular, PersonRegular, ShareRegular, ArrowClockwiseRegular } from '@fluentui/react-icons';
 import caseDetailsData from '../mock-data/case-details.json';
 
@@ -205,6 +206,7 @@ function CaseHeader({ caseData }: { caseData: any }) {
               name={caseData.assignedTo} 
               size={32}
               color="colorful"
+              style={{ backgroundColor: getAssigneeAvatarColor(caseData.assignedTo) }}
             />
             <div className={styles.statusItem}>
               <Body2>{caseData.assignedTo}</Body2>
