@@ -1,0 +1,70 @@
+# Project context
+You are working in a React + TypeScript prototype that mimics a Dynamics 365 (model-driven) app
+for internal Marine Management Organisation staff.
+
+Design system:
+- Fluent UI v8 + v9 — prefer v9 for new components, tables, and menus.
+- ListView.tsx uses Fluent UI v9 Table.
+- Use Fluent UI v9 Popover/Menu for header and cell hover menus (see ListView.tsx Title hover menu pattern).
+
+Layout & Navigation:
+- Layout: TopBar (navy header) ▸ Custom Left Nav rail ▸ Main content.
+- Navigation: custom Nav.tsx with Nav.css styled to match D365 (expandable sections, chevrons, spacing).
+- Data: mocked JSON in src/mock-data; entity configs in src/config/entities.
+
+Styling:
+- Use CSS files per component (e.g. Nav.css) or Fluent v9 makeStyles/mergeClasses.
+- No external CSS frameworks.
+
+---
+
+# Coding conventions
+- Functional components + hooks only.
+- Import types with `import type { … } from '@fluentui/react'`.
+- Assume `initializeIcons()` runs in `src/main.tsx`.
+- Keep row components small (e.g. ListView.tsx, RecordForm.tsx).
+- Use Fluent v9 `makeStyles`/`mergeClasses` for styling.
+- Tables: set fixed/min/max widths for key columns to match D365 layout.
+- Header menus: narrow popover (≈180–220px), chevron immediately after label, no left padding, bold label, open on click.
+- Colour tokens: #0078d4 active, #edebe9 hover, #f3f2f1 rail background.
+
+---
+
+# New page / entity scaffold checklist
+1. Add mock rows → `src/mock-data/<entityPlural>.json`
+2. Describe columns + form layout → `src/config/entities/<entity>.json`
+3. Create `<Entity>ListView.tsx` in `src/components` (Fluent v9 Table)
+4. Register a left-nav link in `Shell.tsx` groups array
+5. Add a route + page stub in `App.tsx` (or your router)
+6. Keep each PR focussed on one entity/page
+
+---
+
+# File & folder structure
+- Components → `src/components` using PascalCase filenames
+- Non-React helpers → `src/utils`
+- Use relative imports (no absolute aliases here)
+
+---
+
+# Allowed libraries
+Allowed: `@fluentui/*`, `date-fns`, `uuid`, `faker`  
+Avoid: `moment`, `lodash` (poor tree-shaking), any CSS-in-JS besides Fluent v9 utilities
+
+---
+
+# Navigation component rules (D365 styling)
+- Use custom `Nav.tsx` (not Fluent Nav) for precise D365 look
+- `Nav.css` handles expand/collapse, chevrons, hover states
+- Chevrons: down (V) when closed, up (^) when expanded
+- Selected item = white background + left border #0078d4
+- Full-height nav with responsive behaviour
+
+---
+
+# Commit style
+Use Conventional Commits:
+- feat: …  (new screens/components)
+- fix: …   (bug fixes)
+- chore: … (tooling / lint / deps)
+Keep PRs under ~300 lines where possible
