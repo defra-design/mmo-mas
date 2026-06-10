@@ -105,6 +105,27 @@
   color: #282d30;
 }
 
+/* Marine licence case status tags */
+.tag-mla-awaiting-allocation {
+  background: #e5e6e7;
+  color: #282d30;
+}
+
+.tag-mla-assessment {
+  background: #cfe4f8;
+  color: #0c2d4a;
+}
+
+.tag-mla-awaiting-applicant {
+  background: #fdf2cc;
+  color: #5c4400;
+}
+
+.tag-mla-consultation {
+  background: #fbe2c4;
+  color: #6b3b00;
+}
+
 /* Clickable Link Styles */
 .link-button {
   background: none !important;
