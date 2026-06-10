@@ -87,7 +87,6 @@ export default function TaskList({ caseId }: TaskListProps) {
   const [selected, setSelected] = useState<string[]>([]);
 
   const rows: TaskRow[] = [
-    { key: 'review', name: 'Review application', status: tasks.reviewApplication },
     {
       key: 'siteCheck',
       name: 'Site check',

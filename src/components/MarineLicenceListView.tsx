@@ -1,5 +1,5 @@
 // src/components/MarineLicenceListView.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -13,6 +13,7 @@ import {
   MenuList,
   MenuItem,
   Checkbox,
+  Divider,
   Table,
   TableHeader,
   TableRow,
@@ -23,13 +24,11 @@ import {
   ChevronDownRegular,
   ArrowUpRegular,
   ArrowDownRegular,
-  ArrowRightRegular,
-  ArrowLeftRegular,
   FilterRegular,
-  SettingsRegular,
-  DocumentRegular,
+  FilterFilled,
 } from '@fluentui/react-icons';
 import FormCommandBar from './FormCommandBar';
+import marineCaseDetails from '../mock-data/marine-case-details.json';
 
 const useStyles = makeStyles({
   pageContainer: {
@@ -54,14 +53,19 @@ const useStyles = makeStyles({
     marginLeft: tokens.spacingHorizontalXS,
     fontSize: tokens.fontSizeBase400,
   },
+  activeFilterIcon: {
+    marginLeft: tokens.spacingHorizontalXXS,
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorBrandForeground1,
+  },
   title: {
     fontSize: tokens.fontSizeBase600,
     fontWeight: tokens.fontWeightSemibold,
     margin: 0,
   },
   popoverSurface: {
-    minWidth: '180px',
-    maxWidth: '220px',
+    minWidth: '220px',
+    maxWidth: '280px',
     boxShadow: tokens.shadow16,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
@@ -80,6 +84,22 @@ const useStyles = makeStyles({
     marginRight: tokens.spacingHorizontalS,
     fontSize: tokens.fontSizeBase400,
   },
+  filterLabel: {
+    fontWeight: tokens.fontWeightSemibold,
+    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
+  },
+  filterList: {
+    maxHeight: '200px',
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalXXS,
+    ...shorthands.padding('0', tokens.spacingHorizontalS),
+  },
+  clearRow: {
+    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
+  },
+  staticLink: { color: '#0078d4' },
   tableRow: {
     ':hover': { backgroundColor: tokens.colorNeutralBackground3 },
   },
@@ -104,6 +124,9 @@ interface ColumnConfig {
   tag?: boolean;
 }
 
+type SortState = { key: string; dir: 'asc' | 'desc' } | null;
+type Filters = Record<string, string[]>; // key -> allowed values; absent = all
+
 interface MarineLicenceListViewProps {
   entityConfig: { list: { columns: ColumnConfig[] } };
   items: Record<string, string>[];
@@ -116,6 +139,8 @@ export default function MarineLicenceListView({
   title,
 }: MarineLicenceListViewProps) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [sort, setSort] = useState<SortState>(null);
+  const [filters, setFilters] = useState<Filters>({});
   const navigate = useNavigate();
   const styles = useStyles();
   const columns = entityConfig.list.columns;
@@ -124,43 +149,124 @@ export default function MarineLicenceListView({
     document.title = `${title} - MMO Marine Applications System`;
   }, [title]);
 
+  // Only cases with full data (in marine-case-details.json) are navigable.
+  const isClickable = (reference: string) =>
+    Object.prototype.hasOwnProperty.call(marineCaseDetails, reference);
+
   const navigateToCase = (reference: string) =>
     navigate(`/review-assess/cases/${encodeURIComponent(reference)}`);
 
-  // Non-functional column header menu (matches the D365 filter affordance).
-  function ColumnHeaderMenu({ label, includeMoveRight = true }: { label: string; includeMoveRight?: boolean }) {
-    const options = [
-      { key: 'aToZ', label: 'A to Z', icon: <ArrowUpRegular /> },
-      { key: 'zToA', label: 'Z to A', icon: <ArrowDownRegular /> },
-      { key: 'filterBy', label: 'Filter by', icon: <FilterRegular /> },
-      { key: 'groupBy', label: 'Group by', icon: <DocumentRegular /> },
-      { key: 'columnWidth', label: 'Column width', icon: <SettingsRegular /> },
-      { key: 'moveLeft', label: 'Move left', icon: <ArrowLeftRegular /> },
-      ...(includeMoveRight ? [{ key: 'moveRight', label: 'Move right', icon: <ArrowRightRegular /> }] : []),
-    ];
+  // Apply active filters then the active sort.
+  const displayed = useMemo(() => {
+    let rows = items.filter(item =>
+      Object.entries(filters).every(
+        ([key, allowed]) => allowed.length === 0 || allowed.includes(item[key]),
+      ),
+    );
+    if (sort) {
+      rows = [...rows].sort((a, b) => {
+        const cmp = (a[sort.key] ?? '').localeCompare(b[sort.key] ?? '', undefined, { numeric: true });
+        return sort.dir === 'asc' ? cmp : -cmp;
+      });
+    }
+    return rows;
+  }, [items, filters, sort]);
+
+  // Distinct values for a column, blanks shown last as "(Blank)".
+  const distinctValues = (key: string) =>
+    [...new Set(items.map(i => i[key]))].sort((a, b) => {
+      if (a === '') return 1;
+      if (b === '') return -1;
+      return a.localeCompare(b, undefined, { numeric: true });
+    });
+
+  const toggleFilterValue = (key: string, value: string) => {
+    setFilters(prev => {
+      const all = distinctValues(key);
+      const current = prev[key] ?? all;
+      const next = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value];
+      const updated = { ...prev };
+      if (next.length === all.length) {
+        delete updated[key]; // all selected = no filter
+      } else {
+        updated[key] = next;
+      }
+      return updated;
+    });
+  };
+
+  const clearFilter = (key: string) =>
+    setFilters(prev => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
+
+  function ColumnHeaderMenu({ col }: { col: ColumnConfig }) {
+    const isFiltered = Boolean(filters[col.key]);
+    const allowed = filters[col.key]; // undefined = all selected
     return (
-      <Popover trapFocus>
+      <Popover>
         <PopoverTrigger>
           <Button
             appearance="transparent"
             className={styles.headerMenuTrigger}
-            aria-label={`${label} column menu`}
+            aria-label={`${col.name} column menu`}
             icon={null}
             style={{ width: '100%', paddingLeft: 0, justifyContent: 'flex-start' }}
           >
-            <Text style={{ fontWeight: tokens.fontWeightSemibold }}>{label}</Text>
+            <Text style={{ fontWeight: tokens.fontWeightSemibold }}>{col.name}</Text>
+            {isFiltered && <FilterFilled className={styles.activeFilterIcon} />}
             <ChevronDownRegular className={styles.chevron} />
           </Button>
         </PopoverTrigger>
         <PopoverSurface className={styles.popoverSurface}>
           <MenuList className={styles.menuList}>
-            {options.map(opt => (
-              <MenuItem key={opt.key} className={styles.menuItem}>
-                <span className={styles.menuIconStart}>{opt.icon}</span>
-                <Text>{opt.label}</Text>
-              </MenuItem>
-            ))}
+            <MenuItem
+              className={styles.menuItem}
+              onClick={() => setSort({ key: col.key, dir: 'asc' })}
+            >
+              <span className={styles.menuIconStart}><ArrowUpRegular /></span>
+              <Text>A to Z</Text>
+            </MenuItem>
+            <MenuItem
+              className={styles.menuItem}
+              onClick={() => setSort({ key: col.key, dir: 'desc' })}
+            >
+              <span className={styles.menuIconStart}><ArrowDownRegular /></span>
+              <Text>Z to A</Text>
+            </MenuItem>
           </MenuList>
+
+          <Divider style={{ margin: '4px 0' }} />
+
+          <div className={styles.filterLabel}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <FilterRegular /> Filter by
+            </span>
+          </div>
+          <div className={styles.filterList}>
+            {distinctValues(col.key).map(value => (
+              <Checkbox
+                key={value || '__blank__'}
+                label={value === '' ? '(Blank)' : value}
+                checked={!allowed || allowed.includes(value)}
+                onChange={() => toggleFilterValue(col.key, value)}
+              />
+            ))}
+          </div>
+          <div className={styles.clearRow}>
+            <Button
+              appearance="subtle"
+              size="small"
+              disabled={!isFiltered}
+              onClick={() => clearFilter(col.key)}
+            >
+              Clear filter
+            </Button>
+          </div>
         </PopoverSurface>
       </Popover>
     );
@@ -169,10 +275,13 @@ export default function MarineLicenceListView({
   function renderCell(col: ColumnConfig, item: Record<string, string>) {
     const value = item[col.key];
     if (col.link) {
-      return (
+      // All project names look like links; only fully-built cases navigate.
+      return isClickable(item.reference) ? (
         <button onClick={() => navigateToCase(item.reference)} className="link-button">
           {value}
         </button>
+      ) : (
+        <span className={styles.staticLink}>{value}</span>
       );
     }
     if (col.tag && value) {
@@ -180,6 +289,9 @@ export default function MarineLicenceListView({
     }
     return value;
   }
+
+  const allDisplayedSelected =
+    displayed.length > 0 && displayed.every(i => selectedRows.includes(i.reference));
 
   return (
     <div className={styles.pageContainer}>
@@ -206,20 +318,22 @@ export default function MarineLicenceListView({
             <TableRow>
               <TableCell style={{ width: 32, minWidth: 32, maxWidth: 32, paddingLeft: 8, paddingRight: 8 }}>
                 <Checkbox
-                  checked={selectedRows.length === items.length && items.length > 0}
-                  onChange={(_, data) => setSelectedRows(data.checked ? items.map(i => i.reference) : [])}
+                  checked={allDisplayedSelected}
+                  onChange={(_, data) =>
+                    setSelectedRows(data.checked ? displayed.map(i => i.reference) : [])
+                  }
                   aria-label="Select all"
                 />
               </TableCell>
               {columns.map(col => (
                 <TableCell key={col.key} style={{ minWidth: col.width, fontWeight: 600 }}>
-                  <ColumnHeaderMenu label={col.name} includeMoveRight={col.key !== 'notification'} />
+                  <ColumnHeaderMenu col={col} />
                 </TableCell>
               ))}
             </TableRow>
           </TableHeader>
           <tbody>
-            {items.map(item => (
+            {displayed.map(item => (
               <TableRow key={item.reference} className={styles.tableRow}>
                 <TableCell style={{ width: 32, minWidth: 32, maxWidth: 32, paddingLeft: 8, paddingRight: 8 }}>
                   <Checkbox

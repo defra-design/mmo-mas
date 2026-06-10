@@ -1,7 +1,20 @@
 // src/components/IndexPage.tsx
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTasks } from '../context/TaskContext';
 
 export default function IndexPage() {
+  const { resetAll } = useTasks();
+  const [justReset, setJustReset] = useState(false);
+
+  const handleReset = () => {
+    if (window.confirm('Reset all prototype data and start afresh? This clears the Site check answers and task statuses.')) {
+      resetAll();
+      setJustReset(true);
+      setTimeout(() => setJustReset(false), 3000);
+    }
+  };
+
   return (
     <div style={{ 
       padding: '60px 40px',
@@ -43,6 +56,27 @@ export default function IndexPage() {
             {link.label}
           </Link>
         ))}
+      </div>
+
+      <div style={{ marginTop: '48px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button
+          onClick={handleReset}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            fontSize: '14px',
+            color: '#605e5c',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            fontFamily: 'inherit',
+          }}
+        >
+          Reset prototype data
+        </button>
+        {justReset && (
+          <span style={{ fontSize: '14px', color: '#107c10' }}>✓ Prototype data cleared</span>
+        )}
       </div>
     </div>
   );

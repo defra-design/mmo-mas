@@ -1,5 +1,4 @@
 // src/components/tasks/SiteCheckTask.tsx
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -8,7 +7,6 @@ import {
   Card,
   Text,
   Title3,
-  Body1,
   Caption1,
   Field,
   Dropdown,
@@ -37,15 +35,18 @@ const useStyles = makeStyles({
   sectionTitleRow: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalL },
   sectionHeading: { fontSize: tokens.fontSizeBase500, fontWeight: tokens.fontWeightSemibold },
   csvLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalXS },
+  desc: {
+    color: tokens.colorNeutralForeground2,
+    marginTop: tokens.spacingVerticalS,
+    marginBottom: tokens.spacingVerticalL,
+  },
   question: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: tokens.spacingHorizontalXXL,
     alignItems: 'start',
-    paddingTop: tokens.spacingVerticalM,
   },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
-  desc: { color: tokens.colorNeutralForeground2, marginBottom: tokens.spacingVerticalM },
 });
 
 interface SiteCheckTaskProps {
@@ -55,11 +56,7 @@ interface SiteCheckTaskProps {
 export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { completeSiteCheck } = useTasks();
-
-  const [coordinatesOk, setCoordinatesOk] = useState('');
-  const [withinMile, setWithinMile] = useState('');
-  const [notes, setNotes] = useState('');
+  const { siteCheckForm, setSiteCheckField, completeSiteCheck } = useTasks();
 
   const handleSave = () => {
     completeSiteCheck();
@@ -86,20 +83,20 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text className={styles.sectionHeading}>1. Coordinates and shape</Text>
-          <Body1 as="p" className={styles.desc}>
+          <Text block className={styles.sectionHeading}>1. Coordinates and shape</Text>
+          <Text block className={styles.desc}>
             Check that the coordinates accurately represent where the works will physically take
             place, that the shape and size make sense for the activity, and that the site is within
             MMO jurisdiction.
-          </Body1>
+          </Text>
           <div className={styles.question}>
             <Text>Are the coordinates and shape acceptable for assessment?</Text>
             <Field>
               <Dropdown
-                placeholder="--- Select ---"
-                value={coordinatesOk}
-                selectedOptions={coordinatesOk ? [coordinatesOk] : []}
-                onOptionSelect={(_, d) => setCoordinatesOk(d.optionValue ?? '')}
+                placeholder="Select"
+                value={siteCheckForm.coordinatesOk}
+                selectedOptions={siteCheckForm.coordinatesOk ? [siteCheckForm.coordinatesOk] : []}
+                onOptionSelect={(_, d) => setSiteCheckField('coordinatesOk', d.optionValue ?? '')}
               >
                 <Option>Yes</Option>
                 <Option>No</Option>
@@ -111,20 +108,20 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text className={styles.sectionHeading}>2. One nautical mile check</Text>
-          <Body1 as="p" className={styles.desc}>
+          <Text block className={styles.sectionHeading}>2. One nautical mile check</Text>
+          <Text block className={styles.desc}>
             Check the site location to determine whether the activity is within 1 nautical mile of
             the coast. This is used to confirm whether a Water Framework Directive assessment is
             required.
-          </Body1>
+          </Text>
           <div className={styles.question}>
             <Text>Is the activity within 1 nautical mile of the coast?</Text>
             <Field>
               <Dropdown
-                placeholder="--- Select ---"
-                value={withinMile}
-                selectedOptions={withinMile ? [withinMile] : []}
-                onOptionSelect={(_, d) => setWithinMile(d.optionValue ?? '')}
+                placeholder="Select"
+                value={siteCheckForm.withinMile}
+                selectedOptions={siteCheckForm.withinMile ? [siteCheckForm.withinMile] : []}
+                onOptionSelect={(_, d) => setSiteCheckField('withinMile', d.optionValue ?? '')}
               >
                 <Option>Yes</Option>
                 <Option>No</Option>
@@ -136,13 +133,13 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text className={styles.sectionHeading}>3. Notes from your site check</Text>
+          <Text block className={styles.sectionHeading}>3. Notes from your site check</Text>
           <div className={styles.question}>
             <Text>Record anything from your site check that should inform later assessment tasks.</Text>
             <Field>
               <Textarea
-                value={notes}
-                onChange={(_, d) => setNotes(d.value)}
+                value={siteCheckForm.notes}
+                onChange={(_, d) => setSiteCheckField('notes', d.value)}
                 resize="vertical"
                 rows={5}
               />
