@@ -1,6 +1,7 @@
 // src/components/TopBar.tsx
 import { IconButton, mergeStyleSets } from '@fluentui/react';
 import { Persona, PersonaSize } from '@fluentui/react';
+import { useNavigate } from 'react-router-dom';
 
 const classes = mergeStyleSets({
   bar: {
@@ -14,7 +15,10 @@ const classes = mergeStyleSets({
   },
   left: { display: 'flex', alignItems: 'center', gap: 12 },
   right: { display: 'flex', alignItems: 'center', gap: 16 },
-  title: { fontSize: 16, fontWeight: 600, whiteSpace: 'nowrap' },
+  title: { fontSize: 16, whiteSpace: 'nowrap' },
+  titleBrand: { fontWeight: 700 },
+  titleDivider: { opacity: 0.5, margin: '0 6px' },
+  titleName: { fontWeight: 600 },
 });
 
 // Proper IButtonStyles object for the icon buttons
@@ -24,12 +28,22 @@ const buttonStyles = {
 };
 
 export default function TopBar() {
+  const navigate = useNavigate();
   return (
     <header className={classes.bar}>
-      {/* left section: waffle & product title */}
+      {/* left section: waffle (links to index) & product title */}
       <div className={classes.left}>
-        <IconButton iconProps={{ iconName: 'GlobalNavButton' }} styles={buttonStyles} />
-        <span className={classes.title}>Dynamics 365 | Get permission for marine work</span>
+        <IconButton
+          iconProps={{ iconName: 'GlobalNavButton' }}
+          styles={buttonStyles}
+          ariaLabel="Back to home"
+          onClick={() => navigate('/')}
+        />
+        <span className={classes.title}>
+          <span className={classes.titleBrand}>MMO</span>
+          <span className={classes.titleDivider}>|</span>
+          <span className={classes.titleName}>Marine Applications System</span>
+        </span>
       </div>
 
       {/* right section: placeholder actions */}

@@ -1,0 +1,56 @@
+[
+  {
+    "reference": "MLA/2026/1001",
+    "project": "Dawlish sea defence extension",
+    "caseOfficer": "",
+    "status": "Awaiting allocation",
+    "timeAtStatus": "3 days",
+    "caseAge": "3 days",
+    "notification": ""
+  },
+  {
+    "reference": "MLA/2026/1002",
+    "project": "Exmouth Marina jetty extension",
+    "caseOfficer": "Sam Kowalski",
+    "status": "Assessment in progress",
+    "timeAtStatus": "8 days",
+    "caseAge": "22 days",
+    "notification": ""
+  },
+  {
+    "reference": "MLA/2026/1003",
+    "project": "Poole Harbour dredging works",
+    "caseOfficer": "Rachel Patel",
+    "status": "Assessment in progress",
+    "timeAtStatus": "2 days",
+    "caseAge": "31 days",
+    "notification": "Message received"
+  },
+  {
+    "reference": "MLA/2026/1004",
+    "project": "Torquay breakwater repair",
+    "caseOfficer": "Gary Whitfield",
+    "status": "Awaiting applicant",
+    "timeAtStatus": "14 days",
+    "caseAge": "45 days",
+    "notification": ""
+  },
+  {
+    "reference": "MLA/2026/1005",
+    "project": "Plymouth Sound cable laying",
+    "caseOfficer": "",
+    "status": "Awaiting allocation",
+    "timeAtStatus": "1 day",
+    "caseAge": "1 day",
+    "notification": ""
+  },
+  {
+    "reference": "MLA/2026/1006",
+    "project": "Falmouth port expansion phase 2",
+    "caseOfficer": "James Okafor",
+    "status": "Consultation",
+    "timeAtStatus": "5 days",
+    "caseAge": "62 days",
+    "notification": "Message received"
+  }
+]
