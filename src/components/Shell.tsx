@@ -1,12 +1,27 @@
 // src/components/Shell.tsx
 import type { PropsWithChildren } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TopBar from './TopBar';
 import Nav from './Nav';
 import '../App.css';
 
+/* ---------- Navigation types ------------------------------------------ */
+
+interface ShellNavItem {
+  name: string;
+  key: string;
+  url?: string;
+  icon?: string;
+  children?: ShellNavItem[];
+}
+interface ShellNavGroup {
+  name?: string;
+  items: ShellNavItem[];
+}
+
 /* ---------- Navigation groups ----------------------------------------- */
 
-const navGroups = [
+const navGroups: ShellNavGroup[] = [
   {
     // First group - no header
     items: [
@@ -52,18 +67,87 @@ const navGroups = [
   },
 ];
 
+/* ---------- Review and assess journey navigation ---------------------- */
+
+export const reviewAssessNavGroups: ShellNavGroup[] = [
+  {
+    items: [
+      { name: 'Home', key: 'home', url: '#', icon: 'Home' },
+      {
+        name: 'Recent',
+        key: 'recent',
+        icon: 'Clock',
+        children: [
+          { name: 'Recent Item 1', key: 'recent1', url: '#' },
+          { name: 'Recent Item 2', key: 'recent2', url: '#' },
+        ],
+      },
+      {
+        name: 'Pinned',
+        key: 'pinned',
+        icon: 'Pinned',
+        children: [
+          { name: 'Pinned Item 1', key: 'pinned1', url: '#' },
+          { name: 'Pinned Item 2', key: 'pinned2', url: '#' },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'My work',
+    items: [
+      { name: 'Applications dashboard', key: 'dashboard', url: '#', icon: 'BIDashboard' },
+    ],
+  },
+  {
+    name: 'Customers',
+    items: [
+      { name: 'Organisations', key: 'orgs', url: '#', icon: 'CompanyDirectory' },
+      { name: 'Applicants', key: 'applicants', url: '#', icon: 'Contact' },
+    ],
+  },
+  {
+    name: 'Service',
+    items: [
+      { name: 'Marine licence cases', key: 'marine-licence-cases', url: '#', icon: 'Repair' },
+      { name: 'Exemption cases', key: 'exemption-cases', url: '#', icon: 'Documentation' },
+      { name: 'Case Coastal Operations Areas', key: 'coastal-ops', url: '#', icon: 'MapPin' },
+      { name: 'Case Marine Plan Areas', key: 'marine-plan-areas', url: '#', icon: 'MapPin' },
+    ],
+  },
+];
+
 /* ---------- Shell layout ---------------------------------------------- */
 
-export default function Shell({ children }: PropsWithChildren) {
+interface ShellProps {
+  navGroups?: ShellNavGroup[];
+  selectedKey?: string;
+}
+
+// Nav keys that map to a real route; everything else is a dead link.
+const navRoutes: Record<string, string> = {
+  home: '/',
+  cases: '/iteration1',
+  'marine-licence-cases': '/review-assess',
+};
+
+export default function Shell({
+  children,
+  navGroups: groups = navGroups,
+  selectedKey = 'cases',
+}: PropsWithChildren<ShellProps>) {
+  const navigate = useNavigate();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <TopBar />
 
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <Nav
-          groups={navGroups}
-          selectedKey="cases"
-          onLinkClick={(key: string) => console.log('Clicked:', key)}
+          groups={groups}
+          selectedKey={selectedKey}
+          onLinkClick={(key: string) => {
+            if (navRoutes[key]) navigate(navRoutes[key]);
+          }}
         />
 
         <main style={{ 
