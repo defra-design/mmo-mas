@@ -48,11 +48,18 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
-  fieldGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    columnGap: tokens.spacingHorizontalXXL,
-    rowGap: tokens.spacingVerticalL,
+  fieldColumns: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    gap: tokens.spacingHorizontalXXL,
+  },
+  fieldColumn: {
+    flex: '1 1 320px',
+    minWidth: '280px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalL,
   },
   field: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'center', gap: tokens.spacingHorizontalM },
   fieldLabel: {},
@@ -98,14 +105,17 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     { label: 'Assigned to', value: data.assignedTo },
   ];
 
-  const fields = [
+  const leftFields = [
     { label: 'Reference', value: data.reference },
-    { label: 'Applicant', value: data.applicant },
     { label: 'Application type', value: data.applicationType },
-    { label: 'Organisation', value: data.organisation },
     { label: 'Submitted', value: data.submitted },
-    { label: 'Consent to publish', value: data.consentToPublish },
     { label: 'Fee band', value: data.feeBand },
+  ];
+
+  const rightFields = [
+    { label: 'Applicant', value: data.applicant },
+    { label: 'Organisation', value: data.organisation },
+    { label: 'Consent to publish', value: data.consentToPublish },
   ];
 
   return (
@@ -159,11 +169,15 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
       <div className={styles.layout}>
         <Card className={styles.mainCard}>
           <Text as="h2" className={styles.sectionHeading}>Case summary</Text>
-          <div className={styles.fieldGrid}>
-            {fields.map(f => (
-              <div key={f.label} className={styles.field}>
-                <Text className={styles.fieldLabel}>{f.label}</Text>
-                <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+          <div className={styles.fieldColumns}>
+            {[leftFields, rightFields].map((col, i) => (
+              <div key={i} className={styles.fieldColumn}>
+                {col.map(f => (
+                  <div key={f.label} className={styles.field}>
+                    <Text className={styles.fieldLabel}>{f.label}</Text>
+                    <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
