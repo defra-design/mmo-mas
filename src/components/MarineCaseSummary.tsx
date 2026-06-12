@@ -55,7 +55,7 @@ const useStyles = makeStyles({
     rowGap: tokens.spacingVerticalL,
   },
   field: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'center', gap: tokens.spacingHorizontalM },
-  fieldLabel: { fontWeight: tokens.fontWeightSemibold },
+  fieldLabel: {},
   fieldValue: {
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
