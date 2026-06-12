@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "start": "serve -s dist -l ${PORT:-3000}",
+    "start": "node server.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -28,9 +28,9 @@
     "@fluentui/react-components": "^9.67.0",
     "@fluentui/react-icons": "^2.0.306",
     "@types/react-router-dom": "^5.3.3",
+    "express": "^4.22.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.7.0",
-    "serve": "^14.2.6"
+    "react-router-dom": "^7.7.0"
   }
 }
