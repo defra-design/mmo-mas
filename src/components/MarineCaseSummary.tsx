@@ -4,6 +4,7 @@ import {
   makeStyles,
   shorthands,
   tokens,
+  Avatar,
   Card,
   Text,
   Title3,
@@ -12,6 +13,7 @@ import {
   TabList,
   Tab,
 } from '@fluentui/react-components';
+import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
@@ -33,14 +35,16 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalXXL,
     marginBottom: tokens.spacingVerticalL,
   },
+  titleGroup: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM },
   metaGroup: { display: 'flex', gap: tokens.spacingHorizontalXXL },
   metaItem: { display: 'flex', flexDirection: 'column' },
-  metaLabel: { fontWeight: tokens.fontWeightSemibold },
+  metaLabel: { color: tokens.colorNeutralForeground3 },
+  assignedItem: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
   layout: { display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
   mainCard: { flex: 1, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   tasksCard: { width: '340px', flexShrink: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   sectionHeading: {
-    fontSize: tokens.fontSizeBase500,
+    fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
@@ -90,8 +94,8 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const meta = [
     { label: 'Reference', value: data.reference },
     { label: 'Status', value: data.status },
-    { label: 'Assigned to', value: data.assignedTo },
     { label: 'Case age', value: data.caseAge },
+    { label: 'Assigned to', value: data.assignedTo },
   ];
 
   const fields = [
@@ -110,21 +114,39 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
       <Card className={styles.headerCard}>
         <div className={styles.headerTop}>
-          <div>
-            <Title3>{data.title}</Title3>
-            <div><Body1>Case</Body1></div>
+          <div className={styles.titleGroup}>
+            <Avatar name={data.title} size={48} color="colorful" />
+            <div>
+              <Title3>{data.title}</Title3>
+              <div><Body1>Case</Body1></div>
+            </div>
           </div>
           <div className={styles.metaGroup}>
-            {meta.map(m => (
-              <div key={m.label} className={styles.metaItem}>
-                <Caption1 className={styles.metaLabel}>{m.label}</Caption1>
-                <Body1>{m.value}</Body1>
-              </div>
-            ))}
+            {meta.map(m =>
+              m.label === 'Assigned to' ? (
+                <div key={m.label} className={styles.assignedItem}>
+                  <Avatar
+                    name={m.value}
+                    size={32}
+                    color="colorful"
+                    style={{ backgroundColor: getAssigneeAvatarColor(m.value) }}
+                  />
+                  <div className={styles.metaItem}>
+                    <Body1>{m.value}</Body1>
+                    <Caption1 className={styles.metaLabel}>{m.label}</Caption1>
+                  </div>
+                </div>
+              ) : (
+                <div key={m.label} className={styles.metaItem}>
+                  <Body1>{m.value}</Body1>
+                  <Caption1 className={styles.metaLabel}>{m.label}</Caption1>
+                </div>
+              )
+            )}
           </div>
         </div>
 
-        <TabList defaultSelectedValue="summary">
+        <TabList defaultSelectedValue="summary" size="large">
           <Tab value="summary">Case summary</Tab>
           <Tab value="project">Project details</Tab>
           <Tab value="site">Site and activity</Tab>
