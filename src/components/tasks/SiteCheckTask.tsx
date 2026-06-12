@@ -33,7 +33,11 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalXL,
   },
   sectionTitleRow: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalL },
-  sectionHeading: { fontSize: tokens.fontSizeBase500, fontWeight: tokens.fontWeightSemibold },
+  sectionHeading: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  headingGap: { marginBottom: tokens.spacingVerticalM },
   csvLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalXS },
   desc: {
     color: tokens.colorNeutralForeground2,
@@ -133,7 +137,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>3. Notes from your site check</Text>
+          <Text block className={`${styles.sectionHeading} ${styles.headingGap}`}>3. Notes from your site check</Text>
           <div className={styles.question}>
             <Text>Record anything from your site check that should inform later assessment tasks.</Text>
             <Field>

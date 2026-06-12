@@ -4,6 +4,7 @@ import {
   makeStyles,
   shorthands,
   tokens,
+  Avatar,
   Card,
   Text,
   Title3,
@@ -12,6 +13,7 @@ import {
   TabList,
   Tab,
 } from '@fluentui/react-components';
+import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
@@ -33,25 +35,34 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalXXL,
     marginBottom: tokens.spacingVerticalL,
   },
+  titleGroup: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM },
   metaGroup: { display: 'flex', gap: tokens.spacingHorizontalXXL },
   metaItem: { display: 'flex', flexDirection: 'column' },
-  metaLabel: { fontWeight: tokens.fontWeightSemibold },
-  layout: { display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
-  mainCard: { flex: 1, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
+  metaLabel: { color: tokens.colorNeutralForeground3 },
+  assignedItem: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
+  layout: { display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
+  mainCard: { flex: '1 1 320px', minWidth: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   tasksCard: { width: '340px', flexShrink: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   sectionHeading: {
-    fontSize: tokens.fontSizeBase500,
+    fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
-  fieldGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    columnGap: tokens.spacingHorizontalXXL,
-    rowGap: tokens.spacingVerticalL,
+  fieldColumns: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    gap: tokens.spacingHorizontalXXL,
+  },
+  fieldColumn: {
+    flex: '1 1 320px',
+    minWidth: '280px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalL,
   },
   field: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'center', gap: tokens.spacingHorizontalM },
-  fieldLabel: { fontWeight: tokens.fontWeightSemibold },
+  fieldLabel: {},
   fieldValue: {
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
@@ -90,18 +101,21 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const meta = [
     { label: 'Reference', value: data.reference },
     { label: 'Status', value: data.status },
-    { label: 'Assigned to', value: data.assignedTo },
     { label: 'Case age', value: data.caseAge },
+    { label: 'Assigned to', value: data.assignedTo },
   ];
 
-  const fields = [
+  const leftFields = [
     { label: 'Reference', value: data.reference },
-    { label: 'Applicant', value: data.applicant },
     { label: 'Application type', value: data.applicationType },
-    { label: 'Organisation', value: data.organisation },
     { label: 'Submitted', value: data.submitted },
-    { label: 'Consent to publish', value: data.consentToPublish },
     { label: 'Fee band', value: data.feeBand },
+  ];
+
+  const rightFields = [
+    { label: 'Applicant', value: data.applicant },
+    { label: 'Organisation', value: data.organisation },
+    { label: 'Consent to publish', value: data.consentToPublish },
   ];
 
   return (
@@ -110,21 +124,39 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
       <Card className={styles.headerCard}>
         <div className={styles.headerTop}>
-          <div>
-            <Title3>{data.title}</Title3>
-            <div><Body1>Case</Body1></div>
+          <div className={styles.titleGroup}>
+            <Avatar name={data.title} size={48} color="colorful" />
+            <div>
+              <Title3>{data.title}</Title3>
+              <div><Body1>Case</Body1></div>
+            </div>
           </div>
           <div className={styles.metaGroup}>
-            {meta.map(m => (
-              <div key={m.label} className={styles.metaItem}>
-                <Caption1 className={styles.metaLabel}>{m.label}</Caption1>
-                <Body1>{m.value}</Body1>
-              </div>
-            ))}
+            {meta.map(m =>
+              m.label === 'Assigned to' ? (
+                <div key={m.label} className={styles.assignedItem}>
+                  <Avatar
+                    name={m.value}
+                    size={32}
+                    color="colorful"
+                    style={{ backgroundColor: getAssigneeAvatarColor(m.value) }}
+                  />
+                  <div className={styles.metaItem}>
+                    <Body1>{m.value}</Body1>
+                    <Caption1 className={styles.metaLabel}>{m.label}</Caption1>
+                  </div>
+                </div>
+              ) : (
+                <div key={m.label} className={styles.metaItem}>
+                  <Body1>{m.value}</Body1>
+                  <Caption1 className={styles.metaLabel}>{m.label}</Caption1>
+                </div>
+              )
+            )}
           </div>
         </div>
 
-        <TabList defaultSelectedValue="summary">
+        <TabList defaultSelectedValue="summary" size="large">
           <Tab value="summary">Case summary</Tab>
           <Tab value="project">Project details</Tab>
           <Tab value="site">Site and activity</Tab>
@@ -137,11 +169,15 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
       <div className={styles.layout}>
         <Card className={styles.mainCard}>
           <Text as="h2" className={styles.sectionHeading}>Case summary</Text>
-          <div className={styles.fieldGrid}>
-            {fields.map(f => (
-              <div key={f.label} className={styles.field}>
-                <Text className={styles.fieldLabel}>{f.label}</Text>
-                <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+          <div className={styles.fieldColumns}>
+            {[leftFields, rightFields].map((col, i) => (
+              <div key={i} className={styles.fieldColumn}>
+                {col.map(f => (
+                  <div key={f.label} className={styles.field}>
+                    <Text className={styles.fieldLabel}>{f.label}</Text>
+                    <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>

@@ -8,6 +8,7 @@ export const assigneeAvatarColors: Record<string, string> = {
   'Michael Grant': '#BA68C8', // Purple
   'Emma Thompson': '#26C6DA', // Teal (saturated)
   'James Carter': '#EC407A', // Pink (saturated)
+  'Sam Evans': '#5C6BC0', // Indigo
 };
 
 export function getAssigneeAvatarColor(name: string): string {
