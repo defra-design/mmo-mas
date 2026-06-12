@@ -40,8 +40,8 @@ const useStyles = makeStyles({
   metaItem: { display: 'flex', flexDirection: 'column' },
   metaLabel: { color: tokens.colorNeutralForeground3 },
   assignedItem: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
-  layout: { display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
-  mainCard: { flex: 1, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
+  layout: { display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
+  mainCard: { flex: '1 1 320px', minWidth: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   tasksCard: { width: '340px', flexShrink: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
