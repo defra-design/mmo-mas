@@ -22,13 +22,7 @@ export default function HeaderRow() {
       />
 
       {/* Status pill */}
-      <Tag
-        shape="rounded"
-        appearance="outline"
-        // close button gives us the little “×”
-        dismissible
-        onDismiss={() => {}}
-      >
+      <Tag shape="rounded" appearance="outline">
         Status:&nbsp;<strong>Active</strong>
       </Tag>
     </div>
