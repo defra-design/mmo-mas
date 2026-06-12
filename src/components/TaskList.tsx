@@ -22,13 +22,12 @@ import {
   ChevronRightRegular,
   PreviousRegular,
 } from '@fluentui/react-icons';
-import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
 
 const useStyles = makeStyles({
   heading: {
-    fontSize: tokens.fontSizeBase500,
+    fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
@@ -131,7 +130,7 @@ export default function TaskList({ caseId }: TaskListProps) {
             initials={initials(row.name)}
             size={32}
             color="colorful"
-            style={{ backgroundColor: getAssigneeAvatarColor(row.name) }}
+            idForColor={row.name}
           />
           <div className={styles.rowText}>
             <Text className={styles.taskName}>{row.name}</Text>

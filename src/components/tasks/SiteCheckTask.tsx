@@ -33,11 +33,15 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalXL,
   },
   sectionTitleRow: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalL },
-  sectionHeading: { fontSize: tokens.fontSizeBase500, fontWeight: tokens.fontWeightSemibold },
+  sectionHeading: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    marginBottom: tokens.spacingVerticalM,
+  },
   csvLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalXS },
   desc: {
     color: tokens.colorNeutralForeground2,
-    marginTop: tokens.spacingVerticalS,
+    marginTop: '0',
     marginBottom: tokens.spacingVerticalL,
   },
   question: {
