@@ -26,26 +26,44 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralStroke2,
     margin: `0 ${tokens.spacingHorizontalXS}`,
   },
+  // Plain, non-interactive back icon shown when there is nowhere to go back to.
+  backIconInactive: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '32px',
+    height: '32px',
+    fontSize: '20px',
+    color: tokens.colorNeutralForegroundDisabled,
+  },
 });
 
 interface FormCommandBarProps {
   saveLabel?: string;
   onSave?: () => void;
   showReject?: boolean;
+  /** Route the back chevron returns to. When omitted, back is disabled. */
+  backTo?: string;
 }
 
-export default function FormCommandBar({ saveLabel, onSave, showReject }: FormCommandBarProps) {
+export default function FormCommandBar({ saveLabel, onSave, showReject, backTo }: FormCommandBarProps) {
   const styles = useStyles();
   const navigate = useNavigate();
 
   return (
     <div className={mergeClasses(styles.bar, 'elevated-panel')}>
-      <Button
-        appearance="subtle"
-        icon={<ArrowLeftRegular />}
-        aria-label="Back"
-        onClick={() => navigate(-1)}
-      />
+      {backTo ? (
+        <Button
+          appearance="subtle"
+          icon={<ArrowLeftRegular />}
+          aria-label="Back"
+          onClick={() => navigate(backTo)}
+        />
+      ) : (
+        <span className={styles.backIconInactive} aria-hidden="true">
+          <ArrowLeftRegular />
+        </span>
+      )}
       <Button appearance="subtle" icon={<OpenRegular />} aria-label="Open in new window" />
       {saveLabel && (
         <>
