@@ -146,3 +146,79 @@ body {
   height: auto;
   border-radius: var(--cdp-radius);
 }
+
+/* ---- Marine plan policies (nav + detail layout) ------------------------- */
+
+.mpp {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.mpp__nav {
+  flex: 0 0 280px;
+}
+
+.mpp__detail {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mpp__group {
+  margin-bottom: 24px;
+}
+
+.mpp__group-title {
+  margin: 0 0 8px;
+  padding-left: 11px;
+  font-weight: 600;
+}
+
+/* Blue links; the selected policy is marked by a 3px brand accent only (the
+   3px transparent border on every link reserves the space so text never jumps). */
+.mpp__link {
+  display: block;
+  width: 100%;
+  padding: 4px 8px;
+  border: none;
+  border-left: 3px solid transparent;
+  background: none;
+  font: inherit;
+  line-height: 1.35;
+  text-align: left;
+  color: #0078d4;
+  cursor: pointer;
+}
+
+.mpp__link:hover {
+  text-decoration: underline;
+}
+
+.mpp__link--active {
+  border-left-color: #0078d4;
+}
+
+.mpp__detail-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.mpp__subhead {
+  margin: 16px 0 8px;
+  color: var(--cdp-text-secondary);
+}
+
+.mpp__box {
+  padding: 16px;
+  background: var(--cdp-value-bg);
+  border-radius: var(--cdp-radius);
+}
+
+.mpp__box p {
+  margin: 0 0 12px;
+}
+
+.mpp__box p:last-child {
+  margin-bottom: 0;
+}
