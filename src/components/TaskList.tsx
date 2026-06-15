@@ -6,7 +6,6 @@ import {
   shorthands,
   tokens,
   Text,
-  Avatar,
   Checkbox,
   Button,
   Menu,
@@ -66,15 +65,6 @@ interface TaskRow {
   onClick?: () => void;
 }
 
-function initials(name: string) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map(w => w[0])
-    .join('')
-    .replace(/^(.)(.*)$/, (_, a, b) => a.toUpperCase() + (b || '').toLowerCase());
-}
-
 interface TaskListProps {
   caseId: string;
 }
@@ -95,7 +85,15 @@ export default function TaskList({ caseId }: TaskListProps) {
           ? () => navigate(`/review-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
           : undefined,
     },
-    { key: 'wfd', name: 'WFD assessment', status: tasks.wfdAssessment },
+    {
+      key: 'wfd',
+      name: 'Water Framework Directive (WFD)',
+      status: tasks.wfdAssessment,
+      onClick:
+        tasks.wfdAssessment !== 'Cannot start yet'
+          ? () => navigate(`/review-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
+          : undefined,
+    },
     { key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies },
   ];
 
@@ -125,12 +123,6 @@ export default function TaskList({ caseId }: TaskListProps) {
               setSelected(s => (data.checked ? [...s, row.key] : s.filter(k => k !== row.key)))
             }
             aria-label={`Select ${row.name}`}
-          />
-          <Avatar
-            initials={initials(row.name)}
-            size={32}
-            color="colorful"
-            idForColor={row.name}
           />
           <div className={styles.rowText}>
             <Text className={styles.taskName}>{row.name}</Text>

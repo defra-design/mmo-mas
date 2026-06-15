@@ -16,9 +16,14 @@ export interface SiteCheckForm {
   notes: string;
 }
 
+export interface WfdForm {
+  review: string;
+}
+
 interface PersistedState {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
+  wfdForm: WfdForm;
 }
 
 const initialState: PersistedState = {
@@ -28,6 +33,7 @@ const initialState: PersistedState = {
     marinePlanPolicies: 'Cannot start yet',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
+  wfdForm: { review: '' },
 };
 
 const STORAGE_KEY = 'mas-review-assess-state';
@@ -41,6 +47,7 @@ function loadState(): PersistedState {
       return {
         tasks: { ...initialState.tasks, ...parsed.tasks },
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
+        wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
       };
     }
   } catch {
@@ -52,8 +59,11 @@ function loadState(): PersistedState {
 interface TaskContextValue {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
+  wfdForm: WfdForm;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
+  setWfdReview: (value: string) => void;
   completeSiteCheck: () => void;
+  completeWfd: () => void;
   resetAll: () => void;
 }
 
@@ -73,6 +83,9 @@ export function TaskProvider({ children }: PropsWithChildren) {
   const setSiteCheckField = (field: keyof SiteCheckForm, value: string) =>
     setState(prev => ({ ...prev, siteCheckForm: { ...prev.siteCheckForm, [field]: value } }));
 
+  const setWfdReview = (value: string) =>
+    setState(prev => ({ ...prev, wfdForm: { ...prev.wfdForm, review: value } }));
+
   // Saving the Site check completes it and unlocks the downstream tasks.
   const completeSiteCheck = () =>
     setState(prev => ({
@@ -85,6 +98,13 @@ export function TaskProvider({ children }: PropsWithChildren) {
       },
     }));
 
+  // Saving the WFD assessment completes it; no further tasks depend on it.
+  const completeWfd = () =>
+    setState(prev => ({
+      ...prev,
+      tasks: { ...prev.tasks, wfdAssessment: 'Done' },
+    }));
+
   const resetAll = () => setState(initialState);
 
   return (
@@ -92,8 +112,11 @@ export function TaskProvider({ children }: PropsWithChildren) {
       value={{
         tasks: state.tasks,
         siteCheckForm: state.siteCheckForm,
+        wfdForm: state.wfdForm,
         setSiteCheckField,
+        setWfdReview,
         completeSiteCheck,
+        completeWfd,
         resetAll,
       }}
     >
