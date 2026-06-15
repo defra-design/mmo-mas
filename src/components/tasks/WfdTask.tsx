@@ -38,29 +38,48 @@ const useStyles = makeStyles({
     marginBottom: tokens.spacingVerticalL,
   },
   answers: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
-  answerRow: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(200px, 280px) minmax(0, 1fr) auto',
+  // Flex (not grid) so the value area can wrap under the label at narrow widths.
+  row: {
+    display: 'flex',
+    flexWrap: 'wrap',
     alignItems: 'center',
+    columnGap: tokens.spacingHorizontalL,
+    rowGap: tokens.spacingVerticalS,
+  },
+  label: { flexShrink: 0, flexBasis: '220px', minWidth: '220px' },
+  // Holds one or two field boxes; wraps them under each other when cramped.
+  fields: {
+    flexGrow: 1,
+    flexBasis: '320px',
+    minWidth: 0,
+    display: 'flex',
+    flexWrap: 'wrap',
     gap: tokens.spacingHorizontalL,
   },
+  // flexBasis 0 + equal grow → each field box takes an equal share (50/50 when paired).
   value: {
+    flexGrow: 1,
+    flexBasis: 0,
+    minWidth: '140px',
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
     borderRadius: tokens.borderRadiusSmall,
   },
   docxLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
   confirm: {
-    display: 'inline-flex',
+    flexGrow: 1,
+    flexBasis: 0,
+    minWidth: '180px',
+    display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
     borderRadius: tokens.borderRadiusSmall,
-    whiteSpace: 'nowrap',
   },
   // Static visual of a D365 selected checkbox — not interactive.
   confirmCheck: {
+    flexShrink: 0,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -71,13 +90,8 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralBackground1,
   },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
-  // Same label column as the applicant answers so both sections line up.
-  question: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(200px, 280px) minmax(0, 1fr)',
-    gap: tokens.spacingHorizontalL,
-    alignItems: 'center',
-  },
+  control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
+  dropdown: { width: '100%' },
 });
 
 const reviewOptions = [
@@ -113,28 +127,36 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
         <div>
           <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
           <div className={styles.answers}>
-            <div className={styles.answerRow}>
-              <Text>Within the WFD assessment area</Text>
-              <div className={styles.value}><Body1>Yes</Body1></div>
-              <div className={styles.confirm}>
-                <span className={styles.confirmCheck}><CheckmarkFilled fontSize={14} /></span>
-                <Body1>Confirmed in Site check</Body1>
+            <div className={styles.row}>
+              <Text className={styles.label}>Within the WFD assessment area</Text>
+              <div className={styles.fields}>
+                <div className={styles.value}><Body1>Yes</Body1></div>
+                <div className={styles.confirm}>
+                  <span className={styles.confirmCheck}><CheckmarkFilled fontSize={14} /></span>
+                  <Body1>Confirmed in Site check</Body1>
+                </div>
               </div>
             </div>
-            <div className={styles.answerRow}>
-              <Text>Previous assessment (2015–2022)</Text>
-              <div className={styles.value}><Body1>Yes</Body1></div>
+            <div className={styles.row}>
+              <Text className={styles.label}>Previous assessment (2015–2022)</Text>
+              <div className={styles.fields}>
+                <div className={styles.value}><Body1>Yes</Body1></div>
+              </div>
             </div>
-            <div className={styles.answerRow}>
-              <Text>Anything changed since</Text>
-              <div className={styles.value}><Body1>No</Body1></div>
+            <div className={styles.row}>
+              <Text className={styles.label}>Anything changed since</Text>
+              <div className={styles.fields}>
+                <div className={styles.value}><Body1>No</Body1></div>
+              </div>
             </div>
-            <div className={styles.answerRow}>
-              <Text>Assessment provided</Text>
-              <div className={styles.value}>
-                <Link href="#" className={styles.docxLink}>
-                  <GlobeRegular /> WFD-Exmouth-2019.docx
-                </Link>
+            <div className={styles.row}>
+              <Text className={styles.label}>Assessment provided</Text>
+              <div className={styles.fields}>
+                <div className={styles.value}>
+                  <Link href="#" className={styles.docxLink}>
+                    <GlobeRegular /> WFD-Exmouth-2019.docx
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -144,20 +166,23 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
         <div>
           <Text block className={styles.sectionHeading}>2. WFD review</Text>
-          <div className={styles.question}>
-            <Text>Is the WFD section complete and acceptable?</Text>
-            <Field>
-              <Dropdown
-                placeholder="Select"
-                value={wfdForm.review}
-                selectedOptions={wfdForm.review ? [wfdForm.review] : []}
-                onOptionSelect={(_, d) => setWfdReview(d.optionValue ?? '')}
-              >
-                {reviewOptions.map(o => (
-                  <Option key={o}>{o}</Option>
-                ))}
-              </Dropdown>
-            </Field>
+          <div className={styles.row}>
+            <Text className={styles.label}>Is the WFD section complete and acceptable?</Text>
+            <div className={styles.fields}>
+              <Field className={styles.control}>
+                <Dropdown
+                  className={styles.dropdown}
+                  placeholder="Select"
+                  value={wfdForm.review}
+                  selectedOptions={wfdForm.review ? [wfdForm.review] : []}
+                  onOptionSelect={(_, d) => setWfdReview(d.optionValue ?? '')}
+                >
+                  {reviewOptions.map(o => (
+                    <Option key={o}>{o}</Option>
+                  ))}
+                </Dropdown>
+              </Field>
+            </div>
           </div>
         </div>
       </Card>
