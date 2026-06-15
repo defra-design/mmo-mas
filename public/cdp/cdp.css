@@ -1,0 +1,246 @@
+/*
+ * CDP application-data styling for the D365 iframe sections.
+ *
+ * This is plain CSS (no build step) so the HTML in this folder can be served
+ * and edited directly. It deliberately mirrors the native D365 / Fluent UI
+ * look — Segoe UI type, grey value boxes, label-left / value-right rows — so
+ * the iframe content does not jar against the surrounding model-driven app.
+ *
+ * Shared by every section page in this folder (project-details.html, and the
+ * site / marine-plan-policies / wfd / other-permissions pages to come). Update
+ * tokens here once if the D365 styling is ever redesigned.
+ */
+
+:root {
+  --cdp-font: "Segoe UI", "Segoe UI Web (West European)", -apple-system,
+    BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  --cdp-text: #242424;
+  --cdp-text-secondary: #424242;
+  --cdp-value-bg: #f5f5f5;
+  --cdp-radius: 4px;
+  --cdp-gap: 24px;
+  --cdp-label-width: 220px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #ffffff;
+  color: var(--cdp-text);
+  font-family: var(--cdp-font);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.section {
+  padding: 24px 24px 48px;
+}
+
+.section__title {
+  margin: 0 0 24px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Stack of label / value rows */
+.fields {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cdp-gap);
+}
+
+/* A single row. Flex + wrap so the value drops under the label on narrow
+   screens instead of overflowing. */
+.field {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: var(--cdp-gap);
+  row-gap: 8px;
+}
+
+.field__label {
+  flex: 0 0 var(--cdp-label-width);
+  max-width: var(--cdp-label-width);
+  padding-top: 7px; /* line up with the value box's top padding */
+  color: var(--cdp-text);
+}
+
+.field__value {
+  flex: 1 1 320px;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--cdp-value-bg);
+  border-radius: var(--cdp-radius);
+}
+
+/* Paragraphs inside a value box (e.g. long free-text answers) */
+.field__value p {
+  margin: 0 0 12px;
+}
+
+.field__value p:last-child {
+  margin-bottom: 0;
+}
+
+/* Wider label column for sections whose labels are full sentences (e.g. WFD). */
+.section--wide-labels {
+  --cdp-label-width: 340px;
+}
+
+/* A document value rendered as a link with a globe icon. */
+.doc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.doc-link:hover {
+  text-decoration: underline;
+}
+
+.doc-link svg {
+  flex-shrink: 0;
+}
+
+/* ---- Sub-sections (e.g. "Providing the site location", "Site 1") -------- */
+
+.subsection {
+  margin: 0 0 32px;
+}
+
+.subsection__title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Two columns (Site details | Activity) that collapse to one on smaller
+   screens. Labels are a little narrower here so each column stays readable;
+   inside a column the field rows still wrap value-under-label when cramped. */
+.site-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.site-grid .subsection {
+  margin: 0;
+}
+
+/* Collapse the two columns on smaller screens. Measured against the iframe's
+   own width, which is ~318px narrower than the browser window (left nav rail +
+   right rail + main padding), so 1024px here ≈ a 1342px window. Above it the
+   two columns sit side by side; each column then behaves exactly like the
+   single-column Project details section (label beside value, wrapping under
+   only when the column is too narrow) so the layout stays consistent between
+   tabs. */
+@media (max-width: 1024px) {
+  .site-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Map value ---------------------------------------------------------- */
+
+.field__value--map {
+  padding: 0;
+  background: none;
+  overflow: hidden;
+}
+
+.site-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--cdp-radius);
+}
+
+/* ---- Marine plan policies (nav + detail layout) ------------------------- */
+
+.mpp {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.mpp__nav {
+  flex: 0 0 280px;
+}
+
+.mpp__detail {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mpp__group {
+  margin-bottom: 24px;
+}
+
+.mpp__group-title {
+  margin: 0 0 8px;
+  padding-left: 11px;
+  font-weight: 600;
+}
+
+/* Blue links; the selected policy is marked by a 3px brand accent only (the
+   3px transparent border on every link reserves the space so text never jumps). */
+.mpp__link {
+  display: block;
+  width: 100%;
+  padding: 4px 8px;
+  border: none;
+  border-left: 3px solid transparent;
+  background: none;
+  font: inherit;
+  line-height: 1.35;
+  text-align: left;
+  color: #0078d4;
+  cursor: pointer;
+}
+
+.mpp__link:hover {
+  text-decoration: underline;
+}
+
+.mpp__link--active {
+  border-left-color: #0078d4;
+}
+
+.mpp__detail-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.mpp__subhead {
+  margin: 16px 0 8px;
+  color: var(--cdp-text-secondary);
+}
+
+.mpp__box {
+  padding: 16px;
+  background: var(--cdp-value-bg);
+  border-radius: var(--cdp-radius);
+}
+
+.mpp__box p {
+  margin: 0 0 12px;
+}
+
+.mpp__box p:last-child {
+  margin-bottom: 0;
+}

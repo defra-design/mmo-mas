@@ -1,5 +1,5 @@
 // src/components/MarineCaseSummary.tsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   makeStyles,
   shorthands,
@@ -16,15 +16,57 @@ import {
 import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
+import CdpFrame from './CdpFrame';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
 
 const useStyles = makeStyles({
+  // Fills the height of the scrollable shell area; the header stays put while
+  // only the tab content below it scrolls (matching D365).
   page: {
     backgroundColor: tokens.colorNeutralBackground2,
+    height: '100%',
+    minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
+  },
+  // Command bar + case header: fixed height, never scrolls.
+  stickyTop: {
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  // Tab content area: takes the remaining height.
+  content: {
+    flexGrow: 1,
+    minHeight: 0,
+    marginTop: tokens.spacingVerticalM,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  // Native (Case summary) content scrolls within the content area.
+  summaryScroll: {
+    flexGrow: 1,
+    minHeight: 0,
+    overflowY: 'auto',
+  },
+  // White card that an iframe section fills; the iframe scrolls its own content.
+  frameCard: {
+    flexGrow: 1,
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    boxShadow: tokens.shadow4,
+  },
+  placeholder: {
+    flexGrow: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: tokens.colorNeutralForeground3,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
   headerTop: {
@@ -35,7 +77,10 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalXXL,
     marginBottom: tokens.spacingVerticalL,
   },
-  titleGroup: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM },
+  // Allow the title group to shrink so the long project name wraps onto
+  // multiple lines before the meta block is forced underneath it.
+  titleGroup: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, flexShrink: 1, minWidth: 0 },
+  titleText: { minWidth: 0 },
   metaGroup: { display: 'flex', gap: tokens.spacingHorizontalXXL },
   metaItem: { display: 'flex', flexDirection: 'column' },
   metaLabel: { color: tokens.colorNeutralForeground3 },
@@ -74,10 +119,20 @@ interface MarineCaseSummaryProps {
   caseId: string;
 }
 
+// Tabs whose content is CDP application data rendered in an iframe.
+const cdpPages: Record<string, { src: string; title: string }> = {
+  project: { src: '/cdp/project-details.html', title: 'Project details' },
+  site: { src: '/cdp/site-and-activity.html', title: 'Site and activity' },
+  mpp: { src: '/cdp/marine-plan-policies.html', title: 'Marine plan policies' },
+  wfd: { src: '/cdp/water-framework-directive.html', title: 'Water Framework Directive' },
+  other: { src: '/cdp/other-permissions.html', title: 'Other permissions' },
+};
+
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
+  const [selectedTab, setSelectedTab] = useState('summary');
 
-  // Exmouth is fully built; other references fall back to their list row.
+  // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
   const details = (marineCaseDetails as Record<string, any>)[caseId];
   const row = marineCases.find(c => c.reference === caseId);
   const data = {
@@ -120,13 +175,14 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
   return (
     <div className={styles.page}>
+      <div className={styles.stickyTop}>
       <FormCommandBar saveLabel="Save" showReject />
 
       <Card className={styles.headerCard}>
         <div className={styles.headerTop}>
           <div className={styles.titleGroup}>
-            <Avatar name={data.title} size={48} color="colorful" />
-            <div>
+            <Avatar name={data.title} size={48} color="colorful" style={{ flexShrink: 0 }} />
+            <div className={styles.titleText}>
               <Title3>{data.title}</Title3>
               <div><Body1>Case</Body1></div>
             </div>
@@ -156,7 +212,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           </div>
         </div>
 
-        <TabList defaultSelectedValue="summary" size="large">
+        <TabList
+          selectedValue={selectedTab}
+          onTabSelect={(_, d) => setSelectedTab(d.value as string)}
+          size="large"
+        >
           <Tab value="summary">Case summary</Tab>
           <Tab value="project">Project details</Tab>
           <Tab value="site">Site and activity</Tab>
@@ -165,27 +225,46 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           <Tab value="other">Other permissions</Tab>
         </TabList>
       </Card>
+      </div>
 
-      <div className={styles.layout}>
-        <Card className={styles.mainCard}>
-          <Text as="h2" className={styles.sectionHeading}>Case summary</Text>
-          <div className={styles.fieldColumns}>
-            {[leftFields, rightFields].map((col, i) => (
-              <div key={i} className={styles.fieldColumn}>
-                {col.map(f => (
-                  <div key={f.label} className={styles.field}>
-                    <Text className={styles.fieldLabel}>{f.label}</Text>
-                    <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
-                  </div>
-                ))}
-              </div>
-            ))}
+      <div className={styles.content}>
+        {selectedTab === 'summary' && (
+          <div className={styles.summaryScroll}>
+            <div className={styles.layout}>
+              <Card className={styles.mainCard}>
+                <Text as="h2" className={styles.sectionHeading}>Case summary</Text>
+                <div className={styles.fieldColumns}>
+                  {[leftFields, rightFields].map((col, i) => (
+                    <div key={i} className={styles.fieldColumn}>
+                      {col.map(f => (
+                        <div key={f.label} className={styles.field}>
+                          <Text className={styles.fieldLabel}>{f.label}</Text>
+                          <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card className={styles.tasksCard}>
+                <TaskList caseId={caseId} />
+              </Card>
+            </div>
           </div>
-        </Card>
+        )}
 
-        <Card className={styles.tasksCard}>
-          <TaskList caseId={caseId} />
-        </Card>
+        {cdpPages[selectedTab] && (
+          <div className={styles.frameCard}>
+            <CdpFrame src={cdpPages[selectedTab].src} title={cdpPages[selectedTab].title} />
+          </div>
+        )}
+
+        {selectedTab !== 'summary' && !cdpPages[selectedTab] && (
+          <div className={styles.frameCard}>
+            <div className={styles.placeholder}>This section is not yet available in the prototype.</div>
+          </div>
+        )}
       </div>
     </div>
   );

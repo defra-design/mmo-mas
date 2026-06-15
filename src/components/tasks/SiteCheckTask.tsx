@@ -69,7 +69,12 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
 
   return (
     <div className={styles.page}>
-      <FormCommandBar saveLabel="Save task" onSave={handleSave} showReject />
+      <FormCommandBar
+        saveLabel="Save task"
+        onSave={handleSave}
+        showReject
+        backTo={`/review-assess/cases/${encodeURIComponent(caseId)}`}
+      />
 
       <Card className={styles.headerCard}>
         <Title3>Site check</Title3>

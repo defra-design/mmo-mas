@@ -5,16 +5,16 @@
     "caseOfficer": "",
     "status": "Awaiting allocation",
     "timeAtStatus": "3 days",
-    "caseAge": "3 days",
+    "caseAge": "1",
     "notification": ""
   },
   {
     "reference": "MLA/2026/1002",
-    "project": "Exmouth Marina jetty extension",
+    "project": "Installation of floating pontoon, Teignmouth Harbour, Devon",
     "caseOfficer": "Sam Evans",
     "status": "Assessment in progress",
     "timeAtStatus": "8 days",
-    "caseAge": "22 days",
+    "caseAge": "1",
     "notification": ""
   },
   {
@@ -23,7 +23,7 @@
     "caseOfficer": "Rachel Patel",
     "status": "Assessment in progress",
     "timeAtStatus": "2 days",
-    "caseAge": "31 days",
+    "caseAge": "2",
     "notification": "Message received"
   },
   {
@@ -32,7 +32,7 @@
     "caseOfficer": "Gary Whitfield",
     "status": "Awaiting applicant",
     "timeAtStatus": "14 days",
-    "caseAge": "45 days",
+    "caseAge": "16",
     "notification": ""
   },
   {
@@ -41,7 +41,7 @@
     "caseOfficer": "",
     "status": "Awaiting allocation",
     "timeAtStatus": "1 day",
-    "caseAge": "1 day",
+    "caseAge": "1",
     "notification": ""
   },
   {
@@ -50,7 +50,7 @@
     "caseOfficer": "James Okafor",
     "status": "Consultation",
     "timeAtStatus": "5 days",
-    "caseAge": "62 days",
+    "caseAge": "62",
     "notification": "Message received"
   }
 ]
