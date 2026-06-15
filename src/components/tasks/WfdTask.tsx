@@ -115,7 +115,12 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
   return (
     <div className={styles.page}>
-      <FormCommandBar saveLabel="Save task" onSave={handleSave} showReject />
+      <FormCommandBar
+        saveLabel="Save task"
+        onSave={handleSave}
+        showReject
+        backTo={`/review-assess/cases/${encodeURIComponent(caseId)}`}
+      />
 
       <Card className={styles.headerCard}>
         <Title3>Water Framework Directive (WFD)</Title3>
@@ -153,7 +158,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link href="#" className={styles.docxLink}>
-                    <GlobeRegular /> WFD-Exmouth-2019.docx
+                    <GlobeRegular /> WFD-Teignmouth-2019.docx
                   </Link>
                 </div>
               </div>
