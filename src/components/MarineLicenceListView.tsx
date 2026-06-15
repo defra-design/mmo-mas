@@ -1,5 +1,5 @@
 // src/components/MarineLicenceListView.tsx
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
   TableCell,
+  Tooltip,
   mergeClasses,
 } from '@fluentui/react-components';
 import {
@@ -117,6 +118,52 @@ const useStyles = makeStyles({
     whiteSpace: 'nowrap',
   },
 });
+
+// Project-name cell: a link that only shows the (immediate) hover card when the
+// name is actually truncated, mirroring the D365 grid.
+function ProjectNameCell({
+  value,
+  clickable,
+  onNavigate,
+}: {
+  value: string;
+  clickable: boolean;
+  onNavigate: () => void;
+}) {
+  const styles = useStyles();
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const setRef = (el: HTMLElement | null) => {
+    triggerRef.current = el;
+  };
+
+  const inner = clickable ? (
+    <button ref={setRef} onClick={onNavigate} className={`link-button ${styles.cellText}`}>
+      {value}
+    </button>
+  ) : (
+    <span ref={setRef} className={mergeClasses(styles.staticLink, styles.cellText)}>{value}</span>
+  );
+
+  return (
+    <Tooltip
+      content={value}
+      relationship="label"
+      positioning="below"
+      withArrow={false}
+      showDelay={0}
+      visible={open}
+      onVisibleChange={(_, data) => {
+        const el = triggerRef.current;
+        // Only show when the text is clipped (scroll width exceeds visible width).
+        setOpen(data.visible && !!el && el.scrollWidth > el.clientWidth);
+      }}
+    >
+      {inner}
+    </Tooltip>
+  );
+}
 
 // Maps a status value to its tag CSS class (see App.css).
 function statusClass(status: string) {
@@ -288,17 +335,13 @@ export default function MarineLicenceListView({
   function renderCell(col: ColumnConfig, item: Record<string, string>) {
     const value = item[col.key] ?? '';
     if (col.link) {
-      // All project names look like links; only fully-built cases navigate.
-      return isClickable(item.reference) ? (
-        <button
-          onClick={() => navigateToCase(item.reference)}
-          className={`link-button ${styles.cellText}`}
-          title={value}
-        >
-          {value}
-        </button>
-      ) : (
-        <span className={mergeClasses(styles.staticLink, styles.cellText)} title={value}>{value}</span>
+      // Only fully-built cases navigate; all project names look like links.
+      return (
+        <ProjectNameCell
+          value={value}
+          clickable={isClickable(item.reference)}
+          onNavigate={() => navigateToCase(item.reference)}
+        />
       );
     }
     if (col.tag && value) {
