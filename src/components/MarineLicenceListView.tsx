@@ -103,6 +103,19 @@ const useStyles = makeStyles({
   tableRow: {
     ':hover': { backgroundColor: tokens.colorNeutralBackground3 },
   },
+  // Horizontal scroll when the columns are wider than the panel (like D365).
+  tableScroll: {
+    overflowX: 'auto',
+  },
+  // Single-line cell content that truncates with an ellipsis (full value on hover).
+  cellText: {
+    display: 'block',
+    minWidth: 0,
+    maxWidth: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
 });
 
 // Maps a status value to its tag CSS class (see App.css).
@@ -273,25 +286,32 @@ export default function MarineLicenceListView({
   }
 
   function renderCell(col: ColumnConfig, item: Record<string, string>) {
-    const value = item[col.key];
+    const value = item[col.key] ?? '';
     if (col.link) {
       // All project names look like links; only fully-built cases navigate.
       return isClickable(item.reference) ? (
-        <button onClick={() => navigateToCase(item.reference)} className="link-button">
+        <button
+          onClick={() => navigateToCase(item.reference)}
+          className={`link-button ${styles.cellText}`}
+          title={value}
+        >
           {value}
         </button>
       ) : (
-        <span className={styles.staticLink}>{value}</span>
+        <span className={mergeClasses(styles.staticLink, styles.cellText)} title={value}>{value}</span>
       );
     }
     if (col.tag && value) {
-      return <span className={statusClass(value)}>{value}</span>;
+      return <span className={statusClass(value)} title={value}>{value}</span>;
     }
-    return value;
+    return <span className={styles.cellText} title={value}>{value}</span>;
   }
 
   const allDisplayedSelected =
     displayed.length > 0 && displayed.every(i => selectedRows.includes(i.reference));
+
+  // Sum of column widths (+ checkbox) — the table floor before it scrolls.
+  const minTableWidth = 32 + columns.reduce((sum, c) => sum + c.width, 0);
 
   return (
     <div className={styles.pageContainer}>
@@ -313,48 +333,53 @@ export default function MarineLicenceListView({
           </PopoverSurface>
         </Popover>
 
-        <Table aria-label="Marine licence cases" style={{ minWidth: 960, marginTop: 12 }}>
-          <TableHeader>
-            <TableRow>
-              <TableCell style={{ width: 32, minWidth: 32, maxWidth: 32, paddingLeft: 8, paddingRight: 8 }}>
-                <Checkbox
-                  checked={allDisplayedSelected}
-                  onChange={(_, data) =>
-                    setSelectedRows(data.checked ? displayed.map(i => i.reference) : [])
-                  }
-                  aria-label="Select all"
-                />
-              </TableCell>
-              {columns.map(col => (
-                <TableCell key={col.key} style={{ minWidth: col.width, fontWeight: 600 }}>
-                  <ColumnHeaderMenu col={col} />
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <tbody>
-            {displayed.map(item => (
-              <TableRow key={item.reference} className={styles.tableRow}>
-                <TableCell style={{ width: 32, minWidth: 32, maxWidth: 32, paddingLeft: 8, paddingRight: 8 }}>
+        <div className={styles.tableScroll}>
+          <Table
+            aria-label="Marine licence cases"
+            style={{ tableLayout: 'fixed', width: '100%', minWidth: minTableWidth, marginTop: 12 }}
+          >
+            <TableHeader>
+              <TableRow>
+                <TableCell style={{ width: 32, paddingLeft: 8, paddingRight: 8 }}>
                   <Checkbox
-                    checked={selectedRows.includes(item.reference)}
+                    checked={allDisplayedSelected}
                     onChange={(_, data) =>
-                      setSelectedRows(rows =>
-                        data.checked ? [...rows, item.reference] : rows.filter(r => r !== item.reference)
-                      )
+                      setSelectedRows(data.checked ? displayed.map(i => i.reference) : [])
                     }
-                    aria-label="Select row"
+                    aria-label="Select all"
                   />
                 </TableCell>
                 {columns.map(col => (
-                  <TableCell key={col.key} style={{ minWidth: col.width }}>
-                    {renderCell(col, item)}
+                  <TableCell key={col.key} style={{ width: col.width, fontWeight: 600 }}>
+                    <ColumnHeaderMenu col={col} />
                   </TableCell>
                 ))}
               </TableRow>
-            ))}
-          </tbody>
-        </Table>
+            </TableHeader>
+            <tbody>
+              {displayed.map(item => (
+                <TableRow key={item.reference} className={styles.tableRow}>
+                  <TableCell style={{ width: 32, paddingLeft: 8, paddingRight: 8 }}>
+                    <Checkbox
+                      checked={selectedRows.includes(item.reference)}
+                      onChange={(_, data) =>
+                        setSelectedRows(rows =>
+                          data.checked ? [...rows, item.reference] : rows.filter(r => r !== item.reference)
+                        )
+                      }
+                      aria-label="Select row"
+                    />
+                  </TableCell>
+                  {columns.map(col => (
+                    <TableCell key={col.key} style={{ width: col.width }}>
+                      {renderCell(col, item)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       </div>
     </div>
   );

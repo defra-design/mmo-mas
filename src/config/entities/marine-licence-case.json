@@ -6,8 +6,7 @@
       { "key": "reference",    "name": "Reference",     "width": 140 },
       { "key": "project",      "name": "Project name",  "width": 240, "link": true },
       { "key": "caseOfficer",  "name": "Case officer",  "width": 150 },
-      { "key": "status",       "name": "Status",        "width": 170, "tag": true },
-      { "key": "timeAtStatus", "name": "Time at status","width": 120 },
+      { "key": "status",       "name": "Status",        "width": 190, "tag": true },
       { "key": "caseAge",      "name": "Case age",      "width": 110 },
       { "key": "notification", "name": "Notifications", "width": 150 }
     ],
