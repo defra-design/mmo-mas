@@ -7,7 +7,7 @@ import {
   Card,
   Text,
   Title3,
-  Caption1,
+  Body1,
   Field,
   Dropdown,
   Option,
@@ -72,8 +72,8 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
       <FormCommandBar saveLabel="Save task" onSave={handleSave} showReject />
 
       <Card className={styles.headerCard}>
-        <Caption1>Task</Caption1>
         <Title3>Site check</Title3>
+        <div><Body1>Task</Body1></div>
       </Card>
 
       <Card className={styles.bodyCard}>
