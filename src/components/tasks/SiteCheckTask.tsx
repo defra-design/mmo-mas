@@ -69,7 +69,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
 
   return (
     <div className={styles.page}>
-      <FormCommandBar saveLabel="Save task" onSave={handleSave} />
+      <FormCommandBar saveLabel="Save task" onSave={handleSave} showReject />
 
       <Card className={styles.headerCard}>
         <Caption1>Task</Caption1>
