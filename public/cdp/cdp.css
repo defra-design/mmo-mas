@@ -94,6 +94,28 @@ body {
   margin-bottom: 0;
 }
 
+/* Wider label column for sections whose labels are full sentences (e.g. WFD). */
+.section--wide-labels {
+  --cdp-label-width: 340px;
+}
+
+/* A document value rendered as a link with a globe icon. */
+.doc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.doc-link:hover {
+  text-decoration: underline;
+}
+
+.doc-link svg {
+  flex-shrink: 0;
+}
+
 /* ---- Sub-sections (e.g. "Providing the site location", "Site 1") -------- */
 
 .subsection {
