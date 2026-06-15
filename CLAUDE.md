@@ -129,6 +129,50 @@ the mock-data JSON.
 
 ---
 
+## CDP application-data sections (iframe)
+
+Several Case summary tabs show the **applicant's** submitted data rather than caseworker
+fields: Project details, Site and activity, Marine plan policies, WFD, Other permissions.
+That data lives on CDP (Defra's Core Development Platform). Mirroring the real D365 system —
+and to avoid duplicating the data into D365 — it is rendered as **static HTML in an
+`<iframe>`**, not as React.
+
+- **Files:** `public/cdp/<section>.html`, served by Vite as static files (the iframe loads
+  them at `/cdp/<section>.html`). Plain HTML / CSS / vanilla JS only — do **not** use React,
+  Fluent components, or the build pipeline inside these pages.
+- **Styling:** one shared `public/cdp/cdp.css`, deliberately matched to the native D365 /
+  Fluent look (Segoe UI, grey value boxes, label-left / value-right rows) so the iframe does
+  not jar against the surrounding app. Reuse its classes — `.section` / `.section__title`,
+  `.fields` / `.field` / `.field__label` / `.field__value` — rather than inventing new ones.
+  Fields sit label-beside-value and wrap value-under-label when the column is too narrow.
+- **Data:** baked into the HTML for simple sections (e.g. `project-details.html`). For
+  list/detail sections (Marine plan policies, Other permissions) the data is a sibling
+  `<section>.json` fetched by a sibling `<section>.js` that builds the nav + detail (see
+  `marine-plan-policies.{html,js,json}`).
+- **Rendering:** `src/components/CdpFrame.tsx` renders the `<iframe>`, fills the height left
+  under the sticky case header, and scrolls its own content. It is wired through the
+  `cdpPages` lookup in `MarineCaseSummary.tsx` — `tab value → { src, title }`. The command
+  bar + case header (with the tabs) are fixed/sticky; only the active tab content scrolls.
+
+> Keep iframe content as the raw data would actually arrive from CDP. Free-text textarea
+> values are shown as a single block with any bullets inline — not as semantic `<ul>` lists.
+
+---
+
+## New CDP application-data section checklist
+
+1. Create `public/cdp/<section>.html` and link the shared stylesheet:
+   `<link rel="stylesheet" href="cdp.css" />`. Reuse the existing `cdp.css` classes.
+2. For list/detail sections add a sibling `<section>.json` (data) + `<section>.js` (builds the
+   nav + detail); otherwise bake the data straight into the HTML.
+3. Add a `cdpPages` entry in `MarineCaseSummary.tsx`:
+   `<tabValue>: { src: '/cdp/<section>.html', title: '…' }`. The matching
+   `<Tab value="<tabValue>">` must already exist in the `TabList`.
+4. Put any section-specific CSS in `cdp.css`, scoped with a page/modifier class
+   (e.g. `.section--wide-labels`) so it doesn't change the other sections.
+
+---
+
 ## New task scaffold checklist
 
 When adding a new task type, complete these steps in order:
@@ -161,6 +205,26 @@ When adding a new list view / entity (not a task):
 
 ---
 
+## Case list (D365 grid) conventions
+
+`MarineLicenceListView.tsx` is tuned to match the real D365 read-only grid — follow the same
+pattern for new list views:
+
+- **No wrapping.** Every cell is a single line that truncates with an ellipsis (`.cellText`:
+  `white-space: nowrap; overflow: hidden; text-overflow: ellipsis`).
+- **Truncation-only hover card.** The project name uses a Fluent v9 `Tooltip`
+  (`showDelay={0}`, `positioning="below"`) shown **only** when the text is actually clipped
+  (`scrollWidth > clientWidth`), via the `ProjectNameCell` helper. Don't use the native
+  `title` for it — it's slow and always-on.
+- **Fixed layout + horizontal scroll.** `table-layout: fixed`, `width: 100%` with a
+  `min-width` = sum of column widths, inside an `overflow-x: auto` wrapper. Columns hold their
+  widths and the grid scrolls when narrower (instead of squeezing/overlapping); on wider
+  screens the columns fill the width.
+- Column widths and labels come from `src/config/entities/<entity>.json`. Size choice columns
+  (status badges) wide enough that the badge isn't truncated.
+
+---
+
 ## File and folder structure
 
 ```
@@ -168,6 +232,7 @@ src/
   components/
     tasks/          ← one file per task type, e.g. SiteCheckTask.tsx
     CaseSummary.tsx
+    CdpFrame.tsx    ← embeds a CDP application-data page in an iframe
     CaseList.tsx (or ListView.tsx)
     Nav.tsx / Nav.css
     TopBar.tsx
@@ -177,6 +242,8 @@ src/
   utils/            ← non-React helpers
   main.tsx          ← entry point, initializeIcons() here
   App.tsx           ← router
+public/
+  cdp/              ← static CDP section pages (HTML/CSS/JS) for the iframe tabs
 ```
 
 PascalCase for component filenames. camelCase for utils and helpers.
