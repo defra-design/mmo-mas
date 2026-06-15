@@ -7,7 +7,7 @@ import {
   Button,
   mergeClasses,
 } from '@fluentui/react-components';
-import { ArrowLeftRegular, OpenRegular, SaveRegular } from '@fluentui/react-icons';
+import { ArrowLeftRegular, OpenRegular, SaveRegular, DismissSquareRegular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   bar: {
@@ -31,9 +31,10 @@ const useStyles = makeStyles({
 interface FormCommandBarProps {
   saveLabel?: string;
   onSave?: () => void;
+  showReject?: boolean;
 }
 
-export default function FormCommandBar({ saveLabel, onSave }: FormCommandBarProps) {
+export default function FormCommandBar({ saveLabel, onSave, showReject }: FormCommandBarProps) {
   const styles = useStyles();
   const navigate = useNavigate();
 
@@ -53,6 +54,11 @@ export default function FormCommandBar({ saveLabel, onSave }: FormCommandBarProp
             {saveLabel}
           </Button>
         </>
+      )}
+      {showReject && (
+        <Button appearance="subtle" icon={<DismissSquareRegular />}>
+          Reject application
+        </Button>
       )}
     </div>
   );
