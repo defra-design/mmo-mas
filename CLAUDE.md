@@ -94,8 +94,38 @@ Wrap fields in Fluent v9 `Field` for consistent label + validation layout.
 
 - Mock data lives in `src/mock-data/<entityPlural>.json`.
 - Entity configs (columns, form layout) live in `src/config/entities/<entity>.json`.
-- Task status is stored in mock data and updated on save — no real API calls.
+- Mock data JSON holds the *initial* seed data. Caseworker input and task-status changes
+  are not written back to JSON — they live in runtime state (see **State persistence and
+  reset** below). No real API calls.
 - Use `uuid` for any new ID generation. Use `faker` sparingly for supplementary mock data.
+
+---
+
+## State persistence and reset
+
+Caseworker answers and task statuses persist across page refreshes so a user can leave and
+return to a case and still see their work. This is handled in a single React context, not in
+the mock-data JSON.
+
+- **Store:** `src/context/TaskContext.tsx` — a `TaskProvider` holds all mutable prototype
+  state (task statuses + each task's saved form answers) and exposes it via the `useTasks()`
+  hook. Components read and mutate state only through `useTasks()`; never write to
+  `localStorage` directly from a component.
+- **Persistence:** the whole state object is mirrored to `localStorage` under the key
+  `mas-review-assess-state` on every change, and re-hydrated on load (`loadState`). Hydration
+  merges over `initialState`, so adding a new field is backwards-compatible with older saved
+  state. Corrupt/unavailable storage falls back to `initialState` silently.
+- **Saving a task** calls its context action (e.g. `completeSiteCheck`), which sets that
+  task's status to `Done` and unlocks downstream tasks (e.g. sets `wfdAssessment` and
+  `marinePlanPolicies` from `Cannot start yet` to `To do`). Saved field values are written
+  via per-field setters (e.g. `setSiteCheckField`) so the task form re-populates on revisit.
+- **Reset:** the **Reset prototype data** link on the index page (`src/components/IndexPage.tsx`)
+  calls `resetAll()`, which sets state back to `initialState` (the `useEffect` then clears the
+  persisted copy). This is the supported way for a user to start the prototype afresh.
+
+> Note: `TaskState` / `SiteCheckForm` in `TaskContext.tsx` are currently hand-written per
+> task. When adding a task, extend these types and the `initialState` rather than introducing
+> a second persistence mechanism.
 
 ---
 
@@ -105,12 +135,17 @@ When adding a new task type, complete these steps in order:
 
 1. Add/update task entry in the relevant case's mock data (`src/mock-data/cases.json` or
    equivalent) with status `to-do`, `completed`, or `cannot-start-yet`.
-2. Create `src/components/tasks/<TaskName>Task.tsx` — the task form component.
-3. Add a route in `App.tsx`: `/cases/:caseId/tasks/<task-slug>`.
-4. Wire the task list item in `CaseSummary.tsx` to navigate to the route on click
+2. Extend `TaskContext.tsx`: add the task's status to `TaskState`, add a form-answers
+   interface + field to `PersistedState`, seed both in `initialState`, and add the
+   save/setter actions (mirrors `completeSiteCheck` / `setSiteCheckField`). This is what
+   makes the answers persist and survive refresh; do not store task state anywhere else.
+3. Create `src/components/tasks/<TaskName>Task.tsx` — the task form component. Read and
+   write its state only through `useTasks()`.
+4. Add a route in `App.tsx`: `/cases/:caseId/tasks/<task-slug>`.
+5. Wire the task list item in `CaseSummary.tsx` to navigate to the route on click
    (only when status is not `cannot-start-yet`).
-5. On save, update the task status in state/mock data and navigate back to
-   `/cases/:caseId`.
+6. On save, call the task's context action to set status `Done`, unlock any downstream
+   tasks, and navigate back to `/cases/:caseId`.
 
 ---
 
