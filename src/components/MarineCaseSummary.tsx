@@ -119,6 +119,12 @@ interface MarineCaseSummaryProps {
   caseId: string;
 }
 
+// Tabs whose content is CDP application data rendered in an iframe.
+const cdpPages: Record<string, { src: string; title: string }> = {
+  project: { src: '/cdp/project-details.html', title: 'Project details' },
+  site: { src: '/cdp/site-and-activity.html', title: 'Site and activity' },
+};
+
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState('summary');
@@ -245,13 +251,13 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           </div>
         )}
 
-        {selectedTab === 'project' && (
+        {cdpPages[selectedTab] && (
           <div className={styles.frameCard}>
-            <CdpFrame src="/cdp/project-details.html" title="Project details" />
+            <CdpFrame src={cdpPages[selectedTab].src} title={cdpPages[selectedTab].title} />
           </div>
         )}
 
-        {selectedTab !== 'summary' && selectedTab !== 'project' && (
+        {selectedTab !== 'summary' && !cdpPages[selectedTab] && (
           <div className={styles.frameCard}>
             <div className={styles.placeholder}>This section is not yet available in the prototype.</div>
           </div>

@@ -93,3 +93,56 @@ body {
 .field__value p:last-child {
   margin-bottom: 0;
 }
+
+/* ---- Sub-sections (e.g. "Providing the site location", "Site 1") -------- */
+
+.subsection {
+  margin: 0 0 32px;
+}
+
+.subsection__title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Two columns (Site details | Activity) that collapse to one on smaller
+   screens. Labels are a little narrower here so each column stays readable;
+   inside a column the field rows still wrap value-under-label when cramped. */
+.site-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.site-grid .subsection {
+  margin: 0;
+}
+
+/* Collapse the two columns on smaller screens. Measured against the iframe's
+   own width, which is ~318px narrower than the browser window (left nav rail +
+   right rail + main padding), so 1024px here ≈ a 1342px window. Above it the
+   two columns sit side by side; each column then behaves exactly like the
+   single-column Project details section (label beside value, wrapping under
+   only when the column is too narrow) so the layout stays consistent between
+   tabs. */
+@media (max-width: 1024px) {
+  .site-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Map value ---------------------------------------------------------- */
+
+.field__value--map {
+  padding: 0;
+  background: none;
+  overflow: hidden;
+}
+
+.site-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--cdp-radius);
+}
