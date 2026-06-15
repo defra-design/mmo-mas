@@ -124,6 +124,7 @@ const cdpPages: Record<string, { src: string; title: string }> = {
   project: { src: '/cdp/project-details.html', title: 'Project details' },
   site: { src: '/cdp/site-and-activity.html', title: 'Site and activity' },
   mpp: { src: '/cdp/marine-plan-policies.html', title: 'Marine plan policies' },
+  wfd: { src: '/cdp/water-framework-directive.html', title: 'Water Framework Directive' },
 };
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
