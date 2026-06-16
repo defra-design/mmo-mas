@@ -20,10 +20,18 @@ export interface WfdForm {
   review: string;
 }
 
+// Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
+// task is saved; an edit flips it back to false (matches D365 dirty-tracking).
+export interface SavedState {
+  siteCheck: boolean;
+  wfdAssessment: boolean;
+}
+
 interface PersistedState {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
+  saved: SavedState;
 }
 
 const initialState: PersistedState = {
@@ -34,6 +42,7 @@ const initialState: PersistedState = {
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
+  saved: { siteCheck: false, wfdAssessment: false },
 };
 
 const STORAGE_KEY = 'mas-review-assess-state';
@@ -48,6 +57,7 @@ function loadState(): PersistedState {
         tasks: { ...initialState.tasks, ...parsed.tasks },
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
+        saved: { ...initialState.saved, ...parsed.saved },
       };
     }
   } catch {
@@ -60,8 +70,10 @@ interface TaskContextValue {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
+  saved: SavedState;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
+  markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
   completeWfd: () => void;
   resetAll: () => void;
@@ -86,7 +98,11 @@ export function TaskProvider({ children }: PropsWithChildren) {
   const setWfdReview = (value: string) =>
     setState(prev => ({ ...prev, wfdForm: { ...prev.wfdForm, review: value } }));
 
-  // Saving the Site check completes it and unlocks the downstream tasks.
+  // An edit marks the task as having unsaved changes (shown in the task header).
+  const markUnsaved = (task: keyof SavedState) =>
+    setState(prev => ({ ...prev, saved: { ...prev.saved, [task]: false } }));
+
+  // Saving the Site check completes it, marks it saved, and unlocks downstream tasks.
   const completeSiteCheck = () =>
     setState(prev => ({
       ...prev,
@@ -96,13 +112,15 @@ export function TaskProvider({ children }: PropsWithChildren) {
         wfdAssessment: 'To do',
         marinePlanPolicies: 'To do',
       },
+      saved: { ...prev.saved, siteCheck: true },
     }));
 
-  // Saving the WFD assessment completes it; no further tasks depend on it.
+  // Saving the WFD assessment completes it and marks it saved; nothing depends on it.
   const completeWfd = () =>
     setState(prev => ({
       ...prev,
       tasks: { ...prev.tasks, wfdAssessment: 'Done' },
+      saved: { ...prev.saved, wfdAssessment: true },
     }));
 
   const resetAll = () => setState(initialState);
@@ -113,8 +131,10 @@ export function TaskProvider({ children }: PropsWithChildren) {
         tasks: state.tasks,
         siteCheckForm: state.siteCheckForm,
         wfdForm: state.wfdForm,
+        saved: state.saved,
         setSiteCheckField,
         setWfdReview,
+        markUnsaved,
         completeSiteCheck,
         completeWfd,
         resetAll,

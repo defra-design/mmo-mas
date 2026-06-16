@@ -9,13 +9,12 @@ import {
   Title3,
   Body1,
   Field,
-  Dropdown,
-  Option,
   Textarea,
   Link,
 } from '@fluentui/react-components';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
+import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
 
 const useStyles = makeStyles({
@@ -51,6 +50,20 @@ const useStyles = makeStyles({
     alignItems: 'start',
   },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
+  // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
+  savedLabel: {
+    marginLeft: tokens.spacingHorizontalXS,
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightRegular,
+    color: tokens.colorNeutralForeground2,
+  },
+  // Grey, borderless textarea matching the Case summary data fields.
+  textarea: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall,
+    ...shorthands.border('none'),
+    '::after': { ...shorthands.border('none') },
+  },
 });
 
 interface SiteCheckTaskProps {
@@ -60,7 +73,7 @@ interface SiteCheckTaskProps {
 export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { siteCheckForm, setSiteCheckField, completeSiteCheck } = useTasks();
+  const { siteCheckForm, saved, setSiteCheckField, markUnsaved, completeSiteCheck } = useTasks();
 
   const handleSave = () => {
     completeSiteCheck();
@@ -72,12 +85,14 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
       <FormCommandBar
         saveLabel="Save task"
         onSave={handleSave}
-        showReject
         backTo={`/review-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
       <Card className={styles.headerCard}>
-        <Title3>Site check</Title3>
+        <Title3>
+          Site check
+          <span className={styles.savedLabel}>- {saved.siteCheck ? 'Saved' : 'Unsaved'}</span>
+        </Title3>
         <div><Body1>Task</Body1></div>
       </Card>
 
@@ -101,15 +116,14 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
           <div className={styles.question}>
             <Text>Are the coordinates and shape acceptable for assessment?</Text>
             <Field>
-              <Dropdown
-                placeholder="Select"
+              <OutcomeDropdown
                 value={siteCheckForm.coordinatesOk}
-                selectedOptions={siteCheckForm.coordinatesOk ? [siteCheckForm.coordinatesOk] : []}
-                onOptionSelect={(_, d) => setSiteCheckField('coordinatesOk', d.optionValue ?? '')}
-              >
-                <Option>Yes</Option>
-                <Option>No</Option>
-              </Dropdown>
+                options={['Yes', 'No']}
+                onSelect={v => {
+                  setSiteCheckField('coordinatesOk', v);
+                  markUnsaved('siteCheck');
+                }}
+              />
             </Field>
           </div>
         </div>
@@ -126,15 +140,14 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
           <div className={styles.question}>
             <Text>Is the activity within 1 nautical mile of the coast?</Text>
             <Field>
-              <Dropdown
-                placeholder="Select"
+              <OutcomeDropdown
                 value={siteCheckForm.withinMile}
-                selectedOptions={siteCheckForm.withinMile ? [siteCheckForm.withinMile] : []}
-                onOptionSelect={(_, d) => setSiteCheckField('withinMile', d.optionValue ?? '')}
-              >
-                <Option>Yes</Option>
-                <Option>No</Option>
-              </Dropdown>
+                options={['Yes', 'No']}
+                onSelect={v => {
+                  setSiteCheckField('withinMile', v);
+                  markUnsaved('siteCheck');
+                }}
+              />
             </Field>
           </div>
         </div>
@@ -147,8 +160,11 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
             <Text>Record anything from your site check that should inform later assessment tasks.</Text>
             <Field>
               <Textarea
+                className={styles.textarea}
+                appearance="filled-lighter"
                 value={siteCheckForm.notes}
                 onChange={(_, d) => setSiteCheckField('notes', d.value)}
+                onBlur={() => markUnsaved('siteCheck')}
                 resize="vertical"
                 rows={5}
               />
