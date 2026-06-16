@@ -7,9 +7,9 @@
       { "key": "project",      "name": "Project name",  "width": 240, "link": true },
       { "key": "caseOfficer",  "name": "Case Officer",  "width": 150 },
       { "key": "status",       "name": "Status",        "width": 190, "tag": true },
-      { "key": "caseAge",      "name": "Case age (Days)", "width": 130, "type": "number", "align": "right" },
+      { "key": "caseAge",      "name": "Case age (Days)", "width": 140, "type": "number", "align": "right" },
       { "key": "notification", "name": "Notifications", "width": 150 }
     ],
-    "defaultSort": { "key": "caseAge", "direction": "desc" }
+    "defaultSort": { "key": "reference", "direction": "asc" }
   }
 }
