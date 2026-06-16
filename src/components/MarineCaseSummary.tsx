@@ -176,7 +176,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   return (
     <div className={styles.page}>
       <div className={styles.stickyTop}>
-      <FormCommandBar saveLabel="Save" showReject />
+      <FormCommandBar showReject />
 
       <Card className={styles.headerCard}>
         <div className={styles.headerTop}>
