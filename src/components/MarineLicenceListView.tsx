@@ -59,6 +59,12 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorBrandForeground1,
   },
+  // Direction arrow shown on the header of the column the grid is sorted by.
+  activeSortIcon: {
+    marginLeft: tokens.spacingHorizontalXXS,
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+  },
   title: {
     fontSize: tokens.fontSizeBase600,
     fontWeight: tokens.fontWeightSemibold,
@@ -190,7 +196,12 @@ type SortState = { key: string; dir: 'asc' | 'desc' } | null;
 type Filters = Record<string, string[]>; // key -> allowed values; absent = all
 
 interface MarineLicenceListViewProps {
-  entityConfig: { list: { columns: ColumnConfig[] } };
+  entityConfig: {
+    list: {
+      columns: ColumnConfig[];
+      defaultSort?: { key: string; direction: 'asc' | 'desc' };
+    };
+  };
   items: Record<string, string>[];
   title: string;
 }
@@ -200,16 +211,40 @@ export default function MarineLicenceListView({
   items,
   title,
 }: MarineLicenceListViewProps) {
+  const columns = entityConfig.list.columns;
+  const defaultSort = entityConfig.list.defaultSort;
+
+  // Like D365: the grid always has a sort, and it remembers the column you last
+  // sorted by. Last-used sort is persisted per list view; otherwise fall back to
+  // the view's configured default sort.
+  const sortStorageKey = `mas-list-sort:${title}`;
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [sort, setSort] = useState<SortState>(null);
+  const [sort, setSort] = useState<SortState>(() => {
+    try {
+      const saved = localStorage.getItem(sortStorageKey);
+      if (saved) return JSON.parse(saved) as SortState;
+    } catch {
+      /* ignore unavailable/corrupt storage */
+    }
+    return defaultSort ? { key: defaultSort.key, dir: defaultSort.direction } : null;
+  });
   const [filters, setFilters] = useState<Filters>({});
   const navigate = useNavigate();
   const styles = useStyles();
-  const columns = entityConfig.list.columns;
 
   useEffect(() => {
     document.title = `${title} - MMO Marine Applications System`;
   }, [title]);
+
+  // Remember the last-used sort across reloads.
+  useEffect(() => {
+    try {
+      if (sort) localStorage.setItem(sortStorageKey, JSON.stringify(sort));
+      else localStorage.removeItem(sortStorageKey);
+    } catch {
+      /* ignore unavailable storage */
+    }
+  }, [sort, sortStorageKey]);
 
   // Only cases with full data (in marine-case-details.json) are navigable.
   const isClickable = (reference: string) =>
@@ -283,10 +318,19 @@ export default function MarineLicenceListView({
             style={{
               width: '100%',
               paddingLeft: 0,
+              // Drop the button's right padding so the chevron sits flush with the
+              // cell's right edge — i.e. directly above the right-aligned numbers.
+              paddingRight: col.align === 'right' ? 0 : undefined,
               justifyContent: col.align === 'right' ? 'flex-end' : 'flex-start',
             }}
           >
             <Text style={{ fontWeight: tokens.fontWeightSemibold }}>{col.name}</Text>
+            {sort?.key === col.key &&
+              (sort.dir === 'asc' ? (
+                <ArrowUpRegular className={styles.activeSortIcon} />
+              ) : (
+                <ArrowDownRegular className={styles.activeSortIcon} />
+              ))}
             {isFiltered && <FilterFilled className={styles.activeFilterIcon} />}
             <ChevronDownRegular className={styles.chevron} />
           </Button>
@@ -410,7 +454,10 @@ export default function MarineLicenceListView({
                   />
                 </TableCell>
                 {columns.map(col => (
-                  <TableCell key={col.key} style={{ width: col.width, fontWeight: 600 }}>
+                  <TableCell
+                    key={col.key}
+                    style={{ width: col.width, fontWeight: 600, ...(col.align === 'right' ? { paddingRight: 12 } : {}) }}
+                  >
                     <ColumnHeaderMenu col={col} />
                   </TableCell>
                 ))}
@@ -431,7 +478,10 @@ export default function MarineLicenceListView({
                     />
                   </TableCell>
                   {columns.map(col => (
-                    <TableCell key={col.key} style={{ width: col.width }}>
+                    <TableCell
+                      key={col.key}
+                      style={{ width: col.width, ...(col.align === 'right' ? { paddingRight: 12 } : {}) }}
+                    >
                       {renderCell(col, item)}
                     </TableCell>
                   ))}
