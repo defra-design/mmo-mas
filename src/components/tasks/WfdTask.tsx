@@ -157,7 +157,12 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <Text className={styles.label}>Assessment provided</Text>
               <div className={styles.fields}>
                 <div className={styles.value}>
-                  <Link href="#" className={styles.docxLink}>
+                  <Link
+                    href="/documents/WFD-Teignmouth-2019.docx"
+                    target="_blank"
+                    rel="noopener"
+                    className={styles.docxLink}
+                  >
                     <GlobeRegular /> WFD-Teignmouth-2019.docx
                   </Link>
                 </div>
