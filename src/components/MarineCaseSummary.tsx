@@ -126,6 +126,7 @@ const cdpPages: Record<string, { src: string; title: string }> = {
   mpp: { src: '/cdp/marine-plan-policies.html', title: 'Marine plan policies' },
   wfd: { src: '/cdp/water-framework-directive.html', title: 'Water Framework Directive' },
   other: { src: '/cdp/other-permissions.html', title: 'Other permissions' },
+  'public-register': { src: '/cdp/public-register.html', title: 'Public register' },
 };
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
@@ -170,7 +171,6 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const rightFields = [
     { label: 'Applicant', value: data.applicant },
     { label: 'Organisation', value: data.organisation },
-    { label: 'Consent to publish', value: data.consentToPublish },
   ];
 
   return (
@@ -223,6 +223,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           <Tab value="mpp">Marine plan policies</Tab>
           <Tab value="wfd">WFD</Tab>
           <Tab value="other">Other permissions</Tab>
+          <Tab value="public-register">Public register</Tab>
         </TabList>
       </Card>
       </div>
