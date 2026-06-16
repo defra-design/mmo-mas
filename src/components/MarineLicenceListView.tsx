@@ -182,6 +182,8 @@ interface ColumnConfig {
   width: number;
   link?: boolean;
   tag?: boolean;
+  type?: 'number';
+  align?: 'right';
 }
 
 type SortState = { key: string; dir: 'asc' | 'desc' } | null;
@@ -267,6 +269,9 @@ export default function MarineLicenceListView({
   function ColumnHeaderMenu({ col }: { col: ColumnConfig }) {
     const isFiltered = Boolean(filters[col.key]);
     const allowed = filters[col.key]; // undefined = all selected
+    const isNumber = col.type === 'number';
+    const ascLabel = isNumber ? 'Smaller to Larger' : 'A to Z';
+    const descLabel = isNumber ? 'Larger to Smaller' : 'Z to A';
     return (
       <Popover>
         <PopoverTrigger>
@@ -275,7 +280,11 @@ export default function MarineLicenceListView({
             className={styles.headerMenuTrigger}
             aria-label={`${col.name} column menu`}
             icon={null}
-            style={{ width: '100%', paddingLeft: 0, justifyContent: 'flex-start' }}
+            style={{
+              width: '100%',
+              paddingLeft: 0,
+              justifyContent: col.align === 'right' ? 'flex-end' : 'flex-start',
+            }}
           >
             <Text style={{ fontWeight: tokens.fontWeightSemibold }}>{col.name}</Text>
             {isFiltered && <FilterFilled className={styles.activeFilterIcon} />}
@@ -289,14 +298,14 @@ export default function MarineLicenceListView({
               onClick={() => setSort({ key: col.key, dir: 'asc' })}
             >
               <span className={styles.menuIconStart}><ArrowUpRegular /></span>
-              <Text>A to Z</Text>
+              <Text>{ascLabel}</Text>
             </MenuItem>
             <MenuItem
               className={styles.menuItem}
               onClick={() => setSort({ key: col.key, dir: 'desc' })}
             >
               <span className={styles.menuIconStart}><ArrowDownRegular /></span>
-              <Text>Z to A</Text>
+              <Text>{descLabel}</Text>
             </MenuItem>
           </MenuList>
 
@@ -347,7 +356,15 @@ export default function MarineLicenceListView({
     if (col.tag && value) {
       return <span className={statusClass(value)} title={value}>{value}</span>;
     }
-    return <span className={styles.cellText} title={value}>{value}</span>;
+    return (
+      <span
+        className={styles.cellText}
+        title={value}
+        style={col.align === 'right' ? { textAlign: 'right' } : undefined}
+      >
+        {value}
+      </span>
+    );
   }
 
   const allDisplayedSelected =
