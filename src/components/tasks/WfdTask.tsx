@@ -9,12 +9,11 @@ import {
   Title3,
   Body1,
   Field,
-  Dropdown,
-  Option,
   Link,
 } from '@fluentui/react-components';
 import { GlobeRegular, CheckmarkFilled } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
+import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
 
 const useStyles = makeStyles({
@@ -90,7 +89,13 @@ const useStyles = makeStyles({
   },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
-  dropdown: { width: '100%' },
+  // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
+  savedLabel: {
+    marginLeft: tokens.spacingHorizontalXS,
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightRegular,
+    color: tokens.colorNeutralForeground2,
+  },
 });
 
 const reviewOptions = [
@@ -106,7 +111,7 @@ interface WfdTaskProps {
 export default function WfdTask({ caseId }: WfdTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { wfdForm, setWfdReview, completeWfd } = useTasks();
+  const { wfdForm, saved, setWfdReview, markUnsaved, completeWfd } = useTasks();
 
   const handleSave = () => {
     completeWfd();
@@ -118,12 +123,14 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
       <FormCommandBar
         saveLabel="Save task"
         onSave={handleSave}
-        showReject
         backTo={`/review-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
       <Card className={styles.headerCard}>
-        <Title3>Water Framework Directive (WFD)</Title3>
+        <Title3>
+          Water Framework Directive (WFD)
+          <span className={styles.savedLabel}>- {saved.wfdAssessment ? 'Saved' : 'Unsaved'}</span>
+        </Title3>
         <div><Body1>Task</Body1></div>
       </Card>
 
@@ -179,17 +186,14 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
             <Text className={styles.label}>Is the WFD section complete and acceptable?</Text>
             <div className={styles.fields}>
               <Field className={styles.control}>
-                <Dropdown
-                  className={styles.dropdown}
-                  placeholder="Select"
+                <OutcomeDropdown
                   value={wfdForm.review}
-                  selectedOptions={wfdForm.review ? [wfdForm.review] : []}
-                  onOptionSelect={(_, d) => setWfdReview(d.optionValue ?? '')}
-                >
-                  {reviewOptions.map(o => (
-                    <Option key={o}>{o}</Option>
-                  ))}
-                </Dropdown>
+                  options={reviewOptions}
+                  onSelect={v => {
+                    setWfdReview(v);
+                    markUnsaved('wfdAssessment');
+                  }}
+                />
               </Field>
             </div>
           </div>

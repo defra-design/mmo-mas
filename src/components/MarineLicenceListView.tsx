@@ -19,6 +19,7 @@ import {
   TableRow,
   TableCell,
   Tooltip,
+  Avatar,
   mergeClasses,
 } from '@fluentui/react-components';
 import {
@@ -114,6 +115,13 @@ const useStyles = makeStyles({
   tableScroll: {
     overflowX: 'auto',
   },
+  // Case officer cell: small coloured avatar + the (truncating) name.
+  avatarCell: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+    minWidth: 0,
+  },
   // Single-line cell content that truncates with an ellipsis (full value on hover).
   cellText: {
     display: 'block',
@@ -188,8 +196,9 @@ interface ColumnConfig {
   width: number;
   link?: boolean;
   tag?: boolean;
-  type?: 'number';
-  align?: 'right';
+  type?: string; // 'number' → numeric sort labels (Smaller/Larger to …)
+  align?: string; // 'right' → right-aligned header + cells
+  avatar?: boolean;
 }
 
 type SortState = { key: string; dir: 'asc' | 'desc' } | null;
@@ -199,7 +208,7 @@ interface MarineLicenceListViewProps {
   entityConfig: {
     list: {
       columns: ColumnConfig[];
-      defaultSort?: { key: string; direction: 'asc' | 'desc' };
+      defaultSort?: { key: string; direction: string };
     };
   };
   items: Record<string, string>[];
@@ -226,7 +235,9 @@ export default function MarineLicenceListView({
     } catch {
       /* ignore unavailable/corrupt storage */
     }
-    return defaultSort ? { key: defaultSort.key, dir: defaultSort.direction } : null;
+    return defaultSort
+      ? { key: defaultSort.key, dir: defaultSort.direction === 'desc' ? 'desc' : 'asc' }
+      : null;
   });
   const [filters, setFilters] = useState<Filters>({});
   const navigate = useNavigate();
@@ -399,6 +410,17 @@ export default function MarineLicenceListView({
     }
     if (col.tag && value) {
       return <span className={statusClass(value)} title={value}>{value}</span>;
+    }
+    if (col.avatar) {
+      if (!value) return <span className={styles.cellText} />;
+      return (
+        <span className={styles.avatarCell}>
+          {/* color="colorful" → Fluent picks a stable colour from the name, so
+              each officer differs and Sam Evans matches the case-summary avatar. */}
+          <Avatar name={value} size={24} color="colorful" style={{ flexShrink: 0 }} />
+          <span className={styles.cellText} title={value}>{value}</span>
+        </span>
+      );
     }
     return (
       <span
