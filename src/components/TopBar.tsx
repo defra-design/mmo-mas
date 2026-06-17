@@ -19,6 +19,22 @@ const classes = mergeStyleSets({
   titleBrand: { fontWeight: 700 },
   titleDivider: { opacity: 0.5, margin: '0 6px' },
   titleName: { fontWeight: 600 },
+  waffle: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 4px)',
+    gridTemplateRows: 'repeat(3, 4px)',
+    gap: 3,
+    padding: 8,
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+  },
+  waffleDot: {
+    width: 4,
+    height: 4,
+    borderRadius: '50%',
+    background: 'white',
+  },
 });
 
 // Proper IButtonStyles object for the icon buttons
@@ -33,14 +49,17 @@ export default function TopBar() {
     <header className={classes.bar}>
       {/* left section: waffle (links to index) & product title */}
       <div className={classes.left}>
-        <IconButton
-          iconProps={{ iconName: 'GlobalNavButton' }}
-          styles={buttonStyles}
-          ariaLabel="Back to home"
+        <button
+          className={classes.waffle}
+          aria-label="Back to home"
           onClick={() => navigate('/')}
-        />
+        >
+          {Array.from({ length: 9 }).map((_, i) => (
+            <span key={i} className={classes.waffleDot} />
+          ))}
+        </button>
         <span className={classes.title}>
-          <span className={classes.titleBrand}>MMO</span>
+          <span className={classes.titleBrand}>Dynamics 365</span>
           <span className={classes.titleDivider}>|</span>
           <span className={classes.titleName}>Marine Applications System</span>
         </span>
