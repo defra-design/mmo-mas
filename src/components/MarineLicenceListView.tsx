@@ -14,6 +14,8 @@ import {
   MenuItem,
   Checkbox,
   Divider,
+  Field,
+  Input,
   Table,
   TableHeader,
   TableRow,
@@ -28,6 +30,9 @@ import {
   ArrowDownRegular,
   FilterRegular,
   FilterFilled,
+  FilterDismissRegular,
+  ArrowAutofitWidthRegular,
+  DismissRegular,
 } from '@fluentui/react-icons';
 import FormCommandBar from './FormCommandBar';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
@@ -92,20 +97,29 @@ const useStyles = makeStyles({
     marginRight: tokens.spacingHorizontalS,
     fontSize: tokens.fontSizeBase400,
   },
-  filterLabel: {
+  // "Filter by" card (shown after choosing Filter by in the column menu).
+  filterHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     fontWeight: tokens.fontWeightSemibold,
+    fontSize: tokens.fontSizeBase300,
     ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
   },
-  filterList: {
-    maxHeight: '200px',
-    overflowY: 'auto',
+  filterBody: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXXS,
-    ...shorthands.padding('0', tokens.spacingHorizontalS),
+    gap: tokens.spacingVerticalM,
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalS),
   },
-  clearRow: {
-    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
+  filterActions: {
+    display: 'flex',
+    gap: tokens.spacingHorizontalS,
+  },
+  // Brand border + funnel icon on a column heading whose filter is active.
+  filteredHeaderCell: {
+    ...shorthands.border('1px', 'solid', '#0078d4'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
   },
   staticLink: { color: '#0078d4' },
   tableRow: {
@@ -202,7 +216,7 @@ interface ColumnConfig {
 }
 
 type SortState = { key: string; dir: 'asc' | 'desc' } | null;
-type Filters = Record<string, string[]>; // key -> allowed values; absent = all
+type Filters = Record<string, string>; // key -> "contains" text; absent = no filter
 
 interface MarineLicenceListViewProps {
   entityConfig: {
@@ -264,11 +278,11 @@ export default function MarineLicenceListView({
   const navigateToCase = (reference: string) =>
     navigate(`/review-assess/cases/${encodeURIComponent(reference)}`);
 
-  // Apply active filters then the active sort.
+  // Apply active filters ("contains", case-insensitive) then the active sort.
   const displayed = useMemo(() => {
     let rows = items.filter(item =>
       Object.entries(filters).every(
-        ([key, allowed]) => allowed.length === 0 || allowed.includes(item[key]),
+        ([key, text]) => (item[key] ?? '').toLowerCase().includes(text.toLowerCase()),
       ),
     );
     if (sort) {
@@ -280,30 +294,15 @@ export default function MarineLicenceListView({
     return rows;
   }, [items, filters, sort]);
 
-  // Distinct values for a column, blanks shown last as "(Blank)".
-  const distinctValues = (key: string) =>
-    [...new Set(items.map(i => i[key]))].sort((a, b) => {
-      if (a === '') return 1;
-      if (b === '') return -1;
-      return a.localeCompare(b, undefined, { numeric: true });
-    });
-
-  const toggleFilterValue = (key: string, value: string) => {
+  // Set (or, when blank, remove) the "contains" filter for a column.
+  const setFilter = (key: string, text: string) =>
     setFilters(prev => {
-      const all = distinctValues(key);
-      const current = prev[key] ?? all;
-      const next = current.includes(value)
-        ? current.filter(v => v !== value)
-        : [...current, value];
       const updated = { ...prev };
-      if (next.length === all.length) {
-        delete updated[key]; // all selected = no filter
-      } else {
-        updated[key] = next;
-      }
+      const trimmed = text.trim();
+      if (trimmed) updated[key] = trimmed;
+      else delete updated[key];
       return updated;
     });
-  };
 
   const clearFilter = (key: string) =>
     setFilters(prev => {
@@ -314,12 +313,31 @@ export default function MarineLicenceListView({
 
   function ColumnHeaderMenu({ col }: { col: ColumnConfig }) {
     const isFiltered = Boolean(filters[col.key]);
-    const allowed = filters[col.key]; // undefined = all selected
     const isNumber = col.type === 'number';
     const ascLabel = isNumber ? 'Smaller to Larger' : 'A to Z';
     const descLabel = isNumber ? 'Larger to Smaller' : 'Z to A';
+    const [open, setOpen] = useState(false);
+    const [view, setView] = useState<'menu' | 'filter'>('menu');
+    const [draft, setDraft] = useState('');
+
+    const openFilter = () => {
+      setDraft(filters[col.key] ?? '');
+      setView('filter');
+    };
+    const applyFilter = () => {
+      setFilter(col.key, draft);
+      setOpen(false);
+    };
+
     return (
-      <Popover>
+      <Popover
+        open={open}
+        positioning="below-start"
+        onOpenChange={(_, data) => {
+          setOpen(data.open);
+          if (data.open) setView('menu'); // always reopen on the menu view
+        }}
+      >
         <PopoverTrigger>
           <Button
             appearance="transparent"
@@ -347,50 +365,80 @@ export default function MarineLicenceListView({
           </Button>
         </PopoverTrigger>
         <PopoverSurface className={styles.popoverSurface}>
-          <MenuList className={styles.menuList}>
-            <MenuItem
-              className={styles.menuItem}
-              onClick={() => setSort({ key: col.key, dir: 'asc' })}
-            >
-              <span className={styles.menuIconStart}><ArrowUpRegular /></span>
-              <Text>{ascLabel}</Text>
-            </MenuItem>
-            <MenuItem
-              className={styles.menuItem}
-              onClick={() => setSort({ key: col.key, dir: 'desc' })}
-            >
-              <span className={styles.menuIconStart}><ArrowDownRegular /></span>
-              <Text>{descLabel}</Text>
-            </MenuItem>
-          </MenuList>
+          {view === 'menu' ? (
+            <MenuList className={styles.menuList}>
+              <MenuItem
+                className={styles.menuItem}
+                onClick={() => { setSort({ key: col.key, dir: 'asc' }); setOpen(false); }}
+              >
+                <span className={styles.menuIconStart}><ArrowUpRegular /></span>
+                <Text>{ascLabel}</Text>
+              </MenuItem>
+              <MenuItem
+                className={styles.menuItem}
+                onClick={() => { setSort({ key: col.key, dir: 'desc' }); setOpen(false); }}
+              >
+                <span className={styles.menuIconStart}><ArrowDownRegular /></span>
+                <Text>{descLabel}</Text>
+              </MenuItem>
 
-          <Divider style={{ margin: '4px 0' }} />
+              <Divider style={{ margin: '4px 0' }} />
 
-          <div className={styles.filterLabel}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <FilterRegular /> Filter by
-            </span>
-          </div>
-          <div className={styles.filterList}>
-            {distinctValues(col.key).map(value => (
-              <Checkbox
-                key={value || '__blank__'}
-                label={value === '' ? '(Blank)' : value}
-                checked={!allowed || allowed.includes(value)}
-                onChange={() => toggleFilterValue(col.key, value)}
-              />
-            ))}
-          </div>
-          <div className={styles.clearRow}>
-            <Button
-              appearance="subtle"
-              size="small"
-              disabled={!isFiltered}
-              onClick={() => clearFilter(col.key)}
-            >
-              Clear filter
-            </Button>
-          </div>
+              <MenuItem className={styles.menuItem} onClick={openFilter}>
+                <span className={styles.menuIconStart}><FilterRegular /></span>
+                <Text>Filter by</Text>
+              </MenuItem>
+              {isFiltered && (
+                <MenuItem
+                  className={styles.menuItem}
+                  onClick={() => { clearFilter(col.key); setOpen(false); }}
+                >
+                  <span className={styles.menuIconStart}><FilterDismissRegular /></span>
+                  <Text>Clear filter</Text>
+                </MenuItem>
+              )}
+              {/* Non-functional — present for usability feedback only. */}
+              <MenuItem className={styles.menuItem} onClick={() => setOpen(false)}>
+                <span className={styles.menuIconStart}><ArrowAutofitWidthRegular /></span>
+                <Text>Column width</Text>
+              </MenuItem>
+            </MenuList>
+          ) : (
+            <>
+              <div className={styles.filterHeader}>
+                <span>Filter by</span>
+                <Button
+                  appearance="transparent"
+                  size="small"
+                  icon={<DismissRegular />}
+                  aria-label="Close filter"
+                  onClick={() => setOpen(false)}
+                />
+              </div>
+              <div className={styles.filterBody}>
+                <Field label="Contains">
+                  <Input
+                    value={draft}
+                    autoFocus
+                    onChange={(_, data) => setDraft(data.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') applyFilter(); }}
+                  />
+                </Field>
+                <div className={styles.filterActions}>
+                  <Button appearance="primary" onClick={applyFilter}>
+                    Apply
+                  </Button>
+                  <Button
+                    appearance="secondary"
+                    disabled={!isFiltered && !draft.trim()}
+                    onClick={() => { setDraft(''); clearFilter(col.key); setOpen(false); }}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </PopoverSurface>
       </Popover>
     );
@@ -478,6 +526,7 @@ export default function MarineLicenceListView({
                 {columns.map(col => (
                   <TableCell
                     key={col.key}
+                    className={filters[col.key] ? styles.filteredHeaderCell : undefined}
                     style={{ width: col.width, fontWeight: 600, ...(col.align === 'right' ? { paddingRight: 12 } : {}) }}
                   >
                     <ColumnHeaderMenu col={col} />
