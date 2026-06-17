@@ -14,6 +14,7 @@ import {
   Tab,
 } from '@fluentui/react-components';
 import { getAssigneeAvatarColor } from '../utils/avatarColors';
+import { useTasks } from '../context/TaskContext';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
 import CdpFrame from './CdpFrame';
@@ -43,6 +44,28 @@ const useStyles = makeStyles({
     marginTop: tokens.spacingVerticalM,
     display: 'flex',
     flexDirection: 'column',
+  },
+  // Version 2: main region + persistent Tasks rail, side by side.
+  contentRow: {
+    flexGrow: 1,
+    minHeight: 0,
+    display: 'flex',
+    gap: tokens.spacingHorizontalM,
+  },
+  mainRegion: {
+    flexGrow: 1,
+    minWidth: 0,
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  // Persistent Tasks panel shown on every tab (Version 2); scrolls its own content.
+  tasksRail: {
+    width: '340px',
+    flexShrink: 0,
+    minHeight: 0,
+    overflowY: 'auto',
+    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
   },
   // Native (Case summary) content scrolls within the content area.
   summaryScroll: {
@@ -131,6 +154,7 @@ const cdpPages: Record<string, { src: string; title: string }> = {
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
+  const { tasksOnAllTabs } = useTasks();
   const [selectedTab, setSelectedTab] = useState('summary');
 
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
@@ -229,43 +253,58 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
       </div>
 
       <div className={styles.content}>
-        {selectedTab === 'summary' && (
-          <div className={styles.summaryScroll}>
-            <div className={styles.layout}>
-              <Card className={styles.mainCard}>
-                <Text as="h2" className={styles.sectionHeading}>Case summary</Text>
-                <div className={styles.fieldColumns}>
-                  {[leftFields, rightFields].map((col, i) => (
-                    <div key={i} className={styles.fieldColumn}>
-                      {col.map(f => (
-                        <div key={f.label} className={styles.field}>
-                          <Text className={styles.fieldLabel}>{f.label}</Text>
-                          <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+        <div className={styles.contentRow}>
+          <div className={styles.mainRegion}>
+            {selectedTab === 'summary' && (
+              <div className={styles.summaryScroll}>
+                <div className={styles.layout}>
+                  <Card className={styles.mainCard}>
+                    <Text as="h2" className={styles.sectionHeading}>Case summary</Text>
+                    <div className={styles.fieldColumns}>
+                      {[leftFields, rightFields].map((col, i) => (
+                        <div key={i} className={styles.fieldColumn}>
+                          {col.map(f => (
+                            <div key={f.label} className={styles.field}>
+                              <Text className={styles.fieldLabel}>{f.label}</Text>
+                              <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+                            </div>
+                          ))}
                         </div>
                       ))}
                     </div>
-                  ))}
+                  </Card>
+
+                  {/* Version 1: Tasks panel sits inline on the Case summary tab.
+                      Version 2 renders it in the persistent rail instead. */}
+                  {!tasksOnAllTabs && (
+                    <Card className={styles.tasksCard}>
+                      <TaskList caseId={caseId} />
+                    </Card>
+                  )}
                 </div>
-              </Card>
+              </div>
+            )}
 
-              <Card className={styles.tasksCard}>
-                <TaskList caseId={caseId} />
-              </Card>
-            </div>
-          </div>
-        )}
+            {cdpPages[selectedTab] && (
+              <div className={styles.frameCard}>
+                <CdpFrame src={cdpPages[selectedTab].src} title={cdpPages[selectedTab].title} />
+              </div>
+            )}
 
-        {cdpPages[selectedTab] && (
-          <div className={styles.frameCard}>
-            <CdpFrame src={cdpPages[selectedTab].src} title={cdpPages[selectedTab].title} />
+            {selectedTab !== 'summary' && !cdpPages[selectedTab] && (
+              <div className={styles.frameCard}>
+                <div className={styles.placeholder}>This section is not yet available in the prototype.</div>
+              </div>
+            )}
           </div>
-        )}
 
-        {selectedTab !== 'summary' && !cdpPages[selectedTab] && (
-          <div className={styles.frameCard}>
-            <div className={styles.placeholder}>This section is not yet available in the prototype.</div>
-          </div>
-        )}
+          {/* Version 2: one Tasks panel that persists across every tab. */}
+          {tasksOnAllTabs && (
+            <Card className={styles.tasksRail}>
+              <TaskList caseId={caseId} />
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
