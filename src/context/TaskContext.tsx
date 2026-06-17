@@ -32,6 +32,10 @@ interface PersistedState {
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   saved: SavedState;
+  // Prototype demo flag (set from the index page): Version 1 = Tasks panel on
+  // the Case summary tab only; Version 2 (true) = Tasks panel persists on every
+  // case tab. See IndexPage.
+  tasksOnAllTabs: boolean;
 }
 
 const initialState: PersistedState = {
@@ -43,6 +47,7 @@ const initialState: PersistedState = {
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
   saved: { siteCheck: false, wfdAssessment: false },
+  tasksOnAllTabs: false,
 };
 
 const STORAGE_KEY = 'mas-review-assess-state';
@@ -58,6 +63,7 @@ function loadState(): PersistedState {
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
         saved: { ...initialState.saved, ...parsed.saved },
+        tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
       };
     }
   } catch {
@@ -71,6 +77,8 @@ interface TaskContextValue {
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   saved: SavedState;
+  tasksOnAllTabs: boolean;
+  setTasksOnAllTabs: (value: boolean) => void;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
@@ -91,6 +99,9 @@ export function TaskProvider({ children }: PropsWithChildren) {
       /* ignore quota / privacy-mode errors */
     }
   }, [state]);
+
+  const setTasksOnAllTabs = (value: boolean) =>
+    setState(prev => ({ ...prev, tasksOnAllTabs: value }));
 
   const setSiteCheckField = (field: keyof SiteCheckForm, value: string) =>
     setState(prev => ({ ...prev, siteCheckForm: { ...prev.siteCheckForm, [field]: value } }));
@@ -132,6 +143,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
         siteCheckForm: state.siteCheckForm,
         wfdForm: state.wfdForm,
         saved: state.saved,
+        tasksOnAllTabs: state.tasksOnAllTabs,
+        setTasksOnAllTabs,
         setSiteCheckField,
         setWfdReview,
         markUnsaved,
