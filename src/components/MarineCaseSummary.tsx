@@ -160,6 +160,16 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
   const details = (marineCaseDetails as Record<string, any>)[caseId];
   const row = marineCases.find(c => c.reference === caseId);
+
+  // Case age is fixed at "1 day", so Submitted is always yesterday — shown in the
+  // out-of-the-box D365 format (DD/MM/YYYY).
+  const submittedDate = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${dd}/${mm}/${d.getFullYear()}`;
+  })();
   const data = {
     reference: caseId,
     title: details?.title ?? row?.project ?? 'Marine licence case',
@@ -167,7 +177,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
     applicationType: details?.applicationType ?? 'Marine licence',
-    submitted: details?.submitted ?? '—',
+    submitted: details ? submittedDate : '—',
     feeBand: details?.feeBand ?? '—',
     applicant: details?.applicant ?? '—',
     organisation: details?.organisation ?? '—',
@@ -245,7 +255,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           <Tab value="project">Project details</Tab>
           <Tab value="site">Site and activity</Tab>
           <Tab value="mpp">Marine plan policies</Tab>
-          <Tab value="wfd">WFD</Tab>
+          <Tab value="wfd">Water Framework Directive</Tab>
           <Tab value="other">Other permissions</Tab>
           <Tab value="public-register">Public register</Tab>
         </TabList>
