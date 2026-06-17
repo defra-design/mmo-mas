@@ -126,7 +126,6 @@ interface ShellProps {
 
 // Nav keys that map to a real route; everything else is a dead link.
 const navRoutes: Record<string, string> = {
-  home: '/',
   cases: '/iteration1',
   'marine-licence-cases': '/review-assess',
 };
@@ -137,6 +136,9 @@ export default function Shell({
   selectedKey = 'cases',
 }: PropsWithChildren<ShellProps>) {
   const navigate = useNavigate();
+  // Home links to the section's case list: the Marine licence cases list in
+  // Review and assess, the Active cases list in the Proof of concept.
+  const homeRoute = groups === reviewAssessNavGroups ? '/review-assess' : '/iteration1';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <TopBar />
@@ -146,7 +148,8 @@ export default function Shell({
           groups={groups}
           selectedKey={selectedKey}
           onLinkClick={(key: string) => {
-            if (navRoutes[key]) navigate(navRoutes[key]);
+            if (key === 'home') navigate(homeRoute);
+            else if (navRoutes[key]) navigate(navRoutes[key]);
           }}
         />
 
