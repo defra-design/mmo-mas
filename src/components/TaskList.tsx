@@ -87,7 +87,7 @@ export default function TaskList({ caseId }: TaskListProps) {
     },
     {
       key: 'wfd',
-      name: 'Water Framework Directive (WFD)',
+      name: 'Water Framework Directive',
       status: tasks.wfdAssessment,
       onClick:
         tasks.wfdAssessment !== 'Cannot start yet'

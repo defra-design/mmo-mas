@@ -255,7 +255,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           <Tab value="project">Project details</Tab>
           <Tab value="site">Site and activity</Tab>
           <Tab value="mpp">Marine plan policies</Tab>
-          <Tab value="wfd">WFD</Tab>
+          <Tab value="wfd">Water Framework Directive</Tab>
           <Tab value="other">Other permissions</Tab>
           <Tab value="public-register">Public register</Tab>
         </TabList>
