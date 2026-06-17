@@ -32,14 +32,10 @@ export default function IndexPage() {
         MMO Marine Applications System prototype
       </h1>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {[
-          { to: '/iteration1', label: 'Proof of concept' },
-          { to: '/review-assess', label: 'Review and assess' },
-        ].map(link => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div>
           <Link
-            key={link.to}
-            to={link.to}
+            to="/review-assess"
             style={{
               fontSize: '18px',
               color: '#0078d4',
@@ -53,9 +49,37 @@ export default function IndexPage() {
               (e.target as HTMLElement).style.textDecoration = 'none';
             }}
           >
-            {link.label}
+            Review and assess
           </Link>
-        ))}
+          <p style={{
+            margin: '12px 0 0',
+            fontSize: '14px',
+            color: '#323130',
+            lineHeight: 1.5,
+            maxWidth: '640px',
+          }}>
+            MLA/2026/1002 is the active case.<br />
+            After completing the tasks click ‘Reset prototype data’ below to clear the saved data.
+          </p>
+        </div>
+
+        <Link
+          to="/iteration1"
+          style={{
+            fontSize: '18px',
+            color: '#0078d4',
+            textDecoration: 'none',
+            fontWeight: 400,
+          }}
+          onMouseOver={(e) => {
+            (e.target as HTMLElement).style.textDecoration = 'underline';
+          }}
+          onMouseOut={(e) => {
+            (e.target as HTMLElement).style.textDecoration = 'none';
+          }}
+        >
+          Proof of concept
+        </Link>
       </div>
 
       <div style={{ marginTop: '48px', display: 'flex', alignItems: 'center', gap: '12px' }}>
