@@ -35,6 +35,7 @@ import {
   DismissRegular,
 } from '@fluentui/react-icons';
 import FormCommandBar from './FormCommandBar';
+import { getAssigneeAvatarColor, getContrastText } from '../utils/avatarColors';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 
 const useStyles = makeStyles({
@@ -463,9 +464,25 @@ export default function MarineLicenceListView({
       if (!value) return <span className={styles.cellText} />;
       return (
         <span className={styles.avatarCell}>
-          {/* color="colorful" → Fluent picks a stable colour from the name, so
-              each officer differs and Sam Evans matches the case-summary avatar. */}
-          <Avatar name={value} size={24} color="colorful" style={{ flexShrink: 0 }} />
+          {/* Fluent paints the avatar colour on the initials slot, not the root, so
+              the override has to target that slot. Sam Evans keeps Fluent's
+              "colorful" default; everyone else uses the shared mapping. */}
+          <Avatar
+            name={value}
+            size={24}
+            color={value === 'Sam Evans' ? 'colorful' : 'neutral'}
+            initials={
+              value === 'Sam Evans'
+                ? undefined
+                : {
+                    style: {
+                      backgroundColor: getAssigneeAvatarColor(value),
+                      color: getContrastText(getAssigneeAvatarColor(value)),
+                    },
+                  }
+            }
+            style={{ flexShrink: 0 }}
+          />
           <span className={styles.cellText} title={value}>{value}</span>
         </span>
       );
