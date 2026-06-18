@@ -32,9 +32,9 @@ interface PersistedState {
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   saved: SavedState;
-  // Prototype demo flag (set from the index page): Version 1 = Tasks panel on
-  // the Case summary tab only; Version 2 (true) = Tasks panel persists on every
-  // case tab. See IndexPage.
+  // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
+  // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
+  // on every case tab. See IndexPage.
   tasksOnAllTabs: boolean;
 }
 

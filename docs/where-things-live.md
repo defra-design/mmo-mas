@@ -28,6 +28,8 @@ The app contains two separate journeys, reached from the landing page:
 | Journey | What it is | Status |
 |---------|-----------|--------|
 | **Review and assess** | The real work — marine licence case list, case summary, CDP data tabs, caseworker tasks. | Active / current focus |
+| ↳ **Version 1** | Review and assess with the **persistent task list** — the Tasks panel stays pinned beside every case tab. | The chosen direction |
+| ↳ **Version 2** | Review and assess with the task list shown on the **Case summary tab only**. | Alternative, kept for comparison |
 | **Proof of concept** | An earlier exploration ("Active cases" list + case view). | Legacy — kept for reference |
 
 The current design work happens almost entirely in **Review and assess**.
@@ -139,8 +141,8 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
 
 - **What you see:** a "Tasks" panel listing caseworker tasks (Site check, Water Framework
   Directive, Marine plan policies) each with a status. Clicking a startable task opens its form.
-- **Task list panel:** `src/components/TaskList.tsx`. In **Version 1** it sits inline on the
-  Case summary tab; in **Version 2** (`tasksOnAllTabs = true`) it persists in a rail on every
+- **Task list panel:** `src/components/TaskList.tsx`. In **Version 2** it sits inline on the
+  Case summary tab; in **Version 1** (`tasksOnAllTabs = true`) it persists in a rail on every
   tab. The version is chosen by the Version 1 / 2 links on the landing page.
 - **Task forms:**
   - `src/components/tasks/SiteCheckTask.tsx`
