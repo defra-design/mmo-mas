@@ -334,9 +334,10 @@ export default function MarineLicenceListView({
     });
 
   function ColumnHeaderMenu({ col }: { col: ColumnConfig }) {
-    // The Status column filters by an "equals one of" checkbox list rather than
+    // The Status and Case Officer columns filter by an "equals one of" checkbox
+    // list (options derived from the values on the page, alphabetised) rather than
     // the free-text "contains" input used by every other column.
-    const isStatusCol = col.key === 'status';
+    const isEqualsCol = col.key === 'status' || col.key === 'caseOfficer';
     const activeFilter = filters[col.key];
     const isFiltered = Array.isArray(activeFilter)
       ? activeFilter.length > 0
@@ -347,7 +348,7 @@ export default function MarineLicenceListView({
     const [open, setOpen] = useState(false);
     const [view, setView] = useState<'menu' | 'filter'>('menu');
     const [draft, setDraft] = useState('');
-    const [statusDraft, setStatusDraft] = useState<string[]>([]);
+    const [equalsDraft, setEqualsDraft] = useState<string[]>([]);
 
     // Distinct values present in this column, alphabetised — the checkbox options.
     const equalsOptions = useMemo(
@@ -359,20 +360,20 @@ export default function MarineLicenceListView({
     );
 
     const openFilter = () => {
-      if (isStatusCol) {
-        setStatusDraft(Array.isArray(activeFilter) ? activeFilter : []);
+      if (isEqualsCol) {
+        setEqualsDraft(Array.isArray(activeFilter) ? activeFilter : []);
       } else {
         setDraft(typeof activeFilter === 'string' ? activeFilter : '');
       }
       setView('filter');
     };
     const applyFilter = () => {
-      if (isStatusCol) setEqualsFilter(col.key, statusDraft);
+      if (isEqualsCol) setEqualsFilter(col.key, equalsDraft);
       else setFilter(col.key, draft);
       setOpen(false);
     };
-    const toggleStatus = (value: string, checked: boolean) =>
-      setStatusDraft(prev => (checked ? [...prev, value] : prev.filter(v => v !== value)));
+    const toggleEqualsValue = (value: string, checked: boolean) =>
+      setEqualsDraft(prev => (checked ? [...prev, value] : prev.filter(v => v !== value)));
 
     return (
       <Popover
@@ -461,15 +462,15 @@ export default function MarineLicenceListView({
                 />
               </div>
               <div className={styles.filterBody}>
-                {isStatusCol ? (
+                {isEqualsCol ? (
                   <Field label="Equals">
                     <div className={styles.checkboxList}>
                       {equalsOptions.map(option => (
                         <Checkbox
                           key={option}
                           label={option}
-                          checked={statusDraft.includes(option)}
-                          onChange={(_, data) => toggleStatus(option, !!data.checked)}
+                          checked={equalsDraft.includes(option)}
+                          onChange={(_, data) => toggleEqualsValue(option, !!data.checked)}
                         />
                       ))}
                     </div>
@@ -491,12 +492,12 @@ export default function MarineLicenceListView({
                   <Button
                     appearance="secondary"
                     disabled={
-                      isStatusCol
-                        ? !isFiltered && statusDraft.length === 0
+                      isEqualsCol
+                        ? !isFiltered && equalsDraft.length === 0
                         : !isFiltered && !draft.trim()
                     }
                     onClick={() => {
-                      if (isStatusCol) setStatusDraft([]);
+                      if (isEqualsCol) setEqualsDraft([]);
                       else setDraft('');
                       clearFilter(col.key);
                       setOpen(false);
