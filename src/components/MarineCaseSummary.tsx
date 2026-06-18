@@ -56,7 +56,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
   },
-  // Version 2: main region + persistent Tasks rail, side by side.
+  // Version 1: main region + persistent Tasks rail, side by side.
   contentRow: {
     flexGrow: 1,
     minHeight: 0,
@@ -70,7 +70,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
   },
-  // Persistent Tasks panel shown on every tab (Version 2); scrolls its own content.
+  // Persistent Tasks panel shown on every tab (Version 1); scrolls its own content.
   tasksRail: {
     width: '305px',
     flexShrink: 0,
@@ -373,8 +373,8 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                     </div>
                   </Card>
 
-                  {/* Version 1: Tasks panel sits inline on the Case summary tab.
-                      Version 2 renders it in the persistent rail instead. */}
+                  {/* Version 2: Tasks panel sits inline on the Case summary tab.
+                      Version 1 renders it in the persistent rail instead. */}
                   {!tasksOnAllTabs && (
                     <Card className={styles.tasksCard}>
                       <TaskList caseId={caseId} />
@@ -397,7 +397,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
             )}
           </div>
 
-          {/* Version 2: one Tasks panel that persists across every tab. */}
+          {/* Version 1: one Tasks panel that persists across every tab. */}
           {tasksOnAllTabs && (
             <Card className={styles.tasksRail}>
               <TaskList caseId={caseId} />

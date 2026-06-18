@@ -55,22 +55,12 @@ export default function IndexPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
             <Link
               to="/review-assess"
-              onClick={() => setTasksOnAllTabs(false)}
-              style={{ fontSize: '16px', color: '#0078d4', textDecoration: 'none', fontWeight: 400 }}
-              onMouseOver={(e) => { (e.target as HTMLElement).style.textDecoration = 'underline'; }}
-              onMouseOut={(e) => { (e.target as HTMLElement).style.textDecoration = 'none'; }}
-            >
-              Version 1
-            </Link>
-            <span style={{ color: '#605e5c' }} aria-hidden="true">|</span>
-            <Link
-              to="/review-assess"
               onClick={() => setTasksOnAllTabs(true)}
               style={{ fontSize: '16px', color: '#0078d4', textDecoration: 'none', fontWeight: 400 }}
               onMouseOver={(e) => { (e.target as HTMLElement).style.textDecoration = 'underline'; }}
               onMouseOut={(e) => { (e.target as HTMLElement).style.textDecoration = 'none'; }}
             >
-              Version 2
+              Version 1
             </Link>
           </div>
           <p style={{
@@ -83,6 +73,17 @@ export default function IndexPage() {
             MLA/2026/1002 is the active case.<br />
             After completing the tasks click ‘Clear saved data’ below to clear the saved data.
           </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
+            <Link
+              to="/review-assess"
+              onClick={() => setTasksOnAllTabs(false)}
+              style={{ fontSize: '16px', color: '#0078d4', textDecoration: 'none', fontWeight: 400 }}
+              onMouseOver={(e) => { (e.target as HTMLElement).style.textDecoration = 'underline'; }}
+              onMouseOut={(e) => { (e.target as HTMLElement).style.textDecoration = 'none'; }}
+            >
+              Version 2
+            </Link>
+          </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -113,19 +114,40 @@ export default function IndexPage() {
         </div>
       </div>
 
-      <Link
-        to="/iteration1"
-        style={{
-          marginTop: 'auto',
-          marginBottom: '-20px',
-          fontSize: '14px',
-          color: '#323130',
-          textDecoration: 'underline',
-          fontWeight: 400,
-        }}
-      >
-        Proof of concept
-      </Link>
+      <div style={{
+        marginTop: 'auto',
+        marginBottom: '-20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px',
+      }}>
+        {/* External link to the project documentation on GitHub (renders the
+            markdown formatted); plain <a> since it's not an in-app route. */}
+        <a
+          href="https://github.com/defra-design/mmo-mas/blob/main/docs/where-things-live.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontSize: '14px',
+            color: '#323130',
+            textDecoration: 'underline',
+            fontWeight: 400,
+          }}
+        >
+          Design and development guide
+        </a>
+        <Link
+          to="/iteration1"
+          style={{
+            fontSize: '14px',
+            color: '#323130',
+            textDecoration: 'underline',
+            fontWeight: 400,
+          }}
+        >
+          Proof of concept
+        </Link>
+      </div>
     </div>
   );
 }
