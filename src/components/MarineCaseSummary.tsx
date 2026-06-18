@@ -12,7 +12,18 @@ import {
   Caption1,
   TabList,
   Tab,
+  Overflow,
+  OverflowItem,
+  useOverflowMenu,
+  useIsOverflowItemVisible,
+  Menu,
+  MenuTrigger,
+  MenuButton,
+  MenuPopover,
+  MenuList,
+  MenuItem,
 } from '@fluentui/react-components';
+import { MoreHorizontalRegular } from '@fluentui/react-icons';
 import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { useTasks } from '../context/TaskContext';
 import FormCommandBar from './FormCommandBar';
@@ -61,7 +72,7 @@ const useStyles = makeStyles({
   },
   // Persistent Tasks panel shown on every tab (Version 2); scrolls its own content.
   tasksRail: {
-    width: '340px',
+    width: '305px',
     flexShrink: 0,
     minHeight: 0,
     overflowY: 'auto',
@@ -100,17 +111,32 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalXXL,
     marginBottom: tokens.spacingVerticalL,
   },
-  // Allow the title group to shrink so the long project name wraps onto
-  // multiple lines before the meta block is forced underneath it.
-  titleGroup: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, flexShrink: 1, minWidth: 0 },
+  // The title holds at least ~240px and wraps its text (at word boundaries)
+  // within that column. Once the title's min width and the meta strip can no
+  // longer sit side by side, the meta strip wraps onto its own line underneath.
+  // This is container-relative — it tracks the actual header width, not the
+  // viewport, so it works regardless of nav/task-rail widths.
+  titleGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: '280px',
+    minWidth: '240px',
+  },
   titleText: { minWidth: 0 },
-  metaGroup: { display: 'flex', gap: tokens.spacingHorizontalXXL },
+  metaGroup: { display: 'flex', gap: tokens.spacingHorizontalXXL, flexShrink: 0 },
+  // Fill the header width so the overflow logic measures the real available
+  // space — otherwise the shrink-to-fit TabList reports "full" and the overflow
+  // menu kicks in while there's still room for more tabs.
+  tabList: { width: '100%' },
   metaItem: { display: 'flex', flexDirection: 'column' },
   metaLabel: { color: tokens.colorNeutralForeground3 },
   assignedItem: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
   layout: { display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
   mainCard: { flex: '1 1 320px', minWidth: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
-  tasksCard: { width: '340px', flexShrink: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
+  tasksCard: { width: '260px', flexShrink: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -151,6 +177,66 @@ const cdpPages: Record<string, { src: string; title: string }> = {
   other: { src: '/cdp/other-permissions.html', title: 'Other permissions' },
   'public-register': { src: '/cdp/public-register.html', title: 'Public register' },
 };
+
+// The case tabs, in order. Driven by data so the overflow menu can list the
+// tabs that don't fit on screen.
+const tabs: { id: string; name: string }[] = [
+  { id: 'summary', name: 'Case summary' },
+  { id: 'project', name: 'Project details' },
+  { id: 'site', name: 'Sites and activities' },
+  { id: 'mpp', name: 'Marine plan policies' },
+  { id: 'wfd', name: 'Water Framework Directive' },
+  { id: 'other', name: 'Other permissions' },
+  { id: 'public-register', name: 'Public register' },
+];
+
+// A single overflowed tab, shown as a menu item; visible tabs render nothing.
+function OverflowTabMenuItem({
+  id,
+  name,
+  onClick,
+}: {
+  id: string;
+  name: string;
+  onClick: () => void;
+}) {
+  const isVisible = useIsOverflowItemVisible(id);
+  if (isVisible) return null;
+  return <MenuItem onClick={onClick}>{name}</MenuItem>;
+}
+
+// The "…" button, shown only when one or more tabs don't fit; opens a menu of
+// the hidden tabs (matching the D365 model-driven form overflow flyout).
+function OverflowTabsMenu({ onTabSelect }: { onTabSelect: (id: string) => void }) {
+  const { ref, isOverflowing, overflowCount } = useOverflowMenu<HTMLButtonElement>();
+  if (!isOverflowing) return null;
+  return (
+    <Menu>
+      <MenuTrigger disableButtonEnhancement>
+        <MenuButton
+          ref={ref}
+          appearance="transparent"
+          icon={<MoreHorizontalRegular />}
+          menuIcon={null}
+          aria-label={`${overflowCount} more tabs`}
+          role="tab"
+        />
+      </MenuTrigger>
+      <MenuPopover>
+        <MenuList>
+          {tabs.map(tab => (
+            <OverflowTabMenuItem
+              key={tab.id}
+              id={tab.id}
+              name={tab.name}
+              onClick={() => onTabSelect(tab.id)}
+            />
+          ))}
+        </MenuList>
+      </MenuPopover>
+    </Menu>
+  );
+}
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
@@ -246,19 +332,22 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           </div>
         </div>
 
-        <TabList
-          selectedValue={selectedTab}
-          onTabSelect={(_, d) => setSelectedTab(d.value as string)}
-          size="large"
-        >
-          <Tab value="summary">Case summary</Tab>
-          <Tab value="project">Project details</Tab>
-          <Tab value="site">Site and activity</Tab>
-          <Tab value="mpp">Marine plan policies</Tab>
-          <Tab value="wfd">Water Framework Directive</Tab>
-          <Tab value="other">Other permissions</Tab>
-          <Tab value="public-register">Public register</Tab>
-        </TabList>
+        <Overflow minimumVisible={1}>
+          <TabList
+            className={styles.tabList}
+            selectedValue={selectedTab}
+            onTabSelect={(_, d) => setSelectedTab(d.value as string)}
+            size="large"
+          >
+            {tabs.map(tab => (
+              // The active tab gets a higher priority so it's never the one hidden.
+              <OverflowItem key={tab.id} id={tab.id} priority={selectedTab === tab.id ? 2 : 1}>
+                <Tab value={tab.id}>{tab.name}</Tab>
+              </OverflowItem>
+            ))}
+            <OverflowTabsMenu onTabSelect={setSelectedTab} />
+          </TabList>
+        </Overflow>
       </Card>
       </div>
 

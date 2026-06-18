@@ -178,11 +178,19 @@ body {
 }
 
 .mpp__nav {
-  flex: 0 0 280px;
+  /* Holds ~360px at wide widths (around a 1280px window) so the policy labels
+     sit on one line, then shrinks down with the detail as the window narrows so
+     the labels wrap rather than the detail being starved. */
+  flex: 0 1 300px;
+  min-width: 180px;
 }
 
 .mpp__detail {
-  flex: 1 1 auto;
+  /* A concrete flex-basis (not `auto`) is essential: with `auto` the basis
+     becomes the unwrapped paragraph width (~2000px), which hogs the row and
+     pins the nav to its min-width. A real basis lets the two panes shrink
+     together so the nav can actually reach its 360px. */
+  flex: 1 1 320px;
   min-width: 0;
 }
 
