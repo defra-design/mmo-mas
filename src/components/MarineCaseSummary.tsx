@@ -183,7 +183,7 @@ const cdpPages: Record<string, { src: string; title: string }> = {
 const tabs: { id: string; name: string }[] = [
   { id: 'summary', name: 'Case summary' },
   { id: 'project', name: 'Project details' },
-  { id: 'site', name: 'Site and activity' },
+  { id: 'site', name: 'Sites and activities' },
   { id: 'mpp', name: 'Marine plan policies' },
   { id: 'wfd', name: 'Water Framework Directive' },
   { id: 'other', name: 'Other permissions' },
