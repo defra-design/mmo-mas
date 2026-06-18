@@ -117,6 +117,12 @@ const useStyles = makeStyles({
     display: 'flex',
     gap: tokens.spacingHorizontalS,
   },
+  // Vertical stack of status checkboxes in the Status column "Equals" filter.
+  checkboxList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalXXS,
+  },
   // Brand border + funnel icon on a column heading whose filter is active.
   filteredHeaderCell: {
     ...shorthands.border('1px', 'solid', '#0078d4'),
@@ -217,7 +223,9 @@ interface ColumnConfig {
 }
 
 type SortState = { key: string; dir: 'asc' | 'desc' } | null;
-type Filters = Record<string, string>; // key -> "contains" text; absent = no filter
+// key -> filter; absent = no filter. A string is a "contains" text filter; a
+// string[] is an "equals one of" filter (used by the Status column checkboxes).
+type Filters = Record<string, string | string[]>;
 
 interface MarineLicenceListViewProps {
   entityConfig: {
@@ -279,12 +287,16 @@ export default function MarineLicenceListView({
   const navigateToCase = (reference: string) =>
     navigate(`/review-assess/cases/${encodeURIComponent(reference)}`);
 
-  // Apply active filters ("contains", case-insensitive) then the active sort.
+  // Apply active filters then the active sort. A string filter is a
+  // case-insensitive "contains"; an array filter is an "equals one of" match.
   const displayed = useMemo(() => {
     let rows = items.filter(item =>
-      Object.entries(filters).every(
-        ([key, text]) => (item[key] ?? '').toLowerCase().includes(text.toLowerCase()),
-      ),
+      Object.entries(filters).every(([key, filter]) => {
+        const cell = item[key] ?? '';
+        return Array.isArray(filter)
+          ? filter.includes(cell)
+          : cell.toLowerCase().includes(filter.toLowerCase());
+      }),
     );
     if (sort) {
       rows = [...rows].sort((a, b) => {
@@ -305,6 +317,15 @@ export default function MarineLicenceListView({
       return updated;
     });
 
+  // Set (or, when empty, remove) the "equals one of" filter for a column.
+  const setEqualsFilter = (key: string, values: string[]) =>
+    setFilters(prev => {
+      const updated = { ...prev };
+      if (values.length) updated[key] = values;
+      else delete updated[key];
+      return updated;
+    });
+
   const clearFilter = (key: string) =>
     setFilters(prev => {
       const updated = { ...prev };
@@ -313,22 +334,45 @@ export default function MarineLicenceListView({
     });
 
   function ColumnHeaderMenu({ col }: { col: ColumnConfig }) {
-    const isFiltered = Boolean(filters[col.key]);
+    // The Status column filters by an "equals one of" checkbox list rather than
+    // the free-text "contains" input used by every other column.
+    const isStatusCol = col.key === 'status';
+    const activeFilter = filters[col.key];
+    const isFiltered = Array.isArray(activeFilter)
+      ? activeFilter.length > 0
+      : Boolean(activeFilter);
     const isNumber = col.type === 'number';
     const ascLabel = isNumber ? 'Smaller to Larger' : 'A to Z';
     const descLabel = isNumber ? 'Larger to Smaller' : 'Z to A';
     const [open, setOpen] = useState(false);
     const [view, setView] = useState<'menu' | 'filter'>('menu');
     const [draft, setDraft] = useState('');
+    const [statusDraft, setStatusDraft] = useState<string[]>([]);
+
+    // Distinct values present in this column, alphabetised — the checkbox options.
+    const equalsOptions = useMemo(
+      () =>
+        Array.from(new Set(items.map(i => i[col.key]).filter(Boolean))).sort((a, b) =>
+          a.localeCompare(b),
+        ),
+      [col.key],
+    );
 
     const openFilter = () => {
-      setDraft(filters[col.key] ?? '');
+      if (isStatusCol) {
+        setStatusDraft(Array.isArray(activeFilter) ? activeFilter : []);
+      } else {
+        setDraft(typeof activeFilter === 'string' ? activeFilter : '');
+      }
       setView('filter');
     };
     const applyFilter = () => {
-      setFilter(col.key, draft);
+      if (isStatusCol) setEqualsFilter(col.key, statusDraft);
+      else setFilter(col.key, draft);
       setOpen(false);
     };
+    const toggleStatus = (value: string, checked: boolean) =>
+      setStatusDraft(prev => (checked ? [...prev, value] : prev.filter(v => v !== value)));
 
     return (
       <Popover
@@ -417,22 +461,46 @@ export default function MarineLicenceListView({
                 />
               </div>
               <div className={styles.filterBody}>
-                <Field label="Contains">
-                  <Input
-                    value={draft}
-                    autoFocus
-                    onChange={(_, data) => setDraft(data.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') applyFilter(); }}
-                  />
-                </Field>
+                {isStatusCol ? (
+                  <Field label="Equals">
+                    <div className={styles.checkboxList}>
+                      {equalsOptions.map(option => (
+                        <Checkbox
+                          key={option}
+                          label={option}
+                          checked={statusDraft.includes(option)}
+                          onChange={(_, data) => toggleStatus(option, !!data.checked)}
+                        />
+                      ))}
+                    </div>
+                  </Field>
+                ) : (
+                  <Field label="Contains">
+                    <Input
+                      value={draft}
+                      autoFocus
+                      onChange={(_, data) => setDraft(data.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') applyFilter(); }}
+                    />
+                  </Field>
+                )}
                 <div className={styles.filterActions}>
                   <Button appearance="primary" onClick={applyFilter}>
                     Apply
                   </Button>
                   <Button
                     appearance="secondary"
-                    disabled={!isFiltered && !draft.trim()}
-                    onClick={() => { setDraft(''); clearFilter(col.key); setOpen(false); }}
+                    disabled={
+                      isStatusCol
+                        ? !isFiltered && statusDraft.length === 0
+                        : !isFiltered && !draft.trim()
+                    }
+                    onClick={() => {
+                      if (isStatusCol) setStatusDraft([]);
+                      else setDraft('');
+                      clearFilter(col.key);
+                      setOpen(false);
+                    }}
                   >
                     Clear
                   </Button>

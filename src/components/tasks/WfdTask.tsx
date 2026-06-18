@@ -44,7 +44,7 @@ const useStyles = makeStyles({
     columnGap: tokens.spacingHorizontalL,
     rowGap: tokens.spacingVerticalS,
   },
-  label: { flexShrink: 0, flexBasis: '220px', minWidth: '220px' },
+  label: { flexShrink: 0, flexBasis: '320px', minWidth: '320px' },
   // Holds one or two field boxes; wraps them under each other when cramped.
   fields: {
     flexGrow: 1,
@@ -98,11 +98,7 @@ const useStyles = makeStyles({
   },
 });
 
-const reviewOptions = [
-  'Assessment accepted',
-  'Assessment not ok to send to EA',
-  'New current assessment needed',
-];
+const reviewOptions = ['Yes', 'No'];
 
 interface WfdTaskProps {
   caseId: string;
@@ -139,7 +135,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
           <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
-              <Text className={styles.label}>Within the WFD assessment area</Text>
+              <Text className={styles.label}>Site located in the WFD assessment area</Text>
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>Yes</Body1></div>
                 <div className={styles.confirm}>
@@ -149,13 +145,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               </div>
             </div>
             <div className={styles.row}>
-              <Text className={styles.label}>Previous assessment (2015–2022)</Text>
-              <div className={styles.fields}>
-                <div className={styles.value}><Body1>Yes</Body1></div>
-              </div>
-            </div>
-            <div className={styles.row}>
-              <Text className={styles.label}>Anything changed since</Text>
+              <Text className={styles.label}>Excluded activity</Text>
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>No</Body1></div>
               </div>
@@ -165,12 +155,12 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
-                    href="/documents/WFD-Teignmouth-2019.docx"
+                    href="/documents/WFD-Teignmouth-2026.docx"
                     target="_blank"
                     rel="noopener"
                     className={styles.docxLink}
                   >
-                    <GlobeRegular /> WFD-Teignmouth-2019.docx
+                    <GlobeRegular /> WFD-Teignmouth-2026.docx
                   </Link>
                 </div>
               </div>
