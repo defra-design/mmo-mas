@@ -11,11 +11,18 @@ import {
   Field,
   Textarea,
   Link,
+  mergeClasses,
 } from '@fluentui/react-components';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
+
+// Width of the label column on the Site check task. This is the knob to play
+// with — widen/narrow to taste. It's deliberately wider than the WFD task's
+// 320px label. Once a row can't fit this label plus its control side by side,
+// the control wraps underneath (same behaviour as the WFD task).
+const LABEL_WIDTH = '360px';
 
 const useStyles = makeStyles({
   page: {
@@ -36,18 +43,36 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
   },
-  headingGap: { marginBottom: tokens.spacingVerticalM },
+  // Extra space above the section-3 row. Applied as margin-top on the row (a
+  // plain div we control) rather than margin-bottom on the heading, because the
+  // Fluent <Text> heading swallows that margin. Sections 1 & 2 get their
+  // separation from the description paragraph above their row; section 3 has
+  // none, so it needs this. Adjust to taste.
+  notesRowGap: { marginTop: tokens.spacingVerticalM },
   csvLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalXS },
   desc: {
     color: tokens.colorNeutralForeground2,
     marginTop: tokens.spacingVerticalS,
     marginBottom: tokens.spacingVerticalL,
   },
+  // A fixed-width label beside its control. The control wraps underneath when
+  // the row is too narrow to hold both side by side (mirrors the WFD task).
   question: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: tokens.spacingHorizontalXXL,
+    display: 'flex',
+    flexWrap: 'wrap',
     alignItems: 'start',
+    columnGap: tokens.spacingHorizontalXXL,
+    rowGap: tokens.spacingVerticalS,
+  },
+  label: {
+    flexShrink: 0,
+    flexBasis: LABEL_WIDTH,
+    minWidth: LABEL_WIDTH,
+  },
+  control: {
+    flexGrow: 1,
+    flexBasis: '320px',
+    minWidth: '240px',
   },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
@@ -59,6 +84,7 @@ const useStyles = makeStyles({
   },
   // Grey, borderless textarea matching the Case summary data fields.
   textarea: {
+    width: '100%',
     backgroundColor: tokens.colorNeutralBackground3,
     borderRadius: tokens.borderRadiusSmall,
     ...shorthands.border('none'),
@@ -109,13 +135,13 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div>
           <Text block className={styles.sectionHeading}>1. Coordinates and shape</Text>
           <Text block className={styles.desc}>
-            Check that the coordinates accurately represent where the works will physically take
-            place, that the shape and size make sense for the activity, and that the site is within
-            MMO jurisdiction.
+            Check that the coordinates accurately represent the location of the works, that the
+            shape and size are appropriate for the activity, and that the site is within MMO
+            jurisdiction.
           </Text>
           <div className={styles.question}>
-            <Text>Are the coordinates and shape acceptable for assessment?</Text>
-            <Field>
+            <Text className={styles.label}>Are the coordinates and shape correct and appropriate?</Text>
+            <Field className={styles.control}>
               <OutcomeDropdown
                 value={siteCheckForm.coordinatesOk}
                 options={['Yes', 'No']}
@@ -131,15 +157,15 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>2. One nautical mile check</Text>
+          <Text block className={styles.sectionHeading}>2. Site located in the Water Framework Directive assessment (WFD) area</Text>
           <Text block className={styles.desc}>
-            Check the site location to determine whether the activity is within 1 nautical mile of
-            the coast. This is used to confirm whether a Water Framework Directive assessment is
-            required.
+            Confirm whether the site is within the WFD assessment area. Within one nautical mile
+            (1.85km) of the low water line, or in a tidal river or estuary - including the shore
+            between low and Mean High Water Springs.
           </Text>
           <div className={styles.question}>
-            <Text>Is the activity within 1 nautical mile of the coast?</Text>
-            <Field>
+            <Text className={styles.label}>Is the site within the WFD assessment area?</Text>
+            <Field className={styles.control}>
               <OutcomeDropdown
                 value={siteCheckForm.withinMile}
                 options={['Yes', 'No']}
@@ -155,10 +181,10 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text block className={`${styles.sectionHeading} ${styles.headingGap}`}>3. Notes from your site check</Text>
-          <div className={styles.question}>
-            <Text>Record anything from your site check that should inform later assessment tasks.</Text>
-            <Field>
+          <Text block className={styles.sectionHeading}>3. Notes from your site check</Text>
+          <div className={mergeClasses(styles.question, styles.notesRowGap)}>
+            <Text className={styles.label}>Record anything from your site check that is relevant to later stages of the assessment.</Text>
+            <Field className={styles.control}>
               <Textarea
                 className={styles.textarea}
                 appearance="filled-lighter"
