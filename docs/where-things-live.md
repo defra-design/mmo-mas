@@ -1,6 +1,6 @@
 # Where things live
 
-A map of the MAS caseworker prototype for someone coming in fresh. It's organised
+A map of the MAS caseworker prototype. It's organised
 around what you actually **see on screen**: for each piece of the UI, where it's
 **defined** and where its **data** comes from.
 
