@@ -44,11 +44,13 @@
 }
 
 .d365-nav-item.selected {
+  /* White button with a soft inner shadow hugging its right edge, matching the
+     graduation on the real D365 selected item. */
   background: #ffffff;
   border-left: 5px solid #0078d4;
   padding-left: 13px;
   font-weight: 500;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset -10px 0 8px -8px rgba(0, 0, 0, 0.18);
 }
 
 .d365-nav-item.child {
@@ -64,7 +66,7 @@
   color: #323130;
   border-left: 3px solid #0078d4;
   background: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset -10px 0 8px -8px rgba(0, 0, 0, 0.18);
 }
 
 .d365-nav-item.child .d365-nav-text {
