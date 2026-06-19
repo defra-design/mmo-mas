@@ -1,6 +1,6 @@
 // src/components/TopBar.tsx
 import { IconButton, mergeStyleSets } from '@fluentui/react';
-import { Persona, PersonaSize } from '@fluentui/react';
+import { Avatar } from '@fluentui/react-components';
 import { useNavigate } from 'react-router-dom';
 
 const classes = mergeStyleSets({
@@ -72,7 +72,9 @@ export default function TopBar() {
         <IconButton iconProps={{ iconName: 'Add' }}        styles={buttonStyles} />
         <IconButton iconProps={{ iconName: 'Settings' }}   styles={buttonStyles} />
         <IconButton iconProps={{ iconName: 'Help' }}       styles={buttonStyles} />
-        <Persona text="User" size={PersonaSize.size32} hidePersonaDetails />
+        {/* Same v9 Avatar + "colorful" colour Sam Evans gets in the case list,
+            so the signed-in user's colour matches everywhere. */}
+        <Avatar name="Sam Evans" size={32} color="colorful" />
       </div>
     </header>
   );
