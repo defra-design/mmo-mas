@@ -154,9 +154,11 @@ const useStyles = makeStyles({
   },
 });
 
-// Project-name cell: a link that only shows the (immediate) hover card when the
-// name is actually truncated, mirroring the D365 grid.
-function ProjectNameCell({
+// Link cell (Reference column): every reference looks like a blue link, but only
+// fully-built cases actually navigate (the rest are non-functional in this
+// prototype). Only shows the (immediate) hover card when the value is actually
+// truncated, mirroring the D365 grid.
+function LinkCell({
   value,
   clickable,
   onNavigate,
@@ -517,9 +519,10 @@ export default function MarineLicenceListView({
   function renderCell(col: ColumnConfig, item: Record<string, string>) {
     const value = item[col.key] ?? '';
     if (col.link) {
-      // Only fully-built cases navigate; all project names look like links.
+      // Every reference looks like a link; only fully-built cases navigate
+      // (currently MLA/2026/1002).
       return (
-        <ProjectNameCell
+        <LinkCell
           value={value}
           clickable={isClickable(item.reference)}
           onNavigate={() => navigateToCase(item.reference)}
