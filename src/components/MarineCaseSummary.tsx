@@ -267,6 +267,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     feeBand: details?.feeBand ?? '—',
     applicant: details?.applicant ?? '—',
     organisation: details?.organisation ?? '—',
+    caseOfficer: details?.caseOfficer ?? 'Sam Evans',
     consentToPublish: details?.consentToPublish ?? '—',
   };
 
@@ -291,6 +292,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const rightFields = [
     { label: 'Applicant', value: data.applicant },
     { label: 'Organisation', value: data.organisation },
+    { label: 'Case Officer', value: data.caseOfficer },
   ];
 
   return (
