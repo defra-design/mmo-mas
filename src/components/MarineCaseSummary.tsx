@@ -292,7 +292,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const rightFields = [
     { label: 'Applicant', value: data.applicant },
     { label: 'Organisation', value: data.organisation },
-    { label: 'Case officer', value: data.caseOfficer },
+    { label: 'Case Officer', value: data.caseOfficer },
   ];
 
   return (
