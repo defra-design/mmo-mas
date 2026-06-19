@@ -128,6 +128,7 @@ const useStyles = makeStyles({
     ...shorthands.border('1px', 'solid', '#0078d4'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
   },
+  staticLink: { color: '#0078d4' },
   tableRow: {
     ':hover': { backgroundColor: tokens.colorNeutralBackground3 },
   },
@@ -153,9 +154,10 @@ const useStyles = makeStyles({
   },
 });
 
-// Link cell (Reference column): the clickable reference is a navigable link;
-// non-navigable references show as standard text. Only shows the (immediate)
-// hover card when the value is actually truncated, mirroring the D365 grid.
+// Link cell (Reference column): every reference looks like a blue link, but only
+// fully-built cases actually navigate (the rest are non-functional in this
+// prototype). Only shows the (immediate) hover card when the value is actually
+// truncated, mirroring the D365 grid.
 function LinkCell({
   value,
   clickable,
@@ -178,7 +180,7 @@ function LinkCell({
       {value}
     </button>
   ) : (
-    <span ref={setRef} className={styles.cellText}>{value}</span>
+    <span ref={setRef} className={mergeClasses(styles.staticLink, styles.cellText)}>{value}</span>
   );
 
   return (
@@ -517,8 +519,8 @@ export default function MarineLicenceListView({
   function renderCell(col: ColumnConfig, item: Record<string, string>) {
     const value = item[col.key] ?? '';
     if (col.link) {
-      // Only fully-built cases navigate (currently MLA/2026/1002); the rest
-      // show as standard text.
+      // Every reference looks like a link; only fully-built cases navigate
+      // (currently MLA/2026/1002).
       return (
         <LinkCell
           value={value}
