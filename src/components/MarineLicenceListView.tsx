@@ -520,7 +520,7 @@ export default function MarineLicenceListView({
     const value = item[col.key] ?? '';
     if (col.link) {
       // Every reference looks like a link; only fully-built cases navigate
-      // (currently MLA/2026/1002).
+      // (currently MLA/2026/10002).
       return (
         <LinkCell
           value={value}
