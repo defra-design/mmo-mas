@@ -21,6 +21,22 @@ npm run lint     # eslint
 
 ---
 
+## Hosting & access (no password)
+
+The deployed prototype is served by **`server.js`** (a small Express server, started via the
+`Procfile`). It serves the built `dist/` folder with an SPA fallback so client-side routes work.
+
+- **There is no authentication.** Anyone with the URL can open the prototype — this is
+  deliberate so usability-test participants aren't blocked.
+- **History:** the server used to sit behind **HTTP Basic Auth**, with the password read from
+  a `PASSWORD` env/config var. That gate was removed because the password prompt
+  ("Authentication required") was stopping test participants from getting in. The
+  password-checking code is gone from `server.js`; the `PASSWORD` env var is now ignored.
+- If you ever need to lock it down again (e.g. before it holds anything sensitive), restore a
+  Basic Auth middleware in `server.js` — but remember to share the credentials with testers.
+
+---
+
 ## The two journeys
 
 The app contains two separate journeys, reached from the landing page:
