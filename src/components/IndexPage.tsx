@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowClockwiseRegular } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
+import { asset } from '../utils/asset';
 
 export default function IndexPage() {
-  const { resetAll, setTasksOnAllTabs } = useTasks();
+  const { resetAll } = useTasks();
   const [justReset, setJustReset] = useState(false);
 
   const handleReset = () => {
@@ -28,7 +29,7 @@ export default function IndexPage() {
       fontFamily: '"Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif'
     }}>
       <img
-        src="/images/Marine_Management_Organisation_logo.svg"
+        src={asset('images/Marine_Management_Organisation_logo.svg')}
         alt="Marine Management Organisation"
         style={{ height: '100px', width: 'auto', alignSelf: 'flex-start', marginBottom: '32px' }}
       />
@@ -50,18 +51,30 @@ export default function IndexPage() {
             color: '#323130',
             margin: 0,
           }}>
-            Review and assess
+            Receive and assess
           </h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
+            {/* The current, in-progress iteration lives at the domain root. */}
             <Link
-              to="/review-assess"
-              onClick={() => setTasksOnAllTabs(true)}
+              to="/receive-assess"
               style={{ fontSize: '16px', color: '#0078d4', textDecoration: 'none', fontWeight: 400 }}
               onMouseOver={(e) => { (e.target as HTMLElement).style.textDecoration = 'underline'; }}
               onMouseOut={(e) => { (e.target as HTMLElement).style.textDecoration = 'none'; }}
             >
-              Version 1
+              Iteration 2 (in progress)
             </Link>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
+            {/* Frozen snapshot — a separate build served under /iteration-1/, so
+                this is a plain full-page link, not a react-router route. */}
+            <a
+              href="/iteration-1/receive-assess"
+              style={{ fontSize: '16px', color: '#0078d4', textDecoration: 'none', fontWeight: 400 }}
+              onMouseOver={(e) => { (e.target as HTMLElement).style.textDecoration = 'underline'; }}
+              onMouseOut={(e) => { (e.target as HTMLElement).style.textDecoration = 'none'; }}
+            >
+              Iteration 1 (as usability-tested)
+            </a>
           </div>
           <p style={{
             margin: '12px 0 0',
@@ -73,17 +86,6 @@ export default function IndexPage() {
             MLA/2026/1002 is the active case.<br />
             After completing the tasks click ‘Clear saved data’ below to clear the saved data.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
-            <Link
-              to="/review-assess"
-              onClick={() => setTasksOnAllTabs(false)}
-              style={{ fontSize: '16px', color: '#0078d4', textDecoration: 'none', fontWeight: 400 }}
-              onMouseOver={(e) => { (e.target as HTMLElement).style.textDecoration = 'underline'; }}
-              onMouseOut={(e) => { (e.target as HTMLElement).style.textDecoration = 'none'; }}
-            >
-              Version 2
-            </Link>
-          </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -124,7 +126,7 @@ export default function IndexPage() {
         {/* External link to the project documentation on GitHub (renders the
             markdown formatted); plain <a> since it's not an in-app route. */}
         <a
-          href="https://github.com/defra-design/mmo-mas/blob/main/docs/where-things-live.md"
+          href="https://github.com/defra-design/mmo-mas/blob/main/docs/design-and-development-guide.md"
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -137,7 +139,7 @@ export default function IndexPage() {
           Design and development guide
         </a>
         <Link
-          to="/iteration1"
+          to="/proof-of-concept"
           style={{
             fontSize: '14px',
             color: '#323130',

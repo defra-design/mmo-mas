@@ -47,10 +47,20 @@ const initialState: PersistedState = {
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
   saved: { siteCheck: false, wfdAssessment: false },
-  tasksOnAllTabs: false,
+  // Default to the "tasks on all tabs" experience — the tested Iteration 1
+  // behaviour (formerly the "Version 1" index link). The untested "Version 2"
+  // variant that turned this off has been dropped.
+  tasksOnAllTabs: true,
 };
 
-const STORAGE_KEY = 'mas-review-assess-state';
+// Scope the persisted state to the build's base URL so a frozen iteration
+// (served under /iteration-N/) keeps its own saved answers rather than sharing
+// the live app's. At the domain root the base is '/', preserving the original key.
+const base = import.meta.env.BASE_URL;
+const STORAGE_KEY =
+  base === '/'
+    ? 'mas-review-assess-state'
+    : `mas-review-assess-state:${base.replace(/\//g, '')}`;
 
 // Hydrate from localStorage so answers survive a full page refresh.
 function loadState(): PersistedState {

@@ -25,6 +25,7 @@ import {
 } from '@fluentui/react-components';
 import { MoreHorizontalRegular } from '@fluentui/react-icons';
 import { getAssigneeAvatarColor } from '../utils/avatarColors';
+import { asset } from '../utils/asset';
 import { useTasks } from '../context/TaskContext';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
@@ -168,14 +169,15 @@ interface MarineCaseSummaryProps {
   caseId: string;
 }
 
-// Tabs whose content is CDP application data rendered in an iframe.
+// Tabs whose content is CDP application data rendered in an iframe. Paths are
+// resolved through asset() so a frozen iteration loads its own CDP pages.
 const cdpPages: Record<string, { src: string; title: string }> = {
-  project: { src: '/cdp/project-details.html', title: 'Project details' },
-  site: { src: '/cdp/site-and-activity.html', title: 'Site and activity' },
-  mpp: { src: '/cdp/marine-plan-policies.html', title: 'Marine plan policies' },
-  wfd: { src: '/cdp/water-framework-directive.html', title: 'Water Framework Directive' },
-  other: { src: '/cdp/other-permissions.html', title: 'Other permissions' },
-  'public-register': { src: '/cdp/public-register.html', title: 'Public register' },
+  project: { src: asset('cdp/project-details.html'), title: 'Project details' },
+  site: { src: asset('cdp/site-and-activity.html'), title: 'Site and activity' },
+  mpp: { src: asset('cdp/marine-plan-policies.html'), title: 'Marine plan policies' },
+  wfd: { src: asset('cdp/water-framework-directive.html'), title: 'Water Framework Directive' },
+  other: { src: asset('cdp/other-permissions.html'), title: 'Other permissions' },
+  'public-register': { src: asset('cdp/public-register.html'), title: 'Public register' },
 };
 
 // The case tabs, in order. Driven by data so the overflow menu can list the

@@ -165,7 +165,7 @@ function CaseHeader({ caseData }: { caseData: any }) {
             <Button 
               appearance="subtle"
               icon={<ArrowLeftRegular />}
-              onClick={() => navigate('/iteration1')}
+              onClick={() => navigate('/proof-of-concept')}
             />
             <div className={styles.verticalDivider}></div>
             <Button 

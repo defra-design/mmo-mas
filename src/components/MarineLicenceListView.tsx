@@ -287,7 +287,7 @@ export default function MarineLicenceListView({
     Object.prototype.hasOwnProperty.call(marineCaseDetails, reference);
 
   const navigateToCase = (reference: string) =>
-    navigate(`/review-assess/cases/${encodeURIComponent(reference)}`);
+    navigate(`/receive-assess/cases/${encodeURIComponent(reference)}`);
 
   // Apply active filters then the active sort. A string filter is a
   // case-insensitive "contains"; an array filter is an "equals one of" match.
