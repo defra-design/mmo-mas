@@ -67,7 +67,7 @@ const navGroups: ShellNavGroup[] = [
   },
 ];
 
-/* ---------- Review and assess journey navigation ---------------------- */
+/* ---------- Receive and assess journey navigation ---------------------- */
 
 export const reviewAssessNavGroups: ShellNavGroup[] = [
   {
@@ -126,8 +126,8 @@ interface ShellProps {
 
 // Nav keys that map to a real route; everything else is a dead link.
 const navRoutes: Record<string, string> = {
-  cases: '/iteration1',
-  'marine-licence-cases': '/review-assess',
+  cases: '/proof-of-concept',
+  'marine-licence-cases': '/receive-assess',
 };
 
 export default function Shell({
@@ -137,8 +137,8 @@ export default function Shell({
 }: PropsWithChildren<ShellProps>) {
   const navigate = useNavigate();
   // Home links to the section's case list: the Marine licence cases list in
-  // Review and assess, the Active cases list in the Proof of concept.
-  const homeRoute = groups === reviewAssessNavGroups ? '/review-assess' : '/iteration1';
+  // Receive and assess, the Active cases list in the Proof of concept.
+  const homeRoute = groups === reviewAssessNavGroups ? '/receive-assess' : '/proof-of-concept';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <TopBar />

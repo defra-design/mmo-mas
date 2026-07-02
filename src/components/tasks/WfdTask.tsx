@@ -15,6 +15,7 @@ import { GlobeRegular, CheckmarkFilled } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
+import { asset } from '../../utils/asset';
 
 const useStyles = makeStyles({
   page: {
@@ -111,7 +112,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
   const handleSave = () => {
     completeWfd();
-    navigate(`/review-assess/cases/${encodeURIComponent(caseId)}`);
+    navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`);
   };
 
   return (
@@ -119,7 +120,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
       <FormCommandBar
         saveLabel="Save task"
         onSave={handleSave}
-        backTo={`/review-assess/cases/${encodeURIComponent(caseId)}`}
+        backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
       <Card className={styles.headerCard}>
@@ -155,7 +156,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
-                    href="/documents/WFD-Teignmouth-2026.docx"
+                    href={asset('documents/WFD-Teignmouth-2026.docx')}
                     target="_blank"
                     rel="noopener"
                     className={styles.docxLink}

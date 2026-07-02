@@ -103,7 +103,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
 
   const handleSave = () => {
     completeSiteCheck();
-    navigate(`/review-assess/cases/${encodeURIComponent(caseId)}`);
+    navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`);
   };
 
   return (
@@ -111,7 +111,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
       <FormCommandBar
         saveLabel="Save task"
         onSave={handleSave}
-        backTo={`/review-assess/cases/${encodeURIComponent(caseId)}`}
+        backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
       <Card className={styles.headerCard}>

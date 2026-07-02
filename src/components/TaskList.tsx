@@ -82,7 +82,7 @@ export default function TaskList({ caseId }: TaskListProps) {
       status: tasks.siteCheck,
       onClick:
         tasks.siteCheck !== 'Cannot start yet'
-          ? () => navigate(`/review-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
+          ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
           : undefined,
     },
     {
@@ -91,7 +91,7 @@ export default function TaskList({ caseId }: TaskListProps) {
       status: tasks.wfdAssessment,
       onClick:
         tasks.wfdAssessment !== 'Cannot start yet'
-          ? () => navigate(`/review-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
+          ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
           : undefined,
     },
     { key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies },

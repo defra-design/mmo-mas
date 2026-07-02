@@ -19,7 +19,7 @@ function App() {
   return (
     <FluentProvider theme={webLightTheme}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL.replace(/\/$/, '') || '/'}>
           <TaskProvider>
             <Routes>
               {/* Clean index page without Shell */}
@@ -27,7 +27,7 @@ function App() {
 
               {/* Proof of concept journey */}
               <Route
-                path="/iteration1"
+                path="/proof-of-concept"
                 element={
                   <Shell>
                     <ListView
@@ -48,9 +48,9 @@ function App() {
                 }
               />
 
-              {/* Review and assess journey */}
+              {/* Receive and assess journey */}
               <Route
-                path="/review-assess"
+                path="/receive-assess"
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineLicenceListView
@@ -62,7 +62,7 @@ function App() {
                 }
               />
               <Route
-                path="/review-assess/cases/:caseId"
+                path="/receive-assess/cases/:caseId"
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <MarineCaseSummary caseId={id} />} />
@@ -70,7 +70,7 @@ function App() {
                 }
               />
               <Route
-                path="/review-assess/cases/:caseId/tasks/site-check"
+                path="/receive-assess/cases/:caseId/tasks/site-check"
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <SiteCheckTask caseId={id} />} />
@@ -78,7 +78,7 @@ function App() {
                 }
               />
               <Route
-                path="/review-assess/cases/:caseId/tasks/wfd"
+                path="/receive-assess/cases/:caseId/tasks/wfd"
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <WfdTask caseId={id} />} />

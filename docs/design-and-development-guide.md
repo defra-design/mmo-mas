@@ -1,6 +1,6 @@
-# Where things live
+# Design and development guide
 
-A map of the MAS caseworker prototype. It's organised
+A map of the MAS caseworker prototype (where things live). It's organised
 around what you actually **see on screen**: for each piece of the UI, where it's
 **defined** and where its **data** comes from.
 
@@ -43,12 +43,16 @@ The app contains two separate journeys, reached from the landing page:
 
 | Journey | What it is | Status |
 |---------|-----------|--------|
-| **Review and assess** | The real work — marine licence case list, case summary, CDP data tabs, caseworker tasks. | Active / current focus |
-| ↳ **Version 1** | Review and assess with the **persistent task list** — the Tasks panel stays pinned beside every case tab. | The chosen direction |
-| ↳ **Version 2** | Review and assess with the task list shown on the **Case summary tab only**. | Alternative, kept for comparison |
+| **Receive and assess** | The real work — marine licence case list, case summary, CDP data tabs, caseworker tasks. | Active / current focus |
 | **Proof of concept** | An earlier exploration ("Active cases" list + case view). | Legacy — kept for reference |
 
-The current design work happens almost entirely in **Review and assess**.
+The current design work happens almost entirely in **Receive and assess**.
+
+> **On "versions" and iterations.** The landing page used to offer "Version 1" (persistent
+> task list, pinned beside every tab) and "Version 2" (task list on the Case summary tab
+> only). Version 2 was an experiment we didn't usability-test and has been dropped; the
+> Version 1 behaviour is now the default. Going forward we track **iterations** instead — see
+> [Iterations & versioning](#iterations--versioning) below.
 
 ---
 
@@ -91,28 +95,32 @@ All routes are declared in `src/App.tsx`. The `:caseId` is a case reference like
 | URL | Page component | Journey |
 |-----|---------------|---------|
 | `/` | `IndexPage.tsx` | Landing page (no Shell) |
-| `/iteration1` | `ListView.tsx` ("Active cases") | Proof of concept |
+| `/proof-of-concept` | `ListView.tsx` ("Active cases") | Proof of concept |
 | `/cases/:caseId` | `CaseView.tsx` | Proof of concept |
-| `/review-assess` | `MarineLicenceListView.tsx` ("Marine licence cases") | Review and assess |
-| `/review-assess/cases/:caseId` | `MarineCaseSummary.tsx` | Review and assess |
-| `/review-assess/cases/:caseId/tasks/site-check` | `tasks/SiteCheckTask.tsx` | Review and assess |
-| `/review-assess/cases/:caseId/tasks/wfd` | `tasks/WfdTask.tsx` | Review and assess |
+| `/iteration-1/…` | *(frozen snapshot — separate build, served by `server.js`)* | Iteration 1 |
+| `/receive-assess` | `MarineLicenceListView.tsx` ("Marine licence cases") | Receive and assess |
+| `/receive-assess/cases/:caseId` | `MarineCaseSummary.tsx` | Receive and assess |
+| `/receive-assess/cases/:caseId/tasks/site-check` | `tasks/SiteCheckTask.tsx` | Receive and assess |
+| `/receive-assess/cases/:caseId/tasks/wfd` | `tasks/WfdTask.tsx` | Receive and assess |
 
 ---
 
-## Section by section (Review and assess)
+## Section by section (Receive and assess)
 
 ### Landing page
 
-- **What you see:** MMO logo, "Marine Applications System prototype", Version 1 / Version 2
-  links into Review and assess, a "Clear saved data" button, and a "Proof of concept" link.
+- **What you see:** MMO logo, "Marine Applications System prototype", a link into the current
+  iteration ("Iteration 2 (in progress)"), a link to the frozen "Iteration 1" snapshot, a
+  "Clear saved data" button, and a "Proof of concept" link.
 - **Defined in:** `src/components/IndexPage.tsx`
-- **Data:** none. The Version 1 / Version 2 links set the `tasksOnAllTabs` flag (see
-  [Tasks](#tasks-panel--task-forms)). "Clear saved data" calls `resetAll()` to wipe runtime state.
+- **Data:** none. The current-iteration link is an in-app `<Link>`; the frozen-iteration link
+  is a plain `<a href="/iteration-1/…">` (a separate build — see
+  [Iterations & versioning](#iterations--versioning)). "Clear saved data" calls `resetAll()`
+  to wipe runtime state.
 
 ### Marine licence cases list (the grid)
 
-- **What you see:** the D365-style read-only table of cases at `/review-assess`, with
+- **What you see:** the D365-style read-only table of cases at `/receive-assess`, with
   sortable/filterable column headers, status badges, a case-officer avatar column.
 - **Defined in:** `src/components/MarineLicenceListView.tsx`
 - **Column definitions** (which columns, labels, widths): `src/config/entities/marine-licence-case.json`
@@ -126,7 +134,7 @@ All routes are declared in `src/App.tsx`. The `:caseId` is a case reference like
 
 ### Case summary
 
-- **What you see:** at `/review-assess/cases/:caseId` — a command bar, a blue **case header**
+- **What you see:** at `/receive-assess/cases/:caseId` — a command bar, a blue **case header**
   (avatar, project title, and a meta strip: Reference / Status / Case age / Assigned to),
   then a row of **tabs**, then the selected tab's content.
 - **Defined in:** `src/components/MarineCaseSummary.tsx`
@@ -226,6 +234,40 @@ and these are **not** written back to the JSON files.
 
 ---
 
+## Iterations & versioning
+
+We usability-test the prototype, then iterate on it. So that stakeholders can always go back
+and see exactly what an earlier round looked like, each completed iteration is **frozen** and
+stays permanently viewable.
+
+**How it works, in plain terms:**
+
+- The **current, in-progress iteration** is the live app at the root URL (e.g. `/receive-assess`).
+  This is where all new design work happens. Right now that's **Iteration 2**.
+- Each **completed iteration** is captured as a frozen copy served under its own URL prefix —
+  Iteration 1 lives at `/iteration-1/`. It's the exact build that was tested and it never
+  changes, even as the live app moves on. It has its own copy of everything (including the CDP
+  application-data pages), so later edits can't alter it.
+- The **landing page** links to the current iteration and to each frozen one, so anyone can
+  flip between them.
+- The **Proof of concept** (`/proof-of-concept`) is the earliest exploration, kept for
+  reference — it predates the numbered iterations.
+
+**When an iteration finishes** (before starting the next one), we freeze it with a single
+command and commit the result. The mechanics — how the freeze build works, the naming rules,
+and the gotchas to check — are written up for whoever runs it (a developer or an AI agent) in
+[`iteration-snapshots.md`](./iteration-snapshots.md). At a high level:
+
+1. Tag the tested commit in git (`git tag iteration-N`).
+2. Run `npm run freeze -- iteration-N`, which builds a self-contained copy into
+   `snapshots/iteration-N/`.
+3. Add a link to it on the landing page and commit the snapshot.
+
+That's it — no separate Heroku app or hosting change; the one existing server serves every
+frozen iteration alongside the live app.
+
+---
+
 ## File tree (quick reference)
 
 ```
@@ -236,8 +278,8 @@ src/
     Shell.tsx                   ← 3-column frame + nav-group data + nav→route map
     TopBar.tsx                  ← navy top header bar
     Nav.tsx / Nav.css           ← custom left navigation rail
-    IndexPage.tsx               ← landing page (Version 1/2 links, reset)
-    MarineLicenceListView.tsx   ← Marine licence cases grid (Review & assess)
+    IndexPage.tsx               ← landing page (iteration links, reset)
+    MarineLicenceListView.tsx   ← Marine licence cases grid (Receive & assess)
     MarineCaseSummary.tsx       ← case header + tabs; wires CDP iframe tabs
     CdpFrame.tsx                ← the <iframe> wrapper for CDP pages
     FormCommandBar.tsx          ← Back / Open / Save / Reject command bar
