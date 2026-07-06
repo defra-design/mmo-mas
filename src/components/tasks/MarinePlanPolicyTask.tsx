@@ -89,7 +89,14 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalS,
   },
   dividerLine: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
-  reason: { width: '100%' },
+  // Grey, borderless textarea matching the Site check notes / Case summary fields.
+  reason: {
+    width: '100%',
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall,
+    ...shorthands.border('none'),
+    '::after': { ...shorthands.border('none') },
+  },
 });
 
 interface MarinePlanPolicyTaskProps {
@@ -218,7 +225,9 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
                 <Field>
                   <Textarea
                     className={styles.reason}
+                    appearance="filled-lighter"
                     resize="vertical"
+                    rows={5}
                     value={answer?.reason ?? ''}
                     onChange={(_, data) => setMppField(policy.code, 'reason', data.value)}
                   />

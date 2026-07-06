@@ -30,6 +30,8 @@ const PAGE_SIZE = 8;
 
 const useStyles = makeStyles({
   section: { marginTop: tokens.spacingVerticalXXL },
+  // Full-width (unpaginated) placement is its own card, so no top margin needed.
+  sectionStandalone: {},
   heading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -65,9 +67,14 @@ const useStyles = makeStyles({
 
 interface MarinePlanPoliciesListProps {
   caseId: string;
+  /** When false, show every policy in one list with no pager (full-width layout). */
+  paginate?: boolean;
 }
 
-export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesListProps) {
+export default function MarinePlanPoliciesList({
+  caseId,
+  paginate = true,
+}: MarinePlanPoliciesListProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
@@ -77,11 +84,11 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
   const locked = tasks.marinePlanPolicies === 'Cannot start yet';
   const total = policies.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const start = (page - 1) * PAGE_SIZE;
-  const pagePolicies = policies.slice(start, start + PAGE_SIZE);
+  const start = paginate ? (page - 1) * PAGE_SIZE : 0;
+  const pagePolicies = paginate ? policies.slice(start, start + PAGE_SIZE) : policies;
 
   return (
-    <div className={styles.section}>
+    <div className={paginate ? styles.section : styles.sectionStandalone}>
       <Text as="h2" className={styles.heading}>Marine plan policies</Text>
 
       <div className={styles.toolbar}>
@@ -147,33 +154,39 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
         );
       })}
 
-      <div className={styles.footer}>
-        <Text>{start + 1} - {start + pagePolicies.length} of {total}</Text>
-        <div className={styles.pager}>
-          <Button
-            appearance="subtle"
-            icon={<PreviousRegular />}
-            aria-label="First page"
-            disabled={page === 1}
-            onClick={() => setPage(1)}
-          />
-          <Button
-            appearance="subtle"
-            icon={<ChevronLeftRegular />}
-            aria-label="Previous page"
-            disabled={page === 1}
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-          />
-          <Text>Page {page}</Text>
-          <Button
-            appearance="subtle"
-            icon={<ChevronRightRegular />}
-            aria-label="Next page"
-            disabled={page >= pageCount}
-            onClick={() => setPage(p => Math.min(pageCount, p + 1))}
-          />
+      {paginate ? (
+        <div className={styles.footer}>
+          <Text>{start + 1} - {start + pagePolicies.length} of {total}</Text>
+          <div className={styles.pager}>
+            <Button
+              appearance="subtle"
+              icon={<PreviousRegular />}
+              aria-label="First page"
+              disabled={page === 1}
+              onClick={() => setPage(1)}
+            />
+            <Button
+              appearance="subtle"
+              icon={<ChevronLeftRegular />}
+              aria-label="Previous page"
+              disabled={page === 1}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+            />
+            <Text>Page {page}</Text>
+            <Button
+              appearance="subtle"
+              icon={<ChevronRightRegular />}
+              aria-label="Next page"
+              disabled={page >= pageCount}
+              onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className={styles.footer}>
+          <Text>1 - {total} of {total}</Text>
+        </div>
+      )}
     </div>
   );
 }

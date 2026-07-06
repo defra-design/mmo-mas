@@ -139,6 +139,11 @@ const useStyles = makeStyles({
   layout: { display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
   mainCard: { flex: '1 1 320px', minWidth: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   tasksCard: { width: '260px', flexShrink: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
+  // Full-width MPP list stacked under the summary + tasks (MLA/2026/10013 variant).
+  mppFullWidthCard: {
+    marginTop: tokens.spacingHorizontalM,
+    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
+  },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -246,6 +251,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const { tasksOnAllTabs } = useTasks();
   const [selectedTab, setSelectedTab] = useState('summary');
 
+  // MLA/2026/10013 explores a full-width, unpaginated MPP list stacked under the
+  // Case summary + Tasks, instead of the paginated list in the right-hand rail.
+  const mppFullWidth = caseId === 'MLA/2026/10013';
+  const showRail = tasksOnAllTabs && !mppFullWidth;
+
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
   const details = (marineCaseDetails as Record<string, any>)[caseId];
   const row = marineCases.find(c => c.reference === caseId);
@@ -295,7 +305,6 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const rightFields = [
     { label: 'Applicant', value: data.applicant },
     { label: 'Organisation', value: data.organisation },
-    { label: 'Case Officer', value: data.caseOfficer },
   ];
 
   return (
@@ -378,15 +387,22 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                     </div>
                   </Card>
 
-                  {/* Version 2: Tasks panel sits inline on the Case summary tab.
-                      Version 1 renders it in the persistent rail instead. */}
-                  {!tasksOnAllTabs && (
+                  {/* Tasks panel sits inline on the Case summary tab when it isn't
+                      in the persistent rail (Version 2, or the full-width MPP variant). */}
+                  {!showRail && (
                     <Card className={styles.tasksCard}>
                       <TaskList caseId={caseId} />
-                      <MarinePlanPoliciesList caseId={caseId} />
+                      {!mppFullWidth && <MarinePlanPoliciesList caseId={caseId} />}
                     </Card>
                   )}
                 </div>
+
+                {/* Full-width MPP list stacked under the summary + tasks (10013). */}
+                {mppFullWidth && (
+                  <Card className={styles.mppFullWidthCard}>
+                    <MarinePlanPoliciesList caseId={caseId} paginate={false} />
+                  </Card>
+                )}
               </div>
             )}
 
@@ -404,7 +420,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           </div>
 
           {/* Version 1: one Tasks panel that persists across every tab. */}
-          {tasksOnAllTabs && (
+          {showRail && (
             <Card className={styles.tasksRail}>
               <TaskList caseId={caseId} />
               <MarinePlanPoliciesList caseId={caseId} />
