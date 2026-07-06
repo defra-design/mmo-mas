@@ -256,9 +256,13 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // MLA/2026/10002 keeps its plain single "Marine plan policies" task row.
   //  · 10012 → paginated policy list in the right-hand rail
   //  · 10013 → full-width policy subgrid stacked under the Case summary + Tasks
+  //  · 10014 → policy subgrid replaces the CDP view on the Marine plan policies
+  //           tab, and every task is ungated (demo of the merged review/assess).
   const mppRailList = caseId === 'MLA/2026/10012';
   const mppFullWidth = caseId === 'MLA/2026/10013';
-  const mppAsList = mppRailList || mppFullWidth;
+  const mppTabList = caseId === 'MLA/2026/10014';
+  const mppAsList = mppRailList || mppFullWidth || mppTabList;
+  const ungated = mppTabList;
   const showRail = tasksOnAllTabs && !mppFullWidth;
 
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
@@ -396,7 +400,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                       in the persistent rail (Version 2, or the full-width MPP variant). */}
                   {!showRail && (
                     <Card className={styles.tasksCard}>
-                      <TaskList caseId={caseId} mppInSeparateList={mppAsList} />
+                      <TaskList caseId={caseId} mppInSeparateList={mppAsList} ungated={ungated} />
                       {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
                     </Card>
                   )}
@@ -411,7 +415,17 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
               </div>
             )}
 
-            {cdpPages[selectedTab] && (
+            {/* 10014: the Marine plan policies tab is the caseworker subgrid
+                (all policies "To do", click to assess), not the CDP applicant view. */}
+            {mppTabList && selectedTab === 'mpp' && (
+              <div className={styles.summaryScroll}>
+                <Card className={styles.mppFullWidthCard}>
+                  <MarinePlanPoliciesSubgrid caseId={caseId} defaultStatus="To do" ungated />
+                </Card>
+              </div>
+            )}
+
+            {cdpPages[selectedTab] && !(mppTabList && selectedTab === 'mpp') && (
               <div className={styles.frameCard}>
                 <CdpFrame src={cdpPages[selectedTab].src} title={cdpPages[selectedTab].title} />
               </div>
@@ -427,7 +441,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           {/* Version 1: one Tasks panel that persists across every tab. */}
           {showRail && (
             <Card className={styles.tasksRail}>
-              <TaskList caseId={caseId} mppInSeparateList={mppAsList} />
+              <TaskList caseId={caseId} mppInSeparateList={mppAsList} ungated={ungated} />
               {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
             </Card>
           )}

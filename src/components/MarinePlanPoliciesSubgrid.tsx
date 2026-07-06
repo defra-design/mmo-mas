@@ -65,9 +65,17 @@ const useStyles = makeStyles({
 
 interface MarinePlanPoliciesSubgridProps {
   caseId: string;
+  /** Status shown for a policy that hasn't been assessed yet. */
+  defaultStatus?: string;
+  /** When true, ignore the task gating: every policy is always openable. */
+  ungated?: boolean;
 }
 
-export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPoliciesSubgridProps) {
+export default function MarinePlanPoliciesSubgrid({
+  caseId,
+  defaultStatus = 'Not started',
+  ungated = false,
+}: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
@@ -75,7 +83,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const locked = tasks.marinePlanPolicies === 'Cannot start yet';
+  const locked = !ungated && tasks.marinePlanPolicies === 'Cannot start yet';
   const total = policies.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
@@ -111,7 +119,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
           <tbody>
             {pagePolicies.map(policy => {
               const outcome = mppForm[policy.code]?.outcome;
-              const status = locked ? 'Cannot start yet' : outcome || 'Not started';
+              const status = locked ? 'Cannot start yet' : outcome || defaultStatus;
               const openPolicy = () =>
                 navigate(
                   `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${policy.code}`

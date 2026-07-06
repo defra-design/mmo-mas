@@ -71,33 +71,43 @@ interface TaskListProps {
   /** When true, the policies are shown as their own list, so the single
    *  "Marine plan policies" task row is omitted (exploration cases only). */
   mppInSeparateList?: boolean;
+  /** When true, no task is gated: every task is clickable and any
+   *  "Cannot start yet" is shown as "To do" (demo case MLA/2026/10014). */
+  ungated?: boolean;
 }
 
-export default function TaskList({ caseId, mppInSeparateList = false }: TaskListProps) {
+export default function TaskList({
+  caseId,
+  mppInSeparateList = false,
+  ungated = false,
+}: TaskListProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks } = useTasks();
   const [selected, setSelected] = useState<string[]>([]);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
+  // In the ungated demo, a locked task reads as "To do" and stays clickable.
+  const shownStatus = (s: TaskStatus): TaskStatus =>
+    ungated && s === 'Cannot start yet' ? 'To do' : s;
+  const canOpen = (s: TaskStatus) => ungated || s !== 'Cannot start yet';
+
   const rows: TaskRow[] = [
     {
       key: 'siteCheck',
       name: 'Site check',
-      status: tasks.siteCheck,
-      onClick:
-        tasks.siteCheck !== 'Cannot start yet'
-          ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
-          : undefined,
+      status: shownStatus(tasks.siteCheck),
+      onClick: canOpen(tasks.siteCheck)
+        ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
+        : undefined,
     },
     {
       key: 'wfd',
       name: 'Water Framework Directive',
-      status: tasks.wfdAssessment,
-      onClick:
-        tasks.wfdAssessment !== 'Cannot start yet'
-          ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
-          : undefined,
+      status: shownStatus(tasks.wfdAssessment),
+      onClick: canOpen(tasks.wfdAssessment)
+        ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
+        : undefined,
     },
   ];
 
