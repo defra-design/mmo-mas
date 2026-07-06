@@ -94,7 +94,6 @@ export default function TaskList({ caseId }: TaskListProps) {
           ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
           : undefined,
     },
-    { key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies },
   ];
 
   return (

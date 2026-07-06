@@ -29,6 +29,7 @@ import { asset } from '../utils/asset';
 import { useTasks } from '../context/TaskContext';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
+import MarinePlanPoliciesList from './MarinePlanPoliciesList';
 import CdpFrame from './CdpFrame';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
@@ -382,6 +383,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   {!tasksOnAllTabs && (
                     <Card className={styles.tasksCard}>
                       <TaskList caseId={caseId} />
+                      <MarinePlanPoliciesList caseId={caseId} />
                     </Card>
                   )}
                 </div>
@@ -405,6 +407,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           {tasksOnAllTabs && (
             <Card className={styles.tasksRail}>
               <TaskList caseId={caseId} />
+              <MarinePlanPoliciesList caseId={caseId} />
             </Card>
           )}
         </div>

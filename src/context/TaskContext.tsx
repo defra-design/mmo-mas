@@ -1,6 +1,7 @@
 // src/context/TaskContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
+import { policyCount } from '../utils/marinePlanPolicies';
 
 export type TaskStatus = 'Done' | 'To do' | 'Cannot start yet';
 
@@ -20,17 +21,28 @@ export interface WfdForm {
   review: string;
 }
 
+// A caseworker's assessment of one marine plan policy.
+export interface MppAnswer {
+  outcome: string;
+  reason: string;
+}
+
+// The MPP task is 1-to-many: one answer per policy, keyed by policy code.
+export type MppForm = Record<string, MppAnswer>;
+
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
 // task is saved; an edit flips it back to false (matches D365 dirty-tracking).
 export interface SavedState {
   siteCheck: boolean;
   wfdAssessment: boolean;
+  marinePlanPolicies: boolean;
 }
 
 interface PersistedState {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
+  mppForm: MppForm;
   saved: SavedState;
   // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
   // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
@@ -46,7 +58,8 @@ const initialState: PersistedState = {
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
-  saved: { siteCheck: false, wfdAssessment: false },
+  mppForm: {},
+  saved: { siteCheck: false, wfdAssessment: false, marinePlanPolicies: false },
   // Default to the "tasks on all tabs" experience — the tested Iteration 1
   // behaviour (formerly the "Version 1" index link). The untested "Version 2"
   // variant that turned this off has been dropped.
@@ -72,6 +85,7 @@ function loadState(): PersistedState {
         tasks: { ...initialState.tasks, ...parsed.tasks },
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
+        mppForm: { ...initialState.mppForm, ...parsed.mppForm },
         saved: { ...initialState.saved, ...parsed.saved },
         tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
       };
@@ -86,11 +100,13 @@ interface TaskContextValue {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
+  mppForm: MppForm;
   saved: SavedState;
   tasksOnAllTabs: boolean;
   setTasksOnAllTabs: (value: boolean) => void;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
+  setMppField: (code: string, field: keyof MppAnswer, value: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
   completeWfd: () => void;
@@ -118,6 +134,29 @@ export function TaskProvider({ children }: PropsWithChildren) {
 
   const setWfdReview = (value: string) =>
     setState(prev => ({ ...prev, wfdForm: { ...prev.wfdForm, review: value } }));
+
+  // Writes one field of one policy's assessment (live, like setSiteCheckField). Once
+  // every policy has an outcome the whole MPP task rolls up to Done; otherwise it
+  // stays "To do" while it's being worked through.
+  const setMppField = (code: string, field: keyof MppAnswer, value: string) =>
+    setState(prev => {
+      const existing = prev.mppForm[code] ?? { outcome: '', reason: '' };
+      const mppForm = {
+        ...prev.mppForm,
+        [code]: { ...existing, [field]: value },
+      };
+      const allAssessed =
+        policyCount > 0 &&
+        Object.values(mppForm).filter(a => a.outcome).length === policyCount;
+      return {
+        ...prev,
+        mppForm,
+        tasks: {
+          ...prev.tasks,
+          marinePlanPolicies: allAssessed ? 'Done' : prev.tasks.marinePlanPolicies,
+        },
+      };
+    });
 
   // An edit marks the task as having unsaved changes (shown in the task header).
   const markUnsaved = (task: keyof SavedState) =>
@@ -152,11 +191,13 @@ export function TaskProvider({ children }: PropsWithChildren) {
         tasks: state.tasks,
         siteCheckForm: state.siteCheckForm,
         wfdForm: state.wfdForm,
+        mppForm: state.mppForm,
         saved: state.saved,
         tasksOnAllTabs: state.tasksOnAllTabs,
         setTasksOnAllTabs,
         setSiteCheckField,
         setWfdReview,
+        setMppField,
         markUnsaved,
         completeSiteCheck,
         completeWfd,
