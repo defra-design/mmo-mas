@@ -29,6 +29,8 @@ import { asset } from '../utils/asset';
 import { useTasks } from '../context/TaskContext';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
+import MarinePlanPoliciesList from './MarinePlanPoliciesList';
+import MarinePlanPoliciesSubgrid from './MarinePlanPoliciesSubgrid';
 import CdpFrame from './CdpFrame';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
@@ -138,6 +140,11 @@ const useStyles = makeStyles({
   layout: { display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalM, alignItems: 'flex-start' },
   mainCard: { flex: '1 1 320px', minWidth: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   tasksCard: { width: '260px', flexShrink: 0, ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
+  // Full-width MPP list stacked under the summary + tasks (MLA/2026/10013 variant).
+  mppFullWidthCard: {
+    marginTop: tokens.spacingHorizontalM,
+    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
+  },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -245,6 +252,19 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const { tasksOnAllTabs } = useTasks();
   const [selectedTab, setSelectedTab] = useState('summary');
 
+  // MPP design explorations live only on the duplicate cases; the original
+  // MLA/2026/10002 keeps its plain single "Marine plan policies" task row.
+  //  · 10012 → paginated policy list in the right-hand rail
+  //  · 10013 → full-width policy subgrid stacked under the Case summary + Tasks
+  //  · 10014 → policy subgrid replaces the CDP view on the Marine plan policies
+  //           tab, and every task is ungated (demo of the merged review/assess).
+  const mppRailList = caseId === 'MLA/2026/10012';
+  const mppFullWidth = caseId === 'MLA/2026/10013';
+  const mppTabList = caseId === 'MLA/2026/10014';
+  const mppAsList = mppRailList || mppFullWidth || mppTabList;
+  const ungated = mppTabList;
+  const showRail = tasksOnAllTabs && !mppFullWidth;
+
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
   const details = (marineCaseDetails as Record<string, any>)[caseId];
   const row = marineCases.find(c => c.reference === caseId);
@@ -264,7 +284,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     status: details?.status ?? 'Allocated',
     assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
-    applicationType: details?.applicationType ?? 'Marine licence',
+    applicationType: details?.applicationType ?? 'Marine licence application',
     submitted: details ? submittedDate : '—',
     feeBand: details?.feeBand ?? '—',
     applicant: details?.applicant ?? '—',
@@ -294,7 +314,6 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const rightFields = [
     { label: 'Applicant', value: data.applicant },
     { label: 'Organisation', value: data.organisation },
-    { label: 'Case Officer', value: data.caseOfficer },
   ];
 
   return (
@@ -377,18 +396,36 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                     </div>
                   </Card>
 
-                  {/* Version 2: Tasks panel sits inline on the Case summary tab.
-                      Version 1 renders it in the persistent rail instead. */}
-                  {!tasksOnAllTabs && (
+                  {/* Tasks panel sits inline on the Case summary tab when it isn't
+                      in the persistent rail (Version 2, or the full-width MPP variant). */}
+                  {!showRail && (
                     <Card className={styles.tasksCard}>
-                      <TaskList caseId={caseId} />
+                      <TaskList caseId={caseId} mppInSeparateList={mppAsList} ungated={ungated} />
+                      {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
                     </Card>
                   )}
                 </div>
+
+                {/* Full-width MPP subgrid stacked under the summary + tasks (10013). */}
+                {mppFullWidth && (
+                  <Card className={styles.mppFullWidthCard}>
+                    <MarinePlanPoliciesSubgrid caseId={caseId} />
+                  </Card>
+                )}
               </div>
             )}
 
-            {cdpPages[selectedTab] && (
+            {/* 10014: the Marine plan policies tab is the caseworker subgrid
+                (all policies "To do", click to assess), not the CDP applicant view. */}
+            {mppTabList && selectedTab === 'mpp' && (
+              <div className={styles.summaryScroll}>
+                <Card className={styles.mppFullWidthCard}>
+                  <MarinePlanPoliciesSubgrid caseId={caseId} defaultStatus="To do" ungated />
+                </Card>
+              </div>
+            )}
+
+            {cdpPages[selectedTab] && !(mppTabList && selectedTab === 'mpp') && (
               <div className={styles.frameCard}>
                 <CdpFrame src={cdpPages[selectedTab].src} title={cdpPages[selectedTab].title} />
               </div>
@@ -402,9 +439,10 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           </div>
 
           {/* Version 1: one Tasks panel that persists across every tab. */}
-          {tasksOnAllTabs && (
+          {showRail && (
             <Card className={styles.tasksRail}>
-              <TaskList caseId={caseId} />
+              <TaskList caseId={caseId} mppInSeparateList={mppAsList} ungated={ungated} />
+              {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
             </Card>
           )}
         </div>

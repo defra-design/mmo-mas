@@ -23,6 +23,7 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
+import GridRowSelect from './GridRowSelect';
 
 const useStyles = makeStyles({
   heading: {
@@ -67,35 +68,53 @@ interface TaskRow {
 
 interface TaskListProps {
   caseId: string;
+  /** When true, the policies are shown as their own list, so the single
+   *  "Marine plan policies" task row is omitted (exploration cases only). */
+  mppInSeparateList?: boolean;
+  /** When true, no task is gated: every task is clickable and any
+   *  "Cannot start yet" is shown as "To do" (demo case MLA/2026/10014). */
+  ungated?: boolean;
 }
 
-export default function TaskList({ caseId }: TaskListProps) {
+export default function TaskList({
+  caseId,
+  mppInSeparateList = false,
+  ungated = false,
+}: TaskListProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks } = useTasks();
   const [selected, setSelected] = useState<string[]>([]);
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+
+  // In the ungated demo, a locked task reads as "To do" and stays clickable.
+  const shownStatus = (s: TaskStatus): TaskStatus =>
+    ungated && s === 'Cannot start yet' ? 'To do' : s;
+  const canOpen = (s: TaskStatus) => ungated || s !== 'Cannot start yet';
 
   const rows: TaskRow[] = [
     {
       key: 'siteCheck',
       name: 'Site check',
-      status: tasks.siteCheck,
-      onClick:
-        tasks.siteCheck !== 'Cannot start yet'
-          ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
-          : undefined,
+      status: shownStatus(tasks.siteCheck),
+      onClick: canOpen(tasks.siteCheck)
+        ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
+        : undefined,
     },
     {
       key: 'wfd',
       name: 'Water Framework Directive',
-      status: tasks.wfdAssessment,
-      onClick:
-        tasks.wfdAssessment !== 'Cannot start yet'
-          ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
-          : undefined,
+      status: shownStatus(tasks.wfdAssessment),
+      onClick: canOpen(tasks.wfdAssessment)
+        ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
+        : undefined,
     },
-    { key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies },
   ];
+
+  // Original single-row treatment (kept for the standard cases, e.g. MLA/2026/10002).
+  if (!mppInSeparateList) {
+    rows.push({ key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies });
+  }
 
   return (
     <div>
@@ -115,14 +134,17 @@ export default function TaskList({ caseId }: TaskListProps) {
           key={row.key}
           className={`${styles.row} ${row.onClick ? styles.rowClickable : ''}`}
           onClick={row.onClick}
+          onMouseEnter={() => setHoveredKey(row.key)}
+          onMouseLeave={() => setHoveredKey(k => (k === row.key ? null : k))}
         >
-          <Checkbox
+          <GridRowSelect
+            name={row.name}
             checked={selected.includes(row.key)}
-            onClick={e => e.stopPropagation()}
-            onChange={(_, data) =>
-              setSelected(s => (data.checked ? [...s, row.key] : s.filter(k => k !== row.key)))
+            showCheckbox={selected.includes(row.key) || hoveredKey === row.key}
+            onToggle={checked =>
+              setSelected(s => (checked ? [...s, row.key] : s.filter(k => k !== row.key)))
             }
-            aria-label={`Select ${row.name}`}
+            ariaLabel={`Select ${row.name}`}
           />
           <div className={styles.rowText}>
             <Text className={styles.taskName}>{row.name}</Text>
