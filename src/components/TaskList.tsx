@@ -23,6 +23,7 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
+import GridRowSelect from './GridRowSelect';
 
 const useStyles = makeStyles({
   heading: {
@@ -67,13 +68,17 @@ interface TaskRow {
 
 interface TaskListProps {
   caseId: string;
+  /** When true, the policies are shown as their own list, so the single
+   *  "Marine plan policies" task row is omitted (exploration cases only). */
+  mppInSeparateList?: boolean;
 }
 
-export default function TaskList({ caseId }: TaskListProps) {
+export default function TaskList({ caseId, mppInSeparateList = false }: TaskListProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks } = useTasks();
   const [selected, setSelected] = useState<string[]>([]);
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const rows: TaskRow[] = [
     {
@@ -96,6 +101,11 @@ export default function TaskList({ caseId }: TaskListProps) {
     },
   ];
 
+  // Original single-row treatment (kept for the standard cases, e.g. MLA/2026/10002).
+  if (!mppInSeparateList) {
+    rows.push({ key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies });
+  }
+
   return (
     <div>
       <Text as="h2" className={styles.heading}>Tasks</Text>
@@ -114,14 +124,17 @@ export default function TaskList({ caseId }: TaskListProps) {
           key={row.key}
           className={`${styles.row} ${row.onClick ? styles.rowClickable : ''}`}
           onClick={row.onClick}
+          onMouseEnter={() => setHoveredKey(row.key)}
+          onMouseLeave={() => setHoveredKey(k => (k === row.key ? null : k))}
         >
-          <Checkbox
+          <GridRowSelect
+            name={row.name}
             checked={selected.includes(row.key)}
-            onClick={e => e.stopPropagation()}
-            onChange={(_, data) =>
-              setSelected(s => (data.checked ? [...s, row.key] : s.filter(k => k !== row.key)))
+            showCheckbox={selected.includes(row.key) || hoveredKey === row.key}
+            onToggle={checked =>
+              setSelected(s => (checked ? [...s, row.key] : s.filter(k => k !== row.key)))
             }
-            aria-label={`Select ${row.name}`}
+            ariaLabel={`Select ${row.name}`}
           />
           <div className={styles.rowText}>
             <Text className={styles.taskName}>{row.name}</Text>

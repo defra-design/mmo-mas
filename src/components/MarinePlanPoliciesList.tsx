@@ -23,15 +23,14 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import { policies } from '../utils/marinePlanPolicies';
+import GridRowSelect from './GridRowSelect';
 
 // The MPP task is 1-to-many, so the policies are their own list under Tasks,
-// paginated to keep the rail manageable (matching the D365 subgrid pager).
+// paginated to keep the narrow rail manageable (matching the D365 subgrid pager).
 const PAGE_SIZE = 8;
 
 const useStyles = makeStyles({
   section: { marginTop: tokens.spacingVerticalXXL },
-  // Full-width (unpaginated) placement is its own card, so no top margin needed.
-  sectionStandalone: {},
   heading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -67,39 +66,31 @@ const useStyles = makeStyles({
 
 interface MarinePlanPoliciesListProps {
   caseId: string;
-  /** When false, show every policy in one list with no pager (full-width layout). */
-  paginate?: boolean;
 }
 
-export default function MarinePlanPoliciesList({
-  caseId,
-  paginate = true,
-}: MarinePlanPoliciesListProps) {
+export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesListProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
   const [selected, setSelected] = useState<string[]>([]);
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const locked = tasks.marinePlanPolicies === 'Cannot start yet';
   const total = policies.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const start = paginate ? (page - 1) * PAGE_SIZE : 0;
-  const pagePolicies = paginate ? policies.slice(start, start + PAGE_SIZE) : policies;
+  const start = (page - 1) * PAGE_SIZE;
+  const pagePolicies = policies.slice(start, start + PAGE_SIZE);
 
   return (
-    <div className={paginate ? styles.section : styles.sectionStandalone}>
+    <div className={styles.section}>
       <Text as="h2" className={styles.heading}>Marine plan policies</Text>
 
       <div className={styles.toolbar}>
         <Checkbox
           label="Select all"
-          checked={
-            pagePolicies.length > 0 && pagePolicies.every(p => selected.includes(p.code))
-          }
-          onChange={(_, data) =>
-            setSelected(data.checked ? pagePolicies.map(p => p.code) : [])
-          }
+          checked={pagePolicies.length > 0 && pagePolicies.every(p => selected.includes(p.code))}
+          onChange={(_, data) => setSelected(data.checked ? pagePolicies.map(p => p.code) : [])}
         />
         <Button appearance="subtle" icon={<ArrowSortRegular />} aria-label="Sort" />
       </div>
@@ -118,16 +109,19 @@ export default function MarinePlanPoliciesList({
             key={policy.code}
             className={`${styles.row} ${onClick ? styles.rowClickable : ''}`}
             onClick={onClick}
+            onMouseEnter={() => setHoveredKey(policy.code)}
+            onMouseLeave={() => setHoveredKey(k => (k === policy.code ? null : k))}
           >
-            <Checkbox
+            <GridRowSelect
+              name={policy.label}
               checked={selected.includes(policy.code)}
-              onClick={e => e.stopPropagation()}
-              onChange={(_, data) =>
+              showCheckbox={selected.includes(policy.code) || hoveredKey === policy.code}
+              onToggle={checked =>
                 setSelected(s =>
-                  data.checked ? [...s, policy.code] : s.filter(k => k !== policy.code)
+                  checked ? [...s, policy.code] : s.filter(k => k !== policy.code)
                 )
               }
-              aria-label={`Select ${policy.label}`}
+              ariaLabel={`Select ${policy.label}`}
             />
             <div className={styles.rowText}>
               <Text className={styles.taskName}>{policy.label}</Text>
@@ -154,39 +148,33 @@ export default function MarinePlanPoliciesList({
         );
       })}
 
-      {paginate ? (
-        <div className={styles.footer}>
-          <Text>{start + 1} - {start + pagePolicies.length} of {total}</Text>
-          <div className={styles.pager}>
-            <Button
-              appearance="subtle"
-              icon={<PreviousRegular />}
-              aria-label="First page"
-              disabled={page === 1}
-              onClick={() => setPage(1)}
-            />
-            <Button
-              appearance="subtle"
-              icon={<ChevronLeftRegular />}
-              aria-label="Previous page"
-              disabled={page === 1}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-            />
-            <Text>Page {page}</Text>
-            <Button
-              appearance="subtle"
-              icon={<ChevronRightRegular />}
-              aria-label="Next page"
-              disabled={page >= pageCount}
-              onClick={() => setPage(p => Math.min(pageCount, p + 1))}
-            />
-          </div>
+      <div className={styles.footer}>
+        <Text>{start + 1} - {start + pagePolicies.length} of {total}</Text>
+        <div className={styles.pager}>
+          <Button
+            appearance="subtle"
+            icon={<PreviousRegular />}
+            aria-label="First page"
+            disabled={page === 1}
+            onClick={() => setPage(1)}
+          />
+          <Button
+            appearance="subtle"
+            icon={<ChevronLeftRegular />}
+            aria-label="Previous page"
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+          />
+          <Text>Page {page}</Text>
+          <Button
+            appearance="subtle"
+            icon={<ChevronRightRegular />}
+            aria-label="Next page"
+            disabled={page >= pageCount}
+            onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+          />
         </div>
-      ) : (
-        <div className={styles.footer}>
-          <Text>1 - {total} of {total}</Text>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

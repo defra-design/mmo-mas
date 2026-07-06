@@ -30,6 +30,7 @@ import { useTasks } from '../context/TaskContext';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
 import MarinePlanPoliciesList from './MarinePlanPoliciesList';
+import MarinePlanPoliciesSubgrid from './MarinePlanPoliciesSubgrid';
 import CdpFrame from './CdpFrame';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
@@ -251,9 +252,13 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const { tasksOnAllTabs } = useTasks();
   const [selectedTab, setSelectedTab] = useState('summary');
 
-  // MLA/2026/10013 explores a full-width, unpaginated MPP list stacked under the
-  // Case summary + Tasks, instead of the paginated list in the right-hand rail.
+  // MPP design explorations live only on the duplicate cases; the original
+  // MLA/2026/10002 keeps its plain single "Marine plan policies" task row.
+  //  · 10012 → paginated policy list in the right-hand rail
+  //  · 10013 → full-width policy subgrid stacked under the Case summary + Tasks
+  const mppRailList = caseId === 'MLA/2026/10012';
   const mppFullWidth = caseId === 'MLA/2026/10013';
+  const mppAsList = mppRailList || mppFullWidth;
   const showRail = tasksOnAllTabs && !mppFullWidth;
 
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
@@ -275,7 +280,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     status: details?.status ?? 'Allocated',
     assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
-    applicationType: details?.applicationType ?? 'Marine licence',
+    applicationType: details?.applicationType ?? 'Marine licence application',
     submitted: details ? submittedDate : '—',
     feeBand: details?.feeBand ?? '—',
     applicant: details?.applicant ?? '—',
@@ -391,16 +396,16 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                       in the persistent rail (Version 2, or the full-width MPP variant). */}
                   {!showRail && (
                     <Card className={styles.tasksCard}>
-                      <TaskList caseId={caseId} />
-                      {!mppFullWidth && <MarinePlanPoliciesList caseId={caseId} />}
+                      <TaskList caseId={caseId} mppInSeparateList={mppAsList} />
+                      {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
                     </Card>
                   )}
                 </div>
 
-                {/* Full-width MPP list stacked under the summary + tasks (10013). */}
+                {/* Full-width MPP subgrid stacked under the summary + tasks (10013). */}
                 {mppFullWidth && (
                   <Card className={styles.mppFullWidthCard}>
-                    <MarinePlanPoliciesList caseId={caseId} paginate={false} />
+                    <MarinePlanPoliciesSubgrid caseId={caseId} />
                   </Card>
                 )}
               </div>
@@ -422,8 +427,8 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           {/* Version 1: one Tasks panel that persists across every tab. */}
           {showRail && (
             <Card className={styles.tasksRail}>
-              <TaskList caseId={caseId} />
-              <MarinePlanPoliciesList caseId={caseId} />
+              <TaskList caseId={caseId} mppInSeparateList={mppAsList} />
+              {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
             </Card>
           )}
         </div>
