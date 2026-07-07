@@ -1,15 +1,14 @@
 // src/components/MarinePlanPoliciesSubgrid.tsx
 // Full-width D365 subgrid (read-only grid) of the marine plan policies — the
 // columnar rendering a related-records list actually gets at full width, rather
-// than the narrow two-line reflow used in the rail. Leading column shows the
-// avatar↔checkbox swap; paged like an OOB subgrid.
+// than the narrow two-line reflow used in the rail. Paged like an OOB subgrid;
+// the leading row-select column is hidden per the confirmed subgrid config.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
   tokens,
   Text,
-  Checkbox,
   Button,
   Table,
   TableHeader,
@@ -23,16 +22,16 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import { policies } from '../utils/marinePlanPolicies';
-import GridRowSelect from './GridRowSelect';
 
 // OOB subgrids page their records; 25 is a standard "records per page" value and
 // makes the 41 policies span two pages so the pager is exercised.
 const PAGE_SIZE = 25;
 
-// Column widths (leading select column is a fixed 32). table-layout:fixed +
-// width:100% shares any extra space in proportion to these, so Policy grows most.
+// Column widths. table-layout:fixed + width:100% shares any extra space in
+// proportion to these, so Policy grows most. The leading row-select column is
+// hidden (per the D365 subgrid config the dev confirmed), so Policy leads.
 const COLS = { policy: 420, group: 180, outcome: 180 };
-const MIN_WIDTH = 32 + COLS.policy + COLS.group + COLS.outcome;
+const MIN_WIDTH = COLS.policy + COLS.group + COLS.outcome;
 
 const useStyles = makeStyles({
   heading: {
@@ -42,7 +41,6 @@ const useStyles = makeStyles({
   },
   scroll: { overflowX: 'auto' },
   headerCell: { fontWeight: tokens.fontWeightSemibold },
-  selectCell: { width: '32px', paddingLeft: '8px', paddingRight: '8px' },
   row: { ':hover': { backgroundColor: tokens.colorNeutralBackground3 } },
   cellText: {
     display: 'block',
@@ -79,8 +77,6 @@ export default function MarinePlanPoliciesSubgrid({
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const locked = !ungated && tasks.marinePlanPolicies === 'Cannot start yet';
@@ -88,8 +84,6 @@ export default function MarinePlanPoliciesSubgrid({
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
   const pagePolicies = policies.slice(start, start + PAGE_SIZE);
-  const allSelected =
-    pagePolicies.length > 0 && pagePolicies.every(p => selected.includes(p.code));
 
   return (
     <div>
@@ -102,15 +96,6 @@ export default function MarinePlanPoliciesSubgrid({
         >
           <TableHeader>
             <TableRow>
-              <TableCell className={styles.selectCell}>
-                <Checkbox
-                  checked={allSelected}
-                  onChange={(_, data) =>
-                    setSelected(data.checked ? pagePolicies.map(p => p.code) : [])
-                  }
-                  aria-label="Select all"
-                />
-              </TableCell>
               <TableCell className={styles.headerCell} style={{ width: COLS.policy }}>Policy</TableCell>
               <TableCell className={styles.headerCell} style={{ width: COLS.group }}>Group</TableCell>
               <TableCell className={styles.headerCell} style={{ width: COLS.outcome }}>Outcome</TableCell>
@@ -125,25 +110,7 @@ export default function MarinePlanPoliciesSubgrid({
                   `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${policy.code}`
                 );
               return (
-                <TableRow
-                  key={policy.code}
-                  className={styles.row}
-                  onMouseEnter={() => setHoveredKey(policy.code)}
-                  onMouseLeave={() => setHoveredKey(k => (k === policy.code ? null : k))}
-                >
-                  <TableCell className={styles.selectCell}>
-                    <GridRowSelect
-                      name={policy.label}
-                      checked={selected.includes(policy.code)}
-                      showCheckbox={selected.includes(policy.code) || hoveredKey === policy.code}
-                      onToggle={checked =>
-                        setSelected(s =>
-                          checked ? [...s, policy.code] : s.filter(k => k !== policy.code)
-                        )
-                      }
-                      ariaLabel={`Select ${policy.label}`}
-                    />
-                  </TableCell>
+                <TableRow key={policy.code} className={styles.row}>
                   <TableCell style={{ width: COLS.policy }}>
                     {/* Primary column is a hyperlink that opens the record — OOB
                         read-only grid behaviour; other cells stay plain text. */}

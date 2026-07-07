@@ -41,6 +41,7 @@ import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
 import MarinePlanPoliciesList from './MarinePlanPoliciesList';
 import MarinePlanPoliciesSubgrid from './MarinePlanPoliciesSubgrid';
+import TasksSubgrid from './TasksSubgrid';
 import CdpFrame from './CdpFrame';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
@@ -155,6 +156,8 @@ const useStyles = makeStyles({
     marginTop: tokens.spacingHorizontalM,
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
   },
+  // Full-width Task grid at the top of the dedicated Tasks tab (MLA/2026/10015).
+  tasksTabCard: { ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL) },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -250,7 +253,13 @@ function OverflowTabMenuItem({
 
 // The "…" button, shown only when one or more tabs don't fit; opens a menu of
 // the hidden tabs (matching the D365 model-driven form overflow flyout).
-function OverflowTabsMenu({ onTabSelect }: { onTabSelect: (id: string) => void }) {
+function OverflowTabsMenu({
+  tabs,
+  onTabSelect,
+}: {
+  tabs: { id: string; name: string }[];
+  onTabSelect: (id: string) => void;
+}) {
   const { ref, isOverflowing, overflowCount } = useOverflowMenu<HTMLButtonElement>();
   if (!isOverflowing) return null;
   return (
@@ -284,7 +293,10 @@ function OverflowTabsMenu({ onTabSelect }: { onTabSelect: (id: string) => void }
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
   const { tasksOnAllTabs, transfer, transferToMcms } = useTasks();
-  const [selectedTab, setSelectedTab] = useState('summary');
+  // 10015 leads with its dedicated Tasks tab; every other case opens on Case summary.
+  const [selectedTab, setSelectedTab] = useState(
+    caseId === 'MLA/2026/10015' ? 'tasks' : 'summary'
+  );
 
   // Transfer to MCMS dialog state. `transferError` drives the OOB required-field
   // validation on the Transfer details textarea.
@@ -302,14 +314,21 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   //  · 10013 → full-width policy subgrid stacked under the Case summary + Tasks
   //  · 10014 → policy subgrid replaces the CDP view on the Marine plan policies
   //           tab, and every task is ungated (demo of the merged review/assess).
+  //  · 10015 → dedicated "Tasks" tab (before Case summary) holding the full-width
+  //           Task grid + full-width MPP subgrid; WFD & MPP gated behind Site check.
   const mppRailList = caseId === 'MLA/2026/10012';
   const mppFullWidth = caseId === 'MLA/2026/10013';
   const mppTabList = caseId === 'MLA/2026/10014';
-  const mppAsList = mppRailList || mppFullWidth || mppTabList;
+  const tasksTab = caseId === 'MLA/2026/10015';
+  const mppAsList = mppRailList || mppFullWidth || mppTabList || tasksTab;
   const ungated = mppTabList;
   // 10013 shows the Tasks list in the persistent rail (across every tab) even
   // though it also has the full-width MPP subgrid stacked under the Case summary.
-  const showRail = tasksOnAllTabs;
+  // 10015 instead gives the tasks their own tab, so it opts out of the rail.
+  const showRail = tasksOnAllTabs && !tasksTab;
+
+  // 10015 prepends a dedicated "Tasks" tab ahead of Case summary.
+  const caseTabs = tasksTab ? [{ id: 'tasks', name: 'Tasks' }, ...tabs] : tabs;
 
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
   const details = (marineCaseDetails as Record<string, any>)[caseId];
@@ -428,13 +447,13 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
             onTabSelect={(_, d) => setSelectedTab(d.value as string)}
             size="large"
           >
-            {tabs.map(tab => (
+            {caseTabs.map(tab => (
               // The active tab gets a higher priority so it's never the one hidden.
               <OverflowItem key={tab.id} id={tab.id} priority={selectedTab === tab.id ? 2 : 1}>
                 <Tab value={tab.id}>{tab.name}</Tab>
               </OverflowItem>
             ))}
-            <OverflowTabsMenu onTabSelect={setSelectedTab} />
+            <OverflowTabsMenu tabs={caseTabs} onTabSelect={setSelectedTab} />
           </TabList>
         </Overflow>
       </Card>
@@ -443,6 +462,19 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
       <div className={styles.content}>
         <div className={styles.contentRow}>
           <div className={styles.mainRegion}>
+            {/* 10015: dedicated Tasks tab — full-width Task grid, then the
+                full-width Marine plan policies subgrid stacked underneath. */}
+            {tasksTab && selectedTab === 'tasks' && (
+              <div className={styles.summaryScroll}>
+                <Card className={styles.tasksTabCard}>
+                  <TasksSubgrid caseId={caseId} />
+                </Card>
+                <Card className={styles.mppFullWidthCard}>
+                  <MarinePlanPoliciesSubgrid caseId={caseId} />
+                </Card>
+              </div>
+            )}
+
             {selectedTab === 'summary' && (
               <div className={styles.summaryScroll}>
                 <div className={styles.layout}>
@@ -463,8 +495,9 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   </Card>
 
                   {/* Tasks panel sits inline on the Case summary tab when it isn't
-                      in the persistent rail (Version 2, or the full-width MPP variant). */}
-                  {!showRail && (
+                      in the persistent rail (Version 2, or the full-width MPP variant).
+                      10015 keeps its tasks on the dedicated Tasks tab, not here. */}
+                  {!showRail && !tasksTab && (
                     <Card className={styles.tasksCard}>
                       <TaskList caseId={caseId} mppInSeparateList={mppAsList} ungated={ungated} />
                       {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
@@ -521,7 +554,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
               </div>
             )}
 
-            {selectedTab !== 'summary' && !cdpPages[selectedTab] && (
+            {selectedTab !== 'summary' && !cdpPages[selectedTab] && !(tasksTab && selectedTab === 'tasks') && (
               <div className={styles.frameCard}>
                 <div className={styles.placeholder}>This section is not yet available in the prototype.</div>
               </div>
