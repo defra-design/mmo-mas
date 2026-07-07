@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import {
   makeStyles,
+  mergeClasses,
   shorthands,
   tokens,
   Avatar,
@@ -22,8 +23,17 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
+  Button,
+  Field,
+  Textarea,
+  Dialog,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@fluentui/react-components';
-import { MoreHorizontalRegular } from '@fluentui/react-icons';
+import { MoreHorizontalRegular, DismissRegular } from '@fluentui/react-icons';
 import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { asset } from '../utils/asset';
 import { useTasks } from '../context/TaskContext';
@@ -170,6 +180,19 @@ const useStyles = makeStyles({
     ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
     borderRadius: tokens.borderRadiusSmall,
   },
+  // "Transfer to MCMS details" card, stacked under the Case summary once the
+  // case has been transferred (mirrors a read-only D365 section).
+  transferCard: {
+    marginTop: tokens.spacingHorizontalM,
+    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
+  },
+  // The transfer details value can be multi-line, so it sits top-aligned and
+  // preserves the caseworker's line breaks. Label column matches the Case summary
+  // section above it (140px); the value stretches to the far right of the card.
+  transferField: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'start', gap: tokens.spacingHorizontalM },
+  transferDetailsValue: { whiteSpace: 'pre-wrap' },
+  transferFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
+  transferTextarea: { minHeight: '160px' },
 });
 
 interface MarineCaseSummaryProps {
@@ -249,8 +272,18 @@ function OverflowTabsMenu({ onTabSelect }: { onTabSelect: (id: string) => void }
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
-  const { tasksOnAllTabs } = useTasks();
+  const { tasksOnAllTabs, transfer, transferToMcms } = useTasks();
   const [selectedTab, setSelectedTab] = useState('summary');
+
+  // Transfer to MCMS dialog state. `transferError` drives the OOB required-field
+  // validation on the Transfer details textarea.
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferDetails, setTransferDetails] = useState('');
+  const [transferError, setTransferError] = useState('');
+
+  // This case's transfer record (transfer is scoped to a single case).
+  const caseTransfer = transfer?.caseId === caseId ? transfer : null;
+  const isTransferred = Boolean(caseTransfer);
 
   // MPP design explorations live only on the duplicate cases; the original
   // MLA/2026/10002 keeps its plain single "Marine plan policies" task row.
@@ -299,7 +332,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
   const meta = [
     { label: 'Reference', value: data.reference },
-    { label: 'Status', value: data.status },
+    { label: 'Status', value: isTransferred ? 'Transferred' : data.status },
     { label: 'Case age', value: data.caseAge },
     { label: 'Assigned to', value: data.assignedTo },
   ];
@@ -316,10 +349,30 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     { label: 'Organisation', value: data.organisation },
   ];
 
+  const openTransfer = () => {
+    setTransferDetails('');
+    setTransferError('');
+    setTransferOpen(true);
+  };
+
+  // Cancel / dismiss: close the dialog leaving the case unchanged.
+  const cancelTransfer = () => setTransferOpen(false);
+
+  // OOB required-field validation on the details textarea, then record the
+  // transfer, close the dialog and return to a transferred state.
+  const confirmTransfer = () => {
+    if (!transferDetails.trim()) {
+      setTransferError('You must provide a value for Transfer details.');
+      return;
+    }
+    transferToMcms(caseId, transferDetails.trim(), data.caseOfficer);
+    setTransferOpen(false);
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.stickyTop}>
-      <FormCommandBar showReject />
+      <FormCommandBar showReject showTransfer={!isTransferred} onTransfer={openTransfer} />
 
       <Card className={styles.headerCard}>
         <div className={styles.headerTop}>
@@ -412,6 +465,30 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                     <MarinePlanPoliciesSubgrid caseId={caseId} />
                   </Card>
                 )}
+
+                {/* Read-only Transfer to MCMS record, shown once transferred. */}
+                {caseTransfer && (
+                  <Card className={styles.transferCard}>
+                    <Text as="h2" className={styles.sectionHeading}>Transfer to MCMS details</Text>
+                    <div className={styles.transferFields}>
+                      {[
+                        { label: 'Transferred by', value: caseTransfer.transferredBy },
+                        { label: 'Date transferred', value: caseTransfer.date },
+                      ].map(f => (
+                        <div key={f.label} className={styles.field}>
+                          <Text className={styles.fieldLabel}>{f.label}</Text>
+                          <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+                        </div>
+                      ))}
+                      <div className={styles.transferField}>
+                        <Text className={styles.fieldLabel}>Transfer details</Text>
+                        <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
+                          <Body1>{caseTransfer.details}</Body1>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                )}
               </div>
             )}
 
@@ -447,6 +524,52 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           )}
         </div>
       </div>
+
+      {/* Transfer to MCMS dialog — a custom modal following the OOB Resolve Case
+          pattern (command-bar action → modal → close). */}
+      <Dialog open={transferOpen} onOpenChange={(_, d) => setTransferOpen(d.open)} modalType="modal">
+        <DialogSurface>
+          <DialogBody>
+            <DialogTitle
+              action={
+                <Button
+                  appearance="subtle"
+                  aria-label="Close"
+                  icon={<DismissRegular />}
+                  onClick={cancelTransfer}
+                />
+              }
+            >
+              Transfer to MCMS
+            </DialogTitle>
+            <DialogContent>
+              <Field
+                label="Transfer details"
+                required
+                validationState={transferError ? 'error' : 'none'}
+                validationMessage={transferError || undefined}
+              >
+                <Textarea
+                  className={styles.transferTextarea}
+                  value={transferDetails}
+                  onChange={(_, d) => {
+                    setTransferDetails(d.value);
+                    if (transferError) setTransferError('');
+                  }}
+                />
+              </Field>
+            </DialogContent>
+            <DialogActions>
+              <Button appearance="primary" onClick={confirmTransfer}>
+                Transfer and close
+              </Button>
+              <Button appearance="secondary" onClick={cancelTransfer}>
+                Cancel
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 }
