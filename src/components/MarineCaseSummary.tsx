@@ -192,7 +192,18 @@ const useStyles = makeStyles({
   transferField: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'start', gap: tokens.spacingHorizontalM },
   transferDetailsValue: { whiteSpace: 'pre-wrap' },
   transferFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
-  transferTextarea: { minHeight: '160px' },
+  // Grey, borderless textarea matching the Site check task and the read-only
+  // value boxes — the prototype never uses a white/bordered input.
+  transferTextarea: {
+    width: '100%',
+    minHeight: '160px',
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall,
+    ...shorthands.border('none'),
+    '::after': { ...shorthands.border('none') },
+  },
+  // Breathing room between the Transfer details field and the action buttons.
+  dialogActions: { marginTop: tokens.spacingVerticalXL },
 });
 
 interface MarineCaseSummaryProps {
@@ -551,6 +562,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
               >
                 <Textarea
                   className={styles.transferTextarea}
+                  appearance="filled-lighter"
                   value={transferDetails}
                   onChange={(_, d) => {
                     setTransferDetails(d.value);
@@ -559,7 +571,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                 />
               </Field>
             </DialogContent>
-            <DialogActions>
+            <DialogActions className={styles.dialogActions}>
               <Button appearance="primary" onClick={confirmTransfer}>
                 Transfer and close
               </Button>
