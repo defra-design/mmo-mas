@@ -35,6 +35,7 @@ import {
   DismissRegular,
 } from '@fluentui/react-icons';
 import FormCommandBar from './FormCommandBar';
+import { useTasks } from '../context/TaskContext';
 import { getAssigneeAvatarColor, getContrastText } from '../utils/avatarColors';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 
@@ -209,6 +210,7 @@ function statusClass(status: string) {
     case 'Assessment in progress': return 'tag tag-mla-assessment';
     case 'Awaiting applicant': return 'tag tag-mla-awaiting-applicant';
     case 'Consultation': return 'tag tag-mla-consultation';
+    case 'Transferred': return 'tag tag-mla-transferred';
     default: return 'tag';
   }
 }
@@ -247,6 +249,19 @@ export default function MarineLicenceListView({
 }: MarineLicenceListViewProps) {
   const columns = entityConfig.list.columns;
   const defaultSort = entityConfig.list.defaultSort;
+  const { transfer } = useTasks();
+
+  // Overlay the runtime "Transferred" status onto the transferred case's row so
+  // the grid reflects the case-summary action (the mock data itself is unchanged).
+  const overlaidItems = useMemo(
+    () =>
+      transfer
+        ? items.map(i =>
+            i.reference === transfer.caseId ? { ...i, status: 'Transferred' } : i,
+          )
+        : items,
+    [items, transfer],
+  );
 
   // Like D365: the grid always has a sort, and it remembers the column you last
   // sorted by. Last-used sort is persisted per list view; otherwise fall back to
@@ -292,7 +307,7 @@ export default function MarineLicenceListView({
   // Apply active filters then the active sort. A string filter is a
   // case-insensitive "contains"; an array filter is an "equals one of" match.
   const displayed = useMemo(() => {
-    let rows = items.filter(item =>
+    let rows = overlaidItems.filter(item =>
       Object.entries(filters).every(([key, filter]) => {
         const cell = item[key] ?? '';
         return Array.isArray(filter)
@@ -307,7 +322,7 @@ export default function MarineLicenceListView({
       });
     }
     return rows;
-  }, [items, filters, sort]);
+  }, [overlaidItems, filters, sort]);
 
   // Set (or, when blank, remove) the "contains" filter for a column.
   const setFilter = (key: string, text: string) =>
@@ -355,7 +370,7 @@ export default function MarineLicenceListView({
     // Distinct values present in this column, alphabetised — the checkbox options.
     const equalsOptions = useMemo(
       () =>
-        Array.from(new Set(items.map(i => i[col.key]).filter(Boolean))).sort((a, b) =>
+        Array.from(new Set(overlaidItems.map(i => i[col.key]).filter(Boolean))).sort((a, b) =>
           a.localeCompare(b),
         ),
       [col.key],

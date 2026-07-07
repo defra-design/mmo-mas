@@ -7,7 +7,7 @@ import {
   Button,
   mergeClasses,
 } from '@fluentui/react-components';
-import { ArrowLeftRegular, OpenRegular, SaveRegular, DismissSquareRegular } from '@fluentui/react-icons';
+import { ArrowLeftRegular, OpenRegular, SaveRegular, DismissSquareRegular, ArrowExportRegular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   bar: {
@@ -42,11 +42,14 @@ interface FormCommandBarProps {
   saveLabel?: string;
   onSave?: () => void;
   showReject?: boolean;
+  /** Show the "Transfer to MCMS" command; clicking it calls onTransfer. */
+  showTransfer?: boolean;
+  onTransfer?: () => void;
   /** Route the back chevron returns to. When omitted, back is disabled. */
   backTo?: string;
 }
 
-export default function FormCommandBar({ saveLabel, onSave, showReject, backTo }: FormCommandBarProps) {
+export default function FormCommandBar({ saveLabel, onSave, showReject, showTransfer, onTransfer, backTo }: FormCommandBarProps) {
   const styles = useStyles();
   const navigate = useNavigate();
 
@@ -72,6 +75,11 @@ export default function FormCommandBar({ saveLabel, onSave, showReject, backTo }
             {saveLabel}
           </Button>
         </>
+      )}
+      {showTransfer && (
+        <Button appearance="subtle" icon={<ArrowExportRegular />} onClick={onTransfer}>
+          Transfer to MCMS
+        </Button>
       )}
       {showReject && (
         <Button appearance="subtle" icon={<DismissSquareRegular />}>

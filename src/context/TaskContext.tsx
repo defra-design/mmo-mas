@@ -38,12 +38,23 @@ export interface SavedState {
   marinePlanPolicies: boolean;
 }
 
+// Records a "Transfer to MCMS" action against one case: who did it, the date it
+// was done, and the caseworker's free-text reason. null = not transferred.
+export interface TransferState {
+  caseId: string;
+  transferredBy: string;
+  date: string;
+  details: string;
+}
+
 interface PersistedState {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   mppForm: MppForm;
   saved: SavedState;
+  // The case's Transfer to MCMS record, or null until it is transferred.
+  transfer: TransferState | null;
   // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
   // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
   // on every case tab. See IndexPage.
@@ -60,6 +71,7 @@ const initialState: PersistedState = {
   wfdForm: { review: '' },
   mppForm: {},
   saved: { siteCheck: false, wfdAssessment: false, marinePlanPolicies: false },
+  transfer: null,
   // Default to the "tasks on all tabs" experience — the tested Iteration 1
   // behaviour (formerly the "Version 1" index link). The untested "Version 2"
   // variant that turned this off has been dropped.
@@ -87,6 +99,7 @@ function loadState(): PersistedState {
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
         mppForm: { ...initialState.mppForm, ...parsed.mppForm },
         saved: { ...initialState.saved, ...parsed.saved },
+        transfer: parsed.transfer ?? initialState.transfer,
         tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
       };
     }
@@ -102,7 +115,9 @@ interface TaskContextValue {
   wfdForm: WfdForm;
   mppForm: MppForm;
   saved: SavedState;
+  transfer: TransferState | null;
   tasksOnAllTabs: boolean;
+  transferToMcms: (caseId: string, details: string, transferredBy: string) => void;
   setTasksOnAllTabs: (value: boolean) => void;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
@@ -128,6 +143,19 @@ export function TaskProvider({ children }: PropsWithChildren) {
 
   const setTasksOnAllTabs = (value: boolean) =>
     setState(prev => ({ ...prev, tasksOnAllTabs: value }));
+
+  // Records the Transfer to MCMS against a case. The date is always "today" (the
+  // day the transfer is done), stamped in the OOB D365 format (DD/MM/YYYY).
+  const transferToMcms = (caseId: string, details: string, transferredBy: string) =>
+    setState(prev => {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return {
+        ...prev,
+        transfer: { caseId, transferredBy, date: `${dd}/${mm}/${d.getFullYear()}`, details },
+      };
+    });
 
   const setSiteCheckField = (field: keyof SiteCheckForm, value: string) =>
     setState(prev => ({ ...prev, siteCheckForm: { ...prev.siteCheckForm, [field]: value } }));
@@ -193,7 +221,9 @@ export function TaskProvider({ children }: PropsWithChildren) {
         wfdForm: state.wfdForm,
         mppForm: state.mppForm,
         saved: state.saved,
+        transfer: state.transfer,
         tasksOnAllTabs: state.tasksOnAllTabs,
+        transferToMcms,
         setTasksOnAllTabs,
         setSiteCheckField,
         setWfdReview,
