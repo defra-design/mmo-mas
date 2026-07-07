@@ -1,12 +1,10 @@
 // src/components/TaskList.tsx
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
   shorthands,
   tokens,
   Text,
-  Checkbox,
   Button,
   Menu,
   MenuTrigger,
@@ -23,7 +21,6 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
-import GridRowSelect from './GridRowSelect';
 
 const useStyles = makeStyles({
   heading: {
@@ -31,10 +28,12 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
+  // Sort control only (the select-all checkbox is hidden per the D365 subgrid
+  // config the dev confirmed), so it sits at the right of the toolbar row.
   toolbar: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
     paddingBottom: tokens.spacingVerticalS,
   },
@@ -84,8 +83,6 @@ export default function TaskList({
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks } = useTasks();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   // In the ungated demo, a locked task reads as "To do" and stays clickable.
   const shownStatus = (s: TaskStatus): TaskStatus =>
@@ -121,11 +118,6 @@ export default function TaskList({
       <Text as="h2" className={styles.heading}>Tasks</Text>
 
       <div className={styles.toolbar}>
-        <Checkbox
-          label="Select all"
-          checked={selected.length === rows.length && rows.length > 0}
-          onChange={(_, data) => setSelected(data.checked ? rows.map(r => r.key) : [])}
-        />
         <Button appearance="subtle" icon={<ArrowSortRegular />} aria-label="Sort" />
       </div>
 
@@ -134,18 +126,7 @@ export default function TaskList({
           key={row.key}
           className={`${styles.row} ${row.onClick ? styles.rowClickable : ''}`}
           onClick={row.onClick}
-          onMouseEnter={() => setHoveredKey(row.key)}
-          onMouseLeave={() => setHoveredKey(k => (k === row.key ? null : k))}
         >
-          <GridRowSelect
-            name={row.name}
-            checked={selected.includes(row.key)}
-            showCheckbox={selected.includes(row.key) || hoveredKey === row.key}
-            onToggle={checked =>
-              setSelected(s => (checked ? [...s, row.key] : s.filter(k => k !== row.key)))
-            }
-            ariaLabel={`Select ${row.name}`}
-          />
           <div className={styles.rowText}>
             <Text className={styles.taskName}>{row.name}</Text>
             <Text className={styles.statusText}>{row.status}</Text>

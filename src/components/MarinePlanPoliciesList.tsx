@@ -6,7 +6,6 @@ import {
   shorthands,
   tokens,
   Text,
-  Checkbox,
   Button,
   Menu,
   MenuTrigger,
@@ -23,7 +22,6 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import { policies } from '../utils/marinePlanPolicies';
-import GridRowSelect from './GridRowSelect';
 
 // The MPP task is 1-to-many, so the policies are their own list under Tasks,
 // paginated to keep the narrow rail manageable (matching the D365 subgrid pager).
@@ -36,10 +34,12 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
+  // Sort control only (the select-all checkbox is hidden per the confirmed
+  // subgrid config), so it sits at the right of the toolbar row.
   toolbar: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
     paddingBottom: tokens.spacingVerticalS,
   },
@@ -72,8 +72,6 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const locked = tasks.marinePlanPolicies === 'Cannot start yet';
@@ -87,11 +85,6 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
       <Text as="h2" className={styles.heading}>Marine plan policies</Text>
 
       <div className={styles.toolbar}>
-        <Checkbox
-          label="Select all"
-          checked={pagePolicies.length > 0 && pagePolicies.every(p => selected.includes(p.code))}
-          onChange={(_, data) => setSelected(data.checked ? pagePolicies.map(p => p.code) : [])}
-        />
         <Button appearance="subtle" icon={<ArrowSortRegular />} aria-label="Sort" />
       </div>
 
@@ -109,20 +102,7 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
             key={policy.code}
             className={`${styles.row} ${onClick ? styles.rowClickable : ''}`}
             onClick={onClick}
-            onMouseEnter={() => setHoveredKey(policy.code)}
-            onMouseLeave={() => setHoveredKey(k => (k === policy.code ? null : k))}
           >
-            <GridRowSelect
-              name={policy.label}
-              checked={selected.includes(policy.code)}
-              showCheckbox={selected.includes(policy.code) || hoveredKey === policy.code}
-              onToggle={checked =>
-                setSelected(s =>
-                  checked ? [...s, policy.code] : s.filter(k => k !== policy.code)
-                )
-              }
-              ariaLabel={`Select ${policy.label}`}
-            />
             <div className={styles.rowText}>
               <Text className={styles.taskName}>{policy.label}</Text>
               <Text className={styles.statusText}>{status}</Text>

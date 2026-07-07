@@ -1,7 +1,6 @@
 // src/components/TopBar.tsx
 import { IconButton, mergeStyleSets } from '@fluentui/react';
 import { Avatar } from '@fluentui/react-components';
-import { useNavigate } from 'react-router-dom';
 
 const classes = mergeStyleSets({
   bar: {
@@ -44,7 +43,6 @@ const buttonStyles = {
 };
 
 export default function TopBar() {
-  const navigate = useNavigate();
   return (
     <header className={classes.bar}>
       {/* left section: waffle (links to index) & product title */}
@@ -52,7 +50,10 @@ export default function TopBar() {
         <button
           className={classes.waffle}
           aria-label="Back to home"
-          onClick={() => navigate('/')}
+          // Hard-navigate to the domain root rather than router navigate('/'),
+          // which would keep a frozen iteration's basename (e.g. /iteration-1/)
+          // and trap the user in that snapshot instead of the live index.
+          onClick={() => { window.location.href = '/'; }}
         >
           {Array.from({ length: 9 }).map((_, i) => (
             <span key={i} className={classes.waffleDot} />
