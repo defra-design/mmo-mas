@@ -307,7 +307,9 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const mppTabList = caseId === 'MLA/2026/10014';
   const mppAsList = mppRailList || mppFullWidth || mppTabList;
   const ungated = mppTabList;
-  const showRail = tasksOnAllTabs && !mppFullWidth;
+  // 10013 shows the Tasks list in the persistent rail (across every tab) even
+  // though it also has the full-width MPP subgrid stacked under the Case summary.
+  const showRail = tasksOnAllTabs;
 
   // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
   const details = (marineCaseDetails as Record<string, any>)[caseId];
