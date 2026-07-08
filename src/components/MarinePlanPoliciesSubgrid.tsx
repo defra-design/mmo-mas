@@ -189,7 +189,7 @@ interface MarinePlanPoliciesSubgridProps {
 
 export default function MarinePlanPoliciesSubgrid({
   caseId,
-  defaultStatus = 'Not started',
+  defaultStatus = 'To do',
   ungated = false,
 }: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();

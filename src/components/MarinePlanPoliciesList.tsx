@@ -90,7 +90,7 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
 
       {pagePolicies.map(policy => {
         const outcome = mppForm[policy.code]?.outcome;
-        const status = locked ? 'Cannot start yet' : outcome || 'Not started';
+        const status = locked ? 'Cannot start yet' : outcome || 'To do';
         const onClick = locked
           ? undefined
           : () =>
