@@ -18,7 +18,6 @@ import {
   ArrowLeftRegular,
   OpenRegular,
   SaveRegular,
-  PlayCircleRegular,
 } from '@fluentui/react-icons';
 import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
@@ -110,6 +109,11 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   const { mppForm, setMppField } = useTasks();
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
+  // MLA/2026/10014 keeps its policies on the "Marine plan policies" tab, so on
+  // Save and close it returns there (not the Case summary) to let the caseworker
+  // continue straight to the next assessment.
+  const saveAndClose = () =>
+    navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
   const index = policyCode ? policyIndex(policyCode) : -1;
   const policy = index >= 0 ? policies[index] : undefined;
 
@@ -132,14 +136,6 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   }
 
   const answer = mppForm[policy.code];
-  const isLast = index === policies.length - 1;
-  const nextCode = !isLast ? policies[index + 1].code : undefined;
-
-  const saveAndNext = () => {
-    if (nextCode) {
-      navigate(`${caseUrl}/tasks/marine-plan-policies/${nextCode}`);
-    }
-  };
 
   return (
     <div className={styles.page}>
@@ -152,16 +148,8 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
         />
         <Button appearance="subtle" icon={<OpenRegular />} aria-label="Open in new window" />
         <div className={styles.divider} />
-        <Button appearance="subtle" icon={<SaveRegular />} onClick={() => navigate(caseUrl)}>
+        <Button appearance="subtle" icon={<SaveRegular />} onClick={saveAndClose}>
           Save and close
-        </Button>
-        <Button
-          appearance="subtle"
-          icon={<PlayCircleRegular />}
-          onClick={saveAndNext}
-          disabled={isLast}
-        >
-          Save and next policy
         </Button>
       </div>
 

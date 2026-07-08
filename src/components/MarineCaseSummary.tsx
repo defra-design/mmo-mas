@@ -1,5 +1,6 @@
 // src/components/MarineCaseSummary.tsx
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   makeStyles,
   mergeClasses,
@@ -293,9 +294,14 @@ function OverflowTabsMenu({
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
   const { tasksOnAllTabs, transfer, transferToMcms } = useTasks();
-  // 10015 leads with its dedicated Tasks tab; every other case opens on Case summary.
+  // A task form can request a specific landing tab via navigation state (e.g.
+  // 10014's MPP assessment returns to the Marine plan policies tab on save so the
+  // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
+  // Tasks tab; every other case opens on Case summary.
+  const location = useLocation();
+  const requestedTab = (location.state as { tab?: string } | null)?.tab;
   const [selectedTab, setSelectedTab] = useState(
-    caseId === 'MLA/2026/10015' ? 'tasks' : 'summary'
+    requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
   );
 
   // Transfer to MCMS dialog state. `transferError` drives the OOB required-field
@@ -394,7 +400,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // transfer, close the dialog and return to a transferred state.
   const confirmTransfer = () => {
     if (!transferDetails.trim()) {
-      setTransferError('You must provide a value for Transfer details.');
+      setTransferError('You must provide a value for Reasons for transfer.');
       return;
     }
     transferToMcms(caseId, transferDetails.trim(), data.caseOfficer);
@@ -530,7 +536,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         </div>
                       ))}
                       <div className={styles.transferField}>
-                        <Text className={styles.fieldLabel}>Transfer details</Text>
+                        <Text className={styles.fieldLabel}>Reasons for transfer</Text>
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
                           <Body1>{caseTransfer.details}</Body1>
                         </div>
@@ -593,7 +599,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
             </DialogTitle>
             <DialogContent>
               <Field
-                label="Transfer details"
+                label="Reasons for transfer"
                 required
                 validationState={transferError ? 'error' : 'none'}
                 validationMessage={transferError || undefined}
