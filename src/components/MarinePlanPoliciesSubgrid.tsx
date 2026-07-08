@@ -53,6 +53,11 @@ const PAGE_SIZE = 25;
 const COLS = { policy: 420, group: 180, outcome: 180 };
 const MIN_WIDTH = COLS.policy + COLS.group + COLS.outcome;
 
+// Left padding shared by every header and body cell so the heading text and the
+// cell values line up in one vertical edge. Applied on the cell (not the content)
+// so it also indents the Policy link, whose `.link-button` sets padding:0.
+const CELL_PAD_LEFT = tokens.spacingHorizontalS;
+
 // The three grid columns, keyed to the fields on the computed row objects.
 const COLUMNS: { key: ColKey; name: string; width: number }[] = [
   { key: 'label', name: 'Policy', width: COLS.policy },
@@ -291,6 +296,9 @@ export default function MarinePlanPoliciesSubgrid({
             className={styles.headerMenuTrigger}
             aria-label={`${col.name} column menu`}
             icon={null}
+            // The cell supplies the left indent; keep the trigger flush so the
+            // heading text starts exactly at the cell's padding edge.
+            style={{ paddingLeft: 0 }}
           >
             <Text style={{ fontWeight: tokens.fontWeightSemibold }}>{col.name}</Text>
             {isSorted &&
@@ -429,7 +437,7 @@ export default function MarinePlanPoliciesSubgrid({
                 <TableCell
                   key={col.key}
                   className={filters[col.key] ? styles.filteredHeaderCell : undefined}
-                  style={{ width: col.width, fontWeight: 600 }}
+                  style={{ width: col.width, fontWeight: 600, paddingLeft: CELL_PAD_LEFT }}
                 >
                   <ColumnHeaderMenu col={col} />
                 </TableCell>
@@ -444,7 +452,7 @@ export default function MarinePlanPoliciesSubgrid({
                 );
               return (
                 <TableRow key={row.code} className={styles.row}>
-                  <TableCell style={{ width: COLS.policy }}>
+                  <TableCell style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
                     {/* Primary column is a hyperlink that opens the record — OOB
                         read-only grid behaviour; other cells stay plain text. */}
                     {locked ? (
@@ -459,10 +467,10 @@ export default function MarinePlanPoliciesSubgrid({
                       </button>
                     )}
                   </TableCell>
-                  <TableCell style={{ width: COLS.group }}>
+                  <TableCell style={{ width: COLS.group, paddingLeft: CELL_PAD_LEFT }}>
                     <span className={styles.cellText} title={row.group}>{row.group}</span>
                   </TableCell>
-                  <TableCell style={{ width: COLS.outcome }}>
+                  <TableCell style={{ width: COLS.outcome, paddingLeft: CELL_PAD_LEFT }}>
                     <span className={`${styles.cellText} ${styles.statusText}`} title={row.status}>{row.status}</span>
                   </TableCell>
                 </TableRow>
