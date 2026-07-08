@@ -9,7 +9,6 @@ import {
   Text,
   Title3,
   Body1,
-  Caption1,
   Button,
   Field,
   Textarea,
@@ -156,9 +155,6 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
       <Card className={styles.headerCard}>
         <div>
           <Title3>{policy.label}</Title3>
-          <div>
-            <Caption1>Marine plan policy – {index + 1} of {policies.length}</Caption1>
-          </div>
         </div>
         <Body1>{policy.group} group</Body1>
       </Card>
