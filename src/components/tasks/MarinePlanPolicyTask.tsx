@@ -156,7 +156,6 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
         <div>
           <Title3>{policy.label}</Title3>
         </div>
-        <Body1>{policy.group} group</Body1>
       </Card>
 
       <Card className={styles.bodyCard}>
@@ -165,6 +164,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
             1. Policy and applicant's consideration
           </Text>
           <div className={styles.answers}>
+            <div className={styles.row}>
+              <Text className={styles.label}>Policy group</Text>
+              <div className={styles.fields}>
+                <div className={styles.value}><Body1>{policy.group}</Body1></div>
+              </div>
+            </div>
             <div className={styles.row}>
               <Text className={styles.label}>Policy information</Text>
               <div className={styles.fields}>
