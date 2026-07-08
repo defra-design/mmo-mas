@@ -193,7 +193,7 @@ const useStyles = makeStyles({
   // preserves the caseworker's line breaks. Label column matches the Case summary
   // section above it (140px); the value stretches to the far right of the card.
   transferField: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'start', gap: tokens.spacingHorizontalM },
-  transferDetailsValue: { whiteSpace: 'pre-wrap' },
+  transferDetailsValue: { whiteSpace: 'pre-wrap', minHeight: '160px' },
   transferFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
   // Grey, borderless textarea matching the Site check task and the read-only
   // value boxes — the prototype never uses a white/bordered input.
@@ -399,6 +399,9 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     }
     transferToMcms(caseId, transferDetails.trim(), data.caseOfficer);
     setTransferOpen(false);
+    // Return to the Case summary tab so the new transfer record is in view,
+    // regardless of which tab the Transfer action was triggered from.
+    setSelectedTab('summary');
   };
 
   return (
