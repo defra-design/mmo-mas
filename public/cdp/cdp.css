@@ -253,6 +253,23 @@ body {
   margin-bottom: 0;
 }
 
+/* ---- Sector view nav/detail widths (MLA/2026/10015 only) ----------------
+   Scoped to .mpp--sectors so tweaking these does NOT affect the per-policy
+   MPP tab on the other cases. Sector names are shorter than policy names, so
+   the nav can be narrowed here. The values below match the shared defaults
+   (.mpp__nav / .mpp__detail) — change only these to resize the 10015 nav.
+   `flex` is `flex-grow flex-shrink flex-basis`; the basis (300px / 320px) and
+   the nav's min-width are the widths to adjust (px or %). */
+.mpp--sectors .mpp__nav {
+  flex: 0 1 200px;
+  min-width: 200px;
+}
+
+.mpp--sectors .mpp__detail {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
 /* Sector view (MLA/2026/10015): one page lists every policy in a sector, so
    each policy is its own block. A light rule + modest gap separates them enough
    to tell them apart without pushing them far down the page. */
