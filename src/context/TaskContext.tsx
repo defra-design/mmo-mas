@@ -81,11 +81,14 @@ const initialState: PersistedState = {
 // Scope the persisted state to the build's base URL so a frozen iteration
 // (served under /iteration-N/) keeps its own saved answers rather than sharing
 // the live app's. At the domain root the base is '/', preserving the original key.
+// Every app's key shares this prefix; "Clear saved data" removes them all (see
+// resetAll) so one click wipes live and every frozen iteration on this origin.
+const STORAGE_KEY_PREFIX = 'mas-review-assess-state';
 const base = import.meta.env.BASE_URL;
 const STORAGE_KEY =
   base === '/'
-    ? 'mas-review-assess-state'
-    : `mas-review-assess-state:${base.replace(/\//g, '')}`;
+    ? STORAGE_KEY_PREFIX
+    : `${STORAGE_KEY_PREFIX}:${base.replace(/\//g, '')}`;
 
 // Hydrate from localStorage so answers survive a full page refresh.
 function loadState(): PersistedState {
@@ -211,7 +214,21 @@ export function TaskProvider({ children }: PropsWithChildren) {
       saved: { ...prev.saved, wfdAssessment: true },
     }));
 
-  const resetAll = () => setState(initialState);
+  // Clears every prototype key on this origin (live + all frozen iterations),
+  // not just this app's own key, so the index page's "Clear saved data" wipes
+  // everything as it did before iterations got their own scoped keys. The
+  // useEffect below then re-seeds only the current app's key with initialState.
+  const resetAll = () => {
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(STORAGE_KEY_PREFIX)) localStorage.removeItem(key);
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+    setState(initialState);
+  };
 
   return (
     <TaskContext.Provider
