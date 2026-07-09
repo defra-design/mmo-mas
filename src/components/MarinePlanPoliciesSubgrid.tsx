@@ -185,12 +185,16 @@ interface MarinePlanPoliciesSubgridProps {
   defaultStatus?: string;
   /** When true, ignore the task gating: every policy is always openable. */
   ungated?: boolean;
+  /** When true, policies stay openable even while gated, but the Outcome still
+   *  reads "Cannot start yet" until Site check is done (MLA/2026/10014). */
+  openableWhenLocked?: boolean;
 }
 
 export default function MarinePlanPoliciesSubgrid({
   caseId,
   defaultStatus = 'To do',
   ungated = false,
+  openableWhenLocked = false,
 }: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();
   const navigate = useNavigate();
@@ -201,6 +205,9 @@ export default function MarinePlanPoliciesSubgrid({
   const [filters, setFilters] = useState<Filters>({});
 
   const locked = !ungated && tasks.marinePlanPolicies === 'Cannot start yet';
+  // While locked the Outcome reads "Cannot start yet"; openableWhenLocked keeps
+  // the policy link clickable regardless so the caseworker can preview it.
+  const rowsOpenable = !locked || openableWhenLocked;
 
   // Build the display rows (with the computed Outcome value) once, then filter
   // and sort them so both operate on what the caseworker actually sees.
@@ -455,9 +462,7 @@ export default function MarinePlanPoliciesSubgrid({
                   <TableCell style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
                     {/* Primary column is a hyperlink that opens the record — OOB
                         read-only grid behaviour; other cells stay plain text. */}
-                    {locked ? (
-                      <span className={styles.cellText} title={row.label}>{row.label}</span>
-                    ) : (
+                    {rowsOpenable ? (
                       <button
                         className={`link-button ${styles.cellText}`}
                         title={row.label}
@@ -465,6 +470,8 @@ export default function MarinePlanPoliciesSubgrid({
                       >
                         {row.label}
                       </button>
+                    ) : (
+                      <span className={styles.cellText} title={row.label}>{row.label}</span>
                     )}
                   </TableCell>
                   <TableCell style={{ width: COLS.group, paddingLeft: CELL_PAD_LEFT }}>

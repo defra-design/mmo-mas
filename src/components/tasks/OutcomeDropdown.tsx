@@ -30,9 +30,11 @@ interface OutcomeDropdownProps {
   value: string;
   options: string[];
   onSelect: (value: string) => void;
+  /** Renders the select read-only/greyed (e.g. a policy gated behind Site check). */
+  disabled?: boolean;
 }
 
-export default function OutcomeDropdown({ value, options, onSelect }: OutcomeDropdownProps) {
+export default function OutcomeDropdown({ value, options, onSelect, disabled }: OutcomeDropdownProps) {
   const styles = useStyles();
   const [hover, setHover] = useState(false);
 
@@ -43,6 +45,7 @@ export default function OutcomeDropdown({ value, options, onSelect }: OutcomeDro
       placeholder={hover ? 'Select' : '---'}
       value={value}
       selectedOptions={value ? [value] : []}
+      disabled={disabled}
       onOptionSelect={(_, d) => onSelect(d.optionValue ?? '')}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
