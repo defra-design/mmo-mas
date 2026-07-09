@@ -151,7 +151,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
           aria-label="Back"
           onClick={() => navigate(caseUrl)}
         />
-        <Button appearance="subtle" icon={<OpenRegular />} aria-label="Open in new window" />
+        <Button
+          appearance="subtle"
+          icon={<OpenRegular />}
+          aria-label="Open in new window"
+          onClick={() => window.open(window.location.href, '_blank', 'noopener,noreferrer')}
+        />
         <div className={styles.divider} />
         <Button appearance="subtle" icon={<SaveRegular />} onClick={saveAndClose}>
           Save and close

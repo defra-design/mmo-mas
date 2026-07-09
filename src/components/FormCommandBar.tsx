@@ -67,7 +67,14 @@ export default function FormCommandBar({ saveLabel, onSave, showReject, showTran
           <ArrowLeftRegular />
         </span>
       )}
-      <Button appearance="subtle" icon={<OpenRegular />} aria-label="Open in new window" />
+      {/* D365 "Open in new window" pop-out: reopens the current record in a new
+          browser tab (same URL, so it lands on the record's default tab). */}
+      <Button
+        appearance="subtle"
+        icon={<OpenRegular />}
+        aria-label="Open in new window"
+        onClick={() => window.open(window.location.href, '_blank', 'noopener,noreferrer')}
+      />
       {saveLabel && (
         <>
           <div className={styles.divider} />
