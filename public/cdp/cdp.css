@@ -252,3 +252,18 @@ body {
 .mpp__box p:last-child {
   margin-bottom: 0;
 }
+
+/* Sector view (MLA/2026/10015): one page lists every policy in a sector, so
+   each policy is its own block. A light rule + modest gap separates them enough
+   to tell them apart without pushing them far down the page. */
+.mpp__policy + .mpp__policy {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.mpp__policy-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}

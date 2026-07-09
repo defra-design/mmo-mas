@@ -559,7 +559,16 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
             {cdpPages[selectedTab] && !(mppTabList && selectedTab === 'mpp') && (
               <div className={styles.frameCard}>
-                <CdpFrame src={cdpPages[selectedTab].src} title={cdpPages[selectedTab].title} />
+                <CdpFrame
+                  // 10015 shows the sector-grouped MPP view (one page per sector);
+                  // every other case keeps the default one-page-per-policy view.
+                  src={
+                    tasksTab && selectedTab === 'mpp'
+                      ? asset('cdp/marine-plan-policies-sectors.html')
+                      : cdpPages[selectedTab].src
+                  }
+                  title={cdpPages[selectedTab].title}
+                />
               </div>
             )}
 
