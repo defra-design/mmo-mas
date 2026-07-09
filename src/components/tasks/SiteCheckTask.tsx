@@ -109,7 +109,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   return (
     <div className={styles.page}>
       <FormCommandBar
-        saveLabel="Save task"
+        saveLabel="Save and close"
         onSave={handleSave}
         backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />

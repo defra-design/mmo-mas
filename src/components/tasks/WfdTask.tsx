@@ -11,7 +11,7 @@ import {
   Field,
   Link,
 } from '@fluentui/react-components';
-import { GlobeRegular, CheckmarkFilled } from '@fluentui/react-icons';
+import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
@@ -65,29 +65,6 @@ const useStyles = makeStyles({
     borderRadius: tokens.borderRadiusSmall,
   },
   docxLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
-  confirm: {
-    flexGrow: 1,
-    flexBasis: 0,
-    minWidth: '180px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
-    borderRadius: tokens.borderRadiusSmall,
-  },
-  // Static visual of a D365 selected checkbox — not interactive.
-  confirmCheck: {
-    flexShrink: 0,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '20px',
-    height: '20px',
-    borderRadius: tokens.borderRadiusSmall,
-    backgroundColor: tokens.colorNeutralForeground1,
-    color: tokens.colorNeutralBackground1,
-  },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
   // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
@@ -118,7 +95,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
   return (
     <div className={styles.page}>
       <FormCommandBar
-        saveLabel="Save task"
+        saveLabel="Save and close"
         onSave={handleSave}
         backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
@@ -138,11 +115,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
             <div className={styles.row}>
               <Text className={styles.label}>Site located in the WFD assessment area</Text>
               <div className={styles.fields}>
-                <div className={styles.value}><Body1>Yes</Body1></div>
-                <div className={styles.confirm}>
-                  <span className={styles.confirmCheck}><CheckmarkFilled fontSize={14} /></span>
-                  <Body1>Confirmed in Site check</Body1>
-                </div>
+                <div className={styles.value}><Body1>Yes (Confirmed in Site check)</Body1></div>
               </div>
             </div>
             <div className={styles.row}>
@@ -161,7 +134,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                     rel="noopener"
                     className={styles.docxLink}
                   >
-                    <GlobeRegular /> WFD-Teignmouth-2026.docx
+                    <ArrowDownloadRegular /> WFD-Teignmouth-2026.docx
                   </Link>
                 </div>
               </div>
