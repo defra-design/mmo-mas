@@ -105,7 +105,13 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   const styles = useStyles();
   const navigate = useNavigate();
   const { policyCode } = useParams<{ policyCode: string }>();
-  const { mppForm, setMppField } = useTasks();
+  const { tasks, mppForm, setMppField } = useTasks();
+
+  // On MLA/2026/10014 the policies stay openable before Site check, but their
+  // assessment fields are gated: disabled, with the Outcome reading "Cannot start
+  // yet". Completing Site check unlocks them (marinePlanPolicies → "To do").
+  const locked =
+    caseId === 'MLA/2026/10014' && tasks.marinePlanPolicies === 'Cannot start yet';
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   // MLA/2026/10014 keeps its policies on the "Marine plan policies" tab, so on
@@ -155,6 +161,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
       <Card className={styles.headerCard}>
         <div>
           <Title3>{policy.label}</Title3>
+          <div><Body1>Marine plan policy assessment</Body1></div>
         </div>
       </Card>
 
@@ -201,8 +208,9 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
               <div className={styles.fields}>
                 <Field>
                   <OutcomeDropdown
-                    value={answer?.outcome ?? ''}
+                    value={locked ? 'Cannot start yet' : answer?.outcome ?? ''}
                     options={outcomeOptions}
+                    disabled={locked}
                     onSelect={v => setMppField(policy.code, 'outcome', v)}
                   />
                 </Field>
@@ -217,6 +225,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
                     appearance="filled-lighter"
                     resize="vertical"
                     rows={5}
+                    disabled={locked}
                     value={answer?.reason ?? ''}
                     onChange={(_, data) => setMppField(policy.code, 'reason', data.value)}
                   />
