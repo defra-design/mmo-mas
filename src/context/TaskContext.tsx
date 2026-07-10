@@ -38,13 +38,32 @@ export interface SavedState {
   marinePlanPolicies: boolean;
 }
 
-// Records a "Transfer to MCMS" action against one case: who did it, the date it
-// was done, and the caseworker's free-text reason. null = not transferred.
+// Records a "Transfer to MCMS" against one case. Two stages, done by two teams:
+// the Case Officer (CO) requests the transfer, then the Business Support Team
+// (BST) carry it out by hand in the legacy MCMS system and record the reference
+// it was given there. The completion fields stay undefined until that second step.
 export interface TransferState {
-  caseId: string;
-  transferredBy: string;
-  date: string;
-  details: string;
+  requestedBy: string;
+  dateRequested: string;
+  reasons: string;
+  completedBy?: string;
+  dateTransferred?: string;
+  mcmsReference?: string;
+}
+
+// Every case's transfer record, keyed by case reference. Cases are independent:
+// transferring one must never disturb another's status, because a caseworker can
+// have several in flight (and, in future, cases rejected rather than transferred).
+// The Status a case shows while a transfer is in flight is derived from this map
+// by `transferStatus` in src/utils/transferStatus.ts.
+export type TransfersState = Record<string, TransferState>;
+
+// Today, in the out-of-the-box D365 format (DD/MM/YYYY).
+function today() {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
 interface PersistedState {
@@ -53,8 +72,8 @@ interface PersistedState {
   wfdForm: WfdForm;
   mppForm: MppForm;
   saved: SavedState;
-  // The case's Transfer to MCMS record, or null until it is transferred.
-  transfer: TransferState | null;
+  // Every case's Transfer to MCMS record, keyed by case reference.
+  transfers: TransfersState;
   // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
   // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
   // on every case tab. See IndexPage.
@@ -71,7 +90,7 @@ const initialState: PersistedState = {
   wfdForm: { review: '' },
   mppForm: {},
   saved: { siteCheck: false, wfdAssessment: false, marinePlanPolicies: false },
-  transfer: null,
+  transfers: {},
   // Default to the "tasks on all tabs" experience — the tested Iteration 1
   // behaviour (formerly the "Version 1" index link). The untested "Version 2"
   // variant that turned this off has been dropped.
@@ -90,6 +109,14 @@ const STORAGE_KEY =
     ? STORAGE_KEY_PREFIX
     : `${STORAGE_KEY_PREFIX}:${base.replace(/\//g, '')}`;
 
+// Lift a pre-`transfers` saved record (one `transfer` object holding its own
+// caseId) into the keyed map. Anything without `requestedBy` predates the
+// two-step split and is discarded.
+function migrateSingleTransfer(old: unknown): TransfersState {
+  const t = old as (TransferState & { caseId?: string }) | null | undefined;
+  return t?.caseId && t.requestedBy ? { [t.caseId]: t } : {};
+}
+
 // Hydrate from localStorage so answers survive a full page refresh.
 function loadState(): PersistedState {
   try {
@@ -102,7 +129,11 @@ function loadState(): PersistedState {
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
         mppForm: { ...initialState.mppForm, ...parsed.mppForm },
         saved: { ...initialState.saved, ...parsed.saved },
-        transfer: parsed.transfer ?? initialState.transfer,
+        // State saved before transfers were keyed by case held a single `transfer`
+        // object carrying its own caseId; lift it into the map. Anything older than
+        // the two-step split has no `requestedBy` and would render an empty card,
+        // so it is dropped rather than migrated.
+        transfers: parsed.transfers ?? migrateSingleTransfer(parsed.transfer),
         tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
       };
     }
@@ -118,9 +149,10 @@ interface TaskContextValue {
   wfdForm: WfdForm;
   mppForm: MppForm;
   saved: SavedState;
-  transfer: TransferState | null;
+  transfers: TransfersState;
   tasksOnAllTabs: boolean;
-  transferToMcms: (caseId: string, details: string, transferredBy: string) => void;
+  requestTransferToMcms: (caseId: string, reasons: string, requestedBy: string) => void;
+  completeTransferToMcms: (caseId: string, mcmsReference: string, completedBy: string) => void;
   setTasksOnAllTabs: (value: boolean) => void;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
@@ -147,18 +179,36 @@ export function TaskProvider({ children }: PropsWithChildren) {
   const setTasksOnAllTabs = (value: boolean) =>
     setState(prev => ({ ...prev, tasksOnAllTabs: value }));
 
-  // Records the Transfer to MCMS against a case. The date is always "today" (the
-  // day the transfer is done), stamped in the OOB D365 format (DD/MM/YYYY).
-  const transferToMcms = (caseId: string, details: string, transferredBy: string) =>
-    setState(prev => {
-      const d = new Date();
-      const dd = String(d.getDate()).padStart(2, '0');
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      return {
-        ...prev,
-        transfer: { caseId, transferredBy, date: `${dd}/${mm}/${d.getFullYear()}`, details },
-      };
-    });
+  // Step 1 (Case Officer): request the transfer, recording the reasons. Other
+  // cases' records are untouched.
+  const requestTransferToMcms = (caseId: string, reasons: string, requestedBy: string) =>
+    setState(prev => ({
+      ...prev,
+      transfers: {
+        ...prev.transfers,
+        [caseId]: { requestedBy, dateRequested: today(), reasons },
+      },
+    }));
+
+  // Step 2 (Business Support Team): record the reference MCMS gave the case, which
+  // completes the transfer. No-op unless this case has a pending request.
+  const completeTransferToMcms = (caseId: string, mcmsReference: string, completedBy: string) =>
+    setState(prev =>
+      prev.transfers[caseId]
+        ? {
+            ...prev,
+            transfers: {
+              ...prev.transfers,
+              [caseId]: {
+                ...prev.transfers[caseId],
+                completedBy,
+                dateTransferred: today(),
+                mcmsReference,
+              },
+            },
+          }
+        : prev,
+    );
 
   const setSiteCheckField = (field: keyof SiteCheckForm, value: string) =>
     setState(prev => ({ ...prev, siteCheckForm: { ...prev.siteCheckForm, [field]: value } }));
@@ -238,9 +288,10 @@ export function TaskProvider({ children }: PropsWithChildren) {
         wfdForm: state.wfdForm,
         mppForm: state.mppForm,
         saved: state.saved,
-        transfer: state.transfer,
+        transfers: state.transfers,
         tasksOnAllTabs: state.tasksOnAllTabs,
-        transferToMcms,
+        requestTransferToMcms,
+        completeTransferToMcms,
         setTasksOnAllTabs,
         setSiteCheckField,
         setWfdReview,
