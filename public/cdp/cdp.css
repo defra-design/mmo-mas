@@ -270,6 +270,15 @@ body {
   min-width: 0;
 }
 
+/* The sector heading sits directly above the policy headings, so it can't win on
+   size alone (20/16/15 reads as one level). Larger but lighter than the policies
+   below it separates them by weight rather than scale. Scoped: on the per-policy
+   view this same class holds the policy name, which stays 16px/600. */
+.mpp--sectors .mpp__detail-title {
+  font-size: 20px;
+  font-weight: 400;
+}
+
 /* Sector view (MLA/2026/10015): one page lists every policy in a sector, so
    each policy is its own block. A light rule + modest gap separates them enough
    to tell them apart without pushing them far down the page. */
