@@ -76,10 +76,10 @@ type SortState = { key: ColKey; dir: 'asc' | 'desc' };
 type Filters = Partial<Record<ColKey, string | string[]>>;
 
 // The Group and Outcome columns filter by an "equals one of" checkbox list.
-// Group options follow the category order; Outcome the four assessment outcomes.
+// Group options follow the category order; Outcome the three assessment outcomes.
 const EQUALS_OPTIONS: Partial<Record<ColKey, string[]>> = {
   group: Array.from(new Set(policies.map(p => p.group))),
-  status: ['Compliant', 'Non-compliant', 'Consultation required', 'Not applicable'],
+  status: ['Compliant', 'Non-compliant', 'Consultation required'],
 };
 
 const useStyles = makeStyles({
@@ -196,8 +196,10 @@ export default function MarinePlanPoliciesSubgrid({
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
   const [page, setPage] = useState(1);
-  // The grid always has a sort; it opens sorted A→Z on Policy like the image.
-  const [sort, setSort] = useState<SortState>({ key: 'label', dir: 'asc' });
+  // The grid always has a sort; it opens sorted A→Z on Group, which puts
+  // Cross-cutting first (then Economic, Environmental, Social). Ties keep the
+  // seed order — the sort is stable — so policies stay in their category order.
+  const [sort, setSort] = useState<SortState>({ key: 'group', dir: 'asc' });
   const [filters, setFilters] = useState<Filters>({});
 
   const locked = !ungated && tasks.marinePlanPolicies === 'Cannot start yet';
