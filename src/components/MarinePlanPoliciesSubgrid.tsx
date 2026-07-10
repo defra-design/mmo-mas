@@ -43,9 +43,9 @@ import {
 import { useTasks } from '../context/TaskContext';
 import { policies } from '../utils/marinePlanPolicies';
 
-// OOB subgrids page their records; 25 is a standard "records per page" value and
-// makes the 41 policies span two pages so the pager is exercised.
-const PAGE_SIZE = 25;
+// OOB subgrids page their records, and "records per page" is set per subgrid on
+// the form. 50 is a standard value and puts all 41 policies on one page.
+const PAGE_SIZE = 50;
 
 // Column widths. table-layout:fixed + width:100% shares any extra space in
 // proportion to these, so Policy grows most. The leading row-select column is

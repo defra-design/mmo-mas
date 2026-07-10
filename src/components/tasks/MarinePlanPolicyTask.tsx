@@ -114,11 +114,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
     caseId === 'MLA/2026/10014' && tasks.marinePlanPolicies === 'Cannot start yet';
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
-  // MLA/2026/10014 keeps its policies on the "Marine plan policies" tab, so on
-  // Save and close it returns there (not the Case summary) to let the caseworker
-  // continue straight to the next assessment.
-  const saveAndClose = () =>
+  // Back and Save and close both return to the tab the policy was opened from,
+  // as D365 does — the subgrid lives on MLA/2026/10014's "Marine plan policies"
+  // tab, and going back restores the case form with that tab still active.
+  const returnToCase = () =>
     navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
+  const saveAndClose = returnToCase;
   const index = policyCode ? policyIndex(policyCode) : -1;
   const policy = index >= 0 ? policies[index] : undefined;
 
@@ -130,7 +131,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
             appearance="subtle"
             icon={<ArrowLeftRegular />}
             aria-label="Back"
-            onClick={() => navigate(caseUrl)}
+            onClick={returnToCase}
           />
         </div>
         <Card className={styles.headerCard}>
@@ -149,7 +150,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
           appearance="subtle"
           icon={<ArrowLeftRegular />}
           aria-label="Back"
-          onClick={() => navigate(caseUrl)}
+          onClick={returnToCase}
         />
         <Button
           appearance="subtle"
