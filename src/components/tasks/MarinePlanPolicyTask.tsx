@@ -17,12 +17,13 @@ import {
   ArrowLeftRegular,
   OpenRegular,
   SaveRegular,
+  LockClosedFilled,
 } from '@fluentui/react-icons';
 import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
 import { policies, policyIndex } from '../../utils/marinePlanPolicies';
 
-const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required', 'Not applicable'];
+const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required'];
 
 const useStyles = makeStyles({
   page: {
@@ -31,6 +32,20 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalM,
   },
+  // D365's form-level read-only notification: a padlock and a plain sentence on a
+  // grey strip above the command bar. It spans the whole content area, so it pulls
+  // out past main's 20px side padding rather than sitting inside the form.
+  readOnlyBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+    backgroundColor: '#f3f2f1',
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
+    marginLeft: '-20px',
+    marginRight: '-20px',
+  },
+  readOnlyIcon: { fontSize: '20px', color: tokens.colorNeutralForeground1 },
   // Command bar, matching FormCommandBar's look (white, subtle buttons, divider).
   bar: {
     backgroundColor: tokens.colorNeutralBackground1,
@@ -95,6 +110,10 @@ const useStyles = makeStyles({
     ...shorthands.border('none'),
     '::after': { ...shorthands.border('none') },
   },
+  // A read-only record's fields look exactly like an editable one's — D365 greys
+  // nothing out and dims no text. Only the caret gives it away, so take the text
+  // cursor off the textarea and leave the pointer as a plain arrow.
+  reasonReadOnly: { '& textarea': { cursor: 'default' } },
 });
 
 interface MarinePlanPolicyTaskProps {
@@ -145,6 +164,15 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
 
   return (
     <div className={styles.page}>
+      {/* Verbatim from the real system: the record is inactive until Site check
+          completes, so D365 shows its standard read-only notification. */}
+      {locked && (
+        <div className={styles.readOnlyBar}>
+          <LockClosedFilled className={styles.readOnlyIcon} />
+          <Body1>Read-only&nbsp;&nbsp;This record's status: Inactive</Body1>
+        </div>
+      )}
+
       <div className={mergeClasses(styles.bar, 'elevated-panel')}>
         <Button
           appearance="subtle"
@@ -158,10 +186,16 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
           aria-label="Open in new window"
           onClick={() => window.open(window.location.href, '_blank', 'noopener,noreferrer')}
         />
-        <div className={styles.divider} />
-        <Button appearance="subtle" icon={<SaveRegular />} onClick={saveAndClose}>
-          Save and close
-        </Button>
+        {/* There is nothing to save on a read-only record, so D365 drops Save from
+            the command bar entirely — Back and Open in new window are all it keeps. */}
+        {!locked && (
+          <>
+            <div className={styles.divider} />
+            <Button appearance="subtle" icon={<SaveRegular />} onClick={saveAndClose}>
+              Save and close
+            </Button>
+          </>
+        )}
       </div>
 
       <Card className={styles.headerCard}>
@@ -212,14 +246,19 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
             <div className={styles.row}>
               <Text className={styles.label}>Outcome</Text>
               <div className={styles.fields}>
-                <Field>
-                  <OutcomeDropdown
-                    value={locked ? 'Cannot start yet' : answer?.outcome ?? ''}
-                    options={outcomeOptions}
-                    disabled={locked}
-                    onSelect={v => setMppField(policy.code, 'outcome', v)}
-                  />
-                </Field>
+                {/* A read-only choice field has no select at all in D365 — just
+                    its value on the same grey background the editable one uses. */}
+                {locked ? (
+                  <div className={styles.value}><Body1>Cannot start yet</Body1></div>
+                ) : (
+                  <Field>
+                    <OutcomeDropdown
+                      value={answer?.outcome ?? ''}
+                      options={outcomeOptions}
+                      onSelect={v => setMppField(policy.code, 'outcome', v)}
+                    />
+                  </Field>
+                )}
               </div>
             </div>
             <div className={styles.row}>
@@ -227,11 +266,11 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
               <div className={styles.fields}>
                 <Field>
                   <Textarea
-                    className={styles.reason}
+                    className={mergeClasses(styles.reason, locked && styles.reasonReadOnly)}
                     appearance="filled-lighter"
-                    resize="vertical"
+                    resize={locked ? 'none' : 'vertical'}
                     rows={5}
-                    disabled={locked}
+                    readOnly={locked}
                     value={answer?.reason ?? ''}
                     onChange={(_, data) => setMppField(policy.code, 'reason', data.value)}
                   />
