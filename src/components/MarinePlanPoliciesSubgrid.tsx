@@ -41,6 +41,7 @@ import {
   DismissRegular,
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
+import TruncatedCell from './TruncatedCell';
 import { policies } from '../utils/marinePlanPolicies';
 
 // OOB subgrids page their records, and "records per page" is set per subgrid on
@@ -50,7 +51,10 @@ const PAGE_SIZE = 50;
 // Column widths. table-layout:fixed + width:100% shares any extra space in
 // proportion to these, so Policy grows most. The leading row-select column is
 // hidden (per the D365 subgrid config the dev confirmed), so Policy leads.
-const COLS = { policy: 420, group: 180, outcome: 180 };
+// Policy is deliberately narrower than its longest label: it holds the sum
+// (MIN_WIDTH) down so the horizontal scrollbar appears later on the narrow
+// 10014 tab, and over-long labels truncate to an ellipsis with a hover title.
+const COLS = { policy: 290, group: 180, outcome: 180 };
 const MIN_WIDTH = COLS.policy + COLS.group + COLS.outcome;
 
 // Left padding shared by every header and body cell so the heading text and the
@@ -86,14 +90,6 @@ const useStyles = makeStyles({
   },
   scroll: { overflowX: 'auto' },
   row: { ':hover': { backgroundColor: tokens.colorNeutralBackground3 } },
-  cellText: {
-    display: 'block',
-    minWidth: 0,
-    maxWidth: '100%',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
   statusText: { color: tokens.colorNeutralForeground3 },
   // Header cell: click-to-open menu trigger, matching the Case list grid.
   headerMenuTrigger: {
@@ -462,23 +458,16 @@ export default function MarinePlanPoliciesSubgrid({
                   <TableCell style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
                     {/* Primary column is a hyperlink that opens the record — OOB
                         read-only grid behaviour; other cells stay plain text. */}
-                    {rowsOpenable ? (
-                      <button
-                        className={`link-button ${styles.cellText}`}
-                        title={row.label}
-                        onClick={openPolicy}
-                      >
-                        {row.label}
-                      </button>
-                    ) : (
-                      <span className={styles.cellText} title={row.label}>{row.label}</span>
-                    )}
+                    <TruncatedCell
+                      value={row.label}
+                      onClick={rowsOpenable ? openPolicy : undefined}
+                    />
                   </TableCell>
                   <TableCell style={{ width: COLS.group, paddingLeft: CELL_PAD_LEFT }}>
-                    <span className={styles.cellText} title={row.group}>{row.group}</span>
+                    <TruncatedCell value={row.group} />
                   </TableCell>
                   <TableCell style={{ width: COLS.outcome, paddingLeft: CELL_PAD_LEFT }}>
-                    <span className={`${styles.cellText} ${styles.statusText}`} title={row.status}>{row.status}</span>
+                    <TruncatedCell value={row.status} className={styles.statusText} />
                   </TableCell>
                 </TableRow>
               );

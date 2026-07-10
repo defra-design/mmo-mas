@@ -1,5 +1,5 @@
 // src/components/MarineLicenceListView.tsx
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -20,7 +20,6 @@ import {
   TableHeader,
   TableRow,
   TableCell,
-  Tooltip,
   Avatar,
   mergeClasses,
 } from '@fluentui/react-components';
@@ -35,7 +34,9 @@ import {
   DismissRegular,
 } from '@fluentui/react-icons';
 import FormCommandBar from './FormCommandBar';
+import TruncatedCell from './TruncatedCell';
 import { useTasks } from '../context/TaskContext';
+import { transferStatus } from '../utils/transferStatus';
 import { getAssigneeAvatarColor, getContrastText } from '../utils/avatarColors';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 
@@ -153,6 +154,7 @@ const useStyles = makeStyles({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
+  alignRight: { textAlign: 'right' },
 });
 
 // Link cell (Reference column): every reference looks like a blue link, but only
@@ -169,37 +171,12 @@ function LinkCell({
   onNavigate: () => void;
 }) {
   const styles = useStyles();
-  const triggerRef = useRef<HTMLElement | null>(null);
-  const [open, setOpen] = useState(false);
-
-  const setRef = (el: HTMLElement | null) => {
-    triggerRef.current = el;
-  };
-
-  const inner = clickable ? (
-    <button ref={setRef} onClick={onNavigate} className={`link-button ${styles.cellText}`}>
-      {value}
-    </button>
-  ) : (
-    <span ref={setRef} className={mergeClasses(styles.staticLink, styles.cellText)}>{value}</span>
-  );
-
   return (
-    <Tooltip
-      content={value}
-      relationship="label"
-      positioning="below"
-      withArrow={false}
-      showDelay={0}
-      visible={open}
-      onVisibleChange={(_, data) => {
-        const el = triggerRef.current;
-        // Only show when the text is clipped (scroll width exceeds visible width).
-        setOpen(data.visible && !!el && el.scrollWidth > el.clientWidth);
-      }}
-    >
-      {inner}
-    </Tooltip>
+    <TruncatedCell
+      value={value}
+      className={clickable ? undefined : styles.staticLink}
+      onClick={clickable ? onNavigate : undefined}
+    />
   );
 }
 
@@ -210,6 +187,7 @@ function statusClass(status: string) {
     case 'Assessment in progress': return 'tag tag-mla-assessment';
     case 'Awaiting applicant': return 'tag tag-mla-awaiting-applicant';
     case 'Consultation': return 'tag tag-mla-consultation';
+    case 'Transfer pending': return 'tag tag-mla-transfer-pending';
     case 'Transferred': return 'tag tag-mla-transferred';
     default: return 'tag';
   }
@@ -249,18 +227,19 @@ export default function MarineLicenceListView({
 }: MarineLicenceListViewProps) {
   const columns = entityConfig.list.columns;
   const defaultSort = entityConfig.list.defaultSort;
-  const { transfer } = useTasks();
+  const { transfers } = useTasks();
 
-  // Overlay the runtime "Transferred" status onto the transferred case's row so
-  // the grid reflects the case-summary action (the mock data itself is unchanged).
+  // Overlay each case's runtime transfer status ("Transfer pending", then
+  // "Transferred") onto its own row, so the grid reflects the case-summary action
+  // (the mock data itself is unchanged). Cases are independent — several can be in
+  // flight at once. Derived by the same helper as the case header.
   const overlaidItems = useMemo(
     () =>
-      transfer
-        ? items.map(i =>
-            i.reference === transfer.caseId ? { ...i, status: 'Transferred' } : i,
-          )
-        : items,
-    [items, transfer],
+      items.map(i => {
+        const status = transferStatus(transfers, i.reference);
+        return status ? { ...i, status } : i;
+      }),
+    [items, transfers],
   );
 
   // Like D365: the grid always has a sort, and it remembers the column you last
@@ -570,19 +549,13 @@ export default function MarineLicenceListView({
             }
             style={{ flexShrink: 0 }}
           />
-          <span className={styles.cellText} title={value}>{value}</span>
+          <TruncatedCell value={value} />
         </span>
       );
     }
-    return (
-      <span
-        className={styles.cellText}
-        title={value}
-        style={col.align === 'right' ? { textAlign: 'right' } : undefined}
-      >
-        {value}
-      </span>
-    );
+    // Every other column (project name, case age, …) truncates the same way and
+    // gets the same immediate hover card when — and only when — it is clipped.
+    return <TruncatedCell value={value} className={col.align === 'right' ? styles.alignRight : undefined} />;
   }
 
   const allDisplayedSelected =

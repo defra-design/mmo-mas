@@ -1,4 +1,5 @@
 // src/components/FormCommandBar.tsx
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -42,14 +43,27 @@ interface FormCommandBarProps {
   saveLabel?: string;
   onSave?: () => void;
   showReject?: boolean;
-  /** Show the "Transfer to MCMS" command; clicking it calls onTransfer. */
+  /** Show the transfer command; clicking it calls onTransfer. */
   showTransfer?: boolean;
+  /** Label for the transfer command — it changes as the transfer progresses. */
+  transferLabel?: string;
+  /** Icon for the transfer command; changes with the label (see MarineCaseSummary). */
+  transferIcon?: ReactElement;
   onTransfer?: () => void;
   /** Route the back chevron returns to. When omitted, back is disabled. */
   backTo?: string;
 }
 
-export default function FormCommandBar({ saveLabel, onSave, showReject, showTransfer, onTransfer, backTo }: FormCommandBarProps) {
+export default function FormCommandBar({
+  saveLabel,
+  onSave,
+  showReject,
+  showTransfer,
+  transferLabel = 'Transfer to MCMS',
+  transferIcon = <ArrowExportRegular />,
+  onTransfer,
+  backTo,
+}: FormCommandBarProps) {
   const styles = useStyles();
   const navigate = useNavigate();
 
@@ -84,8 +98,8 @@ export default function FormCommandBar({ saveLabel, onSave, showReject, showTran
         </>
       )}
       {showTransfer && (
-        <Button appearance="subtle" icon={<ArrowExportRegular />} onClick={onTransfer}>
-          Transfer to MCMS
+        <Button appearance="subtle" icon={transferIcon} onClick={onTransfer}>
+          {transferLabel}
         </Button>
       )}
       {showReject && (
