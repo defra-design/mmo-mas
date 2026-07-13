@@ -101,12 +101,12 @@ interface SiteCheckTaskProps {
   caseId: string;
 }
 
-// The three business-required fields, in form order, with the display names D365
-// would use in its validation messages (not the full question text on the form).
+// The business-required fields, in form order, with the display names D365 would
+// use in its validation messages (not the full question text on the form). Notes
+// is deliberately not required — a caseworker may have nothing to record.
 const REQUIRED_FIELDS: { field: keyof SiteCheckForm; name: string }[] = [
   { field: 'coordinatesOk', name: 'Coordinates and shape' },
   { field: 'withinMile', name: 'WFD assessment area' },
-  { field: 'notes', name: 'Notes' },
 ];
 
 export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
@@ -234,15 +234,8 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div>
           <Text block className={styles.sectionHeading}>3. Notes from your site check</Text>
           <div className={mergeClasses(styles.question, styles.notesRowGap)}>
-            <RequiredLabel className={styles.label}>
-              Record anything from your site check that is relevant to later stages of the assessment.
-            </RequiredLabel>
-            <Field
-              className={styles.control}
-              validationState={errorFor('notes') ? 'error' : 'none'}
-              validationMessage={errorFor('notes')}
-              validationMessageIcon={<DismissCircleRegular />}
-            >
+            <Text className={styles.label}>Record anything from your site check that is relevant to later stages of the assessment.</Text>
+            <Field className={styles.control}>
               <Textarea
                 className={styles.textarea}
                 appearance="filled-lighter"

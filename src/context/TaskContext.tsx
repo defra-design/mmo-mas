@@ -216,9 +216,11 @@ export function TaskProvider({ children }: PropsWithChildren) {
   const setWfdReview = (value: string) =>
     setState(prev => ({ ...prev, wfdForm: { ...prev.wfdForm, review: value } }));
 
-  // Writes one field of one policy's assessment (live, like setSiteCheckField). Once
-  // every policy has an outcome the whole MPP task rolls up to Done; otherwise it
-  // stays "To do" while it's being worked through.
+  // Writes one field of one policy's assessment (live, like setSiteCheckField). A
+  // policy only counts as assessed once it has both an outcome and a reason — the
+  // two business-required fields on its form. Once every policy is assessed the
+  // whole MPP task rolls up to Done; otherwise it stays "To do" while it's being
+  // worked through.
   const setMppField = (code: string, field: keyof MppAnswer, value: string) =>
     setState(prev => {
       const existing = prev.mppForm[code] ?? { outcome: '', reason: '' };
@@ -228,14 +230,21 @@ export function TaskProvider({ children }: PropsWithChildren) {
       };
       const allAssessed =
         policyCount > 0 &&
-        Object.values(mppForm).filter(a => a.outcome).length === policyCount;
+        Object.values(mppForm).filter(a => a.outcome.trim() && a.reason.trim()).length ===
+          policyCount;
+      // Emptying a field on a policy that had been assessed takes the task back off
+      // Done. Any other status ("To do", or "Cannot start yet" on a locked case) is
+      // left alone — only the Done roll-up is derived from the answers.
+      const current = prev.tasks.marinePlanPolicies;
+      const marinePlanPolicies = allAssessed
+        ? 'Done'
+        : current === 'Done'
+          ? 'To do'
+          : current;
       return {
         ...prev,
         mppForm,
-        tasks: {
-          ...prev.tasks,
-          marinePlanPolicies: allAssessed ? 'Done' : prev.tasks.marinePlanPolicies,
-        },
+        tasks: { ...prev.tasks, marinePlanPolicies },
       };
     });
 
