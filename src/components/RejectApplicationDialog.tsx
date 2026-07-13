@@ -8,7 +8,14 @@
 // here as a placeholder for it rather than the final look.
 import { useState } from 'react';
 import { mergeClasses, Field, Dropdown, Option, Textarea } from '@fluentui/react-components';
+import { DismissCircleRegular } from '@fluentui/react-icons';
+import { requiredMessage } from '../utils/validationMessages';
 import CaseDialogShell, { useDialogFieldStyles } from './CaseDialogShell';
+
+// The field names, used as both the labels and the names in the required-field
+// messages, so the two can't drift apart.
+const REASONS_FIELD = 'Reasons for rejection';
+const NOTES_FIELD = 'Rejection notes';
 
 // The option-set values a caseworker can reject an application for.
 export const REJECTION_REASONS = [
@@ -36,10 +43,10 @@ export default function RejectApplicationDialog({
   const confirm = () => {
     const next: { reasons?: string; notes?: string } = {};
     if (reasons.length === 0) {
-      next.reasons = 'You must provide a value for Reasons for rejection.';
+      next.reasons = requiredMessage(REASONS_FIELD);
     }
     if (!notes.trim()) {
-      next.notes = 'You must provide a value for Rejection notes.';
+      next.notes = requiredMessage(NOTES_FIELD);
     }
     if (next.reasons || next.notes) {
       setErrors(next);
@@ -57,10 +64,11 @@ export default function RejectApplicationDialog({
     >
       <div className={styles.fields}>
         <Field
-          label="Reasons for rejection"
+          label={REASONS_FIELD}
           required
           validationState={errors.reasons ? 'error' : 'none'}
           validationMessage={errors.reasons}
+          validationMessageIcon={<DismissCircleRegular />}
         >
           <Dropdown
             className={styles.field}
@@ -83,10 +91,11 @@ export default function RejectApplicationDialog({
         </Field>
 
         <Field
-          label="Rejection notes"
+          label={NOTES_FIELD}
           required
           validationState={errors.notes ? 'error' : 'none'}
           validationMessage={errors.notes}
+          validationMessageIcon={<DismissCircleRegular />}
         >
           <Textarea
             className={mergeClasses(styles.field, styles.textarea)}
