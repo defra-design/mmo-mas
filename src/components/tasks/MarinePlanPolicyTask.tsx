@@ -17,8 +17,8 @@ import {
   ArrowLeftRegular,
   OpenRegular,
   SaveRegular,
-  LockClosedFilled,
 } from '@fluentui/react-icons';
+import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import { useTasks } from '../../context/TaskContext';
 import { policies, policyIndex } from '../../utils/marinePlanPolicies';
@@ -32,20 +32,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalM,
   },
-  // D365's form-level read-only notification: a padlock and a plain sentence on a
-  // grey strip above the command bar. It spans the whole content area, so it pulls
-  // out past main's 20px side padding rather than sitting inside the form.
-  readOnlyBar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    backgroundColor: '#f3f2f1',
-    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
-    marginLeft: '-20px',
-    marginRight: '-20px',
-  },
-  readOnlyIcon: { fontSize: '20px', color: tokens.colorNeutralForeground1 },
   // Command bar, matching FormCommandBar's look (white, subtle buttons, divider).
   bar: {
     backgroundColor: tokens.colorNeutralBackground1,
@@ -167,10 +153,9 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
       {/* Verbatim from the real system: the record is inactive until Site check
           completes, so D365 shows its standard read-only notification. */}
       {locked && (
-        <div className={styles.readOnlyBar}>
-          <LockClosedFilled className={styles.readOnlyIcon} />
-          <Body1>Read-only&nbsp;&nbsp;This record's status: Inactive</Body1>
-        </div>
+        <FormNotification level="read-only">
+          Read-only&nbsp;&nbsp;This record's status: Inactive
+        </FormNotification>
       )}
 
       <div className={mergeClasses(styles.bar, 'elevated-panel')}>

@@ -1,7 +1,9 @@
 // src/components/tasks/WfdTask.tsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
+  mergeClasses,
   shorthands,
   tokens,
   Card,
@@ -11,9 +13,12 @@ import {
   Field,
   Link,
 } from '@fluentui/react-components';
-import { ArrowDownloadRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
+import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
+import RequiredLabel from './RequiredLabel';
+import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { asset } from '../../utils/asset';
 
@@ -46,6 +51,11 @@ const useStyles = makeStyles({
     rowGap: tokens.spacingVerticalS,
   },
   label: { flexShrink: 0, flexBasis: '320px', minWidth: '320px' },
+  // The review row's control can grow a validation message under it, so top-align
+  // the row (rather than centring it, as the read-only answer rows do) to keep the
+  // label level with the select instead of drifting with the message.
+  reviewRow: { alignItems: 'flex-start' },
+  reviewLabel: { paddingTop: tokens.spacingVerticalXS },
   // Holds one or two field boxes; wraps them under each other when cramped.
   fields: {
     flexGrow: 1,
@@ -78,6 +88,9 @@ const useStyles = makeStyles({
 
 const reviewOptions = ['Yes', 'No'];
 
+// Display name D365 would use for the one business-required field on this form.
+const REVIEW_FIELD = 'WFD review';
+
 interface WfdTaskProps {
   caseId: string;
 }
@@ -86,14 +99,24 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { wfdForm, saved, setWfdReview, markUnsaved, completeWfd } = useTasks();
+  // Set on a failed save, cleared as soon as the field is given a value.
+  const [error, setError] = useState(false);
 
   const handleSave = () => {
+    if (!wfdForm.review.trim()) {
+      setError(true);
+      return;
+    }
     completeWfd();
     navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`);
   };
 
   return (
     <div className={styles.page}>
+      {error && (
+        <FormNotification level="error">{notificationMessage([REVIEW_FIELD])}</FormNotification>
+      )}
+
       <FormCommandBar
         saveLabel="Save and close"
         onSave={handleSave}
@@ -146,15 +169,23 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
         <div>
           <Text block className={styles.sectionHeading}>2. WFD review</Text>
-          <div className={styles.row}>
-            <Text className={styles.label}>Is the WFD section complete and acceptable?</Text>
+          <div className={mergeClasses(styles.row, styles.reviewRow)}>
+            <RequiredLabel className={mergeClasses(styles.label, styles.reviewLabel)}>
+              Is the WFD section complete and acceptable?
+            </RequiredLabel>
             <div className={styles.fields}>
-              <Field className={styles.control}>
+              <Field
+                className={styles.control}
+                validationState={error ? 'error' : 'none'}
+                validationMessage={error ? requiredMessage(REVIEW_FIELD) : undefined}
+                validationMessageIcon={<DismissCircleRegular />}
+              >
                 <OutcomeDropdown
                   value={wfdForm.review}
                   options={reviewOptions}
                   onSelect={v => {
                     setWfdReview(v);
+                    setError(false);
                     markUnsaved('wfdAssessment');
                   }}
                 />

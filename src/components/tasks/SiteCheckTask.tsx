@@ -1,4 +1,5 @@
 // src/components/tasks/SiteCheckTask.tsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -13,10 +14,14 @@ import {
   Link,
   mergeClasses,
 } from '@fluentui/react-components';
-import { ArrowDownloadRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
+import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
+import RequiredLabel from './RequiredLabel';
+import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import type { SiteCheckForm } from '../../context/TaskContext';
 
 // Width of the label column on the Site check task. This is the knob to play
 // with — widen/narrow to taste. It's deliberately wider than the WFD task's
@@ -96,18 +101,50 @@ interface SiteCheckTaskProps {
   caseId: string;
 }
 
+// The three business-required fields, in form order, with the display names D365
+// would use in its validation messages (not the full question text on the form).
+const REQUIRED_FIELDS: { field: keyof SiteCheckForm; name: string }[] = [
+  { field: 'coordinatesOk', name: 'Coordinates and shape' },
+  { field: 'withinMile', name: 'WFD assessment area' },
+  { field: 'notes', name: 'Notes' },
+];
+
 export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { siteCheckForm, saved, setSiteCheckField, markUnsaved, completeSiteCheck } = useTasks();
+  // Empty required fields, populated on a failed save. D365 validates on save, not
+  // as you type, then clears a field's error as soon as it is given a value.
+  const [errors, setErrors] = useState<(keyof SiteCheckForm)[]>([]);
+
+  const errorFor = (field: keyof SiteCheckForm) =>
+    errors.includes(field)
+      ? requiredMessage(REQUIRED_FIELDS.find(f => f.field === field)!.name)
+      : undefined;
+
+  const setField = (field: keyof SiteCheckForm, value: string) => {
+    setSiteCheckField(field, value);
+    if (value.trim()) setErrors(prev => prev.filter(f => f !== field));
+  };
 
   const handleSave = () => {
+    const empty = REQUIRED_FIELDS.filter(f => !siteCheckForm[f.field].trim()).map(f => f.field);
+    if (empty.length > 0) {
+      setErrors(empty);
+      return;
+    }
     completeSiteCheck();
     navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`);
   };
 
+  const missing = REQUIRED_FIELDS.filter(f => errors.includes(f.field)).map(f => f.name);
+
   return (
     <div className={styles.page}>
+      {missing.length > 0 && (
+        <FormNotification level="error">{notificationMessage(missing)}</FormNotification>
+      )}
+
       <FormCommandBar
         saveLabel="Save and close"
         onSave={handleSave}
@@ -140,13 +177,20 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
             jurisdiction.
           </Text>
           <div className={styles.question}>
-            <Text className={styles.label}>Are the coordinates and shape correct and appropriate?</Text>
-            <Field className={styles.control}>
+            <RequiredLabel className={styles.label}>
+              Are the coordinates and shape correct and appropriate?
+            </RequiredLabel>
+            <Field
+              className={styles.control}
+              validationState={errorFor('coordinatesOk') ? 'error' : 'none'}
+              validationMessage={errorFor('coordinatesOk')}
+              validationMessageIcon={<DismissCircleRegular />}
+            >
               <OutcomeDropdown
                 value={siteCheckForm.coordinatesOk}
                 options={['Yes', 'No']}
                 onSelect={v => {
-                  setSiteCheckField('coordinatesOk', v);
+                  setField('coordinatesOk', v);
                   markUnsaved('siteCheck');
                 }}
               />
@@ -164,13 +208,20 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
             between low and Mean High Water Springs.
           </Text>
           <div className={styles.question}>
-            <Text className={styles.label}>Is the site within the WFD assessment area?</Text>
-            <Field className={styles.control}>
+            <RequiredLabel className={styles.label}>
+              Is the site within the WFD assessment area?
+            </RequiredLabel>
+            <Field
+              className={styles.control}
+              validationState={errorFor('withinMile') ? 'error' : 'none'}
+              validationMessage={errorFor('withinMile')}
+              validationMessageIcon={<DismissCircleRegular />}
+            >
               <OutcomeDropdown
                 value={siteCheckForm.withinMile}
                 options={['Yes', 'No']}
                 onSelect={v => {
-                  setSiteCheckField('withinMile', v);
+                  setField('withinMile', v);
                   markUnsaved('siteCheck');
                 }}
               />
@@ -183,13 +234,20 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div>
           <Text block className={styles.sectionHeading}>3. Notes from your site check</Text>
           <div className={mergeClasses(styles.question, styles.notesRowGap)}>
-            <Text className={styles.label}>Record anything from your site check that is relevant to later stages of the assessment.</Text>
-            <Field className={styles.control}>
+            <RequiredLabel className={styles.label}>
+              Record anything from your site check that is relevant to later stages of the assessment.
+            </RequiredLabel>
+            <Field
+              className={styles.control}
+              validationState={errorFor('notes') ? 'error' : 'none'}
+              validationMessage={errorFor('notes')}
+              validationMessageIcon={<DismissCircleRegular />}
+            >
               <Textarea
                 className={styles.textarea}
                 appearance="filled-lighter"
                 value={siteCheckForm.notes}
-                onChange={(_, d) => setSiteCheckField('notes', d.value)}
+                onChange={(_, d) => setField('notes', d.value)}
                 onBlur={() => markUnsaved('siteCheck')}
                 resize="vertical"
                 rows={5}
