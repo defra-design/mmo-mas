@@ -7,7 +7,15 @@
 // close icon and action buttons come from CaseDialogShell, shared with Reject.
 import { useState } from 'react';
 import { mergeClasses, Field, Input, Textarea } from '@fluentui/react-components';
+import { DismissCircleRegular } from '@fluentui/react-icons';
+import { requiredMessage } from '../utils/validationMessages';
 import CaseDialogShell, { useDialogFieldStyles } from './CaseDialogShell';
+
+// The field names the required-field messages are built from. Step 2's label is
+// phrased as a question, so its message names the field rather than repeating the
+// label back at the caseworker.
+const REASONS_FIELD = 'Reasons for transfer';
+const REFERENCE_FIELD = 'MCMS reference';
 
 /** Step 1 — the Case Officer states why the case is going to MCMS. */
 export function RequestTransferDialog({
@@ -23,7 +31,7 @@ export function RequestTransferDialog({
 
   const confirm = () => {
     if (!reasons.trim()) {
-      setError('You must provide a value for Reasons for transfer.');
+      setError(requiredMessage(REASONS_FIELD));
       return;
     }
     onConfirm(reasons.trim());
@@ -37,10 +45,11 @@ export function RequestTransferDialog({
       onConfirm={confirm}
     >
       <Field
-        label="Reasons for transfer"
+        label={REASONS_FIELD}
         required
         validationState={error ? 'error' : 'none'}
         validationMessage={error || undefined}
+        validationMessageIcon={<DismissCircleRegular />}
       >
         <Textarea
           className={mergeClasses(styles.field, styles.textarea)}
@@ -70,7 +79,7 @@ export function CompleteTransferDialog({
 
   const confirm = () => {
     if (!reference.trim()) {
-      setError('You must provide a value for MCMS reference.');
+      setError(requiredMessage(REFERENCE_FIELD));
       return;
     }
     onConfirm(reference.trim());
@@ -88,6 +97,7 @@ export function CompleteTransferDialog({
         required
         validationState={error ? 'error' : 'none'}
         validationMessage={error || undefined}
+        validationMessageIcon={<DismissCircleRegular />}
       >
         <Input
           className={styles.field}
