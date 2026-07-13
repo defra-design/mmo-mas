@@ -1,91 +1,13 @@
 // src/components/TransferMcmsDialogs.tsx
-// The two Transfer to MCMS modals. Custom modals following the OOB Resolve Case
-// pattern (command-bar action → modal → close). Step 1 is raised by the Case
-// Officer; step 2 by the Business Support Team, once they have done the transfer
-// by hand in MCMS.
+// The two Transfer to MCMS modals. Step 1 is raised by the Case Officer; step 2
+// by the Business Support Team, once they have done the transfer by hand in MCMS.
 //
 // Each dialog owns its own field + validation state and is mounted only while it
-// is open, so cancelling and reopening starts from an empty field.
+// is open, so cancelling and reopening starts from an empty field. The title,
+// close icon and action buttons come from CaseDialogShell, shared with Reject.
 import { useState } from 'react';
-import type { ReactNode } from 'react';
-import {
-  makeStyles,
-  mergeClasses,
-  shorthands,
-  tokens,
-  Button,
-  Field,
-  Input,
-  Textarea,
-  Dialog,
-  DialogSurface,
-  DialogBody,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from '@fluentui/react-components';
-import { DismissRegular } from '@fluentui/react-icons';
-
-const useStyles = makeStyles({
-  // Grey, borderless fields matching the Site check task and the read-only value
-  // boxes — the prototype never uses a white/bordered input.
-  field: {
-    width: '100%',
-    backgroundColor: tokens.colorNeutralBackground3,
-    borderRadius: tokens.borderRadiusSmall,
-    ...shorthands.border('none'),
-    '::after': { ...shorthands.border('none') },
-  },
-  textarea: { minHeight: '160px' },
-  // Breathing room between the field and the action buttons.
-  actions: { marginTop: tokens.spacingVerticalXL },
-  // The action row shrinks its buttons to fit, which wraps the longer primary
-  // labels onto two lines. Keep each label on one line and let the button size
-  // to it, as D365 does.
-  actionButton: { whiteSpace: 'nowrap' },
-});
-
-type ShellProps = {
-  title: string;
-  confirmLabel: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-  children: ReactNode;
-};
-
-// Title + close icon + primary/Cancel actions, shared by both steps.
-function DialogShell({ title, confirmLabel, onCancel, onConfirm, children }: ShellProps) {
-  const styles = useStyles();
-  return (
-    <Dialog open onOpenChange={(_, d) => !d.open && onCancel()} modalType="modal">
-      <DialogSurface>
-        <DialogBody>
-          <DialogTitle
-            action={
-              <Button
-                appearance="subtle"
-                aria-label="Close"
-                icon={<DismissRegular />}
-                onClick={onCancel}
-              />
-            }
-          >
-            {title}
-          </DialogTitle>
-          <DialogContent>{children}</DialogContent>
-          <DialogActions className={styles.actions}>
-            <Button appearance="primary" className={styles.actionButton} onClick={onConfirm}>
-              {confirmLabel}
-            </Button>
-            <Button appearance="secondary" className={styles.actionButton} onClick={onCancel}>
-              Cancel
-            </Button>
-          </DialogActions>
-        </DialogBody>
-      </DialogSurface>
-    </Dialog>
-  );
-}
+import { mergeClasses, Field, Input, Textarea } from '@fluentui/react-components';
+import CaseDialogShell, { useDialogFieldStyles } from './CaseDialogShell';
 
 /** Step 1 — the Case Officer states why the case is going to MCMS. */
 export function RequestTransferDialog({
@@ -95,7 +17,7 @@ export function RequestTransferDialog({
   onCancel: () => void;
   onConfirm: (reasons: string) => void;
 }) {
-  const styles = useStyles();
+  const styles = useDialogFieldStyles();
   const [reasons, setReasons] = useState('');
   const [error, setError] = useState('');
 
@@ -108,7 +30,7 @@ export function RequestTransferDialog({
   };
 
   return (
-    <DialogShell
+    <CaseDialogShell
       title="Request transfer to MCMS"
       confirmLabel="Request transfer"
       onCancel={onCancel}
@@ -130,7 +52,7 @@ export function RequestTransferDialog({
           }}
         />
       </Field>
-    </DialogShell>
+    </CaseDialogShell>
   );
 }
 
@@ -142,7 +64,7 @@ export function CompleteTransferDialog({
   onCancel: () => void;
   onConfirm: (mcmsReference: string) => void;
 }) {
-  const styles = useStyles();
+  const styles = useDialogFieldStyles();
   const [reference, setReference] = useState('');
   const [error, setError] = useState('');
 
@@ -155,7 +77,7 @@ export function CompleteTransferDialog({
   };
 
   return (
-    <DialogShell
+    <CaseDialogShell
       title="Complete transfer to MCMS"
       confirmLabel="Complete transfer"
       onCancel={onCancel}
@@ -177,6 +99,6 @@ export function CompleteTransferDialog({
           }}
         />
       </Field>
-    </DialogShell>
+    </CaseDialogShell>
   );
 }

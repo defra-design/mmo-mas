@@ -42,7 +42,9 @@ const useStyles = makeStyles({
 interface FormCommandBarProps {
   saveLabel?: string;
   onSave?: () => void;
+  /** Show the reject command; clicking it calls onReject. */
   showReject?: boolean;
+  onReject?: () => void;
   /** Show the transfer command; clicking it calls onTransfer. */
   showTransfer?: boolean;
   /** Label for the transfer command — it changes as the transfer progresses. */
@@ -58,6 +60,7 @@ export default function FormCommandBar({
   saveLabel,
   onSave,
   showReject,
+  onReject,
   showTransfer,
   transferLabel = 'Transfer to MCMS',
   transferIcon = <ArrowExportRegular />,
@@ -103,7 +106,7 @@ export default function FormCommandBar({
         </Button>
       )}
       {showReject && (
-        <Button appearance="subtle" icon={<DismissSquareRegular />}>
+        <Button appearance="subtle" icon={<DismissSquareRegular />} onClick={onReject}>
           Reject application
         </Button>
       )}

@@ -29,8 +29,9 @@ import { MoreHorizontalRegular, SendRegular, ArrowExportRegular } from '@fluentu
 import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { asset } from '../utils/asset';
 import { useTasks } from '../context/TaskContext';
-import { transferStatus } from '../utils/transferStatus';
+import { caseStatus } from '../utils/caseStatus';
 import { RequestTransferDialog, CompleteTransferDialog } from './TransferMcmsDialogs';
+import RejectApplicationDialog from './RejectApplicationDialog';
 import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
 import MarinePlanPoliciesList from './MarinePlanPoliciesList';
@@ -291,7 +292,14 @@ function OverflowTabsMenu({
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
-  const { tasksOnAllTabs, transfers, requestTransferToMcms, completeTransferToMcms } = useTasks();
+  const {
+    tasksOnAllTabs,
+    transfers,
+    rejections,
+    requestTransferToMcms,
+    completeTransferToMcms,
+    rejectApplication,
+  } = useTasks();
   // A task form can request a specific landing tab via navigation state (e.g.
   // 10014's MPP assessment returns to the Marine plan policies tab on save so the
   // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
@@ -302,14 +310,16 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
   );
 
-  // Which Transfer to MCMS dialog is open, if any. Each dialog owns its own field
-  // and validation state and is mounted only while open.
-  const [transferDialog, setTransferDialog] = useState<'request' | 'complete' | null>(null);
+  // Which case-action dialog is open, if any. Each dialog owns its own fields and
+  // validation state and is mounted only while open.
+  const [openDialog, setOpenDialog] = useState<'request' | 'complete' | 'reject' | null>(null);
 
-  // This case's transfer record. Each case keeps its own, independently.
+  // This case's transfer and rejection records. Each case keeps its own, independently.
   const caseTransfer = transfers[caseId] ?? null;
+  const caseRejection = rejections[caseId] ?? null;
   const isRequested = Boolean(caseTransfer);
   const isTransferred = Boolean(caseTransfer?.mcmsReference);
+  const isRejected = Boolean(caseRejection);
 
   // MPP design explorations live only on the duplicate cases; the original
   // MLA/2026/10002 keeps its plain single "Marine plan policies" task row.
@@ -373,7 +383,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
   const meta = [
     { label: 'Reference', value: data.reference },
-    { label: 'Status', value: transferStatus(transfers, caseId) ?? data.status },
+    { label: 'Status', value: caseStatus(transfers, rejections, caseId) ?? data.status },
     { label: 'Case age', value: data.caseAge },
     { label: 'Assigned to', value: data.assignedTo },
   ];
@@ -390,18 +400,18 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     { label: 'Organisation', value: data.organisation },
   ];
 
-  // The command bar drives whichever step is next; once transferred it disappears.
-  const openTransfer = () => setTransferDialog(isRequested ? 'complete' : 'request');
-  const cancelTransfer = () => setTransferDialog(null);
+  // The command bar drives whichever transfer step is next; once transferred it disappears.
+  const openTransfer = () => setOpenDialog(isRequested ? 'complete' : 'request');
+  const cancelDialog = () => setOpenDialog(null);
 
-  // Both names are the caseworker the case is assigned to, so a new case with a
-  // new assignee records that person rather than a hardcoded one. (In the real
-  // system the second step is done by the Business Support Team, not the Case
-  // Officer the case is assigned to.)
+  // Every name recorded is the caseworker the case is assigned to, so a new case
+  // with a new assignee records that person rather than a hardcoded one. (In the
+  // real system the second transfer step is done by the Business Support Team, not
+  // the Case Officer the case is assigned to.)
   const closeToSummary = () => {
-    setTransferDialog(null);
-    // Return to the Case summary tab so the updated transfer record is in view,
-    // regardless of which tab the transfer action was triggered from.
+    setOpenDialog(null);
+    // Return to the Case summary tab so the updated record is in view, regardless
+    // of which tab the action was triggered from.
     setSelectedTab('summary');
   };
 
@@ -415,6 +425,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     closeToSummary();
   };
 
+  const confirmReject = (reasons: string[], notes: string) => {
+    rejectApplication(caseId, reasons, notes, data.assignedTo);
+    closeToSummary();
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.stickyTop}>
@@ -422,10 +437,15 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           to the Business Support Team (nothing has left MAS yet), so it takes the
           send icon; the export arrow is saved for the step where the case actually
           leaves for MCMS. The two never appear together, so each icon has to carry
-          its own meaning rather than be read against the other. */}
+          its own meaning rather than be read against the other.
+
+          Rejecting is terminal, so it removes both commands. A case already on its
+          way to MCMS can't be rejected here either — it is no longer this
+          caseworker's to decide. */}
       <FormCommandBar
-        showReject
-        showTransfer={!isTransferred}
+        showReject={!isRejected && !isRequested}
+        onReject={() => setOpenDialog('reject')}
+        showTransfer={!isTransferred && !isRejected}
         transferLabel={isRequested ? 'Complete transfer to MCMS' : 'Request transfer to MCMS'}
         transferIcon={isRequested ? <ArrowExportRegular /> : <SendRegular />}
         onTransfer={openTransfer}
@@ -567,6 +587,39 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   </Card>
                 )}
 
+                {/* Read-only Rejection record, written by the Reject application
+                    command. Same read-only section pattern as the transfer record. */}
+                {caseRejection && (
+                  <Card className={styles.transferCard}>
+                    <Text as="h2" className={styles.sectionHeading}>Rejection details</Text>
+                    <div className={styles.transferFields}>
+                      {[
+                        { label: 'Rejected by', value: caseRejection.rejectedBy },
+                        { label: 'Date rejected', value: caseRejection.dateRejected },
+                      ].map(f => (
+                        <div key={f.label} className={styles.field}>
+                          <Text className={styles.fieldLabel}>{f.label}</Text>
+                          <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
+                        </div>
+                      ))}
+                      {/* A multi-select choice reads back as its selected values on
+                          one line, the way D365 shows a Choices field. */}
+                      <div className={styles.transferField}>
+                        <Text className={styles.fieldLabel}>Reasons for rejection</Text>
+                        <div className={styles.fieldValue}>
+                          <Body1>{caseRejection.reasons.join(', ')}</Body1>
+                        </div>
+                      </div>
+                      <div className={styles.transferField}>
+                        <Text className={styles.fieldLabel}>Rejection notes</Text>
+                        <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
+                          <Body1>{caseRejection.notes}</Body1>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
                 {/* Full-width MPP subgrid, stacked below the summary, tasks and the
                     transfer record (10013) — the transfer details belong with the
                     case's own fields, above the policy assessments. */}
@@ -620,11 +673,14 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
         </div>
       </div>
 
-      {transferDialog === 'request' && (
-        <RequestTransferDialog onCancel={cancelTransfer} onConfirm={confirmRequest} />
+      {openDialog === 'request' && (
+        <RequestTransferDialog onCancel={cancelDialog} onConfirm={confirmRequest} />
       )}
-      {transferDialog === 'complete' && (
-        <CompleteTransferDialog onCancel={cancelTransfer} onConfirm={confirmComplete} />
+      {openDialog === 'complete' && (
+        <CompleteTransferDialog onCancel={cancelDialog} onConfirm={confirmComplete} />
+      )}
+      {openDialog === 'reject' && (
+        <RejectApplicationDialog onCancel={cancelDialog} onConfirm={confirmReject} />
       )}
     </div>
   );

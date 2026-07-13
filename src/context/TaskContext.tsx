@@ -53,10 +53,24 @@ export interface TransferState {
 
 // Every case's transfer record, keyed by case reference. Cases are independent:
 // transferring one must never disturb another's status, because a caseworker can
-// have several in flight (and, in future, cases rejected rather than transferred).
+// have several in flight (and cases rejected rather than transferred).
 // The Status a case shows while a transfer is in flight is derived from this map
-// by `transferStatus` in src/utils/transferStatus.ts.
+// by `caseStatus` in src/utils/caseStatus.ts.
 export type TransfersState = Record<string, TransferState>;
+
+// Records a "Reject application" against one case. One step, done by the Case
+// Officer: they pick the reasons (a multi-select choice) and explain them. Unlike
+// a transfer this is terminal — the case leaves the caseworker's hands for good.
+export interface RejectionState {
+  rejectedBy: string;
+  dateRejected: string;
+  reasons: string[];
+  notes: string;
+}
+
+// Every case's rejection record, keyed by case reference. Same shape and the same
+// independence rule as `transfers` above.
+export type RejectionsState = Record<string, RejectionState>;
 
 // Today, in the out-of-the-box D365 format (DD/MM/YYYY).
 function today() {
@@ -74,6 +88,8 @@ interface PersistedState {
   saved: SavedState;
   // Every case's Transfer to MCMS record, keyed by case reference.
   transfers: TransfersState;
+  // Every case's rejection record, keyed by case reference.
+  rejections: RejectionsState;
   // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
   // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
   // on every case tab. See IndexPage.
@@ -91,6 +107,7 @@ const initialState: PersistedState = {
   mppForm: {},
   saved: { siteCheck: false, wfdAssessment: false, marinePlanPolicies: false },
   transfers: {},
+  rejections: {},
   // Default to the "tasks on all tabs" experience — the tested Iteration 1
   // behaviour (formerly the "Version 1" index link). The untested "Version 2"
   // variant that turned this off has been dropped.
@@ -134,6 +151,7 @@ function loadState(): PersistedState {
         // the two-step split has no `requestedBy` and would render an empty card,
         // so it is dropped rather than migrated.
         transfers: parsed.transfers ?? migrateSingleTransfer(parsed.transfer),
+        rejections: parsed.rejections ?? initialState.rejections,
         tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
       };
     }
@@ -150,9 +168,16 @@ interface TaskContextValue {
   mppForm: MppForm;
   saved: SavedState;
   transfers: TransfersState;
+  rejections: RejectionsState;
   tasksOnAllTabs: boolean;
   requestTransferToMcms: (caseId: string, reasons: string, requestedBy: string) => void;
   completeTransferToMcms: (caseId: string, mcmsReference: string, completedBy: string) => void;
+  rejectApplication: (
+    caseId: string,
+    reasons: string[],
+    notes: string,
+    rejectedBy: string,
+  ) => void;
   setTasksOnAllTabs: (value: boolean) => void;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
@@ -209,6 +234,22 @@ export function TaskProvider({ children }: PropsWithChildren) {
           }
         : prev,
     );
+
+  // The Case Officer rejects the application, recording the reasons they picked
+  // and their notes. Other cases' records are untouched.
+  const rejectApplication = (
+    caseId: string,
+    reasons: string[],
+    notes: string,
+    rejectedBy: string,
+  ) =>
+    setState(prev => ({
+      ...prev,
+      rejections: {
+        ...prev.rejections,
+        [caseId]: { rejectedBy, dateRejected: today(), reasons, notes },
+      },
+    }));
 
   const setSiteCheckField = (field: keyof SiteCheckForm, value: string) =>
     setState(prev => ({ ...prev, siteCheckForm: { ...prev.siteCheckForm, [field]: value } }));
@@ -298,9 +339,11 @@ export function TaskProvider({ children }: PropsWithChildren) {
         mppForm: state.mppForm,
         saved: state.saved,
         transfers: state.transfers,
+        rejections: state.rejections,
         tasksOnAllTabs: state.tasksOnAllTabs,
         requestTransferToMcms,
         completeTransferToMcms,
+        rejectApplication,
         setTasksOnAllTabs,
         setSiteCheckField,
         setWfdReview,

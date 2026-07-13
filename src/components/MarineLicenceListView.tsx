@@ -36,7 +36,7 @@ import {
 import FormCommandBar from './FormCommandBar';
 import TruncatedCell from './TruncatedCell';
 import { useTasks } from '../context/TaskContext';
-import { transferStatus } from '../utils/transferStatus';
+import { caseStatus } from '../utils/caseStatus';
 import { getAssigneeAvatarColor, getContrastText } from '../utils/avatarColors';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 
@@ -227,19 +227,19 @@ export default function MarineLicenceListView({
 }: MarineLicenceListViewProps) {
   const columns = entityConfig.list.columns;
   const defaultSort = entityConfig.list.defaultSort;
-  const { transfers } = useTasks();
+  const { transfers, rejections } = useTasks();
 
-  // Overlay each case's runtime transfer status ("Transfer pending", then
-  // "Transferred") onto its own row, so the grid reflects the case-summary action
+  // Overlay each case's runtime status ("Transfer pending", then "Transferred",
+  // or "Rejected") onto its own row, so the grid reflects the case-summary action
   // (the mock data itself is unchanged). Cases are independent — several can be in
   // flight at once. Derived by the same helper as the case header.
   const overlaidItems = useMemo(
     () =>
       items.map(i => {
-        const status = transferStatus(transfers, i.reference);
+        const status = caseStatus(transfers, rejections, i.reference);
         return status ? { ...i, status } : i;
       }),
-    [items, transfers],
+    [items, transfers, rejections],
   );
 
   // Like D365: the grid always has a sort, and it remembers the column you last
