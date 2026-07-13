@@ -205,6 +205,11 @@ const useStyles = makeStyles({
   // preserves the caseworker's line breaks. Label column matches the Case summary
   // section above it (140px); the value stretches to the far right of the card.
   transferField: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'start', gap: tokens.spacingHorizontalM },
+  // A top-aligned row's value box carries its own vertical padding, which the bare
+  // label does not — without matching it, the label rides above the first line of
+  // the value beside it. Only the top-aligned rows need this; the centred ones
+  // (styles.field) line up on their own.
+  topAlignedLabel: { paddingTop: tokens.spacingVerticalS },
   transferDetailsValue: { whiteSpace: 'pre-wrap', minHeight: '160px' },
   transferFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
 });
@@ -567,7 +572,9 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         </div>
                       ))}
                       <div className={styles.transferField}>
-                        <Text className={styles.fieldLabel}>Reasons for transfer</Text>
+                        <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
+                          Reasons for transfer
+                        </Text>
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
                           <Body1>{caseTransfer.reasons}</Body1>
                         </div>
@@ -605,13 +612,17 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                       {/* A multi-select choice reads back as its selected values on
                           one line, the way D365 shows a Choices field. */}
                       <div className={styles.transferField}>
-                        <Text className={styles.fieldLabel}>Reasons for rejection</Text>
+                        <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
+                          Reasons for rejection
+                        </Text>
                         <div className={styles.fieldValue}>
                           <Body1>{caseRejection.reasons.join(', ')}</Body1>
                         </div>
                       </div>
                       <div className={styles.transferField}>
-                        <Text className={styles.fieldLabel}>Rejection notes</Text>
+                        <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
+                          Rejection notes
+                        </Text>
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
                           <Body1>{caseRejection.notes}</Body1>
                         </div>

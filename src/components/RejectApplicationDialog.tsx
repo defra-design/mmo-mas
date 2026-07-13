@@ -3,8 +3,9 @@
 // command bar. Same shell, fields and validation behaviour as the Transfer to
 // MCMS modals, with a multi-select for the reasons.
 //
-// The reasons list stands in for a D365 Choices (multi-select option set) column,
-// which renders natively as this checkbox dropdown — no custom control needed.
+// The reasons list stands in for a D365 Choices (multi-select option set) column.
+// The real build uses a custom component for this control, so treat the dropdown
+// here as a placeholder for it rather than the final look.
 import { useState } from 'react';
 import { mergeClasses, Field, Dropdown, Option, Textarea } from '@fluentui/react-components';
 import CaseDialogShell, { useDialogFieldStyles } from './CaseDialogShell';
@@ -57,7 +58,6 @@ export default function RejectApplicationDialog({
       <div className={styles.fields}>
         <Field
           label="Reasons for rejection"
-          hint="Select all that apply."
           required
           validationState={errors.reasons ? 'error' : 'none'}
           validationMessage={errors.reasons}
@@ -84,7 +84,6 @@ export default function RejectApplicationDialog({
 
         <Field
           label="Rejection notes"
-          hint="Explain the issues you have selected and what the applicant needs to put right."
           required
           validationState={errors.notes ? 'error' : 'none'}
           validationMessage={errors.notes}
