@@ -656,11 +656,14 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
               <div className={styles.frameCard}>
                 <CdpFrame
                   // 10015 shows the sector-grouped MPP view (one page per sector);
-                  // every other case keeps the default one-page-per-policy view.
+                  // 10002 (Teignmouth) shows the multi-site, multi-activity Sites and
+                  // activities view — every other case keeps the single-site default.
                   src={
                     tasksTab && selectedTab === 'mpp'
                       ? asset('cdp/marine-plan-policies-sectors.html')
-                      : cdpPages[selectedTab].src
+                      : caseId === 'MLA/2026/10002' && selectedTab === 'site'
+                        ? asset('cdp/site-and-activity-multi.html')
+                        : cdpPages[selectedTab].src
                   }
                   title={cdpPages[selectedTab].title}
                 />

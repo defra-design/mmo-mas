@@ -141,6 +141,22 @@ body {
   margin: 0;
 }
 
+/* Divider between one site block and the next. */
+.site-divider {
+  margin: 48px 0;
+  border: 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Activities occupy the grid's right column and stack vertically, so Activity 2
+   sits directly under Activity 1 (and both collapse under the site details on
+   narrow screens via the .site-grid breakpoint below). */
+.activities {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
 /* Collapse the two columns on smaller screens. Measured against the iframe's
    own width, which is ~318px narrower than the browser window (left nav rail +
    right rail + main padding), so 1024px here ≈ a 1342px window. Above it the
