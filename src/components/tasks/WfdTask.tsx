@@ -75,6 +75,16 @@ const useStyles = makeStyles({
     borderRadius: tokens.borderRadiusSmall,
   },
   docxLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
+  // Excluded-activity guidance bullets, shown full width under the question.
+  // (Dev will custom-inject this HTML for real; here it's a static list.)
+  hintList: {
+    margin: 0,
+    paddingLeft: '22px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalS,
+    '& li': { lineHeight: tokens.lineHeightBase300 },
+  },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
   // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
@@ -136,28 +146,53 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
           <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
-              <Text className={styles.label}>Site located in the WFD assessment area</Text>
+              <Text className={styles.label}>
+                Is your project within one nautical mile (1.85km) of the low-water line, or in a
+                tidal river or estuary?
+              </Text>
               <div className={styles.fields}>
-                <div className={styles.value}><Body1>Yes (Confirmed in Site check)</Body1></div>
+                <div className={styles.value}><Body1>Yes</Body1></div>
               </div>
             </div>
             <div className={styles.row}>
-              <Text className={styles.label}>Excluded activity</Text>
+              <Text className={styles.label}>
+                Is your project limited to one of the following excluded activities?
+              </Text>
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>No</Body1></div>
               </div>
             </div>
+            <ul className={styles.hintList}>
+              <li>
+                maintaining pumps at pumping stations - if you do it regularly, avoid low
+                dissolved oxygen levels during maintenance and minimise silt movement when
+                restarting the pumps
+              </li>
+              <li>
+                removing blockages or obstacles like litter or debris within 10m of an existing
+                structure to maintain flow
+              </li>
+              <li>
+                replacing or removing existing pipes, cables or services crossing over a water
+                body - but not including any new structure or supports, or new bed or bank
+                reinforcement
+              </li>
+              <li>
+                'over water' replacement or repairs to, for example bridge, pier and jetty
+                surfaces - if you minimise bank or bed disturbance
+              </li>
+            </ul>
             <div className={styles.row}>
               <Text className={styles.label}>Assessment provided</Text>
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
-                    href={asset('documents/WFD-Teignmouth-2026.docx')}
+                    href={asset('documents/WFD-Exmouth-2026.docx')}
                     target="_blank"
                     rel="noopener"
                     className={styles.docxLink}
                   >
-                    <ArrowDownloadRegular /> WFD-Teignmouth-2026.docx
+                    <ArrowDownloadRegular /> WFD-Exmouth-2026.docx
                   </Link>
                 </div>
               </div>
