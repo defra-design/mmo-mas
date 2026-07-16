@@ -99,6 +99,22 @@ body {
   --cdp-label-width: 340px;
 }
 
+/* Guidance bullets that sit under a question label (e.g. the WFD excluded
+   activities). Part of the question, not the applicant's answer. */
+.field__hint-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.field__hint-list li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.field__hint-list li:last-child {
+  margin-bottom: 0;
+}
+
 /* A document value rendered as a link with a globe icon. */
 .doc-link {
   display: inline-flex;
@@ -225,7 +241,7 @@ body {
 .mpp__link {
   display: block;
   width: 100%;
-  padding: 4px 8px;
+  padding: 6px 8px;
   border: none;
   border-left: 3px solid transparent;
   background: none;
