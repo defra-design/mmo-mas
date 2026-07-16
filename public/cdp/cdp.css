@@ -255,6 +255,17 @@ body {
   color: var(--cdp-text-secondary);
 }
 
+/* Applicant-facing guidance shown between the question and the answer box.
+   The "Application guidance:" lead-in is bold (via .mpp__guidance-label). */
+.mpp__guidance {
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+.mpp__guidance-label {
+  font-weight: 600;
+}
+
 .mpp__box {
   padding: 16px;
   background: var(--cdp-value-bg);
