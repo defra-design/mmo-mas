@@ -613,7 +613,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                           one line, the way D365 shows a Choices field. */}
                       <div className={styles.transferField}>
                         <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
-                          Reasons for rejection
+                          Sections of the application with issues
                         </Text>
                         <div className={styles.fieldValue}>
                           <Body1>{caseRejection.reasons.join(', ')}</Body1>
@@ -621,7 +621,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                       </div>
                       <div className={styles.transferField}>
                         <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
-                          Rejection notes
+                          Provide details for each issue
                         </Text>
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
                           <Body1>{caseRejection.notes}</Body1>
