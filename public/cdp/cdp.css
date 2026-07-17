@@ -94,6 +94,23 @@ body {
   margin-bottom: 0;
 }
 
+/* Bulleted list of values inside a value box (e.g. sub-activities). Used even
+   when there is a single value so the presentation is consistent. */
+.field__value-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.field__value-list li {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.field__value-list li:last-child {
+  margin-bottom: 0;
+}
+
 /* Wider label column for sections whose labels are full sentences (e.g. WFD). */
 .section--wide-labels {
   --cdp-label-width: 340px;
