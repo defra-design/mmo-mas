@@ -288,6 +288,14 @@ body {
   color: var(--cdp-text-secondary);
 }
 
+/* Follow-up question shown under a Yes/No answer box, introducing the
+   free-text detail the applicant then gave (Other permissions tab). */
+.mpp__followup {
+  margin: 32px 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
 /* Applicant-facing guidance shown between the question and the answer box.
    The "Application guidance:" lead-in is bold (via .mpp__guidance-label). */
 .mpp__guidance {
@@ -300,7 +308,7 @@ body {
 }
 
 .mpp__box {
-  padding: 16px;
+  padding: 8px 12px;
   background: var(--cdp-value-bg);
   border-radius: var(--cdp-radius);
 }
