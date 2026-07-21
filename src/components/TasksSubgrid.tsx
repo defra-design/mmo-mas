@@ -78,6 +78,12 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   const rows: TaskRow[] = [
     { key: 'siteCheck', name: 'Site check', status: tasks.siteCheck, slug: 'site-check' },
     { key: 'wfd', name: 'Water Framework Directive', status: tasks.wfdAssessment, slug: 'wfd' },
+    {
+      key: 'prepForConsultee',
+      name: 'Prep for consultee',
+      status: tasks.prepForConsultee,
+      slug: 'prep-for-consultee',
+    },
   ];
 
   return (

@@ -106,6 +106,17 @@ export default function TaskList({
         ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
         : undefined,
     },
+    {
+      key: 'prepForConsultee',
+      name: 'Prep for consultee',
+      status: shownStatus(tasks.prepForConsultee),
+      onClick: canOpen(tasks.prepForConsultee)
+        ? () =>
+            navigate(
+              `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/prep-for-consultee`,
+            )
+        : undefined,
+    },
   ];
 
   // Original single-row treatment (kept for the standard cases, e.g. MLA/2026/10002).
