@@ -133,7 +133,7 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
   const [pos, setPos] = useState<FlyoutPos | null>(null);
   // Empty lookup reads "---" at rest; "Look for Organisations" only on hover or
   // while open — same placeholder swap OutcomeDropdown uses for "--Select--".
-  const placeholder = hover || open ? 'Look for Organisations' : '---';
+  const placeholder = hover || open ? 'Search for organisations' : '---';
 
   const updatePos = () => {
     const el = rootRef.current;
@@ -247,7 +247,7 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
           }}
         >
           <span style={{ fontSize: 12, fontWeight: 600, color: D365.textSecondary }}>
-            {browsingAll ? 'Organisations' : 'Recent Organisations'}
+            {browsingAll ? 'Organisations' : 'Recent organisations'}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
             <button
