@@ -107,6 +107,10 @@ interface PersistedState {
   mppForm: MppForm;
   prepForConsulteeForm: PrepForConsulteeForm;
   prepForConsulteeMeta: PrepForConsulteeMeta;
+  // Organisations the caseworker has recently picked in the lookup, most-recent
+  // first. Shared across every consultee row/case (a per-user "Recent records"
+  // list, like the real D365 lookup); empty until they select one.
+  recentOrganisations: string[];
   saved: SavedState;
   // Every case's Transfer to MCMS record, keyed by case reference.
   transfers: TransfersState;
@@ -131,13 +135,14 @@ const initialState: PersistedState = {
     siteCheck: 'To do',
     wfdAssessment: 'Cannot start yet',
     marinePlanPolicies: 'Cannot start yet',
-    prepForConsultee: 'To do',
+    prepForConsultee: 'Cannot start yet',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
   mppForm: {},
   prepForConsulteeForm: [emptyConsulteeRow()],
   prepForConsulteeMeta: { completed: false },
+  recentOrganisations: [],
   saved: {
     siteCheck: false,
     wfdAssessment: false,
@@ -192,6 +197,9 @@ function loadState(): PersistedState {
           ...initialState.prepForConsulteeMeta,
           ...parsed.prepForConsulteeMeta,
         },
+        recentOrganisations: Array.isArray(parsed.recentOrganisations)
+          ? parsed.recentOrganisations
+          : initialState.recentOrganisations,
         saved: { ...initialState.saved, ...parsed.saved },
         // State saved before transfers were keyed by case held a single `transfer`
         // object carrying its own caseId; lift it into the map. Anything older than
@@ -215,6 +223,7 @@ interface TaskContextValue {
   mppForm: MppForm;
   prepForConsulteeForm: PrepForConsulteeForm;
   prepForConsulteeMeta: PrepForConsulteeMeta;
+  recentOrganisations: string[];
   saved: SavedState;
   transfers: TransfersState;
   rejections: RejectionsState;
@@ -237,6 +246,7 @@ interface TaskContextValue {
     value: string,
   ) => void;
   setPrepForConsulteeCompleted: (completed: boolean) => void;
+  addRecentOrganisation: (name: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
   completeWfd: () => void;
@@ -379,6 +389,20 @@ export function TaskProvider({ children }: PropsWithChildren) {
       prepForConsulteeMeta: { ...prev.prepForConsulteeMeta, completed },
     }));
 
+  // Records a lookup pick as the most-recent organisation: moves it to the front,
+  // de-duplicates, and keeps at most the last 5 (matches D365's "Recent records").
+  const RECENT_ORG_LIMIT = 5;
+  const addRecentOrganisation = (name: string) =>
+    setState(prev => {
+      const trimmed = name.trim();
+      if (!trimmed) return prev;
+      const next = [trimmed, ...prev.recentOrganisations.filter(o => o !== trimmed)].slice(
+        0,
+        RECENT_ORG_LIMIT,
+      );
+      return { ...prev, recentOrganisations: next };
+    });
+
   // An edit marks the task as having unsaved changes (shown in the task header).
   const markUnsaved = (task: keyof SavedState) =>
     setState(prev => ({ ...prev, saved: { ...prev.saved, [task]: false } }));
@@ -392,6 +416,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         siteCheck: 'Done',
         wfdAssessment: 'To do',
         marinePlanPolicies: 'To do',
+        prepForConsultee: 'To do',
       },
       saved: { ...prev.saved, siteCheck: true },
     }));
@@ -441,6 +466,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         mppForm: state.mppForm,
         prepForConsulteeForm: state.prepForConsulteeForm,
         prepForConsulteeMeta: state.prepForConsulteeMeta,
+        recentOrganisations: state.recentOrganisations,
         saved: state.saved,
         transfers: state.transfers,
         rejections: state.rejections,
@@ -454,6 +480,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setMppField,
         setPrepForConsulteeRow,
         setPrepForConsulteeCompleted,
+        addRecentOrganisation,
         markUnsaved,
         completeSiteCheck,
         completeWfd,

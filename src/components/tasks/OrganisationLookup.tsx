@@ -19,7 +19,7 @@ import {
 import {
   SearchRegular,
   DismissRegular,
-  DocumentRegular,
+  BuildingRegular,
 } from '@fluentui/react-icons';
 // Seed Organisation (Account) records a real lookup view would return.
 // Kept in mock-data (not exported from this component file) so the module only
@@ -109,9 +109,14 @@ const useStyles = makeStyles({
 interface OrganisationLookupProps {
   value: string;
   onSelect: (value: string) => void;
+  // The caseworker's recently picked organisations, most-recent-first. Shown at
+  // rest before any search — empty until they've selected some. Owned by the
+  // parent (TaskContext) so the list is shared and persists like a real
+  // "Recent records" lookup; this control just displays what it's given.
+  recent: string[];
 }
 
-export default function OrganisationLookup({ value, onSelect }: OrganisationLookupProps) {
+export default function OrganisationLookup({ value, onSelect, recent }: OrganisationLookupProps) {
   const styles = useStyles();
   const rootRef = useRef<HTMLDivElement>(null);
   const flyoutRef = useRef<HTMLDivElement>(null);
@@ -173,11 +178,17 @@ export default function OrganisationLookup({ value, onSelect }: OrganisationLook
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open]);
 
+  const trimmed = query.trim();
   const filtered = organisationOptions.filter(org =>
-    org.toLowerCase().includes(query.trim().toLowerCase()),
+    org.toLowerCase().includes(trimmed.toLowerCase()),
   );
-  const recent = filtered.slice(0, 3);
-  const results = showAll || query.trim() ? filtered : recent;
+  // At rest we show the caseworker's recent picks; typing a search or hitting
+  // "All records" switches to the full 117-strong organisation list.
+  const browsingAll = showAll || Boolean(trimmed);
+  const results = browsingAll ? filtered : recent;
+  // No recent history yet (fresh prototype) → prompt to search rather than a
+  // "no records" error, since an empty recent list isn't a failed lookup.
+  const emptyRecent = !browsingAll && recent.length === 0;
 
   const pick = (org: string) => {
     onSelect(org);
@@ -231,7 +242,7 @@ export default function OrganisationLookup({ value, onSelect }: OrganisationLook
           }}
         >
           <span style={{ fontSize: 12, fontWeight: 600, color: D365.textSecondary }}>
-            {showAll || query.trim() ? 'Organisations' : 'Recent Organisations'}
+            {browsingAll ? 'Organisations' : 'Recent Organisations'}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
             <button
@@ -273,7 +284,11 @@ export default function OrganisationLookup({ value, onSelect }: OrganisationLook
           </div>
         </div>
         {results.length === 0 ? (
-          <div style={{ padding: '12px', color: D365.textSecondary }}>No records found.</div>
+          <div style={{ padding: '12px', color: D365.textSecondary }}>
+            {emptyRecent
+              ? 'No recent organisations — search or select All records.'
+              : 'No records found.'}
+          </div>
         ) : (
           results.map(org => (
             <button
@@ -304,7 +319,7 @@ export default function OrganisationLookup({ value, onSelect }: OrganisationLook
                 color: D365.text,
               }}
             >
-              <DocumentRegular style={{ color: D365.textSecondary, fontSize: 16, flexShrink: 0 }} />
+              <BuildingRegular style={{ color: D365.textSecondary, fontSize: 16, flexShrink: 0 }} />
               {org}
             </button>
           ))
@@ -328,7 +343,7 @@ export default function OrganisationLookup({ value, onSelect }: OrganisationLook
       >
         {value && !open && (
           <span className={styles.pill}>
-            <DocumentRegular style={{ color: D365.textSecondary, fontSize: 16 }} />
+            <BuildingRegular style={{ color: D365.textSecondary, fontSize: 16 }} />
             <a
               className={styles.pillLink}
               href="#"

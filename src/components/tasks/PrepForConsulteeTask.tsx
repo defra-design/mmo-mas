@@ -56,6 +56,12 @@ const useStyles = makeStyles({
     marginTop: tokens.spacingVerticalS,
   },
   scroll: { overflowX: 'auto' },
+  // Each consultee row holds its own editable fields, so the whole-row hover
+  // highlight Fluent's Table adds by default just reads as a glitch here — keep
+  // the row background flat (matches the white body card).
+  row: {
+    ':hover': { backgroundColor: tokens.colorNeutralBackground1 },
+  },
   headerCell: { fontWeight: tokens.fontWeightSemibold },
   cell: { verticalAlign: 'top', ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalXS) },
   textarea: {
@@ -74,7 +80,6 @@ const useStyles = makeStyles({
   completeRow: {
     display: 'flex',
     alignItems: 'flex-start',
-    ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2),
     paddingTop: tokens.spacingVerticalL,
   },
 });
@@ -89,9 +94,11 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
   const {
     prepForConsulteeForm,
     prepForConsulteeMeta,
+    recentOrganisations,
     saved,
     setPrepForConsulteeRow,
     setPrepForConsulteeCompleted,
+    addRecentOrganisation,
     markUnsaved,
     savePrepForConsultee,
   } = useTasks();
@@ -111,7 +118,10 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
   const setOrg = (id: string, value: string) => {
     setPrepForConsulteeRow(id, 'organisation', value);
     markUnsaved('prepForConsultee');
-    if (value.trim()) setShowError(false);
+    if (value.trim()) {
+      setShowError(false);
+      addRecentOrganisation(value);
+    }
   };
 
   return (
@@ -130,7 +140,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
 
       <Card className={styles.headerCard}>
         <Title3>
-          Prep for consultee
+          Prepare for consultation
           <span className={styles.savedLabel}>
             - {saved.prepForConsultee ? 'Saved' : 'Unsaved'}
           </span>
@@ -142,8 +152,8 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         <div>
           <Text block className={styles.sectionHeading}>Consultees</Text>
           <Text block className={styles.desc}>
-            Look up each organisation to consult and record any notes for that row.
-            Selecting an organisation adds another empty row.
+            Add each organisation you need to consult on this application, along with
+            any notes. A new row appears each time you select one.
           </Text>
         </div>
 
@@ -167,7 +177,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                 const orgError = showError && !row.organisation.trim() && filled.length === 0
                   && row.id === prepForConsulteeForm[0]?.id;
                 return (
-                  <TableRow key={row.id}>
+                  <TableRow key={row.id} className={styles.row}>
                     <TableCell className={styles.cell} style={{ width: COLS.organisation }}>
                       <Field
                         validationState={orgError ? 'error' : 'none'}
@@ -176,6 +186,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                       >
                         <OrganisationLookup
                           value={row.organisation}
+                          recent={recentOrganisations}
                           onSelect={v => setOrg(row.id, v)}
                         />
                       </Field>
@@ -191,7 +202,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                             markUnsaved('prepForConsultee');
                           }}
                           resize="vertical"
-                          rows={2}
+                          rows={4}
                         />
                       </Field>
                     </TableCell>
@@ -204,7 +215,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
 
         <div className={styles.completeRow}>
           <Checkbox
-            label="Mark prep for consultee as complete"
+            label="Select to mark the task as complete"
             checked={prepForConsulteeMeta.completed}
             onChange={(_, data) => {
               setPrepForConsulteeCompleted(Boolean(data.checked));

@@ -108,7 +108,7 @@ export default function TaskList({
     },
     {
       key: 'prepForConsultee',
-      name: 'Prep for consultee',
+      name: 'Prepare for consultation',
       status: shownStatus(tasks.prepForConsultee),
       onClick: canOpen(tasks.prepForConsultee)
         ? () =>

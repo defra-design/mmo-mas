@@ -80,7 +80,7 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
     { key: 'wfd', name: 'Water Framework Directive', status: tasks.wfdAssessment, slug: 'wfd' },
     {
       key: 'prepForConsultee',
-      name: 'Prep for consultee',
+      name: 'Prepare for consultation',
       status: tasks.prepForConsultee,
       slug: 'prep-for-consultee',
     },
