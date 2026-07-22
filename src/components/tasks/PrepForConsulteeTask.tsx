@@ -152,8 +152,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         <div>
           <Text block className={styles.sectionHeading}>Consultees</Text>
           <Text block className={styles.desc}>
-            Add each organisation you need to consult on this application, along with
-            any notes. A new row appears each time you select one.
+          Add each organisation you need to consult for this application. Include any notes. The service adds a new row for each organisation you select.
           </Text>
         </div>
 
