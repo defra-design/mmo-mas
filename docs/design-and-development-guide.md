@@ -10,6 +10,22 @@ around what you actually **see on screen**: for each piece of the UI, where it's
 > is held in React state and mirrored to the browser's `localStorage`. See
 > [`CLAUDE.md`](../CLAUDE.md) for the design-system rules and conventions.
 
+## Contents
+
+- [Running it](#running-it)
+- [Hosting & access](#hosting--access-no-password)
+- [The two journeys](#the-two-journeys)
+- [Big picture: the app shell](#big-picture-the-app-shell)
+- [Routes](#routes)
+- [Section by section (Receive and assess)](#section-by-section-receive-and-assess)
+  - [Prepare for consultation task (the consultees list)](#prepare-for-consultation-task-the-consultees-list)
+- [Where data lives](#where-data-lives-the-four-sources)
+- ["I want to change X — where do I look?"](#i-want-to-change-x--where-do-i-look)
+- [Iterations & versioning](#iterations--versioning)
+- [File tree](#file-tree-quick-reference)
+
+---
+
 ## Running it
 
 ```bash
@@ -102,6 +118,8 @@ All routes are declared in `src/App.tsx`. The `:caseId` is a case reference like
 | `/receive-assess/cases/:caseId` | `MarineCaseSummary.tsx` | Receive and assess |
 | `/receive-assess/cases/:caseId/tasks/site-check` | `tasks/SiteCheckTask.tsx` | Receive and assess |
 | `/receive-assess/cases/:caseId/tasks/wfd` | `tasks/WfdTask.tsx` | Receive and assess |
+| `/receive-assess/cases/:caseId/tasks/marine-plan-policies/:policyCode` | `tasks/MarinePlanPolicyTask.tsx` | Receive and assess |
+| `/receive-assess/cases/:caseId/tasks/prep-for-consultee` | `tasks/PrepForConsulteeTask.tsx` | Receive and assess |
 
 ---
 
@@ -164,17 +182,48 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
 ### Tasks panel & task forms
 
 - **What you see:** a "Tasks" panel listing caseworker tasks (Site check, Water Framework
-  Directive, Marine plan policies) each with a status. Clicking a startable task opens its form.
-- **Task list panel:** `src/components/TaskList.tsx`. In **Version 2** it sits inline on the
-  Case summary tab; in **Version 1** (`tasksOnAllTabs = true`) it persists in a rail on every
-  tab. The version is chosen by the Version 1 / 2 links on the landing page.
+  Directive, Marine plan policies, Prepare for consultation) each with a status. Clicking a
+  startable task opens its form.
+- **Task list panel:** `src/components/TaskList.tsx` (and `src/components/TasksSubgrid.tsx`,
+  the grid-style variant). In **Version 2** it sits inline on the Case summary tab; in
+  **Version 1** (`tasksOnAllTabs = true`) it persists in a rail on every tab. The version is
+  chosen by the Version 1 / 2 links on the landing page.
 - **Task forms:**
   - `src/components/tasks/SiteCheckTask.tsx`
   - `src/components/tasks/WfdTask.tsx`
-  - `src/components/tasks/OutcomeDropdown.tsx` — the shared grey "outcome" select used by both.
+  - `src/components/tasks/MarinePlanPolicyTask.tsx`
+  - `src/components/tasks/PrepForConsulteeTask.tsx` — see [Prepare for consultation task](#prepare-for-consultation-task-the-consultees-list) below.
+  - `src/components/tasks/OutcomeDropdown.tsx` — the shared grey "outcome" select used by the first two.
+  - `src/components/tasks/OrganisationLookup.tsx` — the organisation lookup control used by the consultation task.
 - **Task data & status:** **not** in any JSON file. Task statuses and the caseworker's saved
   answers live in runtime state — see below. The applicant answers shown read-only inside a
   task form are currently hard-coded in the form component.
+
+### Prepare for consultation task (the consultees list)
+
+The caseworker records which organisations to consult on the application. **Gated behind Site
+check** — it reads "Cannot start yet" until Site check is done (like WFD and Marine plan
+policies). The form is an **editable subgrid of consultees**: each row is an **Organisation**
+(a lookup) plus free-text **Notes**, and a new empty row appears each time an organisation is
+selected. A "Select to mark the task as complete" checkbox decides the saved status — ticked →
+**Done**, unticked → **In progress**.
+
+- **Task form:** `src/components/tasks/PrepForConsulteeTask.tsx`
+- **Organisation lookup control:** `src/components/tasks/OrganisationLookup.tsx` — a
+  custom-styled input + results flyout that simulates the native D365 **Lookup** control
+  (deliberately *not* a Combobox and *not* a PCF). It supports typing to search, a "Recent
+  Organisations" view, and an "All records" view.
+- **📋 Where the consultees list lives:** **`src/mock-data/organisations.json`** — a flat,
+  alphabetical JSON array of organisation names. **To add, remove or rename a consultee, edit
+  this file directly — no code change is needed.** It currently holds ~117 entries (MMO coastal
+  offices, IFCAs, national bodies, and coastal local planning authorities).
+- **"Recent Organisations":** the caseworker's recently picked orgs (most-recent-first, capped
+  at 5) are held in `TaskContext` as `recentOrganisations` — shared across every row and case
+  (a per-user "recent records" list), persisted to `localStorage`. Empty on a fresh prototype;
+  it fills as orgs are selected, and "Clear saved data" resets it.
+- **Saved answers & status:** `prepForConsulteeForm` (the rows) and `prepForConsulteeMeta` (the
+  completion checkbox) in `TaskContext.tsx`, persisted like every other task. Site check's
+  `completeSiteCheck()` unlocks this task alongside WFD and Marine plan policies.
 
 ---
 
@@ -229,6 +278,7 @@ and these are **not** written back to the JSON files.
 | Edit an applicant-data tab (Project details, WFD, etc.) | `public/cdp/<section>.html` (+ `.json` for list/detail sections) |
 | Add a new applicant-data tab | follow the checklist in [`CLAUDE.md`](../CLAUDE.md) ("New CDP application-data section checklist") |
 | Add or edit a caseworker task form | `src/components/tasks/` + extend `src/context/TaskContext.tsx` |
+| Change the list of consultee organisations (the org lookup) | `src/mock-data/organisations.json` |
 | Change task status logic / unlocking | `src/context/TaskContext.tsx` |
 | Add a brand-new list view / entity | follow the "New entity scaffold checklist" in [`CLAUDE.md`](../CLAUDE.md) |
 
@@ -287,11 +337,14 @@ src/
     tasks/
       SiteCheckTask.tsx         ← Site check task form
       WfdTask.tsx               ← Water Framework Directive task form
+      MarinePlanPolicyTask.tsx  ← Marine plan policies task form
+      PrepForConsulteeTask.tsx  ← Prepare for consultation task form (consultees subgrid)
+      OrganisationLookup.tsx    ← D365-style organisation lookup control
       OutcomeDropdown.tsx       ← shared outcome <Dropdown>
     ListView.tsx / CaseView.tsx ← legacy Proof-of-concept pages
     CommandBar.tsx / HeaderRow.tsx / FilterControls.tsx ← legacy helpers
   config/entities/              ← list column + form layout JSON
-  mock-data/                    ← seed row/detail JSON
+  mock-data/                    ← seed row/detail JSON (incl. organisations.json — consultee lookup list)
   context/TaskContext.tsx       ← runtime state + localStorage persistence
   utils/avatarColors.ts         ← assignee avatar colour helper
 public/
