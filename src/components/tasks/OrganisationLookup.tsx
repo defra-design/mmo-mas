@@ -18,7 +18,7 @@ import {
 } from '@fluentui/react-components';
 import {
   SearchRegular,
-  DismissRegular,
+  DismissFilled,
   BuildingRegular,
 } from '@fluentui/react-icons';
 // Seed Organisation (Account) records a real lookup view would return.
@@ -59,31 +59,33 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderBottom('2px', 'solid', '#0078d4'),
   },
+  // Selected-value chip: faint blue highlight hugging just the content (no border,
+  // no white box), matching the D365 lookup. Shrinks so the magnifier stays pinned
+  // right; the name truncates rather than pushing it off.
   pill: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalXXS,
-    maxWidth: '70%',
-    flexShrink: 0,
+    minWidth: 0,
     ...shorthands.padding('2px', tokens.spacingHorizontalXS),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    backgroundColor: tokens.colorBrandBackground2,
     borderRadius: tokens.borderRadiusSmall,
   },
   pillLink: {
     color: '#0078d4',
     fontSize: tokens.fontSizeBase300,
+    minWidth: 0,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    textDecoration: 'none',
-    ':hover': { textDecoration: 'underline' },
+    textDecoration: 'underline',
   },
   clearBtn: {
-    minWidth: '20px',
-    width: '20px',
-    height: '20px',
-    color: tokens.colorNeutralForeground3,
+    minWidth: '16px',
+    width: '16px',
+    height: '16px',
+    ...shorthands.padding(0),
+    color: '#0078d4',
   },
   input: {
     flexGrow: 1,
@@ -101,6 +103,9 @@ const useStyles = makeStyles({
     minWidth: '28px',
     width: '28px',
     height: '28px',
+    // Pinned to the far right of the field in every state (D365 keeps it there
+    // even once a value is chosen, rather than letting it sit beside the name).
+    marginLeft: 'auto',
     color: tokens.colorNeutralForeground3,
     flexShrink: 0,
   },
@@ -355,7 +360,7 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
             <Button
               className={styles.clearBtn}
               appearance="transparent"
-              icon={<DismissRegular />}
+              icon={<DismissFilled style={{ fontSize: 13 }} />}
               aria-label="Remove Organisation"
               onClick={e => {
                 e.stopPropagation();
@@ -389,7 +394,8 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
         <Button
           className={styles.searchBtn}
           appearance="transparent"
-          icon={<SearchRegular />}
+          // Flipped horizontally so the handle faces the D365 way (lens on the right).
+          icon={<SearchRegular style={{ transform: 'scaleX(-1)' }} />}
           aria-label="Search Organisations"
           onClick={e => {
             e.stopPropagation();
