@@ -3,12 +3,13 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import { policyCount } from '../utils/marinePlanPolicies';
 
-export type TaskStatus = 'Done' | 'To do' | 'Cannot start yet';
+export type TaskStatus = 'Done' | 'To do' | 'In progress' | 'Cannot start yet';
 
 export interface TaskState {
   siteCheck: TaskStatus;
   wfdAssessment: TaskStatus;
   marinePlanPolicies: TaskStatus;
+  prepForConsultee: TaskStatus;
 }
 
 export interface SiteCheckForm {
@@ -30,12 +31,31 @@ export interface MppAnswer {
 // The MPP task is 1-to-many: one answer per policy, keyed by policy code.
 export type MppForm = Record<string, MppAnswer>;
 
+// One row in the Prep for consultee editable subgrid. Maps to a related
+// "Consultee" custom-table record: Organisation (lookup) + Notes (multiline text).
+export interface ConsulteeRow {
+  id: string;
+  organisation: string;
+  notes: string;
+}
+
+// Editable-subgrid rows for Prep for consultee. Always keep a trailing empty row
+// so the caseworker can add another (OOB Power Apps grid quick-create behaviour).
+export type PrepForConsulteeForm = ConsulteeRow[];
+
+// Two-options (Yes/No) field on the Prep for consultee task form. Ticked → status
+// Done on save; unticked → In progress. Maps to an OOB boolean / Two Options column.
+export interface PrepForConsulteeMeta {
+  completed: boolean;
+}
+
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
 // task is saved; an edit flips it back to false (matches D365 dirty-tracking).
 export interface SavedState {
   siteCheck: boolean;
   wfdAssessment: boolean;
   marinePlanPolicies: boolean;
+  prepForConsultee: boolean;
 }
 
 // Records a "Transfer to MCMS" against one case. Two stages, done by two teams:
@@ -85,6 +105,12 @@ interface PersistedState {
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   mppForm: MppForm;
+  prepForConsulteeForm: PrepForConsulteeForm;
+  prepForConsulteeMeta: PrepForConsulteeMeta;
+  // Organisations the caseworker has recently picked in the lookup, most-recent
+  // first. Shared across every consultee row/case (a per-user "Recent records"
+  // list, like the real D365 lookup); empty until they select one.
+  recentOrganisations: string[];
   saved: SavedState;
   // Every case's Transfer to MCMS record, keyed by case reference.
   transfers: TransfersState;
@@ -96,16 +122,33 @@ interface PersistedState {
   tasksOnAllTabs: boolean;
 }
 
+function emptyConsulteeRow(): ConsulteeRow {
+  return {
+    id: crypto.randomUUID(),
+    organisation: '',
+    notes: '',
+  };
+}
+
 const initialState: PersistedState = {
   tasks: {
     siteCheck: 'To do',
     wfdAssessment: 'Cannot start yet',
     marinePlanPolicies: 'Cannot start yet',
+    prepForConsultee: 'Cannot start yet',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
   mppForm: {},
-  saved: { siteCheck: false, wfdAssessment: false, marinePlanPolicies: false },
+  prepForConsulteeForm: [emptyConsulteeRow()],
+  prepForConsulteeMeta: { completed: false },
+  recentOrganisations: [],
+  saved: {
+    siteCheck: false,
+    wfdAssessment: false,
+    marinePlanPolicies: false,
+    prepForConsultee: false,
+  },
   transfers: {},
   rejections: {},
   // Default to the "tasks on all tabs" experience — the tested Iteration 1
@@ -140,11 +183,23 @@ function loadState(): PersistedState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
+      const prepRows: PrepForConsulteeForm =
+        Array.isArray(parsed.prepForConsulteeForm) && parsed.prepForConsulteeForm.length > 0
+          ? parsed.prepForConsulteeForm
+          : initialState.prepForConsulteeForm;
       return {
         tasks: { ...initialState.tasks, ...parsed.tasks },
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
         mppForm: { ...initialState.mppForm, ...parsed.mppForm },
+        prepForConsulteeForm: prepRows,
+        prepForConsulteeMeta: {
+          ...initialState.prepForConsulteeMeta,
+          ...parsed.prepForConsulteeMeta,
+        },
+        recentOrganisations: Array.isArray(parsed.recentOrganisations)
+          ? parsed.recentOrganisations
+          : initialState.recentOrganisations,
         saved: { ...initialState.saved, ...parsed.saved },
         // State saved before transfers were keyed by case held a single `transfer`
         // object carrying its own caseId; lift it into the map. Anything older than
@@ -166,6 +221,9 @@ interface TaskContextValue {
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   mppForm: MppForm;
+  prepForConsulteeForm: PrepForConsulteeForm;
+  prepForConsulteeMeta: PrepForConsulteeMeta;
+  recentOrganisations: string[];
   saved: SavedState;
   transfers: TransfersState;
   rejections: RejectionsState;
@@ -182,9 +240,17 @@ interface TaskContextValue {
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
   setMppField: (code: string, field: keyof MppAnswer, value: string) => void;
+  setPrepForConsulteeRow: (
+    id: string,
+    field: keyof Omit<ConsulteeRow, 'id'>,
+    value: string,
+  ) => void;
+  setPrepForConsulteeCompleted: (completed: boolean) => void;
+  addRecentOrganisation: (name: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
   completeWfd: () => void;
+  savePrepForConsultee: () => void;
   resetAll: () => void;
 }
 
@@ -289,6 +355,54 @@ export function TaskProvider({ children }: PropsWithChildren) {
       };
     });
 
+  // Updates one field on one consultee row. Selecting an organisation on the
+  // trailing empty row appends another empty row (editable-subgrid quick-create).
+  // Clearing a row collapses surplus empty trailing rows back to one.
+  const setPrepForConsulteeRow = (
+    id: string,
+    field: keyof Omit<ConsulteeRow, 'id'>,
+    value: string,
+  ) =>
+    setState(prev => {
+      let rows = prev.prepForConsulteeForm.map(row =>
+        row.id === id ? { ...row, [field]: value } : row,
+      );
+      const last = rows[rows.length - 1];
+      if (last?.organisation.trim()) {
+        rows = [...rows, emptyConsulteeRow()];
+      } else {
+        while (rows.length > 1) {
+          const a = rows[rows.length - 1];
+          const b = rows[rows.length - 2];
+          const aEmpty = !a.organisation.trim() && !a.notes.trim();
+          const bEmpty = !b.organisation.trim() && !b.notes.trim();
+          if (aEmpty && bEmpty) rows = rows.slice(0, -1);
+          else break;
+        }
+      }
+      return { ...prev, prepForConsulteeForm: rows };
+    });
+
+  const setPrepForConsulteeCompleted = (completed: boolean) =>
+    setState(prev => ({
+      ...prev,
+      prepForConsulteeMeta: { ...prev.prepForConsulteeMeta, completed },
+    }));
+
+  // Records a lookup pick as the most-recent organisation: moves it to the front,
+  // de-duplicates, and keeps at most the last 5 (matches D365's "Recent records").
+  const RECENT_ORG_LIMIT = 5;
+  const addRecentOrganisation = (name: string) =>
+    setState(prev => {
+      const trimmed = name.trim();
+      if (!trimmed) return prev;
+      const next = [trimmed, ...prev.recentOrganisations.filter(o => o !== trimmed)].slice(
+        0,
+        RECENT_ORG_LIMIT,
+      );
+      return { ...prev, recentOrganisations: next };
+    });
+
   // An edit marks the task as having unsaved changes (shown in the task header).
   const markUnsaved = (task: keyof SavedState) =>
     setState(prev => ({ ...prev, saved: { ...prev.saved, [task]: false } }));
@@ -302,6 +416,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         siteCheck: 'Done',
         wfdAssessment: 'To do',
         marinePlanPolicies: 'To do',
+        prepForConsultee: 'To do',
       },
       saved: { ...prev.saved, siteCheck: true },
     }));
@@ -312,6 +427,18 @@ export function TaskProvider({ children }: PropsWithChildren) {
       ...prev,
       tasks: { ...prev.tasks, wfdAssessment: 'Done' },
       saved: { ...prev.saved, wfdAssessment: true },
+    }));
+
+  // Save Prep for consultee: ticked "completed" → Done; otherwise → In progress.
+  // Status "In progress" is OOB on Task activities; the checkbox is a Two Options field.
+  const savePrepForConsultee = () =>
+    setState(prev => ({
+      ...prev,
+      tasks: {
+        ...prev.tasks,
+        prepForConsultee: prev.prepForConsulteeMeta.completed ? 'Done' : 'In progress',
+      },
+      saved: { ...prev.saved, prepForConsultee: true },
     }));
 
   // Clears every prototype key on this origin (live + all frozen iterations),
@@ -337,6 +464,9 @@ export function TaskProvider({ children }: PropsWithChildren) {
         siteCheckForm: state.siteCheckForm,
         wfdForm: state.wfdForm,
         mppForm: state.mppForm,
+        prepForConsulteeForm: state.prepForConsulteeForm,
+        prepForConsulteeMeta: state.prepForConsulteeMeta,
+        recentOrganisations: state.recentOrganisations,
         saved: state.saved,
         transfers: state.transfers,
         rejections: state.rejections,
@@ -348,9 +478,13 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setSiteCheckField,
         setWfdReview,
         setMppField,
+        setPrepForConsulteeRow,
+        setPrepForConsulteeCompleted,
+        addRecentOrganisation,
         markUnsaved,
         completeSiteCheck,
         completeWfd,
+        savePrepForConsultee,
         resetAll,
       }}
     >
