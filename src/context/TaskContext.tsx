@@ -120,9 +120,7 @@ interface PersistedState {
 
 function emptyConsulteeRow(): ConsulteeRow {
   return {
-    id: typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `consultee-${Date.now()}`,
+    id: crypto.randomUUID(),
     organisation: '',
     notes: '',
   };

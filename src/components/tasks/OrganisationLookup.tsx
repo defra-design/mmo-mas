@@ -21,15 +21,10 @@ import {
   DismissRegular,
   DocumentRegular,
 } from '@fluentui/react-icons';
-
 // Seed Organisation (Account) records a real lookup view would return.
-export const ORGANISATION_OPTIONS = [
-  'Environment Agency',
-  'MMO Coastal Offices',
-  'MCA',
-  'IFCA',
-  'Natural England',
-] as const;
+// Kept in mock-data (not exported from this component file) so the module only
+// exports the component — fast refresh / react-refresh lint requires that.
+import organisationOptions from '../../mock-data/organisations.json';
 
 // D365 colour tokens (same as CLAUDE.md) — used on the portalled flyout only.
 const D365 = {
@@ -178,7 +173,7 @@ export default function OrganisationLookup({ value, onSelect }: OrganisationLook
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open]);
 
-  const filtered = ORGANISATION_OPTIONS.filter(org =>
+  const filtered = organisationOptions.filter(org =>
     org.toLowerCase().includes(query.trim().toLowerCase()),
   );
   const recent = filtered.slice(0, 3);
