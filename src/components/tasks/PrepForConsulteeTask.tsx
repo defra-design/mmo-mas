@@ -168,7 +168,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                   Organisation
                 </TableHeaderCell>
                 <TableHeaderCell className={styles.headerCell} style={{ width: COLS.notes }}>
-                  Notes
+                  Notes for the organisation
                 </TableHeaderCell>
               </TableRow>
             </TableHeader>
