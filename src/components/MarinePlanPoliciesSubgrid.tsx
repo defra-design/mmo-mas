@@ -429,11 +429,11 @@ export default function MarinePlanPoliciesSubgrid({
 
   return (
     <div>
-      <Text as="h2" className={styles.heading}>Marine plan policies</Text>
+      <Text as="h2" className={styles.heading}>Marine plan policy assessments</Text>
 
       <div className={styles.scroll}>
         <Table
-          aria-label="Marine plan policies"
+          aria-label="Marine plan policy assessments"
           style={{ tableLayout: 'fixed', width: '100%', minWidth: MIN_WIDTH }}
         >
           <TableHeader>
