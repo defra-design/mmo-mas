@@ -10,6 +10,7 @@ export interface TaskState {
   wfdAssessment: TaskStatus;
   marinePlanPolicies: TaskStatus;
   prepForConsultee: TaskStatus;
+  publicRegister: TaskStatus;
 }
 
 export interface SiteCheckForm {
@@ -49,6 +50,15 @@ export interface PrepForConsulteeMeta {
   completed: boolean;
 }
 
+// Public register task form. `redact` is an OOB Choice column; `completed` is a
+// Two Options column that decides the status on save (as on Prep for consultee).
+// The redaction link itself is a URL column on the case, not a caseworker answer,
+// so it isn't stored here.
+export interface PublicRegisterForm {
+  redact: string;
+  completed: boolean;
+}
+
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
 // task is saved; an edit flips it back to false (matches D365 dirty-tracking).
 export interface SavedState {
@@ -56,6 +66,7 @@ export interface SavedState {
   wfdAssessment: boolean;
   marinePlanPolicies: boolean;
   prepForConsultee: boolean;
+  publicRegister: boolean;
 }
 
 // Records a "Transfer to MCMS" against one case. Two stages, done by two teams:
@@ -107,6 +118,7 @@ interface PersistedState {
   mppForm: MppForm;
   prepForConsulteeForm: PrepForConsulteeForm;
   prepForConsulteeMeta: PrepForConsulteeMeta;
+  publicRegisterForm: PublicRegisterForm;
   // Organisations the caseworker has recently picked in the lookup, most-recent
   // first. Shared across every consultee row/case (a per-user "Recent records"
   // list, like the real D365 lookup); empty until they select one.
@@ -136,18 +148,21 @@ const initialState: PersistedState = {
     wfdAssessment: 'Cannot start yet',
     marinePlanPolicies: 'Cannot start yet',
     prepForConsultee: 'Cannot start yet',
+    publicRegister: 'Cannot start yet',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
   mppForm: {},
   prepForConsulteeForm: [emptyConsulteeRow()],
   prepForConsulteeMeta: { completed: false },
+  publicRegisterForm: { redact: '', completed: false },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
     wfdAssessment: false,
     marinePlanPolicies: false,
     prepForConsultee: false,
+    publicRegister: false,
   },
   transfers: {},
   rejections: {},
@@ -197,6 +212,10 @@ function loadState(): PersistedState {
           ...initialState.prepForConsulteeMeta,
           ...parsed.prepForConsulteeMeta,
         },
+        publicRegisterForm: {
+          ...initialState.publicRegisterForm,
+          ...parsed.publicRegisterForm,
+        },
         recentOrganisations: Array.isArray(parsed.recentOrganisations)
           ? parsed.recentOrganisations
           : initialState.recentOrganisations,
@@ -223,6 +242,7 @@ interface TaskContextValue {
   mppForm: MppForm;
   prepForConsulteeForm: PrepForConsulteeForm;
   prepForConsulteeMeta: PrepForConsulteeMeta;
+  publicRegisterForm: PublicRegisterForm;
   recentOrganisations: string[];
   saved: SavedState;
   transfers: TransfersState;
@@ -246,11 +266,16 @@ interface TaskContextValue {
     value: string,
   ) => void;
   setPrepForConsulteeCompleted: (completed: boolean) => void;
+  setPublicRegisterField: <K extends keyof PublicRegisterForm>(
+    field: K,
+    value: PublicRegisterForm[K],
+  ) => void;
   addRecentOrganisation: (name: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
   completeWfd: () => void;
   savePrepForConsultee: () => void;
+  savePublicRegister: () => void;
   resetAll: () => void;
 }
 
@@ -389,6 +414,15 @@ export function TaskProvider({ children }: PropsWithChildren) {
       prepForConsulteeMeta: { ...prev.prepForConsulteeMeta, completed },
     }));
 
+  const setPublicRegisterField = <K extends keyof PublicRegisterForm>(
+    field: K,
+    value: PublicRegisterForm[K],
+  ) =>
+    setState(prev => ({
+      ...prev,
+      publicRegisterForm: { ...prev.publicRegisterForm, [field]: value },
+    }));
+
   // Records a lookup pick as the most-recent organisation: moves it to the front,
   // de-duplicates, and keeps at most the last 5 (matches D365's "Recent records").
   const RECENT_ORG_LIMIT = 5;
@@ -417,6 +451,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         wfdAssessment: 'To do',
         marinePlanPolicies: 'To do',
         prepForConsultee: 'To do',
+        publicRegister: 'To do',
       },
       saved: { ...prev.saved, siteCheck: true },
     }));
@@ -439,6 +474,18 @@ export function TaskProvider({ children }: PropsWithChildren) {
         prepForConsultee: prev.prepForConsulteeMeta.completed ? 'Done' : 'In progress',
       },
       saved: { ...prev.saved, prepForConsultee: true },
+    }));
+
+  // Save Public register: same two-options rule as Prep for consultee — ticked
+  // "completed" → Done, otherwise → In progress. Nothing depends on this task.
+  const savePublicRegister = () =>
+    setState(prev => ({
+      ...prev,
+      tasks: {
+        ...prev.tasks,
+        publicRegister: prev.publicRegisterForm.completed ? 'Done' : 'In progress',
+      },
+      saved: { ...prev.saved, publicRegister: true },
     }));
 
   // Clears every prototype key on this origin (live + all frozen iterations),
@@ -466,6 +513,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         mppForm: state.mppForm,
         prepForConsulteeForm: state.prepForConsulteeForm,
         prepForConsulteeMeta: state.prepForConsulteeMeta,
+        publicRegisterForm: state.publicRegisterForm,
         recentOrganisations: state.recentOrganisations,
         saved: state.saved,
         transfers: state.transfers,
@@ -480,11 +528,13 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setMppField,
         setPrepForConsulteeRow,
         setPrepForConsulteeCompleted,
+        setPublicRegisterField,
         addRecentOrganisation,
         markUnsaved,
         completeSiteCheck,
         completeWfd,
         savePrepForConsultee,
+        savePublicRegister,
         resetAll,
       }}
     >
