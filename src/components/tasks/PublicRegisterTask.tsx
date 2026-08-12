@@ -165,7 +165,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
               </Text>
               <div className={styles.fields}>
                 <div className={mergeClasses(styles.value, styles.valueMultiline)}>
-                  <Body1>[Applicants answer]</Body1>
+                  <Body1>[Applicant's answer]</Body1>
                 </div>
               </div>
             </div>
