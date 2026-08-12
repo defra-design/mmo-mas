@@ -117,6 +117,15 @@ export default function TaskList({
             )
         : undefined,
     },
+    {
+      key: 'publicRegister',
+      name: 'Public register',
+      status: shownStatus(tasks.publicRegister),
+      onClick: canOpen(tasks.publicRegister)
+        ? () =>
+            navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/public-register`)
+        : undefined,
+    },
   ];
 
   // Original single-row treatment (kept for the standard cases, e.g. MLA/2026/10002).

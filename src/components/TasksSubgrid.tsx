@@ -84,6 +84,12 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
       status: tasks.prepForConsultee,
       slug: 'prep-for-consultee',
     },
+    {
+      key: 'publicRegister',
+      name: 'Public register',
+      status: tasks.publicRegister,
+      slug: 'public-register',
+    },
   ];
 
   return (
