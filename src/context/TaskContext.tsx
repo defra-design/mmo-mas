@@ -50,12 +50,14 @@ export interface PrepForConsulteeMeta {
   completed: boolean;
 }
 
-// Public register task form. `redact` is an OOB Choice column; `completed` is a
-// Two Options column that decides the status on save (as on Prep for consultee).
-// The redaction link itself is a URL column on the case, not a caseworker answer,
-// so it isn't stored here.
+// Public register task form. `redact` is an OOB Choice column; `notes` is a
+// non-mandatory Multiline Text column; `completed` is a Two Options column that
+// decides the status on save (as on Prep for consultee). The redaction link
+// itself is a URL column on the case, not a caseworker answer, so it isn't
+// stored here.
 export interface PublicRegisterForm {
   redact: string;
+  notes: string;
   completed: boolean;
 }
 
@@ -155,7 +157,7 @@ const initialState: PersistedState = {
   mppForm: {},
   prepForConsulteeForm: [emptyConsulteeRow()],
   prepForConsulteeMeta: { completed: false },
-  publicRegisterForm: { redact: '', completed: false },
+  publicRegisterForm: { redact: '', notes: '', completed: false },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
