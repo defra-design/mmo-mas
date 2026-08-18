@@ -179,18 +179,14 @@ interface MarinePlanPoliciesSubgridProps {
   caseId: string;
   /** Status shown for a policy that hasn't been assessed yet. */
   defaultStatus?: string;
-  /** When true, ignore the task gating: every policy is always openable. */
+  /** When true, ignore the task gating: the Outcome never reads "Cannot start yet". */
   ungated?: boolean;
-  /** When true, policies stay openable even while gated, but the Outcome still
-   *  reads "Cannot start yet" until Site check is done (MLA/2026/10014). */
-  openableWhenLocked?: boolean;
 }
 
 export default function MarinePlanPoliciesSubgrid({
   caseId,
   defaultStatus = 'To do',
   ungated = false,
-  openableWhenLocked = false,
 }: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();
   const navigate = useNavigate();
@@ -202,10 +198,9 @@ export default function MarinePlanPoliciesSubgrid({
   const [sort, setSort] = useState<SortState>({ key: 'group', dir: 'asc' });
   const [filters, setFilters] = useState<Filters>({});
 
+  // While locked the Outcome reads "Cannot start yet", but the policy still
+  // opens — read-only — because D365 cannot lock a caseworker out of a record.
   const locked = !ungated && tasks.marinePlanPolicies === 'Cannot start yet';
-  // While locked the Outcome reads "Cannot start yet"; openableWhenLocked keeps
-  // the policy link clickable regardless so the caseworker can preview it.
-  const rowsOpenable = !locked || openableWhenLocked;
 
   // Build the display rows (with the computed Outcome value) once, then filter
   // and sort them so both operate on what the caseworker actually sees.
@@ -462,7 +457,7 @@ export default function MarinePlanPoliciesSubgrid({
                         read-only grid behaviour; other cells stay plain text. */}
                     <TruncatedCell
                       value={row.label}
-                      onClick={rowsOpenable ? openPolicy : undefined}
+                      onClick={openPolicy}
                     />
                   </TableCell>
                   <TableCell style={{ width: COLS.group, paddingLeft: CELL_PAD_LEFT }}>

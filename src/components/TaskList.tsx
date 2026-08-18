@@ -70,61 +70,43 @@ interface TaskListProps {
   /** When true, the policies are shown as their own list, so the single
    *  "Marine plan policies" task row is omitted (exploration cases only). */
   mppInSeparateList?: boolean;
-  /** When true, no task is gated: every task is clickable and any
-   *  "Cannot start yet" is shown as "To do" (demo case MLA/2026/10014). */
-  ungated?: boolean;
 }
 
-export default function TaskList({
-  caseId,
-  mppInSeparateList = false,
-  ungated = false,
-}: TaskListProps) {
+export default function TaskList({ caseId, mppInSeparateList = false }: TaskListProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks } = useTasks();
 
-  // In the ungated demo, a locked task reads as "To do" and stays clickable.
-  const shownStatus = (s: TaskStatus): TaskStatus =>
-    ungated && s === 'Cannot start yet' ? 'To do' : s;
-  const canOpen = (s: TaskStatus) => ungated || s !== 'Cannot start yet';
+  // Every task opens, whatever its status — D365 cannot lock a caseworker out of
+  // a record. A task still gated behind Site check ("Cannot start yet") opens
+  // read-only instead, so the row is always a link.
+  const open = (slug: string) => () =>
+    navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/${slug}`);
 
   const rows: TaskRow[] = [
     {
       key: 'siteCheck',
       name: 'Site check',
-      status: shownStatus(tasks.siteCheck),
-      onClick: canOpen(tasks.siteCheck)
-        ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/site-check`)
-        : undefined,
+      status: tasks.siteCheck,
+      onClick: open('site-check'),
     },
     {
       key: 'wfd',
       name: 'Water Framework Directive',
-      status: shownStatus(tasks.wfdAssessment),
-      onClick: canOpen(tasks.wfdAssessment)
-        ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/wfd`)
-        : undefined,
+      status: tasks.wfdAssessment,
+      onClick: open('wfd'),
     },
     {
       key: 'prepForConsultee',
       name: 'Prepare for consultation',
-      status: shownStatus(tasks.prepForConsultee),
-      onClick: canOpen(tasks.prepForConsultee)
-        ? () =>
-            navigate(
-              `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/prep-for-consultee`,
-            )
-        : undefined,
+      status: tasks.prepForConsultee,
+      onClick: open('prep-for-consultee'),
     },
     {
       key: 'publicRegister',
       name: 'Public register',
-      status: shownStatus(tasks.publicRegister),
-      onClick: canOpen(tasks.publicRegister)
-        ? () =>
-            navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/public-register`)
-        : undefined,
+      status: tasks.publicRegister,
+      onClick: open('public-register'),
     },
   ];
 

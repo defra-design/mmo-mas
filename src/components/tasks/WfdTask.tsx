@@ -17,8 +17,13 @@ import { ArrowDownloadRegular, DismissCircleRegular } from '@fluentui/react-icon
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
-import RequiredLabel from './RequiredLabel';
-import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
+import TaskFieldLabel from './TaskFieldLabel';
+import FieldLock from './FieldLock';
+import {
+  CANNOT_START_MESSAGE,
+  notificationMessage,
+  requiredMessage,
+} from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { asset } from '../../utils/asset';
 
@@ -108,7 +113,10 @@ interface WfdTaskProps {
 export default function WfdTask({ caseId }: WfdTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { wfdForm, saved, setWfdReview, markUnsaved, completeWfd } = useTasks();
+  const { tasks, wfdForm, saved, setWfdReview, markUnsaved, completeWfd } = useTasks();
+  // Gated behind Site check. The record still opens — D365 cannot lock a
+  // caseworker out — but it opens read-only: padlocked fields, no Save command.
+  const locked = tasks.wfdAssessment === 'Cannot start yet';
   // Set on a failed save, cleared as soon as the field is given a value.
   const [error, setError] = useState(false);
 
@@ -123,13 +131,15 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
   return (
     <div className={styles.page}>
+      {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
+
       {error && (
         <FormNotification level="error">{notificationMessage([REVIEW_FIELD])}</FormNotification>
       )}
 
       <FormCommandBar
-        saveLabel="Save and close"
-        onSave={handleSave}
+        saveLabel={locked ? undefined : 'Save and close'}
+        onSave={locked ? undefined : handleSave}
         backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
@@ -146,18 +156,20 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
           <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
-              <Text className={styles.label}>
+              <TaskFieldLabel className={styles.label}>
                 Is your project within one nautical mile (1.85km) of the low-water line, or in a
                 tidal river or estuary?
-              </Text>
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>Yes</Body1></div>
               </div>
             </div>
             <div className={styles.row}>
-              <Text className={styles.label}>
+              <TaskFieldLabel className={styles.label}>
                 Is your project limited to one of the following excluded activities?
-              </Text>
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>No</Body1></div>
               </div>
@@ -183,7 +195,10 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               </li>
             </ul>
             <div className={styles.row}>
-              <Text className={styles.label}>Assessment provided</Text>
+              <TaskFieldLabel className={styles.label}>
+                Assessment provided
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
@@ -205,26 +220,38 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
         <div>
           <Text block className={styles.sectionHeading}>2. WFD review</Text>
           <div className={mergeClasses(styles.row, styles.reviewRow)}>
-            <RequiredLabel className={mergeClasses(styles.label, styles.reviewLabel)}>
+            <TaskFieldLabel
+              className={mergeClasses(styles.label, styles.reviewLabel)}
+              required
+            >
               Is the WFD section complete and acceptable?
-            </RequiredLabel>
+            </TaskFieldLabel>
+            {locked && <FieldLock />}
             <div className={styles.fields}>
-              <Field
-                className={styles.control}
-                validationState={error ? 'error' : 'none'}
-                validationMessage={error ? requiredMessage(REVIEW_FIELD) : undefined}
-                validationMessageIcon={<DismissCircleRegular />}
-              >
-                <OutcomeDropdown
-                  value={wfdForm.review}
-                  options={reviewOptions}
-                  onSelect={v => {
-                    setWfdReview(v);
-                    setError(false);
-                    markUnsaved('wfdAssessment');
-                  }}
-                />
-              </Field>
+              {/* A read-only choice field has no select at all in D365 — just its
+                  value on the same grey background the editable one uses. */}
+              {locked ? (
+                <div className={mergeClasses(styles.value, styles.control)}>
+                  <Body1>{wfdForm.review || '\u00a0'}</Body1>
+                </div>
+              ) : (
+                <Field
+                  className={styles.control}
+                  validationState={error ? 'error' : 'none'}
+                  validationMessage={error ? requiredMessage(REVIEW_FIELD) : undefined}
+                  validationMessageIcon={<DismissCircleRegular />}
+                >
+                  <OutcomeDropdown
+                    value={wfdForm.review}
+                    options={reviewOptions}
+                    onSelect={v => {
+                      setWfdReview(v);
+                      setError(false);
+                      markUnsaved('wfdAssessment');
+                    }}
+                  />
+                </Field>
+              )}
             </div>
           </div>
         </div>

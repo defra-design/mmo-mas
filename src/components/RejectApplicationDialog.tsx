@@ -29,7 +29,6 @@ export const REJECTION_REASONS = [
   'Other authorities',
   'Pre-application consultation',
   'Sharing your project information publicly',
-  'Other problems',
 ];
 
 export default function RejectApplicationDialog({

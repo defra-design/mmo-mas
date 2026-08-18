@@ -73,8 +73,9 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   const navigate = useNavigate();
   const { tasks } = useTasks();
 
-  // WFD is gated behind Site check: while "Cannot start yet" it's a plain,
-  // non-openable row (the same locked treatment the MPP subgrid uses).
+  // Every task opens, whatever its status. A task still gated behind Site check
+  // ("Cannot start yet") opens read-only rather than being unclickable — D365
+  // cannot lock a caseworker out of a record.
   const rows: TaskRow[] = [
     { key: 'siteCheck', name: 'Site check', status: tasks.siteCheck, slug: 'site-check' },
     { key: 'wfd', name: 'Water Framework Directive', status: tasks.wfdAssessment, slug: 'wfd' },
@@ -109,25 +110,20 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
           </TableHeader>
           <tbody>
             {rows.map(row => {
-              const locked = row.status === 'Cannot start yet';
               const openTask = () =>
                 navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/${row.slug}`);
               return (
                 <TableRow key={row.key} className={styles.row}>
                   <TableCell style={{ width: COLS.task }}>
                     {/* Primary column is a hyperlink that opens the record — OOB
-                        read-only grid behaviour; a gated row stays plain text. */}
-                    {locked ? (
-                      <span className={styles.cellText} title={row.name}>{row.name}</span>
-                    ) : (
-                      <button
-                        className={`link-button ${styles.cellText}`}
-                        title={row.name}
-                        onClick={openTask}
-                      >
-                        {row.name}
-                      </button>
-                    )}
+                        read-only grid behaviour. Gated rows open read-only. */}
+                    <button
+                      className={`link-button ${styles.cellText}`}
+                      title={row.name}
+                      onClick={openTask}
+                    >
+                      {row.name}
+                    </button>
                   </TableCell>
                   <TableCell style={{ width: COLS.status }}>
                     <span className={`${styles.cellText} ${styles.statusText}`} title={row.status}>{row.status}</span>

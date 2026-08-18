@@ -91,16 +91,15 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
       {pagePolicies.map(policy => {
         const outcome = mppForm[policy.code]?.outcome;
         const status = locked ? 'Cannot start yet' : outcome || 'To do';
-        const onClick = locked
-          ? undefined
-          : () =>
-              navigate(
-                `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${policy.code}`
-              );
+        // Openable whatever the status — a gated policy opens read-only.
+        const onClick = () =>
+          navigate(
+            `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${policy.code}`
+          );
         return (
           <div
             key={policy.code}
-            className={`${styles.row} ${onClick ? styles.rowClickable : ''}`}
+            className={`${styles.row} ${styles.rowClickable}`}
             onClick={onClick}
           >
             <div className={styles.rowText}>
