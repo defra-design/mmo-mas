@@ -25,9 +25,14 @@ import { DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
-import RequiredLabel from './RequiredLabel';
+import TaskFieldLabel from './TaskFieldLabel';
+import FieldLock from './FieldLock';
 import UrlField from './UrlField';
-import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
+import {
+  CANNOT_START_MESSAGE,
+  notificationMessage,
+  requiredMessage,
+} from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 
 const useStyles = makeStyles({
@@ -90,6 +95,9 @@ const useStyles = makeStyles({
     ...shorthands.border('none'),
     '::after': { ...shorthands.border('none') },
   },
+  // A read-only record's fields look exactly like an editable one's — D365 greys
+  // nothing out. Only the caret gives it away, so drop the text cursor.
+  textareaReadOnly: { '& textarea': { cursor: 'default' } },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
@@ -110,7 +118,7 @@ const REDACT_FIELD = 'Redact the application';
 // the click target is the GOV.UK prototype instead (prototype-only split).
 const REDACT_URL = 'https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a';
 const REDACT_HREF =
-  'https://marine-licensing-prototype-5b7b33ca29e1.herokuapp.com/versions/multiple-sites-v2/low-complexity-v4/redact/redact-details?redact-site-type=upload';
+  'https://marine-licensing-prototype-5b7b33ca29e1.herokuapp.com/versions/multiple-sites-v2/low-complexity-v4/redact/redact-details?redact-site-type=circular';
 
 interface PublicRegisterTaskProps {
   caseId: string;
@@ -119,8 +127,11 @@ interface PublicRegisterTaskProps {
 export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { publicRegisterForm, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
+  const { tasks, publicRegisterForm, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
     useTasks();
+  // Gated behind Site check. The record still opens — D365 cannot lock a
+  // caseworker out — but it opens read-only: padlocked fields, no Save command.
+  const locked = tasks.publicRegister === 'Cannot start yet';
   // Set on a failed save, cleared as soon as the field is given a value.
   const [error, setError] = useState(false);
 
@@ -140,13 +151,15 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
   return (
     <div className={styles.page}>
+      {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
+
       {error && (
         <FormNotification level="error">{notificationMessage([REDACT_FIELD])}</FormNotification>
       )}
 
       <FormCommandBar
-        saveLabel="Save and close"
-        onSave={handleSave}
+        saveLabel={locked ? undefined : 'Save and close'}
+        onSave={locked ? undefined : handleSave}
         backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
@@ -163,17 +176,21 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
-              <Text className={styles.label}>
+              <TaskFieldLabel className={styles.label}>
                 Request that information is withheld from the public register?
-              </Text>
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>Yes</Body1></div>
               </div>
             </div>
             <div className={mergeClasses(styles.row, styles.topRow)}>
-              <Text className={mergeClasses(styles.label, styles.topLabel)}>
+              <TaskFieldLabel
+                className={mergeClasses(styles.label, styles.topLabel)}
+              >
                 The information the applicant wants withheld and why.
-              </Text>
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={mergeClasses(styles.value, styles.valueMultiline)}>
                   <Body1>[Applicant's answer]</Body1>
@@ -189,35 +206,50 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           <Text block className={styles.sectionHeading}>2. Redaction</Text>
           <div className={styles.answers}>
             <div className={mergeClasses(styles.row, styles.topRow)}>
-              <RequiredLabel className={mergeClasses(styles.label, styles.topLabel)}>
+              <TaskFieldLabel
+                className={mergeClasses(styles.label, styles.topLabel)}
+                required
+              >
                 Do you want to redact the application?
-              </RequiredLabel>
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
-                <Field
-                  className={styles.control}
-                  validationState={error ? 'error' : 'none'}
-                  validationMessage={error ? requiredMessage(REDACT_FIELD) : undefined}
-                  validationMessageIcon={<DismissCircleRegular />}
-                >
-                  <OutcomeDropdown
-                    value={publicRegisterForm.redact}
-                    options={redactOptions}
-                    onSelect={v => {
-                      setPublicRegisterField('redact', v);
-                      setError(false);
-                      markUnsaved('publicRegister');
-                    }}
-                  />
-                </Field>
+                {/* A read-only choice field has no select at all in D365 — just its
+                    value on the same grey background the editable one uses. */}
+                {locked ? (
+                  <div className={mergeClasses(styles.value, styles.control)}>
+                    <Body1>{publicRegisterForm.redact || '\u00a0'}</Body1>
+                  </div>
+                ) : (
+                  <Field
+                    className={styles.control}
+                    validationState={error ? 'error' : 'none'}
+                    validationMessage={error ? requiredMessage(REDACT_FIELD) : undefined}
+                    validationMessageIcon={<DismissCircleRegular />}
+                  >
+                    <OutcomeDropdown
+                      value={publicRegisterForm.redact}
+                      options={redactOptions}
+                      onSelect={v => {
+                        setPublicRegisterField('redact', v);
+                        setError(false);
+                        markUnsaved('publicRegister');
+                      }}
+                    />
+                  </Field>
+                )}
               </div>
             </div>
 
             {showRedactLink && (
               <div className={mergeClasses(styles.row, styles.topRow)}>
-                <Text className={mergeClasses(styles.label, styles.topLabel)}>
+                <TaskFieldLabel
+                  className={mergeClasses(styles.label, styles.topLabel)}
+                >
                   Select the link to redact the application. You will be able to choose which
                   parts of the application to redact.
-                </Text>
+                </TaskFieldLabel>
+                {locked && <FieldLock />}
                 <div className={styles.fields}>
                   <div className={styles.control}>
                     <UrlField
@@ -237,18 +269,22 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
         <div>
           <Text block className={styles.sectionHeading}>3. Notes</Text>
           <div className={mergeClasses(styles.row, styles.topRow)}>
-            <Text className={mergeClasses(styles.label, styles.topLabel)}>
+            <TaskFieldLabel
+              className={mergeClasses(styles.label, styles.topLabel)}
+            >
               Record any additional notes
-            </Text>
+            </TaskFieldLabel>
+            {locked && <FieldLock />}
             <div className={styles.fields}>
               <Field className={styles.control}>
                 <Textarea
-                  className={styles.textarea}
+                  className={mergeClasses(styles.textarea, locked && styles.textareaReadOnly)}
                   appearance="filled-lighter"
                   value={publicRegisterForm.notes}
                   onChange={(_, d) => setPublicRegisterField('notes', d.value)}
                   onBlur={() => markUnsaved('publicRegister')}
-                  resize="vertical"
+                  readOnly={locked}
+                  resize={locked ? 'none' : 'vertical'}
                   rows={5}
                 />
               </Field>
@@ -256,9 +292,12 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           </div>
         </div>
 
+        {/* The task can't be completed while it's gated, so D365 renders the
+            Two Options field disabled along with the rest of the locked form. */}
         <Checkbox
           label="Select to mark the task as complete"
           checked={publicRegisterForm.completed}
+          disabled={locked}
           onChange={(_, data) => {
             setPublicRegisterField('completed', Boolean(data.checked));
             markUnsaved('publicRegister');

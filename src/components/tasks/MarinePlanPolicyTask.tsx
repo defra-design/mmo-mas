@@ -22,8 +22,13 @@ import {
 } from '@fluentui/react-icons';
 import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
-import RequiredLabel from './RequiredLabel';
-import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
+import TaskFieldLabel from './TaskFieldLabel';
+import FieldLock from './FieldLock';
+import {
+  CANNOT_START_MESSAGE,
+  notificationMessage,
+  requiredMessage,
+} from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { policies, policyIndex } from '../../utils/marinePlanPolicies';
 
@@ -128,11 +133,10 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   // record — a locked one has no Save command to fail against.
   const [errors, setErrors] = useState<MppField[]>([]);
 
-  // On MLA/2026/10014 the policies stay openable before Site check, but their
-  // assessment fields are gated: disabled, with the Outcome reading "Cannot start
-  // yet". Completing Site check unlocks them (marinePlanPolicies → "To do").
-  const locked =
-    caseId === 'MLA/2026/10014' && tasks.marinePlanPolicies === 'Cannot start yet';
+  // Policies always open, but before Site check their assessment fields are
+  // gated: read-only, padlocked, with the Outcome reading "Cannot start yet".
+  // Completing Site check unlocks them (marinePlanPolicies → "To do").
+  const locked = tasks.marinePlanPolicies === 'Cannot start yet';
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   // Back and Save and close both return to the tab the policy was opened from,
@@ -190,13 +194,9 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
 
   return (
     <div className={styles.page}>
-      {/* Verbatim from the real system: the record is inactive until Site check
-          completes, so D365 shows its standard read-only notification. */}
-      {locked && (
-        <FormNotification level="read-only">
-          Read-only&nbsp;&nbsp;This record's status: Inactive
-        </FormNotification>
-      )}
+      {/* The record is read-only until Site check completes, so D365 shows its
+          standard read-only notification naming the task that unlocks it. */}
+      {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
 
       {missing.length > 0 && (
         <FormNotification level="error">{notificationMessage(missing)}</FormNotification>
@@ -241,19 +241,22 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
           </Text>
           <div className={styles.answers}>
             <div className={styles.row}>
-              <Text className={styles.label}>Policy group</Text>
+              <TaskFieldLabel className={styles.label}>Policy group</TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>{policy.group}</Body1></div>
               </div>
             </div>
             <div className={styles.row}>
-              <Text className={styles.label}>Policy information</Text>
+              <TaskFieldLabel className={styles.label}>Policy information</TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>{policy.policyInfo}</Body1></div>
               </div>
             </div>
             <div className={styles.row}>
-              <Text className={styles.label}>Applicant's consideration</Text>
+              <TaskFieldLabel className={styles.label}>Applicant's consideration</TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <div className={styles.value}>
                   {policy.consideration.length > 0 ? (
@@ -273,13 +276,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
           <Text block className={styles.sectionHeading}>2. Your assessment</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
-              {/* A locked record's fields aren't required — there is nothing to save
-                  — so the asterisk only appears once the policy is active. */}
-              {locked ? (
-                <Text className={styles.label}>Outcome</Text>
-              ) : (
-                <RequiredLabel className={styles.label}>Outcome</RequiredLabel>
-              )}
+              {/* A locked field keeps its asterisk and gains a padlock, exactly as
+                  the real system renders a business-required field on a locked form. */}
+              <TaskFieldLabel className={styles.label} required>
+                Outcome
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 {/* A read-only choice field has no select at all in D365 — just
                     its value on the same grey background the editable one uses. */}
@@ -301,11 +303,10 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
               </div>
             </div>
             <div className={styles.row}>
-              {locked ? (
-                <Text className={styles.label}>Reason for your decision</Text>
-              ) : (
-                <RequiredLabel className={styles.label}>Reason for your decision</RequiredLabel>
-              )}
+              <TaskFieldLabel className={styles.label} required>
+                Reason for your decision
+              </TaskFieldLabel>
+              {locked && <FieldLock />}
               <div className={styles.fields}>
                 <Field
                   validationState={errorFor('reason') ? 'error' : 'none'}

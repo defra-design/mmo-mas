@@ -18,7 +18,7 @@ import { ArrowDownloadRegular, DismissCircleRegular } from '@fluentui/react-icon
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
-import RequiredLabel from './RequiredLabel';
+import TaskFieldLabel from './TaskFieldLabel';
 import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import type { SiteCheckForm } from '../../context/TaskContext';
@@ -177,9 +177,9 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
             jurisdiction.
           </Text>
           <div className={styles.question}>
-            <RequiredLabel className={styles.label}>
+            <TaskFieldLabel className={styles.label} required>
               Are the coordinates and shape correct and appropriate?
-            </RequiredLabel>
+            </TaskFieldLabel>
             <Field
               className={styles.control}
               validationState={errorFor('coordinatesOk') ? 'error' : 'none'}
@@ -208,9 +208,9 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
             between low and Mean High Water Springs.
           </Text>
           <div className={styles.question}>
-            <RequiredLabel className={styles.label}>
+            <TaskFieldLabel className={styles.label} required>
               Is the site within the WFD assessment area?
-            </RequiredLabel>
+            </TaskFieldLabel>
             <Field
               className={styles.control}
               validationState={errorFor('withinMile') ? 'error' : 'none'}

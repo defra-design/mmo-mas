@@ -330,11 +330,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // MLA/2026/10002 keeps its plain single "Marine plan policies" task row.
   //  · 10012 → paginated policy list in the right-hand rail
   //  · 10013 → full-width policy subgrid stacked under the Case summary + Tasks
-  //  · 10014 → policy subgrid replaces the CDP view on the Marine plan policies
-  //           tab; WFD & MPP are gated behind Site check, but the policies stay
-  //           openable in a disabled (Cannot start yet) state until it's done.
+  //  · 10014 → policy subgrid replaces the CDP view on the Marine plan policies tab
   //  · 10015 → dedicated "Tasks" tab (before Case summary) holding the full-width
-  //           Task grid + full-width MPP subgrid; WFD & MPP gated behind Site check.
+  //           Task grid + full-width MPP subgrid.
+  // Gating is uniform across every case: a task or policy that is "Cannot start
+  // yet" still opens, read-only, until Site check is done.
   const mppRailList = caseId === 'MLA/2026/10012';
   const mppFullWidth = caseId === 'MLA/2026/10013';
   const mppTabList = caseId === 'MLA/2026/10014';
@@ -647,7 +647,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
             {nativeMppTab && (
               <div className={styles.nativeTabBody}>
                 <Card className={styles.mppFullWidthCard}>
-                  <MarinePlanPoliciesSubgrid caseId={caseId} defaultStatus="To do" openableWhenLocked />
+                  <MarinePlanPoliciesSubgrid caseId={caseId} defaultStatus="To do" />
                 </Card>
               </div>
             )}

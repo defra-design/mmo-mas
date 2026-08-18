@@ -9,3 +9,8 @@ export const requiredMessage = (name: string) => `${name}: ${REQUIRED}`;
 
 /** Form-notification text listing every field left empty. */
 export const notificationMessage = (names: string[]) => `${names.join(', ')} : ${REQUIRED}`;
+
+/** D365 read-only notification shown on a task that is gated behind Site check.
+ *  The record is still openable — it is read-only, not hidden. */
+export const CANNOT_START_MESSAGE =
+  'You cannot start this task until you complete the Site check task';
