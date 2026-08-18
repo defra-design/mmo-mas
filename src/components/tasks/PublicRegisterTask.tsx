@@ -18,6 +18,7 @@ import {
   Title3,
   Body1,
   Field,
+  Textarea,
   Checkbox,
 } from '@fluentui/react-components';
 import { DismissCircleRegular } from '@fluentui/react-icons';
@@ -81,6 +82,14 @@ const useStyles = makeStyles({
   // Multiline read-only answer — sized like the multi-line text control it maps to.
   valueMultiline: { minHeight: '120px' },
   control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
+  // Grey, borderless textarea matching Site check notes / Case summary fields.
+  textarea: {
+    width: '100%',
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall,
+    ...shorthands.border('none'),
+    '::after': { ...shorthands.border('none') },
+  },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
@@ -97,9 +106,11 @@ const redactOptions = ['Yes - all of it', REDACT_SOME, 'No - publish all of it']
 // Display name D365 would use for the one business-required field on this form.
 const REDACT_FIELD = 'Redact the application';
 
-// The redaction journey on CDP. It doesn't exist yet, so the field is inert.
-const REDACT_URL =
-  'https://marine-licensing-frontend.test.cdp-int.defra.cloud/redact/6a39375b0e7bc1f2d84a';
+// Displayed as the OOB URL column value. The real CDP journey isn't live, so
+// the click target is the GOV.UK prototype instead (prototype-only split).
+const REDACT_URL = 'https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a';
+const REDACT_HREF =
+  'https://marine-licensing-prototype-5b7b33ca29e1.herokuapp.com/versions/multiple-sites-v2/low-complexity-v4/redact/redact-details?redact-site-type=upload';
 
 interface PublicRegisterTaskProps {
   caseId: string;
@@ -211,13 +222,37 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                   <div className={styles.control}>
                     <UrlField
                       url={REDACT_URL}
+                      href={REDACT_HREF}
                       launchLabel="Redact the application on CDP"
-                      inert
                     />
                   </div>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        <div className={styles.divider} />
+
+        <div>
+          <Text block className={styles.sectionHeading}>3. Notes</Text>
+          <div className={mergeClasses(styles.row, styles.topRow)}>
+            <Text className={mergeClasses(styles.label, styles.topLabel)}>
+              Record any additional notes
+            </Text>
+            <div className={styles.fields}>
+              <Field className={styles.control}>
+                <Textarea
+                  className={styles.textarea}
+                  appearance="filled-lighter"
+                  value={publicRegisterForm.notes}
+                  onChange={(_, d) => setPublicRegisterField('notes', d.value)}
+                  onBlur={() => markUnsaved('publicRegister')}
+                  resize="vertical"
+                  rows={5}
+                />
+              </Field>
+            </div>
           </div>
         </div>
 

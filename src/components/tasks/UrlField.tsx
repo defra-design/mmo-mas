@@ -38,21 +38,27 @@ interface UrlFieldProps {
   url: string;
   /** Accessible name for the launch button, e.g. "Open redaction in a new window". */
   launchLabel: string;
+  /**
+   * Prototype only: destination when it differs from the displayed URL. In real
+   * D365 a URL column shows and launches the same stored value.
+   */
+  href?: string;
   /** Prototype only: the target doesn't exist yet, so clicking does nothing. */
   inert?: boolean;
 }
 
-export default function UrlField({ url, launchLabel, inert = false }: UrlFieldProps) {
+export default function UrlField({ url, launchLabel, href, inert = false }: UrlFieldProps) {
   const styles = useStyles();
+  const target = href ?? url;
   const open = () => {
-    if (!inert) window.open(url, '_blank', 'noopener,noreferrer');
+    if (!inert) window.open(target, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div className={styles.box}>
       <Link
         className={styles.url}
-        href={inert ? undefined : url}
+        href={inert ? undefined : target}
         target={inert ? undefined : '_blank'}
         rel="noopener noreferrer"
         title={url}
