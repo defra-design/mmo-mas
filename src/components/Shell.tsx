@@ -159,7 +159,10 @@ export default function Shell({
           overflow: 'auto',
           minHeight: 0,
           paddingLeft: '20px',
-          paddingRight: '20px'
+          paddingRight: '20px',
+          // Matches the side padding so a form that scrolls doesn't end flush
+          // with the viewport, hiding the bottom of the card.
+          paddingBottom: '20px'
         }}>
           {children}
         </main>

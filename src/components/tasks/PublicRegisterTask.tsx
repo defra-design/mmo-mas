@@ -284,6 +284,8 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           </>
         )}
 
+        <div className={styles.divider} />
+
         {/* The task can't be completed while it's gated, so D365 renders the
             Two Options field disabled along with the rest of the locked form. */}
         <Checkbox

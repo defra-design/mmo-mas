@@ -15,6 +15,11 @@ import { GlobeRegular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   box: {
+    // Fill the value column so the launch button lands hard against its right
+    // edge, as D365 renders a URL column — not hugging the end of the text.
+    flexGrow: 1,
+    flexBasis: 0,
+    minWidth: 0,
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalXS,

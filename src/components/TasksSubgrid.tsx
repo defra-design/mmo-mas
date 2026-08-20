@@ -78,18 +78,18 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   // cannot lock a caseworker out of a record.
   const rows: TaskRow[] = [
     { key: 'siteCheck', name: 'Site check', status: tasks.siteCheck, slug: 'site-check' },
+    {
+      key: 'publicRegister',
+      name: 'Public register',
+      status: tasks.publicRegister,
+      slug: 'public-register',
+    },
     { key: 'wfd', name: 'Water Framework Directive', status: tasks.wfdAssessment, slug: 'wfd' },
     {
       key: 'prepForConsultee',
       name: 'Prepare for consultation',
       status: tasks.prepForConsultee,
       slug: 'prep-for-consultee',
-    },
-    {
-      key: 'publicRegister',
-      name: 'Public register',
-      status: tasks.publicRegister,
-      slug: 'public-register',
     },
   ];
 
