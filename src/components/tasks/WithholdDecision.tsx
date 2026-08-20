@@ -72,17 +72,6 @@ export default function WithholdDecision({
         />
       </TaskRow>
 
-      {needsApplicantText(agree) && (
-        <TaskRow label="What do you want to tell the applicant?" required locked={locked} top>
-          <TaskTextarea
-            value={values[fields.applicantText]}
-            onChange={v => onChange(fields.applicantText, v)}
-            locked={locked}
-            error={errorFor(fields.applicantText)}
-          />
-        </TaskRow>
-      )}
-
       {needsRationale(agree) && (
         <TaskRow label="What is your rationale?" required locked={locked} top>
           <TaskTextarea
@@ -90,6 +79,17 @@ export default function WithholdDecision({
             onChange={v => onChange(fields.rationale, v)}
             locked={locked}
             error={errorFor(fields.rationale)}
+          />
+        </TaskRow>
+      )}
+
+      {needsApplicantText(agree) && (
+        <TaskRow label="What do you want to tell the applicant?" required locked={locked} top>
+          <TaskTextarea
+            value={values[fields.applicantText]}
+            onChange={v => onChange(fields.applicantText, v)}
+            locked={locked}
+            error={errorFor(fields.applicantText)}
           />
         </TaskRow>
       )}

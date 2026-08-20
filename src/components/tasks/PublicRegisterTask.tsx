@@ -209,20 +209,20 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 refusal to explain to the applicant, and the reasoning behind it. */}
             {showsNeither(form.relatesTo) && (
               <>
-                <TaskRow label="What do you want to tell the applicant?" required locked={locked} top>
-                  <TaskTextarea
-                    value={form.neitherApplicantText}
-                    onChange={v => update('neitherApplicantText', v)}
-                    locked={locked}
-                    error={errorFor('neitherApplicantText')}
-                  />
-                </TaskRow>
                 <TaskRow label="What is your rationale?" required locked={locked} top>
                   <TaskTextarea
                     value={form.neitherRationale}
                     onChange={v => update('neitherRationale', v)}
                     locked={locked}
                     error={errorFor('neitherRationale')}
+                  />
+                </TaskRow>
+                <TaskRow label="What do you want to tell the applicant?" required locked={locked} top>
+                  <TaskTextarea
+                    value={form.neitherApplicantText}
+                    onChange={v => update('neitherApplicantText', v)}
+                    locked={locked}
+                    error={errorFor('neitherApplicantText')}
                   />
                 </TaskRow>
               </>

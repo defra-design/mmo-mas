@@ -70,16 +70,16 @@ export function requiredFields(form: PublicRegisterForm): FieldKey[] {
 
   if (showsCommercial(form.relatesTo)) {
     keys.push('commercialAgree');
-    if (needsApplicantText(form.commercialAgree)) keys.push('commercialApplicantText');
     if (needsRationale(form.commercialAgree)) keys.push('commercialRationale');
+    if (needsApplicantText(form.commercialAgree)) keys.push('commercialApplicantText');
   }
   if (showsSecurity(form.relatesTo)) {
     keys.push('securityAgree');
-    if (needsApplicantText(form.securityAgree)) keys.push('securityApplicantText');
     if (needsRationale(form.securityAgree)) keys.push('securityRationale');
+    if (needsApplicantText(form.securityAgree)) keys.push('securityApplicantText');
   }
   if (showsNeither(form.relatesTo)) {
-    keys.push('neitherApplicantText', 'neitherRationale');
+    keys.push('neitherRationale', 'neitherApplicantText');
   }
 
   keys.push('personalInfo');
