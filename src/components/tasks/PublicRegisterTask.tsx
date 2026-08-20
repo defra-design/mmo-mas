@@ -29,6 +29,11 @@ import TaskTextarea from './TaskTextarea';
 import WithholdDecision from './WithholdDecision';
 import UrlField from './UrlField';
 import {
+  CommercialRationaleHint,
+  PersonalInfoHint,
+  SecurityRationaleHint,
+} from './publicRegisterHints';
+import {
   FIELD_NAMES,
   relatesOptions,
   requiredFields,
@@ -187,6 +192,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 values={form}
                 errorFor={errorFor}
                 onChange={update}
+                rationaleHint={<CommercialRationaleHint />}
               />
             )}
 
@@ -202,6 +208,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 values={form}
                 errorFor={errorFor}
                 onChange={update}
+                rationaleHint={<SecurityRationaleHint />}
               />
             )}
 
@@ -236,7 +243,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           <Text block className={styles.sectionHeading}>3. Personal information check</Text>
           <div className={styles.answers}>
             <TaskRow
-              label="Does the application contain personal information that must be removed?"
+              label="Does the application, or any supporting documents, contain personal information about someone else that must be removed before publishing?"
               required
               locked={locked}
               top
@@ -249,6 +256,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 error={errorFor('personalInfo')}
               />
             </TaskRow>
+            <PersonalInfoHint />
 
             {/* Internal only — the applicant isn't told, the information just goes. */}
             {form.personalInfo === YES && (
@@ -270,7 +278,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
             <div>
               <Text block className={styles.sectionHeading}>4. Redact the application</Text>
               <TaskRow
-                label="Select the link to redact the application. You will be able to choose which parts of the application to redact and record a reason for each one."
+                label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
                 locked={locked}
                 top
               >

@@ -8,7 +8,8 @@
 // OOB business rule on that choice: agreeing in full needs only the internal
 // rationale, while a partial agreement or a refusal also needs the wording the
 // applicant will receive. The sub-heading is a form section header.
-import { makeStyles, tokens, Text } from '@fluentui/react-components';
+import type { ReactNode } from 'react';
+import { makeStyles, shorthands, tokens, Text } from '@fluentui/react-components';
 import TaskRow from './TaskRow';
 import TaskChoice from './TaskChoice';
 import TaskTextarea from './TaskTextarea';
@@ -25,6 +26,7 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalL,
   },
+  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   heading: { fontWeight: tokens.fontWeightSemibold },
 });
 
@@ -43,6 +45,8 @@ interface WithholdDecisionProps {
   values: Record<FieldKey, string>;
   errorFor: (field: FieldKey) => string | undefined;
   onChange: (field: FieldKey, value: string) => void;
+  /** Full-width guidance under the rationale field (custom HTML, as on WFD). */
+  rationaleHint?: ReactNode;
 }
 
 export default function WithholdDecision({
@@ -52,12 +56,14 @@ export default function WithholdDecision({
   values,
   errorFor,
   onChange,
+  rationaleHint,
 }: WithholdDecisionProps) {
   const styles = useStyles();
   const agree = values[fields.agree];
 
   return (
     <div className={styles.block}>
+      <div className={styles.divider} />
       <Text block className={styles.heading}>
         {heading}
       </Text>
@@ -73,14 +79,17 @@ export default function WithholdDecision({
       </TaskRow>
 
       {needsRationale(agree) && (
-        <TaskRow label="What is your rationale?" required locked={locked} top>
-          <TaskTextarea
-            value={values[fields.rationale]}
-            onChange={v => onChange(fields.rationale, v)}
-            locked={locked}
-            error={errorFor(fields.rationale)}
-          />
-        </TaskRow>
+        <>
+          <TaskRow label="What is your rationale?" required locked={locked} top>
+            <TaskTextarea
+              value={values[fields.rationale]}
+              onChange={v => onChange(fields.rationale, v)}
+              locked={locked}
+              error={errorFor(fields.rationale)}
+            />
+          </TaskRow>
+          {rationaleHint}
+        </>
       )}
 
       {needsApplicantText(agree) && (
