@@ -8,7 +8,7 @@ import type { PublicRegisterForm } from '../../context/TaskContext';
 
 // "What does the request relate to?" — the two grounds for withholding, either
 // together or neither, so the caseworker never assesses a ground that isn't raised.
-export const RELATES_COMMERCIAL = 'Commercially sensitive';
+export const RELATES_COMMERCIAL = 'Commercial or industrial confidentiality';
 export const RELATES_SECURITY = 'National security';
 export const RELATES_BOTH = 'Both';
 export const RELATES_NEITHER = 'Neither';

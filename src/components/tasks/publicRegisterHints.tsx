@@ -5,7 +5,7 @@ import TaskHint from './TaskHint';
 
 export function PersonalInfoHint() {
   return (
-    <TaskHint>
+    <TaskHint spaceAbove>
       <p>
         Withhold or redact personal data if publishing it would break data protection law
         (including UK GDPR and the Data Protection Act 2018), or reveal more about a person
