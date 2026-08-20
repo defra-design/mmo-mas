@@ -8,7 +8,7 @@ import {
   Button,
   mergeClasses,
 } from '@fluentui/react-components';
-import { ArrowLeftRegular, OpenRegular, SaveRegular, DismissSquareRegular, ArrowExportRegular } from '@fluentui/react-icons';
+import { ArrowLeftRegular, OpenRegular, SaveRegular, DismissSquareRegular, ArrowExportRegular, MailRegular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   bar: {
@@ -42,6 +42,9 @@ const useStyles = makeStyles({
 interface FormCommandBarProps {
   saveLabel?: string;
   onSave?: () => void;
+  /** Show the "Send to applicant" command, which sends the caseworker's decision
+   *  out to the applicant. Prototype: rendered but not yet wired to an action. */
+  showSendToApplicant?: boolean;
   /** Show the reject command; clicking it calls onReject. */
   showReject?: boolean;
   onReject?: () => void;
@@ -59,6 +62,7 @@ interface FormCommandBarProps {
 export default function FormCommandBar({
   saveLabel,
   onSave,
+  showSendToApplicant,
   showReject,
   onReject,
   showTransfer,
@@ -99,6 +103,11 @@ export default function FormCommandBar({
             {saveLabel}
           </Button>
         </>
+      )}
+      {showSendToApplicant && (
+        <Button appearance="subtle" icon={<MailRegular />}>
+          Send to applicant
+        </Button>
       )}
       {showTransfer && (
         <Button appearance="subtle" icon={transferIcon} onClick={onTransfer}>
