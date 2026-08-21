@@ -261,8 +261,21 @@ prototype so both can be tested in the same round**:
 
 | Case | Style | What the caseworker sees |
 |------|-------|--------------------------|
-| **MLA/2026/10014** (and every other case) | **Open** | All guidance sits on the form, marked with an **(i)** icon. Nothing to click; nothing can be missed. |
+| **MLA/2026/10014** (and every case not listed below) | **Open** | All guidance sits on the form, marked with an **(i)** icon. Nothing to click; nothing can be missed. |
 | **MLA/2026/10015** | **Disclosure** | Each block collapses behind a **"Help with …"** link (chevron + blue link text, no icon) that expands on click — the GOV.UK *details* pattern in a Fluent/D365 skin. |
+| **MLA/2026/10013** | **Disclosure** | Same as 10015. This case has no assessment section (see below), so in practice it only affects the personal-information guidance. |
+
+#### The "nothing was requested" variant (MLA/2026/10013)
+
+On **MLA/2026/10013** the applicant answered **No** to the withholding question, so there is
+nothing to assess. The "What they want withheld and why" row and **the whole of section 2
+(Your assessment)** come off the form, and the sections below renumber — Personal information
+check becomes **2**, Redact the application becomes **3**. Because a hidden field is never
+business-required in D365, "What does the request relate to?" is not chased on save either
+(`requiredFields(form, assessed)`).
+
+Which cases behave this way is the **`NO_WITHHOLD_REQUEST`** array at the top of
+`PublicRegisterTask.tsx`, sitting beside `GUIDANCE_AS_DISCLOSURE`.
 
 The idea being tested: new caseworkers can open the guidance when they need it, while
 experienced ones keep it shut and see a much shorter form.
