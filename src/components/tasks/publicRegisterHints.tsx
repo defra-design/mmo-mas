@@ -1,11 +1,19 @@
 // src/components/tasks/publicRegisterHints.tsx
 // Caseworker guidance shown full-width under Public register fields. Same custom
 // HTML injection as the WFD excluded-activity list — not an OOB field description.
+//
+// `disclosure` collapses the guidance behind a "Help with ..." link instead of
+// leaving it open on the form. Set per case so both can be usability tested —
+// see GUIDANCE_AS_DISCLOSURE in PublicRegisterTask.
 import TaskHint from './TaskHint';
 
-export function PersonalInfoHint() {
+interface HintProps {
+  disclosure?: boolean;
+}
+
+export function PersonalInfoHint({ disclosure }: HintProps) {
   return (
-    <TaskHint spaceAbove>
+    <TaskHint spaceAbove title={disclosure ? 'Help with personal information' : undefined}>
       <p>
         Withhold or redact personal data if publishing it would break data protection law
         (including UK GDPR and the Data Protection Act 2018), or reveal more about a person
@@ -37,9 +45,9 @@ export function PersonalInfoHint() {
   );
 }
 
-export function CommercialRationaleHint() {
+export function CommercialRationaleHint({ disclosure }: HintProps) {
   return (
-    <TaskHint>
+    <TaskHint title={disclosure ? 'Help with commercial confidentiality' : undefined}>
       <p>
         Withhold information if it is genuinely confidential and publishing it would damage a
         real business interest. All of these should normally apply:
@@ -66,9 +74,9 @@ export function CommercialRationaleHint() {
   );
 }
 
-export function SecurityRationaleHint() {
+export function SecurityRationaleHint({ disclosure }: HintProps) {
   return (
-    <TaskHint>
+    <TaskHint title={disclosure ? 'Help with national security' : undefined}>
       <p>Withhold information if publishing it would put national security at risk. This includes a likely risk to:</p>
       <ul>
         <li>national security</li>

@@ -91,6 +91,12 @@ const APPLICANT_REQUEST =
 
 // Displayed as the OOB URL column value. The real CDP journey isn't live, so
 // the click target is the GOV.UK prototype instead (prototype-only split).
+// Cases whose Public register guidance collapses behind "Help with ..."
+// disclosures rather than sitting open on the form. Both presentations are in the
+// prototype so the round of testing on 10014 (open) and 10015 (disclosure) can
+// compare them; the guidance copy itself is identical either way.
+const GUIDANCE_AS_DISCLOSURE = ['MLA/2026/10015'];
+
 const REDACT_URL = 'https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a';
 const REDACT_HREF =
   'https://marine-licensing-prototype-5b7b33ca29e1.herokuapp.com/versions/multiple-sites-v2/low-complexity-v4/redact/redact-details?redact-site-type=circular';
@@ -107,6 +113,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked = tasks.publicRegister === 'Cannot start yet';
+  const hideGuidance = GUIDANCE_AS_DISCLOSURE.includes(caseId);
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
   const [errors, setErrors] = useState<FieldKey[]>([]);
 
@@ -192,7 +199,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 values={form}
                 errorFor={errorFor}
                 onChange={update}
-                rationaleHint={<CommercialRationaleHint />}
+                rationaleHint={<CommercialRationaleHint disclosure={hideGuidance} />}
               />
             )}
 
@@ -208,7 +215,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 values={form}
                 errorFor={errorFor}
                 onChange={update}
-                rationaleHint={<SecurityRationaleHint />}
+                rationaleHint={<SecurityRationaleHint disclosure={hideGuidance} />}
               />
             )}
 
@@ -256,7 +263,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 error={errorFor('personalInfo')}
               />
             </TaskRow>
-            <PersonalInfoHint />
+            <PersonalInfoHint disclosure={hideGuidance} />
 
             {/* Internal only — the applicant isn't told, the information just goes. */}
             {form.personalInfo === YES && (
