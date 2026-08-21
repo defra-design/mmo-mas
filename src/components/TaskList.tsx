@@ -91,6 +91,12 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
       onClick: open('site-check'),
     },
     {
+      key: 'publicRegister',
+      name: 'Public register',
+      status: tasks.publicRegister,
+      onClick: open('public-register'),
+    },
+    {
       key: 'wfd',
       name: 'Water Framework Directive',
       status: tasks.wfdAssessment,
@@ -101,12 +107,6 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
       name: 'Prepare for consultation',
       status: tasks.prepForConsultee,
       onClick: open('prep-for-consultee'),
-    },
-    {
-      key: 'publicRegister',
-      name: 'Public register',
-      status: tasks.publicRegister,
-      onClick: open('public-register'),
     },
   ];
 

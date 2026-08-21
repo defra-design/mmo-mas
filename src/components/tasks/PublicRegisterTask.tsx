@@ -1,33 +1,50 @@
 // src/components/tasks/PublicRegisterTask.tsx
 // Task form for "Public register". Section 1 is the applicant's submitted answers
-// (read-only fields on the case). Section 2 is the caseworker's redaction decision
-// — an OOB Choice column, plus a URL column that launches the redaction journey on
-// CDP. The URL row is shown only for a "Yes" answer: OOB that's a business rule
-// (show/hide field on change of the choice), no code needed.
-// A Two Options checkbox marks the task complete: ticked → Done on save,
-// unticked → In progress (OOB Task activity statuses), as on Prep for consultee.
+// (read-only columns on the case). Section 2 is the caseworker's assessment: an
+// OOB Choice column for the grounds raised, which reveals a decision block per
+// ground — or, for "Neither", a straight refusal the applicant is told about.
+// Section 3 is the personal-information check, and section 4 the URL column that
+// launches the redaction journey on CDP. Every show/hide here is an OOB business
+// rule on a choice field, so none of it needs code in the real build.
+// A Two Options checkbox marks the task complete: ticked -> Done on save,
+// unticked -> In progress (OOB Task activity statuses), as on Prep for consultee.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
-  mergeClasses,
   shorthands,
   tokens,
   Card,
   Text,
   Title3,
   Body1,
-  Field,
-  Textarea,
   Checkbox,
 } from '@fluentui/react-components';
-import { DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
-import OutcomeDropdown from './OutcomeDropdown';
-import TaskFieldLabel from './TaskFieldLabel';
-import FieldLock from './FieldLock';
+import TaskRow from './TaskRow';
+import TaskValue from './TaskValue';
+import TaskChoice from './TaskChoice';
+import TaskTextarea from './TaskTextarea';
+import WithholdDecision from './WithholdDecision';
 import UrlField from './UrlField';
+import {
+  CommercialRationaleHint,
+  PersonalInfoHint,
+  SecurityRationaleHint,
+} from './publicRegisterHints';
+import {
+  FIELD_NAMES,
+  relatesOptions,
+  requiredFields,
+  showsCommercial,
+  showsNeither,
+  showsRedact,
+  showsSecurity,
+  yesNoOptions,
+  YES,
+  type FieldKey,
+} from './publicRegisterFields';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
@@ -55,49 +72,6 @@ const useStyles = makeStyles({
     marginBottom: tokens.spacingVerticalL,
   },
   answers: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
-  // Flex (not grid) so the value can wrap under the label at narrow widths.
-  row: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    columnGap: tokens.spacingHorizontalL,
-    rowGap: tokens.spacingVerticalS,
-  },
-  label: { flexShrink: 0, flexBasis: '320px', minWidth: '320px' },
-  // Rows whose control can grow a validation message under it are top-aligned so
-  // the label stays level with the control instead of drifting with the message.
-  topRow: { alignItems: 'flex-start' },
-  topLabel: { paddingTop: tokens.spacingVerticalXS },
-  fields: {
-    flexGrow: 1,
-    flexBasis: '320px',
-    minWidth: 0,
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: tokens.spacingHorizontalL,
-  },
-  value: {
-    flexGrow: 1,
-    flexBasis: 0,
-    minWidth: '140px',
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
-    borderRadius: tokens.borderRadiusSmall,
-  },
-  // Multiline read-only answer — sized like the multi-line text control it maps to.
-  valueMultiline: { minHeight: '120px' },
-  control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
-  // Grey, borderless textarea matching Site check notes / Case summary fields.
-  textarea: {
-    width: '100%',
-    backgroundColor: tokens.colorNeutralBackground3,
-    borderRadius: tokens.borderRadiusSmall,
-    ...shorthands.border('none'),
-    '::after': { ...shorthands.border('none') },
-  },
-  // A read-only record's fields look exactly like an editable one's — D365 greys
-  // nothing out. Only the caret gives it away, so drop the text cursor.
-  textareaReadOnly: { '& textarea': { cursor: 'default' } },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
@@ -107,12 +81,13 @@ const useStyles = makeStyles({
   },
 });
 
-// The only choice that reveals the redaction link (see showRedactLink below).
-const REDACT_SOME = 'Yes - some of it';
-const redactOptions = ['Yes - all of it', REDACT_SOME, 'No - publish all of it'];
-
-// Display name D365 would use for the one business-required field on this form.
-const REDACT_FIELD = 'Redact the application';
+// The applicant's submitted answer, which arrives with the application from CDP.
+const APPLICANT_REQUEST =
+  'We would like the unit rates table in section 4 of our method statement withheld, and ' +
+  'also the vessel movement schedule in appendix B. The unit rates are commercially ' +
+  'confidential and are only shared with our insurer. Two competitors operate in the same ' +
+  'stretch of coast and if they can see our rates they can undercut us. The vessel movement ' +
+  'schedule shows which boats we use and when, which we would rather our competitors did not have.';
 
 // Displayed as the OOB URL column value. The real CDP journey isn't live, so
 // the click target is the GOV.UK prototype instead (prototype-only split).
@@ -127,24 +102,27 @@ interface PublicRegisterTaskProps {
 export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks, publicRegisterForm, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
+  const { tasks, publicRegisterForm: form, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
     useTasks();
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked = tasks.publicRegister === 'Cannot start yet';
-  // Set on a failed save, cleared as soon as the field is given a value.
-  const [error, setError] = useState(false);
+  // Fields left empty on a failed save. Each clears as soon as it's given a value.
+  const [errors, setErrors] = useState<FieldKey[]>([]);
 
-  // Only "some of it" needs the redaction journey — "all of it" simply isn't
-  // published, and "no" publishes as submitted. OOB this is a business rule
-  // showing the URL field when the choice equals that one value.
-  const showRedactLink = publicRegisterForm.redact === REDACT_SOME;
+  const errorFor = (field: FieldKey) =>
+    errors.includes(field) ? requiredMessage(FIELD_NAMES[field]) : undefined;
+
+  const update = (field: FieldKey, value: string) => {
+    setPublicRegisterField(field, value);
+    setErrors(prev => prev.filter(k => k !== field));
+    markUnsaved('publicRegister');
+  };
 
   const handleSave = () => {
-    if (!publicRegisterForm.redact.trim()) {
-      setError(true);
-      return;
-    }
+    const missing = requiredFields(form).filter(k => !form[k].trim());
+    setErrors(missing);
+    if (missing.length) return;
     savePublicRegister();
     navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`);
   };
@@ -153,13 +131,16 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
     <div className={styles.page}>
       {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
 
-      {error && (
-        <FormNotification level="error">{notificationMessage([REDACT_FIELD])}</FormNotification>
+      {errors.length > 0 && (
+        <FormNotification level="error">
+          {notificationMessage(errors.map(k => FIELD_NAMES[k]))}
+        </FormNotification>
       )}
 
       <FormCommandBar
         saveLabel={locked ? undefined : 'Save and close'}
         onSave={locked ? undefined : handleSave}
+        showSendToApplicant={!locked}
         backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
@@ -173,93 +154,85 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
       <Card className={styles.bodyCard}>
         <div>
-          <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
+          <Text block className={styles.sectionHeading}>1. The applicant's request</Text>
           <div className={styles.answers}>
-            <div className={styles.row}>
-              <TaskFieldLabel className={styles.label}>
-                Request that information is withheld from the public register?
-              </TaskFieldLabel>
-              {locked && <FieldLock />}
-              <div className={styles.fields}>
-                <div className={styles.value}><Body1>Yes</Body1></div>
-              </div>
-            </div>
-            <div className={mergeClasses(styles.row, styles.topRow)}>
-              <TaskFieldLabel
-                className={mergeClasses(styles.label, styles.topLabel)}
-              >
-                The information the applicant wants withheld and why.
-              </TaskFieldLabel>
-              {locked && <FieldLock />}
-              <div className={styles.fields}>
-                <div className={mergeClasses(styles.value, styles.valueMultiline)}>
-                  <Body1>[Applicant's answer]</Body1>
-                </div>
-              </div>
-            </div>
+            <TaskRow label="Did the applicant ask for information to be withheld?" locked={locked}>
+              <TaskValue>Yes</TaskValue>
+            </TaskRow>
+            <TaskRow label="What they want withheld and why" locked={locked} top>
+              <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
+            </TaskRow>
           </div>
         </div>
 
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>2. Redaction</Text>
+          <Text block className={styles.sectionHeading}>2. Your assessment</Text>
           <div className={styles.answers}>
-            <div className={mergeClasses(styles.row, styles.topRow)}>
-              <TaskFieldLabel
-                className={mergeClasses(styles.label, styles.topLabel)}
-                required
-              >
-                Do you want to redact the application?
-              </TaskFieldLabel>
-              {locked && <FieldLock />}
-              <div className={styles.fields}>
-                {/* A read-only choice field has no select at all in D365 — just its
-                    value on the same grey background the editable one uses. */}
-                {locked ? (
-                  <div className={mergeClasses(styles.value, styles.control)}>
-                    <Body1>{publicRegisterForm.redact || '\u00a0'}</Body1>
-                  </div>
-                ) : (
-                  <Field
-                    className={styles.control}
-                    validationState={error ? 'error' : 'none'}
-                    validationMessage={error ? requiredMessage(REDACT_FIELD) : undefined}
-                    validationMessageIcon={<DismissCircleRegular />}
-                  >
-                    <OutcomeDropdown
-                      value={publicRegisterForm.redact}
-                      options={redactOptions}
-                      onSelect={v => {
-                        setPublicRegisterField('redact', v);
-                        setError(false);
-                        markUnsaved('publicRegister');
-                      }}
-                    />
-                  </Field>
-                )}
-              </div>
-            </div>
+            <TaskRow label="What does the request relate to?" required locked={locked} top>
+              <TaskChoice
+                value={form.relatesTo}
+                options={relatesOptions}
+                onSelect={v => update('relatesTo', v)}
+                locked={locked}
+                error={errorFor('relatesTo')}
+              />
+            </TaskRow>
 
-            {showRedactLink && (
-              <div className={mergeClasses(styles.row, styles.topRow)}>
-                <TaskFieldLabel
-                  className={mergeClasses(styles.label, styles.topLabel)}
-                >
-                  Select the link to redact the application. You will be able to choose which
-                  parts of the application to redact.
-                </TaskFieldLabel>
-                {locked && <FieldLock />}
-                <div className={styles.fields}>
-                  <div className={styles.control}>
-                    <UrlField
-                      url={REDACT_URL}
-                      href={REDACT_HREF}
-                      launchLabel="Redact the application on CDP"
-                    />
-                  </div>
-                </div>
-              </div>
+            {showsCommercial(form.relatesTo) && (
+              <WithholdDecision
+                heading="Commercial confidentiality"
+                locked={locked}
+                fields={{
+                  agree: 'commercialAgree',
+                  applicantText: 'commercialApplicantText',
+                  rationale: 'commercialRationale',
+                }}
+                values={form}
+                errorFor={errorFor}
+                onChange={update}
+                rationaleHint={<CommercialRationaleHint />}
+              />
+            )}
+
+            {showsSecurity(form.relatesTo) && (
+              <WithholdDecision
+                heading="National security"
+                locked={locked}
+                fields={{
+                  agree: 'securityAgree',
+                  applicantText: 'securityApplicantText',
+                  rationale: 'securityRationale',
+                }}
+                values={form}
+                errorFor={errorFor}
+                onChange={update}
+                rationaleHint={<SecurityRationaleHint />}
+              />
+            )}
+
+            {/* Neither ground is raised, so there is no decision to make — only the
+                refusal to explain to the applicant, and the reasoning behind it. */}
+            {showsNeither(form.relatesTo) && (
+              <>
+                <TaskRow label="What is your rationale?" required locked={locked} top>
+                  <TaskTextarea
+                    value={form.neitherRationale}
+                    onChange={v => update('neitherRationale', v)}
+                    locked={locked}
+                    error={errorFor('neitherRationale')}
+                  />
+                </TaskRow>
+                <TaskRow label="What do you want to tell the applicant?" required locked={locked} top>
+                  <TaskTextarea
+                    value={form.neitherApplicantText}
+                    onChange={v => update('neitherApplicantText', v)}
+                    locked={locked}
+                    error={errorFor('neitherApplicantText')}
+                  />
+                </TaskRow>
+              </>
             )}
           </div>
         </div>
@@ -267,36 +240,65 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>3. Notes</Text>
-          <div className={mergeClasses(styles.row, styles.topRow)}>
-            <TaskFieldLabel
-              className={mergeClasses(styles.label, styles.topLabel)}
+          <Text block className={styles.sectionHeading}>3. Personal information check</Text>
+          <div className={styles.answers}>
+            <TaskRow
+              label="Does the application, or any supporting documents, contain personal information about someone else that must be removed before publishing?"
+              required
+              locked={locked}
+              top
             >
-              Record any additional notes
-            </TaskFieldLabel>
-            {locked && <FieldLock />}
-            <div className={styles.fields}>
-              <Field className={styles.control}>
-                <Textarea
-                  className={mergeClasses(styles.textarea, locked && styles.textareaReadOnly)}
-                  appearance="filled-lighter"
-                  value={publicRegisterForm.notes}
-                  onChange={(_, d) => setPublicRegisterField('notes', d.value)}
-                  onBlur={() => markUnsaved('publicRegister')}
-                  readOnly={locked}
-                  resize={locked ? 'none' : 'vertical'}
-                  rows={5}
+              <TaskChoice
+                value={form.personalInfo}
+                options={yesNoOptions}
+                onSelect={v => update('personalInfo', v)}
+                locked={locked}
+                error={errorFor('personalInfo')}
+              />
+            </TaskRow>
+            <PersonalInfoHint />
+
+            {/* Internal only — the applicant isn't told, the information just goes. */}
+            {form.personalInfo === YES && (
+              <TaskRow label="What personal information needs removing?" required locked={locked} top>
+                <TaskTextarea
+                  value={form.personalInfoDetail}
+                  onChange={v => update('personalInfoDetail', v)}
+                  locked={locked}
+                  error={errorFor('personalInfoDetail')}
                 />
-              </Field>
-            </div>
+              </TaskRow>
+            )}
           </div>
         </div>
+
+        {showsRedact(form.relatesTo) && (
+          <>
+            <div className={styles.divider} />
+            <div>
+              <Text block className={styles.sectionHeading}>4. Redact the application</Text>
+              <TaskRow
+                label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
+                locked={locked}
+                top
+              >
+                <UrlField
+                  url={REDACT_URL}
+                  href={REDACT_HREF}
+                  launchLabel="Redact the application on CDP"
+                />
+              </TaskRow>
+            </div>
+          </>
+        )}
+
+        <div className={styles.divider} />
 
         {/* The task can't be completed while it's gated, so D365 renders the
             Two Options field disabled along with the rest of the locked form. */}
         <Checkbox
           label="Select to mark the task as complete"
-          checked={publicRegisterForm.completed}
+          checked={form.completed}
           disabled={locked}
           onChange={(_, data) => {
             setPublicRegisterField('completed', Boolean(data.checked));
