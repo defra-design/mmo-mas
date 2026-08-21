@@ -19,6 +19,7 @@ around what you actually **see on screen**: for each piece of the UI, where it's
 - [Routes](#routes)
 - [Section by section (Receive and assess)](#section-by-section-receive-and-assess)
   - [Prepare for consultation task (the consultees list)](#prepare-for-consultation-task-the-consultees-list)
+  - [Public register task (and the two guidance styles)](#public-register-task-and-the-two-guidance-styles)
 - [Where data lives](#where-data-lives-the-four-sources)
 - ["I want to change X — where do I look?"](#i-want-to-change-x--where-do-i-look)
 - [Iterations & versioning](#iterations--versioning)
@@ -182,8 +183,14 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
 ### Tasks panel & task forms
 
 - **What you see:** a "Tasks" panel listing caseworker tasks (Site check, Water Framework
-  Directive, Marine plan policies, Prepare for consultation) each with a status. Clicking a
-  startable task opens its form.
+  Directive, Marine plan policies, Prepare for consultation, Public register) each with a
+  status. **Every task opens, whatever its status.**
+- **Gating is read-only, not locked out.** A task still waiting on Site check reads "Cannot
+  start yet", but it still opens — as a **read-only** form: a grey padlock notification
+  reading *"You cannot start this task until you complete the Site check task"*, a padlock
+  against each field, read-only controls, and **no Save** on the command bar. This mirrors
+  real D365, which cannot lock a caseworker out of a record it lets them see. Completing Site
+  check flips the gated tasks to "To do" and the forms become editable.
 - **Task list panel:** `src/components/TaskList.tsx` (and `src/components/TasksSubgrid.tsx`,
   the grid-style variant). In **Version 2** it sits inline on the Case summary tab; in
   **Version 1** (`tasksOnAllTabs = true`) it persists in a rail on every tab. The version is
@@ -193,8 +200,11 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
   - `src/components/tasks/WfdTask.tsx`
   - `src/components/tasks/MarinePlanPolicyTask.tsx`
   - `src/components/tasks/PrepForConsulteeTask.tsx` — see [Prepare for consultation task](#prepare-for-consultation-task-the-consultees-list) below.
+  - `src/components/tasks/PublicRegisterTask.tsx` — see [Public register task](#public-register-task-and-the-two-guidance-styles) below.
   - `src/components/tasks/OutcomeDropdown.tsx` — the shared grey "outcome" select used by the first two.
   - `src/components/tasks/OrganisationLookup.tsx` — the organisation lookup control used by the consultation task.
+  - `src/components/tasks/TaskFieldLabel.tsx` / `FieldLock.tsx` — the required asterisk and the
+    read-only padlock D365 draws against a field.
 - **Task data & status:** **not** in any JSON file. Task statuses and the caseworker's saved
   answers live in runtime state — see below. The applicant answers shown read-only inside a
   task form are currently hard-coded in the form component.
@@ -224,6 +234,64 @@ selected. A "Select to mark the task as complete" checkbox decides the saved sta
 - **Saved answers & status:** `prepForConsulteeForm` (the rows) and `prepForConsulteeMeta` (the
   completion checkbox) in `TaskContext.tsx`, persisted like every other task. Site check's
   `completeSiteCheck()` unlocks this task alongside WFD and Marine plan policies.
+
+### Public register task (and the two guidance styles)
+
+The caseworker decides what — if anything — is withheld from the public register, then sends
+the application off to be redacted. The form is heavily **conditional**: the answer to "What
+does the request relate to?" reveals a decision block for commercial confidentiality, one for
+national security, both, or (for "Neither") a straight refusal to explain to the applicant.
+Every one of those show/hides is an **OOB business rule on a choice field** — no code in the
+real build. A "Select to mark the task as complete" checkbox decides the saved status —
+ticked → **Done**, unticked → **In progress**.
+
+- **Task form:** `src/components/tasks/PublicRegisterTask.tsx`
+- **Field keys, options and conditional logic:** `src/components/tasks/publicRegisterFields.ts`
+- **The reusable row/control pieces:** `TaskRow.tsx`, `TaskValue.tsx`, `TaskChoice.tsx`,
+  `TaskTextarea.tsx`, `WithholdDecision.tsx` (one withhold-or-not block, used twice)
+- **Redaction link:** a **URL column** rendered by `UrlField.tsx` — the raw URL in a grey box
+  with the native globe launch button, exactly as the case's Application URL renders in the
+  real D365 instance. A URL column has no friendly display text OOB, so the value stays a URL.
+  It opens the GOV.UK redaction prototype on CDP.
+
+#### The two guidance styles (A/B for usability testing)
+
+The task carries a lot of caseworker guidance — the legal tests for withholding commercial,
+security and personal information. There are **two presentations of that guidance in the
+prototype so both can be tested in the same round**:
+
+| Case | Style | What the caseworker sees |
+|------|-------|--------------------------|
+| **MLA/2026/10014** (and every other case) | **Open** | All guidance sits on the form, marked with an **(i)** icon. Nothing to click; nothing can be missed. |
+| **MLA/2026/10015** | **Disclosure** | Each block collapses behind a **"Help with …"** link (chevron + blue link text, no icon) that expands on click — the GOV.UK *details* pattern in a Fluent/D365 skin. |
+
+The idea being tested: new caseworkers can open the guidance when they need it, while
+experienced ones keep it shut and see a much shorter form.
+
+**Switching a case between the two is one line** — the `GUIDANCE_AS_DISCLOSURE` array at the
+top of `PublicRegisterTask.tsx`. Add a case reference to it to give that case the disclosure
+style; remove it to go back to open guidance.
+
+**📋 The guidance copy lives in exactly one place:** `src/components/tasks/publicRegisterHints.tsx`
+(`PersonalInfoHint`, `CommercialRationaleHint`, `SecurityRationaleHint`). **Both styles render
+the same text — edit it once and both cases update.** Only the "Help with …" labels are
+specific to the disclosure style, and they live in the same file.
+
+`src/components/tasks/TaskHint.tsx` owns the *presentation* of both: given a `title` it renders
+the collapsed disclosure (Fluent `Accordion`), otherwise the open (i) block. Same body styling
+feeds both, so restyling bullets or paragraph spacing is also a single edit.
+
+**Is the disclosure OOB?** It costs nothing beyond what the open version already costs. D365
+has no native per-field disclosure control, but this guidance is *already* custom-injected HTML
+on the form (a web resource) rather than an OOB field description — so the real build is a
+plain `<details>`/`<summary>` inside the web resource that carries the copy. Same one artefact,
+no PCF, no canvas app. ⚠️ One caveat for the dev team: a plain web resource **won't remember**
+whether a caseworker left the guidance open. If testing says experienced users want it to stay
+shut, that's a few lines of JS in the web resource — cheap, but not free.
+
+**When testing concludes,** dropping the losing style is cheap: keep the disclosure → delete
+the `else` branch in `TaskHint` and the `disclosure` props; keep the open version → delete the
+`if (title)` branch and the titles. The copy file is untouched either way.
 
 ---
 
@@ -279,6 +347,9 @@ and these are **not** written back to the JSON files.
 | Add a new applicant-data tab | follow the checklist in [`CLAUDE.md`](../CLAUDE.md) ("New CDP application-data section checklist") |
 | Add or edit a caseworker task form | `src/components/tasks/` + extend `src/context/TaskContext.tsx` |
 | Change the list of consultee organisations (the org lookup) | `src/mock-data/organisations.json` |
+| Edit the Public register guidance copy (both styles at once) | `src/components/tasks/publicRegisterHints.tsx` |
+| Switch a case between open guidance and "Help with…" disclosures | `GUIDANCE_AS_DISCLOSURE` in `src/components/tasks/PublicRegisterTask.tsx` |
+| Restyle the guidance blocks (either style) | `src/components/tasks/TaskHint.tsx` |
 | Change task status logic / unlocking | `src/context/TaskContext.tsx` |
 | Add a brand-new list view / entity | follow the "New entity scaffold checklist" in [`CLAUDE.md`](../CLAUDE.md) |
 
