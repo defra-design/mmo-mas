@@ -7,17 +7,11 @@
 import type { PublicRegisterForm } from '../../context/TaskContext';
 
 // "What does the request relate to?" — the two grounds for withholding, either
-// together or neither, so the caseworker never assesses a ground that isn't raised.
+// singly or together, so the caseworker never assesses a ground that isn't raised.
 export const RELATES_COMMERCIAL = 'Commercial or industrial confidentiality';
 export const RELATES_SECURITY = 'National security';
 export const RELATES_BOTH = 'Both';
-export const RELATES_NEITHER = 'Neither';
-export const relatesOptions = [
-  RELATES_COMMERCIAL,
-  RELATES_SECURITY,
-  RELATES_BOTH,
-  RELATES_NEITHER,
-];
+export const relatesOptions = [RELATES_COMMERCIAL, RELATES_SECURITY, RELATES_BOTH];
 
 // "Do you agree with this request?" — asked once per ground raised.
 export const AGREE_ALL = 'Agree - withhold all of it';
@@ -40,10 +34,6 @@ export const showsCommercial = (relatesTo: string) =>
   relatesTo === RELATES_COMMERCIAL || relatesTo === RELATES_BOTH;
 export const showsSecurity = (relatesTo: string) =>
   relatesTo === RELATES_SECURITY || relatesTo === RELATES_BOTH;
-export const showsNeither = (relatesTo: string) => relatesTo === RELATES_NEITHER;
-
-/** Nothing is being withheld, so there is nothing to redact. */
-export const showsRedact = (relatesTo: string) => !showsNeither(relatesTo);
 
 export type FieldKey = Exclude<keyof PublicRegisterForm, 'completed'>;
 
@@ -57,10 +47,8 @@ export const FIELD_NAMES: Record<FieldKey, string> = {
   securityAgree: 'National security decision',
   securityApplicantText: 'National security message to applicant',
   securityRationale: 'National security rationale',
-  neitherApplicantText: 'Message to applicant',
-  neitherRationale: 'Rationale',
   personalInfo: 'Personal information check',
-  personalInfoDetail: 'Personal information to remove',
+  personalInfoDetail: 'Personal information to redact',
 };
 
 /** Every business-required column currently visible on the form. A hidden field is
@@ -77,9 +65,6 @@ export function requiredFields(form: PublicRegisterForm): FieldKey[] {
     keys.push('securityAgree');
     if (needsRationale(form.securityAgree)) keys.push('securityRationale');
     if (needsApplicantText(form.securityAgree)) keys.push('securityApplicantText');
-  }
-  if (showsNeither(form.relatesTo)) {
-    keys.push('neitherRationale', 'neitherApplicantText');
   }
 
   keys.push('personalInfo');

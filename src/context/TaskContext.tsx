@@ -54,7 +54,7 @@ export interface PrepForConsulteeMeta {
 // `personalInfo` are OOB Choice columns; the rest are Multiline Text columns
 // revealed by business rules on those choices (see publicRegisterFields).
 // Commercial confidentiality and national security are assessed separately
-// because a request can raise one, both or neither, and each ground gets its own
+// because a request can raise either or both, and each ground gets its own
 // decision, applicant wording and internal rationale. `completed` is a Two
 // Options column that decides the status on save (as on Prep for consultee).
 // The redaction link itself is a URL column on the case, not a caseworker
@@ -67,8 +67,6 @@ export interface PublicRegisterForm {
   securityAgree: string;
   securityApplicantText: string;
   securityRationale: string;
-  neitherApplicantText: string;
-  neitherRationale: string;
   personalInfo: string;
   personalInfoDetail: string;
   completed: boolean;
@@ -178,8 +176,6 @@ const initialState: PersistedState = {
     securityAgree: '',
     securityApplicantText: '',
     securityRationale: '',
-    neitherApplicantText: '',
-    neitherRationale: '',
     personalInfo: '',
     personalInfoDetail: '',
     completed: false,

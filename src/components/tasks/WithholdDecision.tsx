@@ -1,8 +1,8 @@
 // src/components/tasks/WithholdDecision.tsx
 // One ground for withholding information from the public register — commercial
-// confidentiality or national security. A request can raise either, both or
-// neither, so the same block is rendered once per ground raised, pointed at that
-// ground's own columns via `fields`.
+// confidentiality or national security. A request can raise either or both, so
+// the same block is rendered once per ground raised, pointed at that ground's
+// own columns via `fields`.
 //
 // The decision is a Choice column; which Multiline Text columns follow it is an
 // OOB business rule on that choice: agreeing in full needs only the internal
