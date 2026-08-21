@@ -2,8 +2,7 @@
 // Task form for "Public register". Section 1 is the applicant's submitted answers
 // (read-only columns on the case). Section 2 is the caseworker's assessment: an
 // OOB Choice column for the grounds raised, which reveals a decision block per
-// ground — or, for "Neither", a straight refusal the applicant is told about.
-// Section 3 is the personal-information check, and section 4 the URL column that
+// ground. Section 3 is the personal-information check, and section 4 the URL column that
 // launches the redaction journey on CDP. Every show/hide here is an OOB business
 // rule on a choice field, so none of it needs code in the real build.
 // A Two Options checkbox marks the task complete: ticked -> Done on save,
@@ -38,8 +37,6 @@ import {
   relatesOptions,
   requiredFields,
   showsCommercial,
-  showsNeither,
-  showsRedact,
   showsSecurity,
   yesNoOptions,
   YES,
@@ -218,29 +215,6 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                 rationaleHint={<SecurityRationaleHint disclosure={hideGuidance} />}
               />
             )}
-
-            {/* Neither ground is raised, so there is no decision to make — only the
-                refusal to explain to the applicant, and the reasoning behind it. */}
-            {showsNeither(form.relatesTo) && (
-              <>
-                <TaskRow label="What is your rationale?" required locked={locked} top>
-                  <TaskTextarea
-                    value={form.neitherRationale}
-                    onChange={v => update('neitherRationale', v)}
-                    locked={locked}
-                    error={errorFor('neitherRationale')}
-                  />
-                </TaskRow>
-                <TaskRow label="What do you want to tell the applicant?" required locked={locked} top>
-                  <TaskTextarea
-                    value={form.neitherApplicantText}
-                    onChange={v => update('neitherApplicantText', v)}
-                    locked={locked}
-                    error={errorFor('neitherApplicantText')}
-                  />
-                </TaskRow>
-              </>
-            )}
           </div>
         </div>
 
@@ -267,7 +241,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
             {/* Internal only — the applicant isn't told, the information just goes. */}
             {form.personalInfo === YES && (
-              <TaskRow label="What personal information needs removing?" required locked={locked} top>
+              <TaskRow label="What personal information needs to be redacted, and why?" required locked={locked} top>
                 <TaskTextarea
                   value={form.personalInfoDetail}
                   onChange={v => update('personalInfoDetail', v)}
@@ -279,25 +253,22 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           </div>
         </div>
 
-        {showsRedact(form.relatesTo) && (
-          <>
-            <div className={styles.divider} />
-            <div>
-              <Text block className={styles.sectionHeading}>4. Redact the application</Text>
-              <TaskRow
-                label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
-                locked={locked}
-                top
-              >
-                <UrlField
-                  url={REDACT_URL}
-                  href={REDACT_HREF}
-                  launchLabel="Redact the application on CDP"
-                />
-              </TaskRow>
-            </div>
-          </>
-        )}
+        <div className={styles.divider} />
+
+        <div>
+          <Text block className={styles.sectionHeading}>4. Redact the application</Text>
+          <TaskRow
+            label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
+            locked={locked}
+            top
+          >
+            <UrlField
+              url={REDACT_URL}
+              href={REDACT_HREF}
+              launchLabel="Redact the application on CDP"
+            />
+          </TaskRow>
+        </div>
 
         <div className={styles.divider} />
 

@@ -12,6 +12,7 @@
 // Both are the same injected HTML in the real build: the disclosure is a plain
 // <details>/<summary> inside the web resource that already carries this copy, so
 // it costs nothing beyond what the open version already costs.
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   makeStyles,
@@ -38,8 +39,11 @@ const useStyles = makeStyles({
   spaceAbove: { marginTop: tokens.spacingVerticalXXL },
   spaceAboveDisclosure: { marginTop: tokens.spacingVerticalL },
   // Disclosure variant. Sits flush with the fields above it and reads as a link,
-  // the way D365 renders an inline action on a form.
+  // the way D365 renders an inline action on a form. Open, it needs the full gap
+  // to separate the guidance from the next field; closed it is a single line, and
+  // the same gap leaves it stranded — so the closed state gets a much smaller one.
   disclosure: { marginBottom: tokens.spacingVerticalXXL },
+  disclosureClosed: { marginBottom: tokens.spacingVerticalS },
   header: {
     '& button': {
       ...shorthands.padding('0'),
@@ -99,12 +103,20 @@ interface TaskHintProps {
 
 export default function TaskHint({ children, spaceAbove, title }: TaskHintProps) {
   const styles = useStyles();
+  // Controlled so the closed state can be styled — Fluent puts no open/closed
+  // marker on the Accordion root to hang CSS off.
+  const [open, setOpen] = useState(false);
 
   if (title) {
     return (
       <Accordion
         collapsible
-        className={mergeClasses(styles.disclosure, spaceAbove && styles.spaceAboveDisclosure)}
+        openItems={open ? ['help'] : []}
+        onToggle={(_, data) => setOpen(data.openItems.includes('help'))}
+        className={mergeClasses(
+          open ? styles.disclosure : styles.disclosureClosed,
+          spaceAbove && styles.spaceAboveDisclosure,
+        )}
       >
         <AccordionItem value="help">
           {/* No help icon: the chevron already says it expands and the label

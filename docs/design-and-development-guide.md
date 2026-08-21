@@ -237,12 +237,11 @@ selected. A "Select to mark the task as complete" checkbox decides the saved sta
 
 ### Public register task (and the two guidance styles)
 
-The caseworker decides what — if anything — is withheld from the public register, then sends
-the application off to be redacted. The form is heavily **conditional**: the answer to "What
-does the request relate to?" reveals a decision block for commercial confidentiality, one for
-national security, both, or (for "Neither") a straight refusal to explain to the applicant.
-Every one of those show/hides is an **OOB business rule on a choice field** — no code in the
-real build. A "Select to mark the task as complete" checkbox decides the saved status —
+The caseworker decides what is withheld from the public register, then sends the application
+off to be redacted. The form is heavily **conditional**: the answer to "What does the request
+relate to?" reveals a decision block for commercial confidentiality, one for national security,
+or both. Every one of those show/hides is an **OOB business rule on a choice field** — no code
+in the real build. A "Select to mark the task as complete" checkbox decides the saved status —
 ticked → **Done**, unticked → **In progress**.
 
 - **Task form:** `src/components/tasks/PublicRegisterTask.tsx`
