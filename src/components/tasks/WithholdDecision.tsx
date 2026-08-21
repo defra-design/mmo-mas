@@ -38,7 +38,7 @@ interface DecisionFields {
 }
 
 interface WithholdDecisionProps {
-  /** The ground being assessed, e.g. "Commercial confidentiality". */
+  /** The ground being assessed, e.g. "Commercial or industrial confidentiality". */
   heading: string;
   locked?: boolean;
   fields: DecisionFields;
@@ -68,7 +68,7 @@ export default function WithholdDecision({
         {heading}
       </Text>
 
-      <TaskRow label="Do you agree with this request?" required locked={locked} top>
+      <TaskRow label="Do you agree with the applicant's request?" required locked={locked} top>
         <TaskChoice
           value={agree}
           options={agreeOptions}

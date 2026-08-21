@@ -47,7 +47,7 @@ export function PersonalInfoHint({ disclosure }: HintProps) {
 
 export function CommercialRationaleHint({ disclosure }: HintProps) {
   return (
-    <TaskHint title={disclosure ? 'Help with commercial confidentiality' : undefined}>
+    <TaskHint title={disclosure ? 'Help with commercial or industrial confidentiality' : undefined}>
       <p>
         Withhold information if it is genuinely confidential and publishing it would damage a
         real business interest. All of these should normally apply:

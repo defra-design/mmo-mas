@@ -13,7 +13,7 @@ export const RELATES_SECURITY = 'National security';
 export const RELATES_BOTH = 'Both';
 export const relatesOptions = [RELATES_COMMERCIAL, RELATES_SECURITY, RELATES_BOTH];
 
-// "Do you agree with this request?" — asked once per ground raised.
+// "Do you agree with the applicant's request?" — asked once per ground raised.
 export const AGREE_ALL = 'Agree - withhold all of it';
 export const AGREE_SOME = 'Agree - but only withhold some of it';
 export const DISAGREE = 'Disagree';
@@ -41,9 +41,9 @@ export type FieldKey = Exclude<keyof PublicRegisterForm, 'completed'>;
 // grounds ask identical questions, so each is qualified by the ground it belongs to.
 export const FIELD_NAMES: Record<FieldKey, string> = {
   relatesTo: 'What the request relates to',
-  commercialAgree: 'Commercial confidentiality decision',
-  commercialApplicantText: 'Commercial confidentiality message to applicant',
-  commercialRationale: 'Commercial confidentiality rationale',
+  commercialAgree: 'Commercial or industrial confidentiality decision',
+  commercialApplicantText: 'Commercial or industrial confidentiality message to applicant',
+  commercialRationale: 'Commercial or industrial confidentiality rationale',
   securityAgree: 'National security decision',
   securityApplicantText: 'National security message to applicant',
   securityRationale: 'National security rationale',
