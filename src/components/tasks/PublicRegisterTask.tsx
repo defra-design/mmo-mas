@@ -34,6 +34,8 @@ import {
 } from './publicRegisterHints';
 import {
   FIELD_NAMES,
+  RELATES_COMMERCIAL,
+  RELATES_SECURITY,
   relatesOptions,
   requiredFields,
   showsCommercial,
@@ -186,7 +188,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
             {showsCommercial(form.relatesTo) && (
               <WithholdDecision
-                heading="Commercial confidentiality"
+                heading={RELATES_COMMERCIAL}
                 locked={locked}
                 fields={{
                   agree: 'commercialAgree',
@@ -202,7 +204,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
             {showsSecurity(form.relatesTo) && (
               <WithholdDecision
-                heading="National security"
+                heading={RELATES_SECURITY}
                 locked={locked}
                 fields={{
                   agree: 'securityAgree',
