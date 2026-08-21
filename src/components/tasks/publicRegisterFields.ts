@@ -52,9 +52,12 @@ export const FIELD_NAMES: Record<FieldKey, string> = {
 };
 
 /** Every business-required column currently visible on the form. A hidden field is
- *  never required in D365, so the list changes as the choices above are answered. */
-export function requiredFields(form: PublicRegisterForm): FieldKey[] {
-  const keys: FieldKey[] = ['relatesTo'];
+ *  never required in D365, so the list changes as the choices above are answered.
+ *  `assessed` is false when the applicant asked for nothing to be withheld — the
+ *  whole assessment section is off the form, so none of it can be required. */
+export function requiredFields(form: PublicRegisterForm, assessed = true): FieldKey[] {
+  const keys: FieldKey[] = [];
+  if (assessed) keys.push('relatesTo');
 
   if (showsCommercial(form.relatesTo)) {
     keys.push('commercialAgree');

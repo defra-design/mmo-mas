@@ -93,8 +93,15 @@ const APPLICANT_REQUEST =
 // Cases whose Public register guidance collapses behind "Help with ..."
 // disclosures rather than sitting open on the form. Both presentations are in the
 // prototype so the round of testing on 10014 (open) and 10015 (disclosure) can
-// compare them; the guidance copy itself is identical either way.
-const GUIDANCE_AS_DISCLOSURE = ['MLA/2026/10015'];
+// compare them; the guidance copy itself is identical either way. 10013 has no
+// assessment section, so this only affects its personal-information guidance.
+const GUIDANCE_AS_DISCLOSURE = ['MLA/2026/10013', 'MLA/2026/10015'];
+
+// Cases where the applicant answered "No" to the withholding question. There is
+// then nothing to assess: the reason field and the whole assessment section come
+// off the form and the sections below renumber. Modelled as a business rule on
+// the applicant's own answer, exactly like every other reveal on this form.
+const NO_WITHHOLD_REQUEST = ['MLA/2026/10013'];
 
 const REDACT_URL = 'https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a';
 const REDACT_HREF =
@@ -113,6 +120,11 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked = tasks.publicRegister === 'Cannot start yet';
   const hideGuidance = GUIDANCE_AS_DISCLOSURE.includes(caseId);
+  // Did the applicant ask for anything to be withheld? If not there is no
+  // assessment to make, and sections 3 and 4 move up to 2 and 3.
+  const assessed = !NO_WITHHOLD_REQUEST.includes(caseId);
+  const personalInfoNo = assessed ? 3 : 2;
+  const redactNo = assessed ? 4 : 3;
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
   const [errors, setErrors] = useState<FieldKey[]>([]);
 
@@ -126,7 +138,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
   };
 
   const handleSave = () => {
-    const missing = requiredFields(form).filter(k => !form[k].trim());
+    const missing = requiredFields(form, assessed).filter(k => !form[k].trim());
     setErrors(missing);
     if (missing.length) return;
     savePublicRegister();
@@ -163,67 +175,77 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           <Text block className={styles.sectionHeading}>1. The applicant's request</Text>
           <div className={styles.answers}>
             <TaskRow label="Did the applicant ask for information to be withheld?" locked={locked}>
-              <TaskValue>Yes</TaskValue>
+              <TaskValue>{assessed ? 'Yes' : 'No'}</TaskValue>
             </TaskRow>
-            <TaskRow label="What they want withheld and why" locked={locked} top>
-              <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
-            </TaskRow>
-          </div>
-        </div>
-
-        <div className={styles.divider} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>2. Your assessment</Text>
-          <div className={styles.answers}>
-            <TaskRow label="What does the request relate to?" required locked={locked} top>
-              <TaskChoice
-                value={form.relatesTo}
-                options={relatesOptions}
-                onSelect={v => update('relatesTo', v)}
-                locked={locked}
-                error={errorFor('relatesTo')}
-              />
-            </TaskRow>
-
-            {showsCommercial(form.relatesTo) && (
-              <WithholdDecision
-                heading={RELATES_COMMERCIAL}
-                locked={locked}
-                fields={{
-                  agree: 'commercialAgree',
-                  applicantText: 'commercialApplicantText',
-                  rationale: 'commercialRationale',
-                }}
-                values={form}
-                errorFor={errorFor}
-                onChange={update}
-                rationaleHint={<CommercialRationaleHint disclosure={hideGuidance} />}
-              />
-            )}
-
-            {showsSecurity(form.relatesTo) && (
-              <WithholdDecision
-                heading={RELATES_SECURITY}
-                locked={locked}
-                fields={{
-                  agree: 'securityAgree',
-                  applicantText: 'securityApplicantText',
-                  rationale: 'securityRationale',
-                }}
-                values={form}
-                errorFor={errorFor}
-                onChange={update}
-                rationaleHint={<SecurityRationaleHint disclosure={hideGuidance} />}
-              />
+            {/* Nothing was requested, so the applicant never gave a reason. */}
+            {assessed && (
+              <TaskRow label="What they want withheld and why" locked={locked} top>
+                <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
+              </TaskRow>
             )}
           </div>
         </div>
 
+        {/* No request to assess when the applicant answered "No". */}
+        {assessed && (
+          <>
+            <div className={styles.divider} />
+
+            <div>
+              <Text block className={styles.sectionHeading}>2. Your assessment</Text>
+              <div className={styles.answers}>
+                <TaskRow label="What does the request relate to?" required locked={locked} top>
+                  <TaskChoice
+                    value={form.relatesTo}
+                    options={relatesOptions}
+                    onSelect={v => update('relatesTo', v)}
+                    locked={locked}
+                    error={errorFor('relatesTo')}
+                  />
+                </TaskRow>
+
+                {showsCommercial(form.relatesTo) && (
+                  <WithholdDecision
+                    heading={RELATES_COMMERCIAL}
+                    locked={locked}
+                    fields={{
+                      agree: 'commercialAgree',
+                      applicantText: 'commercialApplicantText',
+                      rationale: 'commercialRationale',
+                    }}
+                    values={form}
+                    errorFor={errorFor}
+                    onChange={update}
+                    rationaleHint={<CommercialRationaleHint disclosure={hideGuidance} />}
+                  />
+                )}
+
+                {showsSecurity(form.relatesTo) && (
+                  <WithholdDecision
+                    heading={RELATES_SECURITY}
+                    locked={locked}
+                    fields={{
+                      agree: 'securityAgree',
+                      applicantText: 'securityApplicantText',
+                      rationale: 'securityRationale',
+                    }}
+                    values={form}
+                    errorFor={errorFor}
+                    onChange={update}
+                    rationaleHint={<SecurityRationaleHint disclosure={hideGuidance} />}
+                  />
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>3. Personal information check</Text>
+          <Text block className={styles.sectionHeading}>
+            {personalInfoNo}. Personal information check
+          </Text>
           <div className={styles.answers}>
             <TaskRow
               label="Does the application, or any supporting documents, contain personal information about someone else that must be removed before publishing?"
@@ -258,7 +280,9 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>4. Redact the application</Text>
+          <Text block className={styles.sectionHeading}>
+            {redactNo}. Redact the application
+          </Text>
           <TaskRow
             label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
             locked={locked}
