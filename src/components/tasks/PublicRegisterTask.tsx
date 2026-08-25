@@ -158,7 +158,6 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
       <FormCommandBar
         saveLabel={locked ? undefined : 'Save and close'}
         onSave={locked ? undefined : handleSave}
-        showSendToApplicant={!locked}
         backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
 
@@ -300,6 +299,9 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
         {/* The task can't be completed while it's gated, so D365 renders the
             Two Options field disabled along with the rest of the locked form. */}
+        <Body1>
+          Any information for the applicant will be sent when the task is complete.
+        </Body1>
         <Checkbox
           label="Select to mark the task as complete"
           checked={form.completed}
