@@ -118,7 +118,7 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
   // Sits at the bottom of the list whichever MPP treatment the case uses.
   rows.push({
     key: 'siteNotice',
-    name: 'Site notice',
+    name: 'Public notice',
     status: tasks.siteNotice,
     onClick: open('site-notice'),
   });

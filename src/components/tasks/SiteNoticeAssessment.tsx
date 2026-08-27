@@ -97,7 +97,7 @@ export default function SiteNoticeAssessment({ form, locked, errorFor, onChange 
           <div className={styles.divider} />
 
           <div>
-            <Text block className={styles.sectionHeading}>4. Who the notice is for</Text>
+            <Text block className={styles.sectionHeading}>4. Who the site notice is for</Text>
             <Text block className={styles.desc}>
               The applicant sees suggested notice locations for the group you choose.
             </Text>

@@ -1,6 +1,7 @@
 // src/components/tasks/siteNoticeHints.tsx
-// Caseworker guidance for the Site notice task, collapsed behind a "Help with ..."
-// disclosure. Same custom HTML injection as the Public register guidance — not an
+// Caseworker guidance for the Site notice fields in the Public notice task,
+// collapsed behind a "Help with ..." disclosure. Same custom HTML injection as
+// the Public register guidance — not an
 // OOB field description. The two worked examples are inset text rather than
 // italics: at this length italics are hard to read, and the left rule marks the
 // quoted copy just as clearly.

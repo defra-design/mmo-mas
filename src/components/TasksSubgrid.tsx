@@ -91,7 +91,7 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
       status: tasks.prepForConsultee,
       slug: 'prep-for-consultee',
     },
-    { key: 'siteNotice', name: 'Site notice', status: tasks.siteNotice, slug: 'site-notice' },
+    { key: 'siteNotice', name: 'Public notice', status: tasks.siteNotice, slug: 'site-notice' },
   ];
 
   return (

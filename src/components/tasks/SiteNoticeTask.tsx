@@ -1,6 +1,7 @@
 // src/components/tasks/SiteNoticeTask.tsx
-// Task form for "Site notice". Section 1 is the applicant's proposed-works summary
-// (a read-only column on the case). Section 2 asks whether a notice is required.
+// Task form for "Public notice", currently capturing the Site notice type.
+// Section 1 is the applicant's proposed-works summary (a read-only column on the
+// case). Section 2 asks whether a site notice is required.
 // OOB business rules reveal either a mandatory rationale for No, or the existing
 // summary and audience sections (renumbered 3 and 4) for Yes.
 import { useState } from 'react';
@@ -119,7 +120,7 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
 
       <Card className={styles.headerCard}>
         <Title3>
-          Site notice
+          Public notice
           <span className={styles.savedLabel}>- {saved.siteNotice ? 'Saved' : 'Unsaved'}</span>
         </Title3>
         <div><Body1>Task</Body1></div>
