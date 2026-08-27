@@ -11,6 +11,7 @@ export interface TaskState {
   marinePlanPolicies: TaskStatus;
   prepForConsultee: TaskStatus;
   publicRegister: TaskStatus;
+  siteNotice: TaskStatus;
 }
 
 export interface SiteCheckForm {
@@ -72,6 +73,16 @@ export interface PublicRegisterForm {
   completed: boolean;
 }
 
+// Site notice task form. `summary` is a Multiline Text column holding the
+// caseworker's shortened description of the works, which goes on the public site
+// notice; `groups` is an OOB Choice column naming who has to be told. The
+// applicant's own proposed-works summary is a read-only column on the case, not a
+// caseworker answer, so it isn't stored here.
+export interface SiteNoticeForm {
+  summary: string;
+  groups: string;
+}
+
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
 // task is saved; an edit flips it back to false (matches D365 dirty-tracking).
 export interface SavedState {
@@ -80,6 +91,7 @@ export interface SavedState {
   marinePlanPolicies: boolean;
   prepForConsultee: boolean;
   publicRegister: boolean;
+  siteNotice: boolean;
 }
 
 // Records a "Transfer to MCMS" against one case. Two stages, done by two teams:
@@ -132,6 +144,7 @@ interface PersistedState {
   prepForConsulteeForm: PrepForConsulteeForm;
   prepForConsulteeMeta: PrepForConsulteeMeta;
   publicRegisterForm: PublicRegisterForm;
+  siteNoticeForm: SiteNoticeForm;
   // Organisations the caseworker has recently picked in the lookup, most-recent
   // first. Shared across every consultee row/case (a per-user "Recent records"
   // list, like the real D365 lookup); empty until they select one.
@@ -162,6 +175,7 @@ const initialState: PersistedState = {
     marinePlanPolicies: 'Cannot start yet',
     prepForConsultee: 'Cannot start yet',
     publicRegister: 'Cannot start yet',
+    siteNotice: 'Cannot start yet',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
@@ -180,6 +194,7 @@ const initialState: PersistedState = {
     personalInfoDetail: '',
     completed: false,
   },
+  siteNoticeForm: { summary: '', groups: '' },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
@@ -187,6 +202,7 @@ const initialState: PersistedState = {
     marinePlanPolicies: false,
     prepForConsultee: false,
     publicRegister: false,
+    siteNotice: false,
   },
   transfers: {},
   rejections: {},
@@ -240,6 +256,7 @@ function loadState(): PersistedState {
           ...initialState.publicRegisterForm,
           ...parsed.publicRegisterForm,
         },
+        siteNoticeForm: { ...initialState.siteNoticeForm, ...parsed.siteNoticeForm },
         recentOrganisations: Array.isArray(parsed.recentOrganisations)
           ? parsed.recentOrganisations
           : initialState.recentOrganisations,
@@ -267,6 +284,7 @@ interface TaskContextValue {
   prepForConsulteeForm: PrepForConsulteeForm;
   prepForConsulteeMeta: PrepForConsulteeMeta;
   publicRegisterForm: PublicRegisterForm;
+  siteNoticeForm: SiteNoticeForm;
   recentOrganisations: string[];
   saved: SavedState;
   transfers: TransfersState;
@@ -294,12 +312,14 @@ interface TaskContextValue {
     field: K,
     value: PublicRegisterForm[K],
   ) => void;
+  setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
   addRecentOrganisation: (name: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
   completeWfd: () => void;
   savePrepForConsultee: () => void;
   savePublicRegister: () => void;
+  saveSiteNotice: () => void;
   resetAll: () => void;
 }
 
@@ -447,6 +467,9 @@ export function TaskProvider({ children }: PropsWithChildren) {
       publicRegisterForm: { ...prev.publicRegisterForm, [field]: value },
     }));
 
+  const setSiteNoticeField = (field: keyof SiteNoticeForm, value: string) =>
+    setState(prev => ({ ...prev, siteNoticeForm: { ...prev.siteNoticeForm, [field]: value } }));
+
   // Records a lookup pick as the most-recent organisation: moves it to the front,
   // de-duplicates, and keeps at most the last 5 (matches D365's "Recent records").
   const RECENT_ORG_LIMIT = 5;
@@ -476,6 +499,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         marinePlanPolicies: 'To do',
         prepForConsultee: 'To do',
         publicRegister: 'To do',
+        siteNotice: 'To do',
       },
       saved: { ...prev.saved, siteCheck: true },
     }));
@@ -512,6 +536,15 @@ export function TaskProvider({ children }: PropsWithChildren) {
       saved: { ...prev.saved, publicRegister: true },
     }));
 
+  // Save the Site notice: both its fields are business-required, so a save that
+  // gets this far has completed the task. Nothing depends on it.
+  const saveSiteNotice = () =>
+    setState(prev => ({
+      ...prev,
+      tasks: { ...prev.tasks, siteNotice: 'Done' },
+      saved: { ...prev.saved, siteNotice: true },
+    }));
+
   // Clears every prototype key on this origin (live + all frozen iterations),
   // not just this app's own key, so the index page's "Clear saved data" wipes
   // everything as it did before iterations got their own scoped keys. The
@@ -538,6 +571,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         prepForConsulteeForm: state.prepForConsulteeForm,
         prepForConsulteeMeta: state.prepForConsulteeMeta,
         publicRegisterForm: state.publicRegisterForm,
+        siteNoticeForm: state.siteNoticeForm,
         recentOrganisations: state.recentOrganisations,
         saved: state.saved,
         transfers: state.transfers,
@@ -553,12 +587,14 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setPrepForConsulteeRow,
         setPrepForConsulteeCompleted,
         setPublicRegisterField,
+        setSiteNoticeField,
         addRecentOrganisation,
         markUnsaved,
         completeSiteCheck,
         completeWfd,
         savePrepForConsultee,
         savePublicRegister,
+        saveSiteNotice,
         resetAll,
       }}
     >
