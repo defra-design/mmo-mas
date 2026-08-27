@@ -1,10 +1,8 @@
 // src/components/tasks/SiteNoticeTask.tsx
 // Task form for "Site notice". Section 1 is the applicant's proposed-works summary
-// (a read-only column on the case). Section 2 is the caseworker's shortened version
-// for the public notice — a Multiline Text column with its guidance collapsed behind
-// a disclosure. Section 3 is a Choice column naming who has to be told. Both
-// caseworker fields are business-required, so a save that passes validation
-// completes the task.
+// (a read-only column on the case). Section 2 asks whether a notice is required.
+// OOB business rules reveal either a mandatory rationale for No, or the existing
+// summary and audience sections (renumbered 3 and 4) for Yes.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,16 +18,18 @@ import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import TaskRow from './TaskRow';
 import TaskValue from './TaskValue';
-import TaskChoice from './TaskChoice';
-import TaskTextarea from './TaskTextarea';
-import { GroupsHint, SummaryHint } from './siteNoticeHints';
+import SiteNoticeAssessment from './SiteNoticeAssessment';
+import {
+  requiredSiteNoticeFields,
+  siteNoticeFieldNames,
+  type SiteNoticeField,
+} from './siteNoticeFields';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
-import type { SiteNoticeForm } from '../../context/TaskContext';
 
 const useStyles = makeStyles({
   page: {
@@ -50,12 +50,6 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
-  // Section description, sitting between the heading and the first field.
-  desc: {
-    color: tokens.colorNeutralForeground2,
-    marginTop: `calc(0px - ${tokens.spacingVerticalS})`,
-    marginBottom: tokens.spacingVerticalL,
-  },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
@@ -73,17 +67,6 @@ const PROPOSED_WORKS =
   'the eastern end. Materials will be delivered by road and placed using a tracked excavator ' +
   'working from the beach during low tide. The works are expected to take 14 weeks.';
 
-// "Select the groups who need to be told" — the audiences a notice can be aimed at.
-const GROUP_OPTIONS = ['Marine users', 'Community users', 'Both'];
-
-// Display names D365 uses when it lists the fields that failed validation.
-const FIELD_NAMES: Record<keyof SiteNoticeForm, string> = {
-  summary: 'Summary of the proposed works',
-  groups: 'Who needs to be told about this application',
-};
-
-type FieldKey = keyof SiteNoticeForm;
-
 interface SiteNoticeTaskProps {
   caseId: string;
 }
@@ -97,19 +80,21 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked = tasks.siteNotice === 'Cannot start yet';
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
-  const [errors, setErrors] = useState<FieldKey[]>([]);
+  const [errors, setErrors] = useState<SiteNoticeField[]>([]);
 
-  const errorFor = (field: FieldKey) =>
-    errors.includes(field) ? requiredMessage(FIELD_NAMES[field]) : undefined;
+  const errorFor = (field: SiteNoticeField) =>
+    errors.includes(field) ? requiredMessage(siteNoticeFieldNames[field]) : undefined;
 
-  const update = (field: FieldKey, value: string) => {
+  const update = (field: SiteNoticeField, value: string) => {
     setSiteNoticeField(field, value);
-    setErrors(prev => prev.filter(k => k !== field));
+    const nextForm = { ...form, [field]: value };
+    const stillRequired = requiredSiteNoticeFields(nextForm);
+    setErrors(prev => prev.filter(k => k !== field && stillRequired.includes(k)));
     markUnsaved('siteNotice');
   };
 
   const handleSave = () => {
-    const missing = (Object.keys(FIELD_NAMES) as FieldKey[]).filter(k => !form[k].trim());
+    const missing = requiredSiteNoticeFields(form).filter(k => !form[k].trim());
     setErrors(missing);
     if (missing.length) return;
     saveSiteNotice();
@@ -122,7 +107,7 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
 
       {errors.length > 0 && (
         <FormNotification level="error">
-          {notificationMessage(errors.map(k => FIELD_NAMES[k]))}
+          {notificationMessage(errors.map(k => siteNoticeFieldNames[k]))}
         </FormNotification>
       )}
 
@@ -150,39 +135,12 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
 
         <div className={styles.divider} />
 
-        <div>
-          <Text block className={styles.sectionHeading}>2. Your summary for the site notice</Text>
-          <TaskRow label="Write a summary of the proposed works" required locked={locked} top>
-            <TaskTextarea
-              value={form.summary}
-              onChange={v => update('summary', v)}
-              locked={locked}
-              error={errorFor('summary')}
-            />
-          </TaskRow>
-          <SummaryHint />
-        </div>
-
-        <div className={styles.divider} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>
-            3. Who the notice is for
-          </Text>
-          <Text block className={styles.desc}>
-            The applicant sees suggested notice locations for the group you choose.
-          </Text>
-          <TaskRow label="Who needs to be told about this application?" required locked={locked} top>
-            <TaskChoice
-              value={form.groups}
-              options={GROUP_OPTIONS}
-              onSelect={v => update('groups', v)}
-              locked={locked}
-              error={errorFor('groups')}
-            />
-          </TaskRow>
-          <GroupsHint />
-        </div>
+        <SiteNoticeAssessment
+          form={form}
+          locked={locked}
+          errorFor={errorFor}
+          onChange={update}
+        />
       </Card>
     </div>
   );

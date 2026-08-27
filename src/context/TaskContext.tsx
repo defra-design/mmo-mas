@@ -73,12 +73,14 @@ export interface PublicRegisterForm {
   completed: boolean;
 }
 
-// Site notice task form. `summary` is a Multiline Text column holding the
-// caseworker's shortened description of the works, which goes on the public site
-// notice; `groups` is an OOB Choice column naming who has to be told. The
-// applicant's own proposed-works summary is a read-only column on the case, not a
-// caseworker answer, so it isn't stored here.
+// Site notice task form. `needsNotice` is an OOB Choice column whose business
+// rules reveal either `rationale`, or the existing notice fields. `summary` is a
+// Multiline Text column holding the shortened description of the works and
+// `groups` is an OOB Choice column naming who has to be told. The applicant's own
+// proposed-works summary is read-only case data, so it isn't stored here.
 export interface SiteNoticeForm {
+  needsNotice: string;
+  rationale: string;
   summary: string;
   groups: string;
 }
@@ -194,7 +196,7 @@ const initialState: PersistedState = {
     personalInfoDetail: '',
     completed: false,
   },
-  siteNoticeForm: { summary: '', groups: '' },
+  siteNoticeForm: { needsNotice: '', rationale: '', summary: '', groups: '' },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
@@ -536,8 +538,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
       saved: { ...prev.saved, publicRegister: true },
     }));
 
-  // Save the Site notice: both its fields are business-required, so a save that
-  // gets this far has completed the task. Nothing depends on it.
+  // Save the Site notice: the visible branch's fields are business-required, so
+  // a save that gets this far has completed the task. Nothing depends on it.
   const saveSiteNotice = () =>
     setState(prev => ({
       ...prev,
