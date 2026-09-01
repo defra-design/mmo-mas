@@ -221,7 +221,7 @@ interface MarineCaseSummaryProps {
 // Tabs whose content is CDP application data rendered in an iframe. Paths are
 // resolved through asset() so a frozen iteration loads its own CDP pages.
 const cdpPages: Record<string, { src: string; title: string }> = {
-  project: { src: asset('cdp/project-details.html'), title: 'Project details' },
+  project: { src: asset('cdp/project-details.html'), title: 'Application details' },
   site: { src: asset('cdp/site-and-activity.html'), title: 'Site and activity' },
   mpp: { src: asset('cdp/marine-plan-policies.html'), title: 'Marine plan policies' },
   wfd: { src: asset('cdp/water-framework-directive.html'), title: 'Water Framework Directive' },
@@ -233,7 +233,7 @@ const cdpPages: Record<string, { src: string; title: string }> = {
 // tabs that don't fit on screen.
 const tabs: { id: string; name: string }[] = [
   { id: 'summary', name: 'Case summary' },
-  { id: 'project', name: 'Project details' },
+  { id: 'project', name: 'Application details' },
   { id: 'site', name: 'Sites and activities' },
   { id: 'mpp', name: 'Marine plan policies' },
   { id: 'wfd', name: 'Water Framework Directive' },
