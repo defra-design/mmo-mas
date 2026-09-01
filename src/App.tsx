@@ -12,6 +12,7 @@ import WfdTask from './components/tasks/WfdTask';
 import MarinePlanPolicyTask from './components/tasks/MarinePlanPolicyTask';
 import PrepForConsulteeTask from './components/tasks/PrepForConsulteeTask';
 import PublicRegisterTask from './components/tasks/PublicRegisterTask';
+import SiteNoticeTask from './components/tasks/SiteNoticeTask';
 import { TaskProvider } from './context/TaskContext';
 import caseEntity from './config/entities/case.json';
 import caseData from './mock-data/cases.json';
@@ -101,6 +102,14 @@ function App() {
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <PublicRegisterTask caseId={id} />} />
+                  </Shell>
+                }
+              />
+              <Route
+                path="/receive-assess/cases/:caseId/tasks/site-notice"
+                element={
+                  <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
+                    <MarineCaseWrapper render={(id) => <SiteNoticeTask caseId={id} />} />
                   </Shell>
                 }
               />

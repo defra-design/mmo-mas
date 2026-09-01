@@ -89,6 +89,14 @@ const useStyles = makeStyles({
       gap: tokens.spacingVerticalS,
     },
     '& li': { lineHeight: tokens.lineHeightBase300 },
+    // Inset text — a quoted example set off from the guidance around it by a
+    // left rule (the GOV.UK inset pattern, drawn with Fluent's own tokens).
+    // Used instead of italics, which read poorly at this length.
+    '& blockquote': {
+      margin: 0,
+      paddingLeft: tokens.spacingHorizontalL,
+      ...shorthands.borderLeft('4px', 'solid', tokens.colorNeutralStroke1),
+    },
   },
 });
 

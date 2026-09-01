@@ -115,6 +115,14 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
     rows.push({ key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies });
   }
 
+  // Sits at the bottom of the list whichever MPP treatment the case uses.
+  rows.push({
+    key: 'siteNotice',
+    name: 'Public notice',
+    status: tasks.siteNotice,
+    onClick: open('site-notice'),
+  });
+
   return (
     <div>
       <Text as="h2" className={styles.heading}>Tasks</Text>
