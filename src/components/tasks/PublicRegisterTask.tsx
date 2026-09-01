@@ -82,11 +82,15 @@ const useStyles = makeStyles({
 
 // The applicant's submitted answer, which arrives with the application from CDP.
 const APPLICANT_REQUEST =
-  'We would like the unit rates table in section 4 of our method statement withheld, and ' +
-  'also the vessel movement schedule in appendix B. The unit rates are commercially ' +
-  'confidential and are only shared with our insurer. Two competitors operate in the same ' +
-  'stretch of coast and if they can see our rates they can undercut us. The vessel movement ' +
-  'schedule shows which boats we use and when, which we would rather our competitors did not have.';
+  'We would like two things withheld. First, the concession terms in our project ' +
+  'background - the annual fee, the revenue share and our forecast hire figures. ' +
+  'Teignmouth Harbour Authority gave us these in confidence under clause 14 of the ' +
+  'draft agreement and nothing is agreed or public yet. A second operator is expected ' +
+  'to bid for a concession in the same harbour next year, and if they can see what we ' +
+  'are paying and what we expect to take they can pitch against us. Second, we would ' +
+  'like the pontoon dimensions, the construction method and our working hours withheld. ' +
+  'We spent two years getting this set-up right and we do not want another hire ' +
+  'business copying it.';
 
 // Displayed as the OOB URL column value. The real CDP journey isn't live, so
 // the click target is the GOV.UK prototype instead (prototype-only split).
@@ -215,7 +219,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                     values={form}
                     errorFor={errorFor}
                     onChange={update}
-                    rationaleHint={<CommercialRationaleHint disclosure={hideGuidance} />}
+                    guidance={<CommercialRationaleHint disclosure={hideGuidance} />}
                   />
                 )}
 
@@ -231,7 +235,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
                     values={form}
                     errorFor={errorFor}
                     onChange={update}
-                    rationaleHint={<SecurityRationaleHint disclosure={hideGuidance} />}
+                    guidance={<SecurityRationaleHint disclosure={hideGuidance} />}
                   />
                 )}
               </div>

@@ -657,13 +657,17 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                 <CdpFrame
                   // 10015 shows the sector-grouped MPP view (one page per sector);
                   // 10002 (Teignmouth) shows the multi-site, multi-activity Sites and
-                  // activities view — every other case keeps the single-site default.
+                  // activities view; 10013's applicant asked for nothing to be withheld,
+                  // so its Public register tab answers No with no follow-up — every other
+                  // case keeps the default page for the tab.
                   src={
                     tasksTab && selectedTab === 'mpp'
                       ? asset('cdp/marine-plan-policies-sectors.html')
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
-                        : cdpPages[selectedTab].src
+                        : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
+                          ? asset('cdp/public-register-none.html')
+                          : cdpPages[selectedTab].src
                   }
                   title={cdpPages[selectedTab].title}
                 />
