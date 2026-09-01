@@ -1,9 +1,9 @@
 // src/components/tasks/SiteNoticeTask.tsx
 // Task form for "Public notice", currently capturing the Site notice type.
-// Section 1 is the applicant's proposed-works summary (a read-only column on the
-// case). Section 2 asks whether a site notice is required.
-// OOB business rules reveal either a mandatory rationale for No, or the existing
-// summary and audience sections (renumbered 3 and 4) for Yes.
+// Section 1 asks whether a site notice is required. OOB business rules reveal
+// either a mandatory rationale for No, or the summary and audience sections for
+// Yes. The applicant's proposed works is read-only case data shown alongside the
+// caseworker's editable summary in Section 2.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -11,14 +11,11 @@ import {
   shorthands,
   tokens,
   Card,
-  Text,
   Title3,
   Body1,
 } from '@fluentui/react-components';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
-import TaskRow from './TaskRow';
-import TaskValue from './TaskValue';
 import SiteNoticeAssessment from './SiteNoticeAssessment';
 import {
   requiredSiteNoticeFields,
@@ -46,12 +43,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalXL,
   },
-  sectionHeading: {
-    fontSize: tokens.fontSizeBase400,
-    fontWeight: tokens.fontWeightSemibold,
-    marginBottom: tokens.spacingVerticalL,
-  },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
     fontSize: tokens.fontSizeBase300,
@@ -127,17 +118,9 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
       </Card>
 
       <Card className={styles.bodyCard}>
-        <div>
-          <Text block className={styles.sectionHeading}>1. The applicant's proposed works</Text>
-          <TaskRow label="Proposed works summary" locked={locked} top>
-            <TaskValue multiline>{PROPOSED_WORKS}</TaskValue>
-          </TaskRow>
-        </div>
-
-        <div className={styles.divider} />
-
         <SiteNoticeAssessment
           form={form}
+          proposedWorks={PROPOSED_WORKS}
           locked={locked}
           errorFor={errorFor}
           onChange={update}

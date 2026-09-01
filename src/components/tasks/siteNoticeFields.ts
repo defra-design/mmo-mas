@@ -11,7 +11,7 @@ export type SiteNoticeField = keyof SiteNoticeForm;
 export const siteNoticeFieldNames: Record<SiteNoticeField, string> = {
   needsNotice: 'Does the applicant need to display a site notice',
   rationale: 'Why the applicant does not need to display a site notice',
-  summary: 'Summary of the proposed works',
+  summary: 'Site notice summary',
   groups: 'Who needs to be told about this application',
 };
 

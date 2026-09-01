@@ -3,6 +3,7 @@ import type { SiteNoticeForm } from '../../context/TaskContext';
 import TaskChoice from './TaskChoice';
 import TaskRow from './TaskRow';
 import TaskTextarea from './TaskTextarea';
+import TaskValue from './TaskValue';
 import { GroupsHint, SummaryHint } from './siteNoticeHints';
 import {
   groupOptions,
@@ -29,18 +30,25 @@ const useStyles = makeStyles({
 
 type Props = {
   form: SiteNoticeForm;
+  proposedWorks: string;
   locked: boolean;
   errorFor: (field: SiteNoticeField) => string | undefined;
   onChange: (field: SiteNoticeField, value: string) => void;
 };
 
-export default function SiteNoticeAssessment({ form, locked, errorFor, onChange }: Props) {
+export default function SiteNoticeAssessment({
+  form,
+  proposedWorks,
+  locked,
+  errorFor,
+  onChange,
+}: Props) {
   const styles = useStyles();
 
   return (
     <>
       <div>
-        <Text block className={styles.sectionHeading}>2. Site notice requirement</Text>
+        <Text block className={styles.sectionHeading}>1. Site notice requirement</Text>
         <div className={styles.answers}>
           <TaskRow
             label="Does the applicant need to display a site notice?"
@@ -80,24 +88,27 @@ export default function SiteNoticeAssessment({ form, locked, errorFor, onChange 
           <div className={styles.divider} />
 
           <div>
-            <Text block className={styles.sectionHeading}>
-              3. Your summary for the site notice
-            </Text>
-            <TaskRow label="Write a summary of the proposed works" required locked={locked} top>
-              <TaskTextarea
-                value={form.summary}
-                onChange={v => onChange('summary', v)}
-                locked={locked}
-                error={errorFor('summary')}
-              />
-            </TaskRow>
+            <Text block className={styles.sectionHeading}>2. Site notice summary</Text>
+            <div className={styles.answers}>
+              <TaskRow label="Applicant's proposed works summary" locked={locked} top>
+                <TaskValue multiline>{proposedWorks}</TaskValue>
+              </TaskRow>
+              <TaskRow label="Write a summary for the site notice" required locked={locked} top>
+                <TaskTextarea
+                  value={form.summary}
+                  onChange={v => onChange('summary', v)}
+                  locked={locked}
+                  error={errorFor('summary')}
+                />
+              </TaskRow>
+            </div>
             <SummaryHint />
           </div>
 
           <div className={styles.divider} />
 
           <div>
-            <Text block className={styles.sectionHeading}>4. Who the site notice is for</Text>
+            <Text block className={styles.sectionHeading}>3. Who the site notice is for</Text>
             <Text block className={styles.desc}>
               The applicant sees suggested notice locations for the group you choose.
             </Text>

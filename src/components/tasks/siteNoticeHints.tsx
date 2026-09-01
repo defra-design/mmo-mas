@@ -9,8 +9,8 @@ import TaskHint from './TaskHint';
 
 export function SummaryHint() {
   return (
-    <TaskHint spaceAbove title="Help with writing the summary">
-      <p><strong>Write a summary for the notice</strong></p>
+    <TaskHint spaceAbove title="Help with writing the site notice summary">
+      <p><strong>Write a summary for the site notice</strong></p>
       <p>
         The notice needs a short, plain English description of the proposed activity, for
         members of the public to read.
