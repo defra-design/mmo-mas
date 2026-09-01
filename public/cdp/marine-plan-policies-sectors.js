@@ -81,7 +81,7 @@
 
         var name = document.createElement('h3');
         name.className = 'mpp__policy-title';
-        name.textContent = policyName(policy);
+        name.textContent = policy.label;
         block.appendChild(name);
 
         block.appendChild(subhead('Policy information'));
@@ -105,14 +105,6 @@
 
     // Open the first sector by default (no focus/scroll on initial load).
     if (items.length) select(items[0].sector, items[0].el, false);
-  }
-
-  // "South West Climate change (SW-CC-1)" -> "South West Climate change 1 (SW-CC-1)":
-  // the trailing number from the code is shown before the code in brackets.
-  function policyName(policy) {
-    var num = (policy.code.match(/(\d+)\s*$/) || [])[1];
-    if (!num) return policy.label;
-    return policy.label.replace(/\s*\(/, ' ' + num + ' (');
   }
 
   function subhead(text) {
