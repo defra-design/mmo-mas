@@ -4,7 +4,7 @@
   "list": {
     "columns": [
       { "key": "reference",    "name": "Reference",     "width": 140, "link": true },
-      { "key": "project",      "name": "Project name",  "width": 240 },
+      { "key": "project",      "name": "Application name",  "width": 240 },
       { "key": "caseOfficer",  "name": "Assigned to",  "width": 150, "avatar": true },
       { "key": "status",       "name": "Status",        "width": 190, "tag": true },
       { "key": "caseAge",      "name": "Case age (Days)", "width": 140, "type": "number", "align": "right" },

@@ -157,7 +157,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
           <div className={styles.answers}>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
-                Is your project within one nautical mile (1.85km) of the low-water line, or in a
+                Are your proposed works within one nautical mile (1.85km) of the low-water line, or in a
                 tidal river or estuary?
               </TaskFieldLabel>
               {locked && <FieldLock />}
@@ -167,7 +167,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
             </div>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
-                Is your project limited to one of the following excluded activities?
+                Are your proposed works limited to one of the following excluded activities?
               </TaskFieldLabel>
               {locked && <FieldLock />}
               <div className={styles.fields}>
