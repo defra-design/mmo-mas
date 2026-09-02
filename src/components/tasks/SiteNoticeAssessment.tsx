@@ -46,7 +46,7 @@ export default function SiteNoticeAssessment({
         <Text block className={styles.sectionHeading}>1. Public notice requirement</Text>
         <div className={styles.answers}>
           <TaskRow
-            label="What public notices are required?"
+            label="Which public notices are required?"
             required
             locked={locked}
             top
