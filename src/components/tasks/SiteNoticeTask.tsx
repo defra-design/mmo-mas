@@ -1,9 +1,9 @@
 // src/components/tasks/SiteNoticeTask.tsx
 // Task form for "Public notice", currently capturing the Site notice type.
-// Section 1 asks whether a site notice is required. OOB business rules reveal
-// either a mandatory rationale for No, or the summary and audience sections for
-// Yes. The applicant's proposed works is read-only case data shown alongside the
-// caseworker's editable summary in Section 2.
+// Section 1 asks which public notices are required. OOB business rules reveal
+// either a mandatory rationale for None, or the summary and audience sections for
+// Site notice. The applicant's summary is read-only case data shown alongside
+// the caseworker's editable summary in Section 2.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

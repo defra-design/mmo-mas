@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import { policyCount } from '../utils/marinePlanPolicies';
+import { loadPublicNoticeRequirement } from '../utils/publicNoticeRequirement';
 
 export type TaskStatus = 'Done' | 'To do' | 'In progress' | 'Cannot start yet';
 
@@ -73,9 +74,9 @@ export interface PublicRegisterForm {
   completed: boolean;
 }
 
-// Public notice task form, currently for the Site notice type. `needsNotice` is
-// an OOB Choice column whose business rules reveal either `rationale`, or the
-// existing notice fields. `summary` is a
+// Public notice task form. `needsNotice` stores the notice type or None, retaining
+// its original key for saved-data compatibility. OOB Choice business rules reveal
+// either `rationale` for None or the site-notice fields. `summary` is a
 // Multiline Text column holding the shortened description of the works and
 // `groups` is an OOB Choice column naming who has to be told. The applicant's own
 // proposed-works summary is read-only case data, so it isn't stored here.
@@ -259,7 +260,11 @@ function loadState(): PersistedState {
           ...initialState.publicRegisterForm,
           ...parsed.publicRegisterForm,
         },
-        siteNoticeForm: { ...initialState.siteNoticeForm, ...parsed.siteNoticeForm },
+        siteNoticeForm: {
+          ...initialState.siteNoticeForm,
+          ...parsed.siteNoticeForm,
+          needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
+        },
         recentOrganisations: Array.isArray(parsed.recentOrganisations)
           ? parsed.recentOrganisations
           : initialState.recentOrganisations,
