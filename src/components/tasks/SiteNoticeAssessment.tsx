@@ -90,7 +90,7 @@ export default function SiteNoticeAssessment({
           <div>
             <Text block className={styles.sectionHeading}>2. Site notice summary</Text>
             <div className={styles.answers}>
-              <TaskRow label="Applicant's proposed works summary" locked={locked} top>
+              <TaskRow label="Applicant's proposed works summary" locked top>
                 <TaskValue multiline>{proposedWorks}</TaskValue>
               </TaskRow>
               <TaskRow label="Write a summary for the site notice" required locked={locked} top>

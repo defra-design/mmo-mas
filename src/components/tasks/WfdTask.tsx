@@ -18,7 +18,7 @@ import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
-import FieldLock from './FieldLock';
+import FieldDecorations from './FieldDecorations';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
@@ -52,10 +52,15 @@ const useStyles = makeStyles({
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'center',
-    columnGap: tokens.spacingHorizontalL,
+    columnGap: 0,
     rowGap: tokens.spacingVerticalS,
   },
-  label: { flexShrink: 0, flexBasis: '320px', minWidth: '320px' },
+  label: {
+    flexShrink: 0,
+    flexBasis: '320px',
+    minWidth: '320px',
+    marginRight: tokens.spacingHorizontalL,
+  },
   // The review row's control can grow a validation message under it, so top-align
   // the row (rather than centring it, as the read-only answer rows do) to keep the
   // label level with the select instead of drifting with the message.
@@ -69,6 +74,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexWrap: 'wrap',
     gap: tokens.spacingHorizontalL,
+    marginLeft: tokens.spacingHorizontalS,
   },
   // flexBasis 0 + equal grow → each field box takes an equal share (50/50 when paired).
   value: {
@@ -160,7 +166,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                 Are your proposed works within one nautical mile (1.85km) of the low-water line, or in a
                 tidal river or estuary?
               </TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations locked />
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>Yes</Body1></div>
               </div>
@@ -169,7 +175,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <TaskFieldLabel className={styles.label}>
                 Are your proposed works limited to one of the following excluded activities?
               </TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations locked />
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>No</Body1></div>
               </div>
@@ -198,7 +204,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <TaskFieldLabel className={styles.label}>
                 Assessment provided
               </TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations locked />
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
@@ -220,13 +226,10 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
         <div>
           <Text block className={styles.sectionHeading}>2. WFD review</Text>
           <div className={mergeClasses(styles.row, styles.reviewRow)}>
-            <TaskFieldLabel
-              className={mergeClasses(styles.label, styles.reviewLabel)}
-              required
-            >
+            <TaskFieldLabel className={mergeClasses(styles.label, styles.reviewLabel)}>
               Is the WFD section complete and acceptable?
             </TaskFieldLabel>
-            {locked && <FieldLock />}
+            <FieldDecorations required locked={locked} />
             <div className={styles.fields}>
               {/* A read-only choice field has no select at all in D365 — just its
                   value on the same grey background the editable one uses. */}

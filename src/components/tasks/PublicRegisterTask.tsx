@@ -174,12 +174,12 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
         <div>
           <Text block className={styles.sectionHeading}>1. The applicant's request</Text>
           <div className={styles.answers}>
-            <TaskRow label="Did the applicant ask for information to be withheld?" locked={locked}>
+            <TaskRow label="Did the applicant ask for information to be withheld?" locked>
               <TaskValue>{assessed ? 'Yes' : 'No'}</TaskValue>
             </TaskRow>
             {/* Nothing was requested, so the applicant never gave a reason. */}
             {assessed && (
-              <TaskRow label="What they want withheld and why" locked={locked} top>
+              <TaskRow label="What they want withheld and why" locked top>
                 <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
               </TaskRow>
             )}
@@ -285,7 +285,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           </Text>
           <TaskRow
             label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
-            locked={locked}
+            locked
             top
           >
             <UrlField
