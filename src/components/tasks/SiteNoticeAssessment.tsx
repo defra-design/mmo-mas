@@ -1,17 +1,12 @@
 import { makeStyles, shorthands, tokens, Text } from '@fluentui/react-components';
 import type { SiteNoticeForm } from '../../context/TaskContext';
+import { SITE_NOTICE, NO_NOTICES, publicNoticeOptions } from '../../utils/publicNoticeRequirement';
 import TaskChoice from './TaskChoice';
 import TaskRow from './TaskRow';
 import TaskTextarea from './TaskTextarea';
 import TaskValue from './TaskValue';
 import { GroupsHint, SummaryHint } from './siteNoticeHints';
-import {
-  groupOptions,
-  NO,
-  YES,
-  yesNoOptions,
-  type SiteNoticeField,
-} from './siteNoticeFields';
+import { groupOptions, type SiteNoticeField } from './siteNoticeFields';
 
 const useStyles = makeStyles({
   sectionHeading: {
@@ -48,26 +43,26 @@ export default function SiteNoticeAssessment({
   return (
     <>
       <div>
-        <Text block className={styles.sectionHeading}>1. Site notice requirement</Text>
+        <Text block className={styles.sectionHeading}>1. Public notice requirement</Text>
         <div className={styles.answers}>
           <TaskRow
-            label="Does the applicant need to display a site notice?"
+            label="What public notices are required?"
             required
             locked={locked}
             top
           >
             <TaskChoice
               value={form.needsNotice}
-              options={yesNoOptions}
+              options={publicNoticeOptions}
               onSelect={v => onChange('needsNotice', v)}
               locked={locked}
               error={errorFor('needsNotice')}
             />
           </TaskRow>
 
-          {form.needsNotice === NO && (
+          {form.needsNotice === NO_NOTICES && (
             <TaskRow
-              label="Why does the applicant not need to display a site notice?"
+              label="Why are no public notices required?"
               required
               locked={locked}
               top
@@ -83,7 +78,7 @@ export default function SiteNoticeAssessment({
         </div>
       </div>
 
-      {form.needsNotice === YES && (
+      {form.needsNotice === SITE_NOTICE && (
         <>
           <div className={styles.divider} />
 
