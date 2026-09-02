@@ -29,6 +29,7 @@ import { DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OrganisationLookup from './OrganisationLookup';
+import FieldDecorations from './FieldDecorations';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
@@ -76,6 +77,12 @@ const useStyles = makeStyles({
   },
   headerCell: { fontWeight: tokens.fontWeightSemibold },
   cell: { verticalAlign: 'top', ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalXS) },
+  cellField: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: tokens.spacingHorizontalS,
+  },
+  cellControl: { flexGrow: 1, minWidth: 0 },
   // Read-only lookup cell: the value on the same grey background the lookup uses.
   readOnlyCell: {
     backgroundColor: tokens.colorNeutralBackground3,
@@ -205,42 +212,50 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                 return (
                   <TableRow key={row.id} className={styles.row}>
                     <TableCell className={styles.cell} style={{ width: COLS.organisation }}>
-                      {/* A read-only lookup has no search control in D365 — just
-                          the record's name on the same grey background. */}
-                      {locked ? (
-                        <div className={styles.readOnlyCell}>{row.organisation || '\u00a0'}</div>
-                      ) : (
-                        <Field
-                          validationState={orgError ? 'error' : 'none'}
-                          validationMessage={orgError ? requiredMessage('Organisation') : undefined}
-                          validationMessageIcon={<DismissCircleRegular />}
-                        >
-                          <OrganisationLookup
-                            value={row.organisation}
-                            recent={recentOrganisations}
-                            onSelect={v => setOrg(row.id, v)}
-                          />
-                        </Field>
-                      )}
+                      <div className={styles.cellField}>
+                        <FieldDecorations locked={locked} />
+                        <div className={styles.cellControl}>
+                          {/* A read-only lookup has no search control in D365 — just
+                              the record's name on the same grey background. */}
+                          {locked ? (
+                            <div className={styles.readOnlyCell}>{row.organisation || '\u00a0'}</div>
+                          ) : (
+                            <Field
+                              validationState={orgError ? 'error' : 'none'}
+                              validationMessage={orgError ? requiredMessage('Organisation') : undefined}
+                              validationMessageIcon={<DismissCircleRegular />}
+                            >
+                              <OrganisationLookup
+                                value={row.organisation}
+                                recent={recentOrganisations}
+                                onSelect={v => setOrg(row.id, v)}
+                              />
+                            </Field>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell className={styles.cell} style={{ width: COLS.notes }}>
-                      <Field>
-                        <Textarea
-                          className={mergeClasses(
-                            styles.textarea,
-                            locked && styles.textareaReadOnly,
-                          )}
-                          appearance="filled-lighter"
-                          value={row.notes}
-                          onChange={(_, d) => {
-                            setPrepForConsulteeRow(row.id, 'notes', d.value);
-                            markUnsaved('prepForConsultee');
-                          }}
-                          readOnly={locked}
-                          resize={locked ? 'none' : 'vertical'}
-                          rows={4}
-                        />
-                      </Field>
+                      <div className={styles.cellField}>
+                        <FieldDecorations locked={locked} />
+                        <Field className={styles.cellControl}>
+                          <Textarea
+                            className={mergeClasses(
+                              styles.textarea,
+                              locked && styles.textareaReadOnly,
+                            )}
+                            appearance="filled-lighter"
+                            value={row.notes}
+                            onChange={(_, d) => {
+                              setPrepForConsulteeRow(row.id, 'notes', d.value);
+                              markUnsaved('prepForConsultee');
+                            }}
+                            readOnly={locked}
+                            resize={locked ? 'none' : 'vertical'}
+                            rows={4}
+                          />
+                        </Field>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -250,6 +265,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         </div>
 
         <div className={styles.completeRow}>
+          {locked && <FieldDecorations locked />}
           <Checkbox
             label="Select to mark the task as complete"
             checked={prepForConsulteeMeta.completed}

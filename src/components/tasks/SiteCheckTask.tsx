@@ -19,6 +19,7 @@ import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
+import FieldDecorations from './FieldDecorations';
 import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import type { SiteCheckForm } from '../../context/TaskContext';
@@ -66,18 +67,20 @@ const useStyles = makeStyles({
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'start',
-    columnGap: tokens.spacingHorizontalXXL,
+    columnGap: 0,
     rowGap: tokens.spacingVerticalS,
   },
   label: {
     flexShrink: 0,
     flexBasis: LABEL_WIDTH,
     minWidth: LABEL_WIDTH,
+    marginRight: tokens.spacingHorizontalXXL,
   },
   control: {
     flexGrow: 1,
     flexBasis: '320px',
     minWidth: '240px',
+    marginLeft: tokens.spacingHorizontalS,
   },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
@@ -177,9 +180,10 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
             jurisdiction.
           </Text>
           <div className={styles.question}>
-            <TaskFieldLabel className={styles.label} required>
+            <TaskFieldLabel className={styles.label}>
               Are the coordinates and shape correct and appropriate?
             </TaskFieldLabel>
+            <FieldDecorations required />
             <Field
               className={styles.control}
               validationState={errorFor('coordinatesOk') ? 'error' : 'none'}
@@ -208,9 +212,10 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
             between low and Mean High Water Springs.
           </Text>
           <div className={styles.question}>
-            <TaskFieldLabel className={styles.label} required>
+            <TaskFieldLabel className={styles.label}>
               Is the site within the WFD assessment area?
             </TaskFieldLabel>
+            <FieldDecorations required />
             <Field
               className={styles.control}
               validationState={errorFor('withinMile') ? 'error' : 'none'}
@@ -235,6 +240,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
           <Text block className={styles.sectionHeading}>3. Notes from your site check</Text>
           <div className={mergeClasses(styles.question, styles.notesRowGap)}>
             <Text className={styles.label}>Record anything from your site check that is relevant to later stages of the assessment.</Text>
+            <FieldDecorations />
             <Field className={styles.control}>
               <Textarea
                 className={styles.textarea}

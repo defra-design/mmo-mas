@@ -23,7 +23,7 @@ import {
 import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
-import FieldLock from './FieldLock';
+import FieldDecorations from './FieldDecorations';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
@@ -92,11 +92,22 @@ const useStyles = makeStyles({
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'flex-start',
-    columnGap: tokens.spacingHorizontalL,
+    columnGap: 0,
     rowGap: tokens.spacingVerticalS,
   },
-  label: { flexShrink: 0, flexBasis: '220px', minWidth: '220px', paddingTop: tokens.spacingVerticalXS },
-  fields: { flexGrow: 1, flexBasis: '320px', minWidth: 0 },
+  label: {
+    flexShrink: 0,
+    flexBasis: '220px',
+    minWidth: '220px',
+    paddingTop: tokens.spacingVerticalXS,
+    marginRight: tokens.spacingHorizontalL,
+  },
+  fields: {
+    flexGrow: 1,
+    flexBasis: '320px',
+    minWidth: 0,
+    marginLeft: tokens.spacingHorizontalS,
+  },
   value: {
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalM),
@@ -242,21 +253,21 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
           <div className={styles.answers}>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>Policy group</TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations locked />
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>{policy.group}</Body1></div>
               </div>
             </div>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>Policy information</TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations locked />
               <div className={styles.fields}>
                 <div className={styles.value}><Body1>{policy.policyInfo}</Body1></div>
               </div>
             </div>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>Applicant's consideration</TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations locked />
               <div className={styles.fields}>
                 <div className={styles.value}>
                   {policy.consideration.length > 0 ? (
@@ -276,12 +287,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
           <Text block className={styles.sectionHeading}>2. Your assessment</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
-              {/* A locked field keeps its asterisk and gains a padlock, exactly as
-                  the real system renders a business-required field on a locked form. */}
-              <TaskFieldLabel className={styles.label} required>
+              {/* A locked field keeps its asterisk immediately before its padlock,
+                  exactly as the real system renders a business-required field. */}
+              <TaskFieldLabel className={styles.label}>
                 Outcome
               </TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations required locked={locked} />
               <div className={styles.fields}>
                 {/* A read-only choice field has no select at all in D365 — just
                     its value on the same grey background the editable one uses. */}
@@ -303,10 +314,10 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
               </div>
             </div>
             <div className={styles.row}>
-              <TaskFieldLabel className={styles.label} required>
+              <TaskFieldLabel className={styles.label}>
                 Reason for your decision
               </TaskFieldLabel>
-              {locked && <FieldLock />}
+              <FieldDecorations required locked={locked} />
               <div className={styles.fields}>
                 <Field
                   validationState={errorFor('reason') ? 'error' : 'none'}

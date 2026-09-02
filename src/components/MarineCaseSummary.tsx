@@ -36,6 +36,7 @@ import FormCommandBar from './FormCommandBar';
 import TaskList from './TaskList';
 import MarinePlanPoliciesList from './MarinePlanPoliciesList';
 import MarinePlanPoliciesSubgrid from './MarinePlanPoliciesSubgrid';
+import FieldDecorations from './tasks/FieldDecorations';
 import TasksSubgrid from './TasksSubgrid';
 import CdpFrame from './CdpFrame';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
@@ -188,12 +189,17 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalL,
   },
-  field: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'center', gap: tokens.spacingHorizontalM },
-  fieldLabel: {},
+  field: {
+    display: 'grid',
+    gridTemplateColumns: '140px 26px minmax(0, 1fr)',
+    alignItems: 'center',
+  },
+  fieldLabel: { marginRight: tokens.spacingHorizontalM },
   fieldValue: {
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
     borderRadius: tokens.borderRadiusSmall,
+    marginLeft: tokens.spacingHorizontalS,
   },
   // "Transfer to MCMS details" card, stacked under the Case summary once the
   // case has been transferred (mirrors a read-only D365 section).
@@ -204,7 +210,11 @@ const useStyles = makeStyles({
   // The transfer details value can be multi-line, so it sits top-aligned and
   // preserves the caseworker's line breaks. Label column matches the Case summary
   // section above it (140px); the value stretches to the far right of the card.
-  transferField: { display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'start', gap: tokens.spacingHorizontalM },
+  transferField: {
+    display: 'grid',
+    gridTemplateColumns: '140px 26px minmax(0, 1fr)',
+    alignItems: 'start',
+  },
   // A top-aligned row's value box carries its own vertical padding, which the bare
   // label does not — without matching it, the label rides above the first line of
   // the value beside it. Only the top-aligned rows need this; the centred ones
@@ -536,6 +546,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                           {col.map(f => (
                             <div key={f.label} className={styles.field}>
                               <Text className={styles.fieldLabel}>{f.label}</Text>
+                              <FieldDecorations locked />
                               <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
                             </div>
                           ))}
@@ -568,6 +579,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                       ].map(f => (
                         <div key={f.label} className={styles.field}>
                           <Text className={styles.fieldLabel}>{f.label}</Text>
+                          <FieldDecorations locked />
                           <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
                         </div>
                       ))}
@@ -575,6 +587,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
                           Reasons for transfer
                         </Text>
+                        <FieldDecorations locked />
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
                           <Body1>{caseTransfer.reasons}</Body1>
                         </div>
@@ -587,6 +600,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         ].map(f => (
                           <div key={f.label} className={styles.field}>
                             <Text className={styles.fieldLabel}>{f.label}</Text>
+                            <FieldDecorations locked />
                             <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
                           </div>
                         ))}
@@ -606,6 +620,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                       ].map(f => (
                         <div key={f.label} className={styles.field}>
                           <Text className={styles.fieldLabel}>{f.label}</Text>
+                          <FieldDecorations locked />
                           <div className={styles.fieldValue}><Body1>{f.value}</Body1></div>
                         </div>
                       ))}
@@ -615,6 +630,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
                           Sections of the application with issues
                         </Text>
+                        <FieldDecorations locked />
                         <div className={styles.fieldValue}>
                           <Body1>{caseRejection.reasons.join(', ')}</Body1>
                         </div>
@@ -623,6 +639,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         <Text className={mergeClasses(styles.fieldLabel, styles.topAlignedLabel)}>
                           Provide details for each issue
                         </Text>
+                        <FieldDecorations locked />
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
                           <Body1>{caseRejection.notes}</Body1>
                         </div>
