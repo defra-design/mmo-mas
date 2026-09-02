@@ -204,7 +204,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <TaskFieldLabel className={styles.label}>
                 Assessment provided
               </TaskFieldLabel>
-              <FieldDecorations locked />
+              <FieldDecorations />
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
