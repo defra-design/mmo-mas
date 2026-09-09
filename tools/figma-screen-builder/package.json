@@ -1,0 +1,11 @@
+{
+  "name": "mas-figma-screen-builder",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "refresh-icons": "node scripts/extract-icons.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node --check code.js && node scripts/validate.mjs && node scripts/smoke.mjs"
+  }
+}

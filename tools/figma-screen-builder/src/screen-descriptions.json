@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "name": "MAS D365 Screen Builder",
+    "viewport": { "width": 1640, "height": 1232 },
+    "source": "MAS React prototype and the two supplied reference screenshots",
+    "browserChromeExcluded": true
+  },
+  "shell": {
+    "product": "Dynamics 365",
+    "service": "Marine Applications System",
+    "signedInUser": "Sam Evans",
+    "navigation": [
+      { "kind": "item", "label": "Home", "icon": "HomeRegular" },
+      { "kind": "item", "label": "Recent", "icon": "ClockRegular", "chevron": true },
+      { "kind": "item", "label": "Pinned", "icon": "PinRegular", "chevron": true },
+      { "kind": "group", "label": "My work" },
+      { "kind": "item", "label": "Applications dashboard", "icon": "DataBarVerticalRegular" },
+      { "kind": "group", "label": "Customers" },
+      { "kind": "item", "label": "Organisations", "icon": "ContactCardRegular" },
+      { "kind": "item", "label": "Applicants", "icon": "PersonRegular" },
+      { "kind": "group", "label": "Service" },
+      { "kind": "item", "label": "Marine licence cases", "icon": "WrenchRegular", "selected": true },
+      { "kind": "item", "label": "Exemption cases", "icon": "DocumentCopyRegular" },
+      { "kind": "item", "label": "Case Coastal Operations Areas", "icon": "LocationRegular" },
+      { "kind": "item", "label": "Case Marine Plan Areas", "icon": "LocationRegular" }
+    ]
+  },
+  "caseList": {
+    "frameName": "01 · Marine licence cases",
+    "pageHeading": "Marine licence cases",
+    "columns": [
+      { "key": "reference", "label": "Reference", "width": 172, "sorted": true },
+      { "key": "project", "label": "Application name", "width": 284 },
+      { "key": "assignee", "label": "Assigned to", "width": 182 },
+      { "key": "status", "label": "Status", "width": 255 },
+      { "key": "age", "label": "Case age (Days)", "width": 149, "align": "right" },
+      { "key": "notification", "label": "Notifications", "width": 190 }
+    ],
+    "rows": [
+      { "reference": "MLA/2026/10001", "project": "Dawlish sea defence extension", "assignee": "", "status": "Awaiting allocation", "age": "1", "notification": "" },
+      { "reference": "MLA/2026/10002", "project": "Exmouth Marina pontoon replacement", "assignee": "Sam Evans", "status": "Assessment in progress", "age": "1", "notification": "" },
+      { "reference": "MLA/2026/10003", "project": "Installation of a navigation buoy, Poole Harbour", "assignee": "Rachel Patel", "status": "Assessment in progress", "age": "2", "notification": "Message received" },
+      { "reference": "MLA/2026/10004", "project": "Torquay breakwater repair", "assignee": "Gary Whitfield", "status": "Awaiting applicant", "age": "16", "notification": "" },
+      { "reference": "MLA/2026/10005", "project": "Plymouth Sound cable laying", "assignee": "", "status": "Awaiting allocation", "age": "1", "notification": "" },
+      { "reference": "MLA/2026/10006", "project": "Falmouth port expansion phase 2", "assignee": "James Okafor", "status": "Consultation", "age": "62", "notification": "Message received" },
+      { "reference": "MLA/2026/10012", "project": "Installation of safety ladders at Brixham Fish Quay", "assignee": "Sam Evans", "status": "Assessment in progress", "age": "1", "notification": "" },
+      { "reference": "MLA/2026/10013", "project": "Salcombe Harbour navigation beacon installation", "assignee": "Sam Evans", "status": "Assessment in progress", "age": "1", "notification": "" },
+      { "reference": "MLA/2026/10014", "project": "Installation of floating pontoon, Teignmouth Harbour, Devon", "assignee": "Sam Evans", "status": "Assessment in progress", "age": "1", "notification": "" },
+      { "reference": "MLA/2026/10015", "project": "Installation of floating pontoon, Teignmouth Harbour, Devon", "assignee": "Sam Evans", "status": "Assessment in progress", "age": "1", "notification": "" }
+    ]
+  },
+  "publicRegister": {
+    "frameName": "02 · Public register task · Initial state",
+    "pageHeading": "Public register",
+    "saveState": "Unsaved",
+    "recordType": "Task",
+    "sections": [
+      {
+        "heading": "1. The applicant's request",
+        "rows": [
+          { "type": "readonly", "question": "Did the applicant ask for information to be withheld?", "value": "Yes" },
+          { "type": "readonly-multiline", "question": "What they want withheld and why", "value": "We would like two things withheld. First, the fees and financial figures in our proposed works summary, because they are commercially sensitive. A second operator is expected to bid for a concession in the same harbour next year, and if they can see what we are paying and what we expect to take they can pitch against us. Second, we would like the pontoon dimensions, the construction method and our working hours withheld. We spent two years getting this set-up right and we do not want another hire business copying it." }
+        ]
+      },
+      {
+        "heading": "2. Your assessment",
+        "rows": [
+          { "type": "dropdown", "question": "What does the request relate to?", "value": "---", "required": true }
+        ]
+      },
+      {
+        "heading": "3. Personal information check",
+        "rows": [
+          { "type": "dropdown", "question": "Does the application, or any supporting documents, contain personal information about someone else that must be removed before publishing?", "value": "---", "required": true },
+          { "type": "help", "label": "Help with personal information" }
+        ]
+      },
+      {
+        "heading": "4. Redact the application",
+        "rows": [
+          { "type": "url", "question": "Select the link to redact the application. You will be able to choose which parts of the application to redact.", "value": "https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a" }
+        ]
+      }
+    ],
+    "completionNote": "Any information for the applicant will be sent when the task is complete.",
+    "completionLabel": "Select to mark the task as complete",
+    "completed": true
+  },
+  "publicRegisterVariations": [
+    {
+      "frameName": "03 · Public register task · Conditional fields shown",
+      "frameHeight": 1760,
+      "pageHeading": "Public register",
+      "saveState": "Unsaved",
+      "recordType": "Task",
+      "sections": [
+        {
+          "heading": "1. The applicant's request",
+          "rows": [
+            { "type": "readonly", "question": "Did the applicant ask for information to be withheld?", "value": "Yes" },
+            { "type": "readonly-multiline", "question": "What they want withheld and why", "value": "We would like two things withheld. First, the fees and financial figures in our proposed works summary, because they are commercially sensitive. A second operator is expected to bid for a concession in the same harbour next year, and if they can see what we are paying and what we expect to take they can pitch against us. Second, we would like the pontoon dimensions, the construction method and our working hours withheld. We spent two years getting this set-up right and we do not want another hire business copying it." }
+          ]
+        },
+        {
+          "heading": "2. Your assessment",
+          "rows": [
+            { "type": "dropdown", "question": "What does the request relate to?", "value": "Commercial or industrial confidentiality", "required": true },
+            { "type": "divider" },
+            { "type": "subheading", "label": "Commercial or industrial confidentiality" },
+            { "type": "dropdown", "question": "Do you agree with the applicant's request?", "value": "Agree - but only withhold some of it", "required": true },
+            { "type": "help", "label": "Help with commercial or industrial confidentiality", "spaceAfter": 8 },
+            { "type": "textarea", "question": "What is your rationale?", "value": "The fees and detailed construction methods are confidential and publishing them would cause identifiable commercial harm. The general description of the works can be published.", "required": true },
+            { "type": "textarea", "question": "What do you want to tell the applicant?", "value": "We will withhold the fee figures and detailed construction methods. The remaining information will be published.", "required": true }
+          ]
+        },
+        {
+          "heading": "3. Personal information check",
+          "rows": [
+            { "type": "dropdown", "question": "Does the application, or any supporting documents, contain personal information about someone else that must be removed before publishing?", "value": "Yes", "required": true },
+            { "type": "help", "label": "Help with personal information", "spaceAfter": 8 },
+            { "type": "textarea", "question": "What personal information needs to be redacted, and why?", "value": "Remove personal signatures and direct contact details because they are not needed for the public to understand the application.", "required": true }
+          ]
+        },
+        {
+          "heading": "4. Redact the application",
+          "rows": [
+            { "type": "url", "question": "Select the link to redact the application. You will be able to choose which parts of the application to redact.", "value": "https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a" }
+          ]
+        }
+      ],
+      "completionNote": "Any information for the applicant will be sent when the task is complete.",
+      "completionLabel": "Select to mark the task as complete",
+      "completed": false
+    }
+  ]
+}

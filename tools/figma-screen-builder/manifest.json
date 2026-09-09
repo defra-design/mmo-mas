@@ -1,0 +1,15 @@
+{
+  "name": "MAS D365 Screen Builder",
+  "id": "1500000000000001",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "menu": [
+    { "name": "Generate all MAS D365 screens", "command": "generate-all" },
+    { "name": "Generate Marine licence cases", "command": "generate-case-list" },
+    { "name": "Generate Public register states", "command": "generate-public-register" }
+  ],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  }
+}
