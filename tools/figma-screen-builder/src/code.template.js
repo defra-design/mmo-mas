@@ -17,6 +17,7 @@ const C = {
   field: '#F3F2F1',
   hover: '#EDEBE9',
   red: '#C50F1F',
+  errorBackground: '#FDE7E9',
   yellow: '#FFE399',
 };
 
@@ -465,9 +466,13 @@ function createQuestionRow(page, name, fieldComponent, decoration, multiline = f
 
   const marker = horizontalFrame('Field decoration', 26, 32, 0, 0);
   marker.primaryAxisAlignItems = 'MAX';
-  marker.appendChild(decoration === 'required'
-    ? makeText('Required indicator', '*', 'body', C.red)
-    : makeIcon('Read-only indicator', 'LockClosedRegular', 16, C.secondary));
+  if (decoration === 'required') {
+    marker.appendChild(makeText('Required indicator', '*', 'body', C.red));
+  } else if (decoration === 'locked') {
+    marker.appendChild(makeIcon('Read-only indicator', 'LockClosedRegular', 16, C.secondary));
+  } else {
+    marker.appendChild(fixedFrame('No field decoration', 16, 16));
+  }
   component.appendChild(marker);
 
   component.appendChild(fixedFrame('Field spacing', 8, 1));
@@ -611,6 +616,155 @@ function createCommandBar(page, save) {
   return component;
 }
 
+function createCaseCommandBar(page) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Command bar / Case summary';
+  component.resize(1320, 40);
+  component.layoutMode = 'HORIZONTAL';
+  component.primaryAxisSizingMode = 'FIXED';
+  component.counterAxisSizingMode = 'FIXED';
+  component.counterAxisAlignItems = 'CENTER';
+  component.itemSpacing = 10;
+  component.paddingLeft = 16;
+  component.paddingRight = 16;
+  applyCard(component);
+  component.appendChild(makeIcon('Back action', 'ArrowLeftRegular', 20, C.disabled));
+  component.appendChild(makeIcon('Open in new window', 'OpenRegular', 20, C.text));
+  component.appendChild(makeIcon('Transfer action icon', 'SendRegular', 20, C.text));
+  component.appendChild(makeText('Primary action', 'Request transfer to MCMS', 'body', C.text));
+  component.appendChild(makeIcon('Reject action icon', 'DismissSquareRegular', 20, C.text));
+  component.appendChild(makeText('Secondary action', 'Reject application', 'body', C.text));
+  page.appendChild(component);
+  return component;
+}
+
+function createFormNotification(page) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Form notification / Error';
+  component.resize(1320, 40);
+  component.layoutMode = 'HORIZONTAL';
+  component.primaryAxisSizingMode = 'FIXED';
+  component.counterAxisSizingMode = 'FIXED';
+  component.counterAxisAlignItems = 'CENTER';
+  component.itemSpacing = 8;
+  component.paddingLeft = 12;
+  component.paddingRight = 12;
+  component.fills = paint(C.errorBackground);
+  component.strokes = paint(C.stroke);
+  component.strokeBottomWeight = 1;
+  component.appendChild(makeIcon('Notification icon', 'DismissCircleFilled', 16, C.red));
+  component.appendChild(makeText('Validation message', 'Required fields must be filled in.', 'body', C.text, 1268));
+  page.appendChild(component);
+  return component;
+}
+
+function createTaskListRow(page) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Task list row';
+  component.resize(240, 60);
+  component.layoutMode = 'VERTICAL';
+  component.primaryAxisSizingMode = 'FIXED';
+  component.counterAxisSizingMode = 'FIXED';
+  component.paddingTop = 10;
+  component.paddingRight = 28;
+  component.paddingBottom = 9;
+  component.fills = [];
+  component.appendChild(makeText('Task name', 'Site check', 'label', C.text, 204));
+  component.appendChild(makeText('Task status', 'To do', 'body', C.secondary, 204));
+  const more = makeText('Task actions', '⋯', 'body', C.text);
+  component.appendChild(more);
+  more.layoutPositioning = 'ABSOLUTE';
+  more.x = 220;
+  more.y = 10;
+  const divider = addLine(component, 'Task row divider', 240);
+  divider.layoutPositioning = 'ABSOLUTE';
+  divider.x = 0;
+  divider.y = 59;
+  page.appendChild(component);
+  return component;
+}
+
+function createCaseHeader(page, description) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Case record header';
+  component.resize(1320, 152);
+  applyCard(component);
+
+  const titleGroup = horizontalFrame('Case identity', 680, 72, 12, 0);
+  titleGroup.x = 20;
+  titleGroup.y = 12;
+  const caseAvatar = fixedFrame('Case avatar', 48, 48, '#D9A7E8');
+  caseAvatar.cornerRadius = 24;
+  const caseInitial = makeText('Case avatar initial', 'I', 'title', C.white, 48);
+  caseInitial.textAlignHorizontal = 'CENTER';
+  caseInitial.y = 8;
+  caseAvatar.appendChild(caseInitial);
+  titleGroup.appendChild(caseAvatar);
+  const titleText = verticalFrame('Case title group', 620, 0, 0);
+  const title = makeText('Page heading', description.title, 'title', C.text, 620);
+  titleText.appendChild(title);
+  titleText.appendChild(makeText('Record type', description.recordType, 'body', C.text));
+  titleGroup.appendChild(titleText);
+  component.appendChild(titleGroup);
+
+  const meta = horizontalFrame('Case metadata', 560, 64, 24, 0);
+  meta.primaryAxisAlignItems = 'MAX';
+  meta.x = 740;
+  meta.y = 16;
+  for (const item of description.meta) {
+    const groupWidth = item.avatar
+      ? 124
+      : item.label === 'Status'
+        ? 140
+        : item.label === 'Reference'
+          ? 120
+          : 70;
+    const group = verticalFrame(`Metadata / ${item.label}`, groupWidth, 0, 0);
+    if (item.avatar) {
+      const assigned = horizontalFrame('Assigned user', 124, 40, 8, 0);
+      const avatar = fixedFrame('Assignee avatar', 32, 32, C.yellow);
+      avatar.cornerRadius = 16;
+      const initialsText = makeText('Avatar initials', initials(item.value), 'small', C.text, 32);
+      initialsText.textAlignHorizontal = 'CENTER';
+      initialsText.y = 8;
+      avatar.appendChild(initialsText);
+      assigned.appendChild(avatar);
+      const assignedText = verticalFrame('Assigned user text', 84, 0, 0);
+      assignedText.appendChild(makeText(`Meta value / ${item.label}`, item.value, 'body', C.text, 84));
+      assignedText.appendChild(makeText(`Meta label / ${item.label}`, item.label, 'small', C.secondary));
+      assigned.appendChild(assignedText);
+      group.appendChild(assigned);
+    } else {
+      group.appendChild(makeText(`Meta value / ${item.label}`, item.value, 'body', C.text, groupWidth));
+      group.appendChild(makeText(`Meta label / ${item.label}`, item.label, 'small', C.secondary));
+    }
+    meta.appendChild(group);
+  }
+  component.appendChild(meta);
+
+  const tabs = horizontalFrame('Case tabs', 1280, 48, 28, 0);
+  tabs.x = 20;
+  tabs.y = 104;
+  tabs.counterAxisAlignItems = 'CENTER';
+  description.tabs.forEach((label, index) => {
+    const tab = fixedFrame(`Tab / ${label}`, index === 0 ? 104 : Math.max(110, label.length * 8), 48);
+    const tabText = makeText('Tab label', label, index === 0 ? 'label' : 'body', C.text);
+    tabText.x = 0;
+    tabText.y = 14;
+    tab.appendChild(tabText);
+    if (index === 0) {
+      const indicator = addLine(tab, 'Selected tab indicator', 104, C.brand);
+      indicator.resize(104, 3);
+      indicator.x = 0;
+      indicator.y = 45;
+    }
+    tabs.appendChild(tab);
+  });
+  component.appendChild(tabs);
+  page.appendChild(component);
+  return component;
+}
+
 function createTableComponents(page, checkbox, avatar, status) {
   const header = figma.createComponent();
   header.name = 'D365 / Table header';
@@ -713,12 +867,17 @@ function createComponentLibrary(page, runLabel) {
     readOnlyMultiline: createQuestionRow(page, 'Read only multiline', fields.readOnly, 'locked', true),
     dropdown: createQuestionRow(page, 'Dropdown', fields.dropdown, 'required'),
     textarea: createQuestionRow(page, 'Multiline text', fields.readOnly, 'required', true, true),
+    textareaOptional: createQuestionRow(page, 'Multiline text optional', fields.readOnly, 'none', true, true),
     url: createQuestionRow(page, 'URL', fields.url, 'locked'),
   };
   const globalHeader = createGlobalHeader(page, DESCRIPTIONS.shell);
   const leftNav = createLeftNav(page, DESCRIPTIONS.shell);
   const commandList = createCommandBar(page, false);
   const commandSave = createCommandBar(page, true);
+  const commandCase = createCaseCommandBar(page);
+  const formNotification = createFormNotification(page);
+  const taskListRow = createTaskListRow(page);
+  const caseHeader = createCaseHeader(page, DESCRIPTIONS.caseSummaryStates[0]);
   const table = createTableComponents(page, checkbox, avatar, status);
 
   const card = figma.createComponent();
@@ -740,10 +899,27 @@ function createComponentLibrary(page, runLabel) {
   batchLabel.x = batchX;
   batchLabel.y = 48;
   page.appendChild(batchLabel);
-  return { checkbox, avatar, status, divider, fields, rows, globalHeader, leftNav, commandList, commandSave, table, card };
+  return {
+    checkbox,
+    avatar,
+    status,
+    divider,
+    fields,
+    rows,
+    globalHeader,
+    leftNav,
+    commandList,
+    commandSave,
+    commandCase,
+    formNotification,
+    taskListRow,
+    caseHeader,
+    table,
+    card,
+  };
 }
 
-function addShell(screen, components, save, screenHeight = 1232) {
+function addShell(screen, components, save, screenHeight = 1232, commandComponent = null) {
   const background = fixedFrame('Application canvas', 1640, screenHeight, C.canvas);
   screen.appendChild(background);
 
@@ -767,11 +943,13 @@ function addShell(screen, components, save, screenHeight = 1232) {
   rail.strokeLeftWeight = 1;
   screen.appendChild(rail);
 
-  const command = (save ? components.commandSave : components.commandList).createInstance();
+  const commandSource = commandComponent || (save ? components.commandSave : components.commandList);
+  const command = commandSource.createInstance();
   command.name = 'Command bar';
   command.x = 268;
   command.y = 60;
   screen.appendChild(command);
+  return { command };
 }
 
 function applyRowData(instance, data) {
@@ -825,6 +1003,173 @@ function createCaseListScreen(page, components) {
     card.appendChild(row);
   }
   screen.appendChild(card);
+  page.appendChild(screen);
+  return screen;
+}
+
+function configureCaseHeader(instance, description) {
+  setText(instance, 'Page heading', description.title);
+  setText(instance, 'Record type', description.recordType);
+  for (const item of description.meta) {
+    setText(instance, `Meta value / ${item.label}`, item.value);
+  }
+}
+
+function createCaseSummaryField(components, field) {
+  const row = horizontalFrame(`Case field / ${field.label}`, 484, 32, 0, 0);
+  row.appendChild(makeText('Field label', field.label, 'body', C.text, 140));
+  const decoration = horizontalFrame('Field decoration', 26, 32, 0, 0);
+  decoration.primaryAxisAlignItems = 'MAX';
+  decoration.appendChild(makeIcon('Read-only indicator', 'LockClosedRegular', 16, C.secondary));
+  row.appendChild(decoration);
+  row.appendChild(fixedFrame('Field spacing', 8, 1));
+  const value = components.fields.readOnly.createInstance();
+  value.name = 'Read-only field';
+  value.resize(310, value.height);
+  setText(value, 'Field value', field.value);
+  const valueText = value.findOne(node => node.type === 'TEXT' && node.name === 'Field value');
+  if (valueText) valueText.resize(286, valueText.height);
+  row.appendChild(value);
+  return row;
+}
+
+function createTasksCard(components, tasks) {
+  const card = verticalFrame('Tasks card', 280, 0, 16, C.white);
+  applyCard(card);
+  const heading = horizontalFrame('Tasks heading', 248, 36, 0, 0);
+  heading.primaryAxisAlignItems = 'SPACE_BETWEEN';
+  heading.appendChild(makeText('Section heading', 'Tasks', 'section', C.text));
+  heading.appendChild(makeText('Sort tasks', '⇅', 'section', C.text));
+  card.appendChild(heading);
+  addLine(card, 'Tasks heading divider', 248);
+  for (const task of tasks) {
+    const row = components.taskListRow.createInstance();
+    row.name = `Task / ${task.name}`;
+    setText(row, 'Task name', task.name);
+    setText(row, 'Task status', task.status);
+    card.appendChild(row);
+  }
+  const footer = horizontalFrame('Tasks footer', 248, 44, 0, 0);
+  footer.primaryAxisAlignItems = 'SPACE_BETWEEN';
+  footer.appendChild(makeText('Pagination summary', `1 - ${tasks.length} of ${tasks.length}`, 'body', C.secondary));
+  footer.appendChild(makeText('Pagination', '‹  Page 1  ›', 'body', C.secondary));
+  card.appendChild(footer);
+  return card;
+}
+
+function createCaseSummaryScreen(page, components, description) {
+  const screen = fixedFrame(description.frameName, 1640, 1232, C.canvas);
+  screen.clipsContent = true;
+  addShell(screen, components, false, 1232, components.commandCase);
+
+  const header = components.caseHeader.createInstance();
+  header.name = 'Case record header';
+  configureCaseHeader(header, description);
+  header.x = 268;
+  header.y = 112;
+  screen.appendChild(header);
+
+  const summary = verticalFrame('Case summary card', 1028, 20, 20, C.white);
+  summary.x = 268;
+  summary.y = 280;
+  applyCard(summary);
+  summary.appendChild(makeText('Section heading', 'Case summary', 'section', C.text));
+  const columns = horizontalFrame('Case field columns', 988, 1, 20, 0);
+  columns.counterAxisSizingMode = 'AUTO';
+  const left = verticalFrame('Case fields / Left column', 484, 16, 0);
+  const right = verticalFrame('Case fields / Right column', 484, 16, 0);
+  for (const field of description.fields) {
+    (field.column === 2 ? right : left).appendChild(createCaseSummaryField(components, field));
+  }
+  columns.appendChild(left);
+  columns.appendChild(right);
+  summary.appendChild(columns);
+  screen.appendChild(summary);
+
+  const tasks = createTasksCard(components, description.tasks);
+  tasks.x = 1308;
+  tasks.y = 280;
+  screen.appendChild(tasks);
+  page.appendChild(screen);
+  return screen;
+}
+
+function createIndentedValidation(components, message) {
+  const row = fixedFrame('Field validation row', 1278, 1);
+  row.layoutMode = 'HORIZONTAL';
+  row.primaryAxisSizingMode = 'FIXED';
+  row.counterAxisSizingMode = 'AUTO';
+  row.appendChild(fixedFrame('Validation alignment', 378, 1));
+  const validation = components.fields.validation.createInstance();
+  validation.name = 'Validation message';
+  setText(validation, 'Validation message', message);
+  row.appendChild(validation);
+  return row;
+}
+
+function createSiteCheckSection(components, content, state) {
+  const section = verticalFrame(`Section / ${content.heading}`, 1278, 16, 0);
+  section.appendChild(makeText('Section heading', content.heading, 'section', C.text, 1278));
+  if (content.description) {
+    section.appendChild(makeText('Help text', content.description, 'body', C.secondary, 1278));
+  }
+  const isTextarea = content.type === 'textarea';
+  const source = isTextarea ? components.rows.textareaOptional : components.rows.dropdown;
+  const row = source.createInstance();
+  row.name = `Form question / ${content.question}`;
+  configureQuestionRow(row, {
+    type: content.type,
+    question: content.question,
+    value: state[content.key],
+  });
+  section.appendChild(row);
+  const error = (state.errors || []).find(item => item.field === content.key);
+  if (error) section.appendChild(createIndentedValidation(components, error.message));
+  return section;
+}
+
+function createSiteCheckScreen(page, components, state) {
+  const screen = fixedFrame(state.frameName, 1640, 1232, C.canvas);
+  screen.clipsContent = true;
+  const { command } = addShell(screen, components, true);
+  const offset = state.notification ? 40 : 0;
+  if (state.notification) {
+    const notification = components.formNotification.createInstance();
+    notification.name = 'Form notification';
+    setText(notification, 'Validation message', state.notification);
+    notification.x = 268;
+    notification.y = 60;
+    screen.appendChild(notification);
+    command.y += offset;
+  }
+
+  const headerCard = verticalFrame('Task header card', 1320, 12, 20, C.white);
+  headerCard.x = 268;
+  headerCard.y = 125 + offset;
+  applyCard(headerCard);
+  const headingLine = horizontalFrame('Task title', 1280, 32, 6, 0);
+  headingLine.primaryAxisSizingMode = 'AUTO';
+  headingLine.appendChild(makeText('Page heading', state.pageHeading, 'title', C.text));
+  headingLine.appendChild(makeText('Save state', `- ${state.saveState}`, 'body', C.secondary));
+  headerCard.appendChild(headingLine);
+  headerCard.appendChild(makeText('Record type', state.recordType, 'body', C.text));
+  screen.appendChild(headerCard);
+
+  const body = verticalFrame('Task form card', 1320, 24, 20, C.white);
+  body.x = 268;
+  body.y = 238 + offset;
+  applyCard(body);
+  const siteHeading = horizontalFrame('Site coordinates heading', 1278, 32, 10, 0);
+  siteHeading.primaryAxisSizingMode = 'AUTO';
+  siteHeading.appendChild(makeText('Section heading', DESCRIPTIONS.siteCheckContent.groupHeading, 'section', C.text));
+  siteHeading.appendChild(makeIcon('Download icon', 'ArrowDownloadRegular', 16, C.brand));
+  siteHeading.appendChild(makeText('Primary action', DESCRIPTIONS.siteCheckContent.downloadLabel, 'body', C.brand));
+  body.appendChild(siteHeading);
+  DESCRIPTIONS.siteCheckContent.sections.forEach((content, index) => {
+    body.appendChild(components.divider.createInstance());
+    body.appendChild(createSiteCheckSection(components, content, state));
+  });
+  screen.appendChild(body);
   page.appendChild(screen);
   return screen;
 }
@@ -970,7 +1315,71 @@ function getOrCreateScreensPage() {
   return page;
 }
 
-async function run() {
+const SCREEN_GROUPS = [
+  {
+    id: 'case-list',
+    label: 'Marine licence cases',
+    screens: [
+      { id: 'case-list', label: DESCRIPTIONS.caseList.frameName },
+    ],
+  },
+  {
+    id: 'public-register',
+    label: 'Public register states',
+    screens: [
+      { id: 'public-register-initial', label: DESCRIPTIONS.publicRegister.frameName },
+      ...DESCRIPTIONS.publicRegisterVariations.map((description, index) => ({
+        id: `public-register-variation-${index}`,
+        label: description.frameName,
+      })),
+    ],
+  },
+  {
+    id: 'assessment-journey',
+    label: 'First assessment journey',
+    screens: [
+      { id: 'case-summary-initial', label: DESCRIPTIONS.caseSummaryStates[0].frameName },
+      ...DESCRIPTIONS.siteCheckStates.map((state, index) => ({
+        id: `site-check-${index}`,
+        label: state.frameName,
+      })),
+      { id: 'case-summary-unlocked', label: DESCRIPTIONS.caseSummaryStates[1].frameName },
+    ],
+  },
+];
+
+const ALL_SCREEN_IDS = SCREEN_GROUPS.flatMap(group => group.screens.map(screen => screen.id));
+
+function renderScreenById(id, page, components) {
+  if (id === 'case-list') return createCaseListScreen(page, components);
+  if (id === 'public-register-initial') {
+    return createPublicRegisterScreen(page, components, DESCRIPTIONS.publicRegister);
+  }
+  if (id.startsWith('public-register-variation-')) {
+    const index = Number(id.slice('public-register-variation-'.length));
+    const description = DESCRIPTIONS.publicRegisterVariations[index];
+    if (description) return createPublicRegisterScreen(page, components, description);
+  }
+  if (id === 'case-summary-initial') {
+    return createCaseSummaryScreen(page, components, DESCRIPTIONS.caseSummaryStates[0]);
+  }
+  if (id.startsWith('site-check-')) {
+    const index = Number(id.slice('site-check-'.length));
+    const state = DESCRIPTIONS.siteCheckStates[index];
+    if (state) return createSiteCheckScreen(page, components, state);
+  }
+  if (id === 'case-summary-unlocked') {
+    return createCaseSummaryScreen(page, components, DESCRIPTIONS.caseSummaryStates[1]);
+  }
+  throw new Error(`Unknown screen selection: ${id}`);
+}
+
+async function generateScreens(screenIds) {
+  const uniqueIds = [...new Set(screenIds)];
+  if (!uniqueIds.length) throw new Error('Select at least one screen to generate.');
+  const unknownId = uniqueIds.find(id => !ALL_SCREEN_IDS.includes(id));
+  if (unknownId) throw new Error(`Unknown screen selection: ${unknownId}`);
+
   const runLabel = `Run ${String(nextRunNumber()).padStart(2, '0')}`;
   fonts = await loadPreferredFonts();
   styles = ensureStyles(runLabel);
@@ -987,33 +1396,65 @@ async function run() {
   batchLabel.y = 32;
   screensPage.appendChild(batchLabel);
 
-  const includeList = figma.command !== 'generate-public-register';
-  const includeTask = figma.command !== 'generate-case-list';
-  let listScreen;
-  const taskScreens = [];
-  if (includeList) {
-    listScreen = createCaseListScreen(screensPage, components);
-    listScreen.x = batchX;
-    listScreen.y = 80;
-  }
-  if (includeTask) {
-    const taskDescriptions = [DESCRIPTIONS.publicRegister, ...(DESCRIPTIONS.publicRegisterVariations || [])];
-    taskDescriptions.forEach((description, index) => {
-      const taskScreen = createPublicRegisterScreen(screensPage, components, description);
-      taskScreen.x = batchX + (includeList ? 1720 : 0) + (index * 1720);
-      taskScreen.y = 80;
-      taskScreens.push(taskScreen);
-    });
-  }
+  const generatedScreens = [];
+  let screenX = batchX;
+  const appendScreen = screen => {
+    screen.x = screenX;
+    screen.y = 80;
+    screenX += 1720;
+    generatedScreens.push(screen);
+  };
+  uniqueIds.forEach(id => appendScreen(renderScreenById(id, screensPage, components)));
 
   figma.currentPage = screensPage;
-  const generatedScreens = [listScreen, ...taskScreens].filter(Boolean);
   figma.viewport.scrollAndZoomIntoView(generatedScreens);
   figma.notify(`Added ${runLabel}: ${generatedScreens.length} editable ${generatedScreens.length === 1 ? 'screen' : 'screens'} to 01 - MAS D365 Screens. Existing layers were left unchanged.`);
   figma.closePlugin();
 }
 
-run().catch(error => {
-  figma.notify(`MAS D365 Screen Builder failed: ${error.message}`, { error: true, timeout: 15000 });
-  figma.closePlugin();
-});
+function reportFailure(error, notifyUi = false) {
+  console.error(error);
+  try {
+    const page = getOrCreateScreensPage();
+    figma.currentPage = page;
+    const marker = verticalFrame('MAS D365 Screen Builder error', 760, 12, 20, C.errorBackground);
+    marker.x = nextHorizontalPosition(page);
+    marker.y = 80;
+    marker.strokes = paint(C.red);
+    marker.strokeWeight = 1;
+    marker.appendChild(makeText('Error heading', 'MAS D365 Screen Builder failed', 'section', C.red));
+    marker.appendChild(makeText('Error message', error.message || String(error), 'body', C.text, 720));
+    page.appendChild(marker);
+    figma.viewport.scrollAndZoomIntoView([marker]);
+  } catch (markerError) {
+    console.error(markerError);
+  }
+  if (notifyUi && figma.ui) {
+    figma.ui.postMessage({ type: 'error', message: error.message || String(error) });
+  }
+  figma.notify(`MAS D365 Screen Builder failed: ${error.message}`, { error: true, timeout: 30000 });
+  if (!notifyUi) figma.closePlugin();
+}
+
+function showPicker() {
+  figma.showUI(__html__, { width: 420, height: 640, themeColors: true });
+  figma.ui.postMessage({ type: 'catalog', groups: SCREEN_GROUPS });
+  figma.ui.onmessage = async message => {
+    if (message?.type === 'cancel') {
+      figma.closePlugin();
+      return;
+    }
+    if (message?.type !== 'generate') return;
+    try {
+      await generateScreens(Array.isArray(message.screenIds) ? message.screenIds : []);
+    } catch (error) {
+      reportFailure(error, true);
+    }
+  };
+}
+
+if (figma.command === 'choose-screens') {
+  showPicker();
+} else {
+  generateScreens(ALL_SCREEN_IDS).catch(error => reportFailure(error));
+}

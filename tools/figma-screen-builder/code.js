@@ -8,7 +8,7 @@ const DESCRIPTIONS = {
       "width": 1640,
       "height": 1232
     },
-    "source": "MAS React prototype and the two supplied reference screenshots",
+    "source": "MAS React prototype, rendered application and supplied reference screenshots",
     "browserChromeExcluded": true
   },
   "shell": {
@@ -203,6 +203,258 @@ const DESCRIPTIONS = {
       }
     ]
   },
+  "caseSummaryStates": [
+    {
+      "frameName": "04 · Case summary · Site check to do",
+      "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
+      "recordType": "Case",
+      "meta": [
+        {
+          "label": "Reference",
+          "value": "MLA/2026/10002"
+        },
+        {
+          "label": "Status",
+          "value": "Assessment in progress"
+        },
+        {
+          "label": "Case age",
+          "value": "1 day"
+        },
+        {
+          "label": "Assigned to",
+          "value": "Sam Evans",
+          "avatar": true
+        }
+      ],
+      "tabs": [
+        "Case summary",
+        "Application details",
+        "Sites and activities",
+        "Marine plan policies",
+        "Water Framework Directive",
+        "Other permissions",
+        "Public register"
+      ],
+      "fields": [
+        {
+          "label": "Reference",
+          "value": "MLA/2026/10002",
+          "column": 1
+        },
+        {
+          "label": "Application type",
+          "value": "Marine licence application",
+          "column": 1
+        },
+        {
+          "label": "Submitted",
+          "value": "08/09/2026",
+          "column": 1
+        },
+        {
+          "label": "Fee band",
+          "value": "2A",
+          "column": 1
+        },
+        {
+          "label": "Applicant",
+          "value": "Jenny Smith",
+          "column": 2
+        },
+        {
+          "label": "Organisation",
+          "value": "South Devon Coast SUP Ltd",
+          "column": 2
+        }
+      ],
+      "tasks": [
+        {
+          "name": "Site check",
+          "status": "To do"
+        },
+        {
+          "name": "Public register",
+          "status": "Cannot start yet"
+        },
+        {
+          "name": "Water Framework Directive",
+          "status": "Cannot start yet"
+        },
+        {
+          "name": "Prepare for consultation",
+          "status": "Cannot start yet"
+        },
+        {
+          "name": "Marine plan policies",
+          "status": "Cannot start yet"
+        },
+        {
+          "name": "Public notice",
+          "status": "Cannot start yet"
+        }
+      ]
+    },
+    {
+      "frameName": "08 · Case summary · Tasks unlocked",
+      "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
+      "recordType": "Case",
+      "meta": [
+        {
+          "label": "Reference",
+          "value": "MLA/2026/10002"
+        },
+        {
+          "label": "Status",
+          "value": "Assessment in progress"
+        },
+        {
+          "label": "Case age",
+          "value": "1 day"
+        },
+        {
+          "label": "Assigned to",
+          "value": "Sam Evans",
+          "avatar": true
+        }
+      ],
+      "tabs": [
+        "Case summary",
+        "Application details",
+        "Sites and activities",
+        "Marine plan policies",
+        "Water Framework Directive",
+        "Other permissions",
+        "Public register"
+      ],
+      "fields": [
+        {
+          "label": "Reference",
+          "value": "MLA/2026/10002",
+          "column": 1
+        },
+        {
+          "label": "Application type",
+          "value": "Marine licence application",
+          "column": 1
+        },
+        {
+          "label": "Submitted",
+          "value": "08/09/2026",
+          "column": 1
+        },
+        {
+          "label": "Fee band",
+          "value": "2A",
+          "column": 1
+        },
+        {
+          "label": "Applicant",
+          "value": "Jenny Smith",
+          "column": 2
+        },
+        {
+          "label": "Organisation",
+          "value": "South Devon Coast SUP Ltd",
+          "column": 2
+        }
+      ],
+      "tasks": [
+        {
+          "name": "Site check",
+          "status": "Done"
+        },
+        {
+          "name": "Public register",
+          "status": "To do"
+        },
+        {
+          "name": "Water Framework Directive",
+          "status": "To do"
+        },
+        {
+          "name": "Prepare for consultation",
+          "status": "To do"
+        },
+        {
+          "name": "Marine plan policies",
+          "status": "To do"
+        },
+        {
+          "name": "Public notice",
+          "status": "To do"
+        }
+      ]
+    }
+  ],
+  "siteCheckContent": {
+    "groupHeading": "Site coordinates",
+    "downloadLabel": "Download CSV",
+    "sections": [
+      {
+        "key": "coordinates",
+        "heading": "1. Coordinates and shape",
+        "description": "Check that the coordinates accurately represent the location of the works, that the shape and size are appropriate for the activity, and that the site is within MMO jurisdiction.",
+        "question": "Are the coordinates and shape correct and appropriate?",
+        "type": "dropdown"
+      },
+      {
+        "key": "withinWfd",
+        "heading": "2. Site located in the Water Framework Directive assessment (WFD) area",
+        "description": "Confirm whether the site is within the WFD assessment area. Within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and Mean High Water Springs.",
+        "question": "Is the site within the WFD assessment area?",
+        "type": "dropdown"
+      },
+      {
+        "key": "notes",
+        "heading": "3. Notes from your site check",
+        "question": "Record anything from your site check that is relevant to later stages of the assessment.",
+        "type": "textarea"
+      }
+    ]
+  },
+  "siteCheckStates": [
+    {
+      "frameName": "05 · Site check · Initial state",
+      "pageHeading": "Site check",
+      "saveState": "Unsaved",
+      "recordType": "Task",
+      "coordinates": "---",
+      "withinWfd": "---",
+      "notes": "",
+      "errors": []
+    },
+    {
+      "frameName": "06 · Site check · Validation errors",
+      "pageHeading": "Site check",
+      "saveState": "Unsaved",
+      "recordType": "Task",
+      "coordinates": "---",
+      "withinWfd": "---",
+      "notes": "",
+      "notification": "Coordinates and shape, WFD assessment area : Required fields must be filled in.",
+      "errors": [
+        {
+          "field": "coordinates",
+          "message": "Coordinates and shape: Required fields must be filled in."
+        },
+        {
+          "field": "withinWfd",
+          "message": "WFD assessment area: Required fields must be filled in."
+        }
+      ]
+    },
+    {
+      "frameName": "07 · Site check · Completed",
+      "pageHeading": "Site check",
+      "saveState": "Saved",
+      "recordType": "Task",
+      "coordinates": "Yes",
+      "withinWfd": "Yes",
+      "notes": "Coordinates and shape checked against the application drawings. The site is within the WFD assessment area.",
+      "errors": []
+    }
+  ],
   "publicRegister": {
     "frameName": "02 · Public register task · Initial state",
     "pageHeading": "Public register",
@@ -375,6 +627,9 @@ const FLUENT_ICONS = {
   "ArrowLeftRegular": [
     "M9.16 16.87a.5.5 0 1 0 .67-.74L3.67 10.5H17.5a.5.5 0 0 0 0-1H3.67l6.16-5.63a.5.5 0 0 0-.67-.74L2.24 9.44a.75.75 0 0 0 0 1.11l6.92 6.32Z"
   ],
+  "ArrowDownloadRegular": [
+    "M15.5 17a.5.5 0 0 1 .09 1H4.5a.5.5 0 0 1-.09-1H15.5ZM10 2a.5.5 0 0 1 .5.41V14.3l3.64-3.65a.5.5 0 0 1 .64-.06l.07.06c.17.17.2.44.06.63l-.06.07-4.5 4.5a.5.5 0 0 1-.25.14L10 16a.5.5 0 0 1-.4-.2l-4.46-4.45a.5.5 0 0 1 .64-.76l.07.06 3.65 3.64V2.5c0-.27.22-.5.5-.5Z"
+  ],
   "ArrowUpRegular": [
     "M3.13 9.16a.5.5 0 1 0 .74.68L9.5 3.67V17.5a.5.5 0 1 0 1 0V3.67l5.63 6.17a.5.5 0 0 0 .74-.68l-6.32-6.92a.75.75 0 0 0-1.1 0L3.13 9.16Z"
   ],
@@ -395,6 +650,12 @@ const FLUENT_ICONS = {
   ],
   "DocumentCopyRegular": [
     "M6 4c0-1.1.9-2 2-2h3.59c.4 0 .78.16 1.06.44l3.91 3.91c.28.28.44.67.44 1.06V14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8h-3.5A1.5 1.5 0 0 1 11 6.5V3H8Zm4 .2v3.3c0 .28.22.5.5.5h3.3L12 3.2ZM4 5a1 1 0 0 1 1-1v10a3 3 0 0 0 3 3h7a1 1 0 0 1-1 1H7.94A3.94 3.94 0 0 1 4 14.06V5Z"
+  ],
+  "DismissCircleFilled": [
+    "M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16ZM7.8 7.11a.5.5 0 0 0-.63.06l-.06.07a.5.5 0 0 0 .06.64L9.3 10l-2.12 2.12-.06.07a.5.5 0 0 0 .06.64l.07.06c.2.13.47.11.64-.06L10 10.7l2.12 2.12.07.06c.2.13.46.11.64-.06l.06-.07a.5.5 0 0 0-.06-.64L10.7 10l2.12-2.12.06-.07a.5.5 0 0 0-.06-.64l-.07-.06a.5.5 0 0 0-.64.06L10 9.3 7.88 7.17l-.07-.06Z"
+  ],
+  "DismissSquareRegular": [
+    "M7.15 7.15c.2-.2.5-.2.7 0L10 9.29l2.15-2.14a.5.5 0 0 1 .7.7L10.71 10l2.14 2.15a.5.5 0 0 1-.7.7L10 10.71l-2.15 2.14a.5.5 0 0 1-.7-.7L9.29 10 7.15 7.85a.5.5 0 0 1 0-.7ZM3 6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm3-2a2 2 0 0 0-2 2v8c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6Z"
   ],
   "ErrorCircleRegular": [
     "M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 1a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm0 9.5a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5ZM10 6a.5.5 0 0 1 .5.41V11a.5.5 0 0 1-1 .09V6.5c0-.28.22-.5.5-.5Z"
@@ -432,6 +693,9 @@ const FLUENT_ICONS = {
   "SearchRegular": [
     "M12.73 13.44a6.5 6.5 0 1 1 .7-.7l3.42 3.4a.5.5 0 0 1-.63.77l-.07-.06-3.42-3.41Zm-.71-.71A5.54 5.54 0 0 0 14 8.5a5.5 5.5 0 1 0-1.98 4.23Z"
   ],
+  "SendRegular": [
+    "M2.18 2.11a.5.5 0 0 1 .54-.06l15 7.5a.5.5 0 0 1 0 .9l-15 7.5a.5.5 0 0 1-.7-.58L3.98 10 2.02 2.63a.5.5 0 0 1 .16-.52Zm2.7 8.39-1.61 6.06L16.38 10 3.27 3.44 4.88 9.5h6.62a.5.5 0 1 1 0 1H4.88Z"
+  ],
   "SettingsRegular": [
     "M1.91 7.38A8.5 8.5 0 0 1 3.7 4.3a.5.5 0 0 1 .54-.13l1.92.68a1 1 0 0 0 1.32-.76l.36-2a.5.5 0 0 1 .4-.4 8.53 8.53 0 0 1 3.55 0c.2.04.35.2.38.4l.37 2a1 1 0 0 0 1.32.76l1.92-.68a.5.5 0 0 1 .54.13 8.5 8.5 0 0 1 1.78 3.08c.06.2 0 .4-.15.54l-1.56 1.32a1 1 0 0 0 0 1.52l1.56 1.32a.5.5 0 0 1 .15.54 8.5 8.5 0 0 1-1.78 3.08.5.5 0 0 1-.54.13l-1.92-.68a1 1 0 0 0-1.32.76l-.37 2a.5.5 0 0 1-.38.4 8.53 8.53 0 0 1-3.56 0 .5.5 0 0 1-.39-.4l-.36-2a1 1 0 0 0-1.32-.76l-1.92.68a.5.5 0 0 1-.54-.13 8.5 8.5 0 0 1-1.78-3.08.5.5 0 0 1 .15-.54l1.56-1.32a1 1 0 0 0 0-1.52L2.06 7.92a.5.5 0 0 1-.15-.54Zm1.06 0 1.3 1.1a2 2 0 0 1 0 3.04l-1.3 1.1c.3.79.72 1.51 1.25 2.16l1.6-.58a2 2 0 0 1 2.63 1.53l.3 1.67a7.56 7.56 0 0 0 2.5 0l.3-1.67a2 2 0 0 1 2.64-1.53l1.6.58a7.5 7.5 0 0 0 1.24-2.16l-1.3-1.1a2 2 0 0 1 0-3.04l1.3-1.1a7.5 7.5 0 0 0-1.25-2.16l-1.6.58a2 2 0 0 1-2.63-1.53l-.3-1.67a7.55 7.55 0 0 0-2.5 0l-.3 1.67A2 2 0 0 1 5.81 5.8l-1.6-.58a7.5 7.5 0 0 0-1.24 2.16ZM7.5 10a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0Zm1 0a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Z"
   ],
@@ -453,6 +717,7 @@ const C = {
   field: '#F3F2F1',
   hover: '#EDEBE9',
   red: '#C50F1F',
+  errorBackground: '#FDE7E9',
   yellow: '#FFE399',
 };
 
@@ -901,9 +1166,13 @@ function createQuestionRow(page, name, fieldComponent, decoration, multiline = f
 
   const marker = horizontalFrame('Field decoration', 26, 32, 0, 0);
   marker.primaryAxisAlignItems = 'MAX';
-  marker.appendChild(decoration === 'required'
-    ? makeText('Required indicator', '*', 'body', C.red)
-    : makeIcon('Read-only indicator', 'LockClosedRegular', 16, C.secondary));
+  if (decoration === 'required') {
+    marker.appendChild(makeText('Required indicator', '*', 'body', C.red));
+  } else if (decoration === 'locked') {
+    marker.appendChild(makeIcon('Read-only indicator', 'LockClosedRegular', 16, C.secondary));
+  } else {
+    marker.appendChild(fixedFrame('No field decoration', 16, 16));
+  }
   component.appendChild(marker);
 
   component.appendChild(fixedFrame('Field spacing', 8, 1));
@@ -1047,6 +1316,155 @@ function createCommandBar(page, save) {
   return component;
 }
 
+function createCaseCommandBar(page) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Command bar / Case summary';
+  component.resize(1320, 40);
+  component.layoutMode = 'HORIZONTAL';
+  component.primaryAxisSizingMode = 'FIXED';
+  component.counterAxisSizingMode = 'FIXED';
+  component.counterAxisAlignItems = 'CENTER';
+  component.itemSpacing = 10;
+  component.paddingLeft = 16;
+  component.paddingRight = 16;
+  applyCard(component);
+  component.appendChild(makeIcon('Back action', 'ArrowLeftRegular', 20, C.disabled));
+  component.appendChild(makeIcon('Open in new window', 'OpenRegular', 20, C.text));
+  component.appendChild(makeIcon('Transfer action icon', 'SendRegular', 20, C.text));
+  component.appendChild(makeText('Primary action', 'Request transfer to MCMS', 'body', C.text));
+  component.appendChild(makeIcon('Reject action icon', 'DismissSquareRegular', 20, C.text));
+  component.appendChild(makeText('Secondary action', 'Reject application', 'body', C.text));
+  page.appendChild(component);
+  return component;
+}
+
+function createFormNotification(page) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Form notification / Error';
+  component.resize(1320, 40);
+  component.layoutMode = 'HORIZONTAL';
+  component.primaryAxisSizingMode = 'FIXED';
+  component.counterAxisSizingMode = 'FIXED';
+  component.counterAxisAlignItems = 'CENTER';
+  component.itemSpacing = 8;
+  component.paddingLeft = 12;
+  component.paddingRight = 12;
+  component.fills = paint(C.errorBackground);
+  component.strokes = paint(C.stroke);
+  component.strokeBottomWeight = 1;
+  component.appendChild(makeIcon('Notification icon', 'DismissCircleFilled', 16, C.red));
+  component.appendChild(makeText('Validation message', 'Required fields must be filled in.', 'body', C.text, 1268));
+  page.appendChild(component);
+  return component;
+}
+
+function createTaskListRow(page) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Task list row';
+  component.resize(240, 60);
+  component.layoutMode = 'VERTICAL';
+  component.primaryAxisSizingMode = 'FIXED';
+  component.counterAxisSizingMode = 'FIXED';
+  component.paddingTop = 10;
+  component.paddingRight = 28;
+  component.paddingBottom = 9;
+  component.fills = [];
+  component.appendChild(makeText('Task name', 'Site check', 'label', C.text, 204));
+  component.appendChild(makeText('Task status', 'To do', 'body', C.secondary, 204));
+  const more = makeText('Task actions', '⋯', 'body', C.text);
+  component.appendChild(more);
+  more.layoutPositioning = 'ABSOLUTE';
+  more.x = 220;
+  more.y = 10;
+  const divider = addLine(component, 'Task row divider', 240);
+  divider.layoutPositioning = 'ABSOLUTE';
+  divider.x = 0;
+  divider.y = 59;
+  page.appendChild(component);
+  return component;
+}
+
+function createCaseHeader(page, description) {
+  const component = figma.createComponent();
+  component.name = 'D365 / Case record header';
+  component.resize(1320, 152);
+  applyCard(component);
+
+  const titleGroup = horizontalFrame('Case identity', 680, 72, 12, 0);
+  titleGroup.x = 20;
+  titleGroup.y = 12;
+  const caseAvatar = fixedFrame('Case avatar', 48, 48, '#D9A7E8');
+  caseAvatar.cornerRadius = 24;
+  const caseInitial = makeText('Case avatar initial', 'I', 'title', C.white, 48);
+  caseInitial.textAlignHorizontal = 'CENTER';
+  caseInitial.y = 8;
+  caseAvatar.appendChild(caseInitial);
+  titleGroup.appendChild(caseAvatar);
+  const titleText = verticalFrame('Case title group', 620, 0, 0);
+  const title = makeText('Page heading', description.title, 'title', C.text, 620);
+  titleText.appendChild(title);
+  titleText.appendChild(makeText('Record type', description.recordType, 'body', C.text));
+  titleGroup.appendChild(titleText);
+  component.appendChild(titleGroup);
+
+  const meta = horizontalFrame('Case metadata', 560, 64, 24, 0);
+  meta.primaryAxisAlignItems = 'MAX';
+  meta.x = 740;
+  meta.y = 16;
+  for (const item of description.meta) {
+    const groupWidth = item.avatar
+      ? 124
+      : item.label === 'Status'
+        ? 140
+        : item.label === 'Reference'
+          ? 120
+          : 70;
+    const group = verticalFrame(`Metadata / ${item.label}`, groupWidth, 0, 0);
+    if (item.avatar) {
+      const assigned = horizontalFrame('Assigned user', 124, 40, 8, 0);
+      const avatar = fixedFrame('Assignee avatar', 32, 32, C.yellow);
+      avatar.cornerRadius = 16;
+      const initialsText = makeText('Avatar initials', initials(item.value), 'small', C.text, 32);
+      initialsText.textAlignHorizontal = 'CENTER';
+      initialsText.y = 8;
+      avatar.appendChild(initialsText);
+      assigned.appendChild(avatar);
+      const assignedText = verticalFrame('Assigned user text', 84, 0, 0);
+      assignedText.appendChild(makeText(`Meta value / ${item.label}`, item.value, 'body', C.text, 84));
+      assignedText.appendChild(makeText(`Meta label / ${item.label}`, item.label, 'small', C.secondary));
+      assigned.appendChild(assignedText);
+      group.appendChild(assigned);
+    } else {
+      group.appendChild(makeText(`Meta value / ${item.label}`, item.value, 'body', C.text, groupWidth));
+      group.appendChild(makeText(`Meta label / ${item.label}`, item.label, 'small', C.secondary));
+    }
+    meta.appendChild(group);
+  }
+  component.appendChild(meta);
+
+  const tabs = horizontalFrame('Case tabs', 1280, 48, 28, 0);
+  tabs.x = 20;
+  tabs.y = 104;
+  tabs.counterAxisAlignItems = 'CENTER';
+  description.tabs.forEach((label, index) => {
+    const tab = fixedFrame(`Tab / ${label}`, index === 0 ? 104 : Math.max(110, label.length * 8), 48);
+    const tabText = makeText('Tab label', label, index === 0 ? 'label' : 'body', C.text);
+    tabText.x = 0;
+    tabText.y = 14;
+    tab.appendChild(tabText);
+    if (index === 0) {
+      const indicator = addLine(tab, 'Selected tab indicator', 104, C.brand);
+      indicator.resize(104, 3);
+      indicator.x = 0;
+      indicator.y = 45;
+    }
+    tabs.appendChild(tab);
+  });
+  component.appendChild(tabs);
+  page.appendChild(component);
+  return component;
+}
+
 function createTableComponents(page, checkbox, avatar, status) {
   const header = figma.createComponent();
   header.name = 'D365 / Table header';
@@ -1149,12 +1567,17 @@ function createComponentLibrary(page, runLabel) {
     readOnlyMultiline: createQuestionRow(page, 'Read only multiline', fields.readOnly, 'locked', true),
     dropdown: createQuestionRow(page, 'Dropdown', fields.dropdown, 'required'),
     textarea: createQuestionRow(page, 'Multiline text', fields.readOnly, 'required', true, true),
+    textareaOptional: createQuestionRow(page, 'Multiline text optional', fields.readOnly, 'none', true, true),
     url: createQuestionRow(page, 'URL', fields.url, 'locked'),
   };
   const globalHeader = createGlobalHeader(page, DESCRIPTIONS.shell);
   const leftNav = createLeftNav(page, DESCRIPTIONS.shell);
   const commandList = createCommandBar(page, false);
   const commandSave = createCommandBar(page, true);
+  const commandCase = createCaseCommandBar(page);
+  const formNotification = createFormNotification(page);
+  const taskListRow = createTaskListRow(page);
+  const caseHeader = createCaseHeader(page, DESCRIPTIONS.caseSummaryStates[0]);
   const table = createTableComponents(page, checkbox, avatar, status);
 
   const card = figma.createComponent();
@@ -1176,10 +1599,27 @@ function createComponentLibrary(page, runLabel) {
   batchLabel.x = batchX;
   batchLabel.y = 48;
   page.appendChild(batchLabel);
-  return { checkbox, avatar, status, divider, fields, rows, globalHeader, leftNav, commandList, commandSave, table, card };
+  return {
+    checkbox,
+    avatar,
+    status,
+    divider,
+    fields,
+    rows,
+    globalHeader,
+    leftNav,
+    commandList,
+    commandSave,
+    commandCase,
+    formNotification,
+    taskListRow,
+    caseHeader,
+    table,
+    card,
+  };
 }
 
-function addShell(screen, components, save, screenHeight = 1232) {
+function addShell(screen, components, save, screenHeight = 1232, commandComponent = null) {
   const background = fixedFrame('Application canvas', 1640, screenHeight, C.canvas);
   screen.appendChild(background);
 
@@ -1203,11 +1643,13 @@ function addShell(screen, components, save, screenHeight = 1232) {
   rail.strokeLeftWeight = 1;
   screen.appendChild(rail);
 
-  const command = (save ? components.commandSave : components.commandList).createInstance();
+  const commandSource = commandComponent || (save ? components.commandSave : components.commandList);
+  const command = commandSource.createInstance();
   command.name = 'Command bar';
   command.x = 268;
   command.y = 60;
   screen.appendChild(command);
+  return { command };
 }
 
 function applyRowData(instance, data) {
@@ -1261,6 +1703,173 @@ function createCaseListScreen(page, components) {
     card.appendChild(row);
   }
   screen.appendChild(card);
+  page.appendChild(screen);
+  return screen;
+}
+
+function configureCaseHeader(instance, description) {
+  setText(instance, 'Page heading', description.title);
+  setText(instance, 'Record type', description.recordType);
+  for (const item of description.meta) {
+    setText(instance, `Meta value / ${item.label}`, item.value);
+  }
+}
+
+function createCaseSummaryField(components, field) {
+  const row = horizontalFrame(`Case field / ${field.label}`, 484, 32, 0, 0);
+  row.appendChild(makeText('Field label', field.label, 'body', C.text, 140));
+  const decoration = horizontalFrame('Field decoration', 26, 32, 0, 0);
+  decoration.primaryAxisAlignItems = 'MAX';
+  decoration.appendChild(makeIcon('Read-only indicator', 'LockClosedRegular', 16, C.secondary));
+  row.appendChild(decoration);
+  row.appendChild(fixedFrame('Field spacing', 8, 1));
+  const value = components.fields.readOnly.createInstance();
+  value.name = 'Read-only field';
+  value.resize(310, value.height);
+  setText(value, 'Field value', field.value);
+  const valueText = value.findOne(node => node.type === 'TEXT' && node.name === 'Field value');
+  if (valueText) valueText.resize(286, valueText.height);
+  row.appendChild(value);
+  return row;
+}
+
+function createTasksCard(components, tasks) {
+  const card = verticalFrame('Tasks card', 280, 0, 16, C.white);
+  applyCard(card);
+  const heading = horizontalFrame('Tasks heading', 248, 36, 0, 0);
+  heading.primaryAxisAlignItems = 'SPACE_BETWEEN';
+  heading.appendChild(makeText('Section heading', 'Tasks', 'section', C.text));
+  heading.appendChild(makeText('Sort tasks', '⇅', 'section', C.text));
+  card.appendChild(heading);
+  addLine(card, 'Tasks heading divider', 248);
+  for (const task of tasks) {
+    const row = components.taskListRow.createInstance();
+    row.name = `Task / ${task.name}`;
+    setText(row, 'Task name', task.name);
+    setText(row, 'Task status', task.status);
+    card.appendChild(row);
+  }
+  const footer = horizontalFrame('Tasks footer', 248, 44, 0, 0);
+  footer.primaryAxisAlignItems = 'SPACE_BETWEEN';
+  footer.appendChild(makeText('Pagination summary', `1 - ${tasks.length} of ${tasks.length}`, 'body', C.secondary));
+  footer.appendChild(makeText('Pagination', '‹  Page 1  ›', 'body', C.secondary));
+  card.appendChild(footer);
+  return card;
+}
+
+function createCaseSummaryScreen(page, components, description) {
+  const screen = fixedFrame(description.frameName, 1640, 1232, C.canvas);
+  screen.clipsContent = true;
+  addShell(screen, components, false, 1232, components.commandCase);
+
+  const header = components.caseHeader.createInstance();
+  header.name = 'Case record header';
+  configureCaseHeader(header, description);
+  header.x = 268;
+  header.y = 112;
+  screen.appendChild(header);
+
+  const summary = verticalFrame('Case summary card', 1028, 20, 20, C.white);
+  summary.x = 268;
+  summary.y = 280;
+  applyCard(summary);
+  summary.appendChild(makeText('Section heading', 'Case summary', 'section', C.text));
+  const columns = horizontalFrame('Case field columns', 988, 1, 20, 0);
+  columns.counterAxisSizingMode = 'AUTO';
+  const left = verticalFrame('Case fields / Left column', 484, 16, 0);
+  const right = verticalFrame('Case fields / Right column', 484, 16, 0);
+  for (const field of description.fields) {
+    (field.column === 2 ? right : left).appendChild(createCaseSummaryField(components, field));
+  }
+  columns.appendChild(left);
+  columns.appendChild(right);
+  summary.appendChild(columns);
+  screen.appendChild(summary);
+
+  const tasks = createTasksCard(components, description.tasks);
+  tasks.x = 1308;
+  tasks.y = 280;
+  screen.appendChild(tasks);
+  page.appendChild(screen);
+  return screen;
+}
+
+function createIndentedValidation(components, message) {
+  const row = fixedFrame('Field validation row', 1278, 1);
+  row.layoutMode = 'HORIZONTAL';
+  row.primaryAxisSizingMode = 'FIXED';
+  row.counterAxisSizingMode = 'AUTO';
+  row.appendChild(fixedFrame('Validation alignment', 378, 1));
+  const validation = components.fields.validation.createInstance();
+  validation.name = 'Validation message';
+  setText(validation, 'Validation message', message);
+  row.appendChild(validation);
+  return row;
+}
+
+function createSiteCheckSection(components, content, state) {
+  const section = verticalFrame(`Section / ${content.heading}`, 1278, 16, 0);
+  section.appendChild(makeText('Section heading', content.heading, 'section', C.text, 1278));
+  if (content.description) {
+    section.appendChild(makeText('Help text', content.description, 'body', C.secondary, 1278));
+  }
+  const isTextarea = content.type === 'textarea';
+  const source = isTextarea ? components.rows.textareaOptional : components.rows.dropdown;
+  const row = source.createInstance();
+  row.name = `Form question / ${content.question}`;
+  configureQuestionRow(row, {
+    type: content.type,
+    question: content.question,
+    value: state[content.key],
+  });
+  section.appendChild(row);
+  const error = (state.errors || []).find(item => item.field === content.key);
+  if (error) section.appendChild(createIndentedValidation(components, error.message));
+  return section;
+}
+
+function createSiteCheckScreen(page, components, state) {
+  const screen = fixedFrame(state.frameName, 1640, 1232, C.canvas);
+  screen.clipsContent = true;
+  const { command } = addShell(screen, components, true);
+  const offset = state.notification ? 40 : 0;
+  if (state.notification) {
+    const notification = components.formNotification.createInstance();
+    notification.name = 'Form notification';
+    setText(notification, 'Validation message', state.notification);
+    notification.x = 268;
+    notification.y = 60;
+    screen.appendChild(notification);
+    command.y += offset;
+  }
+
+  const headerCard = verticalFrame('Task header card', 1320, 12, 20, C.white);
+  headerCard.x = 268;
+  headerCard.y = 125 + offset;
+  applyCard(headerCard);
+  const headingLine = horizontalFrame('Task title', 1280, 32, 6, 0);
+  headingLine.primaryAxisSizingMode = 'AUTO';
+  headingLine.appendChild(makeText('Page heading', state.pageHeading, 'title', C.text));
+  headingLine.appendChild(makeText('Save state', `- ${state.saveState}`, 'body', C.secondary));
+  headerCard.appendChild(headingLine);
+  headerCard.appendChild(makeText('Record type', state.recordType, 'body', C.text));
+  screen.appendChild(headerCard);
+
+  const body = verticalFrame('Task form card', 1320, 24, 20, C.white);
+  body.x = 268;
+  body.y = 238 + offset;
+  applyCard(body);
+  const siteHeading = horizontalFrame('Site coordinates heading', 1278, 32, 10, 0);
+  siteHeading.primaryAxisSizingMode = 'AUTO';
+  siteHeading.appendChild(makeText('Section heading', DESCRIPTIONS.siteCheckContent.groupHeading, 'section', C.text));
+  siteHeading.appendChild(makeIcon('Download icon', 'ArrowDownloadRegular', 16, C.brand));
+  siteHeading.appendChild(makeText('Primary action', DESCRIPTIONS.siteCheckContent.downloadLabel, 'body', C.brand));
+  body.appendChild(siteHeading);
+  DESCRIPTIONS.siteCheckContent.sections.forEach((content, index) => {
+    body.appendChild(components.divider.createInstance());
+    body.appendChild(createSiteCheckSection(components, content, state));
+  });
+  screen.appendChild(body);
   page.appendChild(screen);
   return screen;
 }
@@ -1406,7 +2015,71 @@ function getOrCreateScreensPage() {
   return page;
 }
 
-async function run() {
+const SCREEN_GROUPS = [
+  {
+    id: 'case-list',
+    label: 'Marine licence cases',
+    screens: [
+      { id: 'case-list', label: DESCRIPTIONS.caseList.frameName },
+    ],
+  },
+  {
+    id: 'public-register',
+    label: 'Public register states',
+    screens: [
+      { id: 'public-register-initial', label: DESCRIPTIONS.publicRegister.frameName },
+      ...DESCRIPTIONS.publicRegisterVariations.map((description, index) => ({
+        id: `public-register-variation-${index}`,
+        label: description.frameName,
+      })),
+    ],
+  },
+  {
+    id: 'assessment-journey',
+    label: 'First assessment journey',
+    screens: [
+      { id: 'case-summary-initial', label: DESCRIPTIONS.caseSummaryStates[0].frameName },
+      ...DESCRIPTIONS.siteCheckStates.map((state, index) => ({
+        id: `site-check-${index}`,
+        label: state.frameName,
+      })),
+      { id: 'case-summary-unlocked', label: DESCRIPTIONS.caseSummaryStates[1].frameName },
+    ],
+  },
+];
+
+const ALL_SCREEN_IDS = SCREEN_GROUPS.flatMap(group => group.screens.map(screen => screen.id));
+
+function renderScreenById(id, page, components) {
+  if (id === 'case-list') return createCaseListScreen(page, components);
+  if (id === 'public-register-initial') {
+    return createPublicRegisterScreen(page, components, DESCRIPTIONS.publicRegister);
+  }
+  if (id.startsWith('public-register-variation-')) {
+    const index = Number(id.slice('public-register-variation-'.length));
+    const description = DESCRIPTIONS.publicRegisterVariations[index];
+    if (description) return createPublicRegisterScreen(page, components, description);
+  }
+  if (id === 'case-summary-initial') {
+    return createCaseSummaryScreen(page, components, DESCRIPTIONS.caseSummaryStates[0]);
+  }
+  if (id.startsWith('site-check-')) {
+    const index = Number(id.slice('site-check-'.length));
+    const state = DESCRIPTIONS.siteCheckStates[index];
+    if (state) return createSiteCheckScreen(page, components, state);
+  }
+  if (id === 'case-summary-unlocked') {
+    return createCaseSummaryScreen(page, components, DESCRIPTIONS.caseSummaryStates[1]);
+  }
+  throw new Error(`Unknown screen selection: ${id}`);
+}
+
+async function generateScreens(screenIds) {
+  const uniqueIds = [...new Set(screenIds)];
+  if (!uniqueIds.length) throw new Error('Select at least one screen to generate.');
+  const unknownId = uniqueIds.find(id => !ALL_SCREEN_IDS.includes(id));
+  if (unknownId) throw new Error(`Unknown screen selection: ${unknownId}`);
+
   const runLabel = `Run ${String(nextRunNumber()).padStart(2, '0')}`;
   fonts = await loadPreferredFonts();
   styles = ensureStyles(runLabel);
@@ -1423,33 +2096,65 @@ async function run() {
   batchLabel.y = 32;
   screensPage.appendChild(batchLabel);
 
-  const includeList = figma.command !== 'generate-public-register';
-  const includeTask = figma.command !== 'generate-case-list';
-  let listScreen;
-  const taskScreens = [];
-  if (includeList) {
-    listScreen = createCaseListScreen(screensPage, components);
-    listScreen.x = batchX;
-    listScreen.y = 80;
-  }
-  if (includeTask) {
-    const taskDescriptions = [DESCRIPTIONS.publicRegister, ...(DESCRIPTIONS.publicRegisterVariations || [])];
-    taskDescriptions.forEach((description, index) => {
-      const taskScreen = createPublicRegisterScreen(screensPage, components, description);
-      taskScreen.x = batchX + (includeList ? 1720 : 0) + (index * 1720);
-      taskScreen.y = 80;
-      taskScreens.push(taskScreen);
-    });
-  }
+  const generatedScreens = [];
+  let screenX = batchX;
+  const appendScreen = screen => {
+    screen.x = screenX;
+    screen.y = 80;
+    screenX += 1720;
+    generatedScreens.push(screen);
+  };
+  uniqueIds.forEach(id => appendScreen(renderScreenById(id, screensPage, components)));
 
   figma.currentPage = screensPage;
-  const generatedScreens = [listScreen, ...taskScreens].filter(Boolean);
   figma.viewport.scrollAndZoomIntoView(generatedScreens);
   figma.notify(`Added ${runLabel}: ${generatedScreens.length} editable ${generatedScreens.length === 1 ? 'screen' : 'screens'} to 01 - MAS D365 Screens. Existing layers were left unchanged.`);
   figma.closePlugin();
 }
 
-run().catch(error => {
-  figma.notify(`MAS D365 Screen Builder failed: ${error.message}`, { error: true, timeout: 15000 });
-  figma.closePlugin();
-});
+function reportFailure(error, notifyUi = false) {
+  console.error(error);
+  try {
+    const page = getOrCreateScreensPage();
+    figma.currentPage = page;
+    const marker = verticalFrame('MAS D365 Screen Builder error', 760, 12, 20, C.errorBackground);
+    marker.x = nextHorizontalPosition(page);
+    marker.y = 80;
+    marker.strokes = paint(C.red);
+    marker.strokeWeight = 1;
+    marker.appendChild(makeText('Error heading', 'MAS D365 Screen Builder failed', 'section', C.red));
+    marker.appendChild(makeText('Error message', error.message || String(error), 'body', C.text, 720));
+    page.appendChild(marker);
+    figma.viewport.scrollAndZoomIntoView([marker]);
+  } catch (markerError) {
+    console.error(markerError);
+  }
+  if (notifyUi && figma.ui) {
+    figma.ui.postMessage({ type: 'error', message: error.message || String(error) });
+  }
+  figma.notify(`MAS D365 Screen Builder failed: ${error.message}`, { error: true, timeout: 30000 });
+  if (!notifyUi) figma.closePlugin();
+}
+
+function showPicker() {
+  figma.showUI(__html__, { width: 420, height: 640, themeColors: true });
+  figma.ui.postMessage({ type: 'catalog', groups: SCREEN_GROUPS });
+  figma.ui.onmessage = async message => {
+    if (message?.type === 'cancel') {
+      figma.closePlugin();
+      return;
+    }
+    if (message?.type !== 'generate') return;
+    try {
+      await generateScreens(Array.isArray(message.screenIds) ? message.screenIds : []);
+    } catch (error) {
+      reportFailure(error, true);
+    }
+  };
+}
+
+if (figma.command === 'choose-screens') {
+  showPicker();
+} else {
+  generateScreens(ALL_SCREEN_IDS).catch(error => reportFailure(error));
+}

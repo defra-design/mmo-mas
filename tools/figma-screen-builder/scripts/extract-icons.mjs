@@ -5,6 +5,7 @@ const iconSource = new URL('../../../node_modules/@fluentui/react-icons/lib/icon
 const names = [
   'AddRegular',
   'ArrowLeftRegular',
+  'ArrowDownloadRegular',
   'ArrowUpRegular',
   'ContactCardRegular',
   'ChevronDownRegular',
@@ -12,6 +13,8 @@ const names = [
   'ClockRegular',
   'DataBarVerticalRegular',
   'DocumentCopyRegular',
+  'DismissCircleFilled',
+  'DismissSquareRegular',
   'ErrorCircleRegular',
   'GlobeRegular',
   'HomeRegular',
@@ -24,6 +27,7 @@ const names = [
   'QuestionRegular',
   'SaveRegular',
   'SearchRegular',
+  'SendRegular',
   'SettingsRegular',
   'WrenchRegular'
 ];

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MAS D365 Screen Builder</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: Inter, "Segoe UI", sans-serif;
+        font-size: 12px;
+        color: var(--figma-color-text);
+        background: var(--figma-color-bg);
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { padding: 16px; }
+      h1 { margin: 0 0 6px; font-size: 16px; line-height: 22px; }
+      p { margin: 0 0 14px; color: var(--figma-color-text-secondary); line-height: 17px; }
+      .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+      button {
+        min-height: 32px;
+        border: 1px solid var(--figma-color-border);
+        border-radius: 5px;
+        padding: 6px 10px;
+        color: var(--figma-color-text);
+        background: var(--figma-color-bg);
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover { background: var(--figma-color-bg-hover); }
+      button:focus-visible, input:focus-visible { outline: 2px solid var(--figma-color-border-brand); outline-offset: 1px; }
+      fieldset { margin: 0 0 12px; border: 0; padding: 0; }
+      legend { width: 100%; border-bottom: 1px solid var(--figma-color-border); padding: 7px 0; font-weight: 600; }
+      label { display: flex; gap: 9px; align-items: flex-start; padding: 7px 2px; line-height: 17px; cursor: pointer; }
+      input { width: 14px; height: 14px; margin: 1px 0 0; accent-color: var(--figma-color-bg-brand); }
+      footer {
+        position: sticky;
+        bottom: 0;
+        margin: 10px -16px -16px;
+        border-top: 1px solid var(--figma-color-border);
+        padding: 12px 16px;
+        background: var(--figma-color-bg);
+      }
+      .summary { min-height: 17px; margin-bottom: 8px; color: var(--figma-color-text-secondary); }
+      .actions { display: flex; justify-content: flex-end; gap: 8px; }
+      .primary { border-color: var(--figma-color-bg-brand); color: var(--figma-color-text-onbrand); background: var(--figma-color-bg-brand); }
+      .primary:hover { background: var(--figma-color-bg-brand-hover); }
+      .primary:disabled { border-color: var(--figma-color-bg-disabled); color: var(--figma-color-text-disabled); background: var(--figma-color-bg-disabled); cursor: default; }
+      .status { margin: 10px 0 0; color: var(--figma-color-text-danger); }
+      [hidden] { display: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Choose screens and states</h1>
+      <p>Select individual screens or use a preset. New editable frames will be added to <strong>01 - MAS D365 Screens</strong>; existing layers will remain unchanged.</p>
+      <div class="presets" aria-label="Selection presets">
+        <button type="button" data-preset="all">Select all</button>
+        <button type="button" data-preset="case-list">Case list</button>
+        <button type="button" data-preset="public-register">Public register</button>
+        <button type="button" data-preset="assessment-journey">Assessment journey</button>
+        <button type="button" data-preset="none">Clear</button>
+      </div>
+      <form id="screen-form">
+        <div id="groups" aria-live="polite"></div>
+        <footer>
+          <div class="summary" id="summary">Loading available screens…</div>
+          <div class="actions">
+            <button type="button" id="cancel">Cancel</button>
+            <button type="submit" class="primary" id="generate" disabled>Generate selected</button>
+          </div>
+          <div class="status" id="status" role="alert" hidden></div>
+        </footer>
+      </form>
+    </main>
+    <script>
+      const groupsElement = document.getElementById('groups');
+      const form = document.getElementById('screen-form');
+      const generate = document.getElementById('generate');
+      const summary = document.getElementById('summary');
+      const status = document.getElementById('status');
+      let catalog = [];
+
+      function selectedIds() {
+        return [...document.querySelectorAll('input[name="screen"]:checked')].map(input => input.value);
+      }
+
+      function updateSummary() {
+        const count = selectedIds().length;
+        summary.textContent = count ? `${count} ${count === 1 ? 'screen' : 'screens'} will be added` : 'Select at least one screen';
+        generate.disabled = count === 0;
+      }
+
+      function renderCatalog(groups) {
+        catalog = groups;
+        groupsElement.replaceChildren();
+        for (const group of groups) {
+          const fieldset = document.createElement('fieldset');
+          fieldset.dataset.group = group.id;
+          const legend = document.createElement('legend');
+          legend.textContent = group.label;
+          fieldset.appendChild(legend);
+          for (const screen of group.screens) {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = 'screen';
+            input.value = screen.id;
+            input.addEventListener('change', updateSummary);
+            const text = document.createElement('span');
+            text.textContent = screen.label;
+            label.append(input, text);
+            fieldset.appendChild(label);
+          }
+          groupsElement.appendChild(fieldset);
+        }
+        updateSummary();
+      }
+
+      document.querySelector('.presets').addEventListener('click', event => {
+        const preset = event.target.closest('[data-preset]')?.dataset.preset;
+        if (!preset) return;
+        for (const input of document.querySelectorAll('input[name="screen"]')) {
+          input.checked = preset === 'all' || (preset !== 'none' && input.closest('fieldset').dataset.group === preset);
+        }
+        updateSummary();
+      });
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const ids = selectedIds();
+        if (!ids.length) return;
+        generate.disabled = true;
+        status.hidden = true;
+        summary.textContent = 'Generating editable screens…';
+        parent.postMessage({ pluginMessage: { type: 'generate', screenIds: ids } }, '*');
+      });
+
+      document.getElementById('cancel').addEventListener('click', () => {
+        parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+      });
+
+      window.onmessage = event => {
+        const message = event.data.pluginMessage;
+        if (message?.type === 'catalog') renderCatalog(message.groups);
+        if (message?.type === 'error') {
+          status.textContent = message.message;
+          status.hidden = false;
+          summary.textContent = 'Generation did not complete';
+          generate.disabled = selectedIds().length === 0;
+        }
+      };
+    </script>
+  </body>
+</html>

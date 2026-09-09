@@ -29,12 +29,20 @@ only when that package is upgraded or the plugin needs another Fluent icon.
    plugin from manifest…**.
 3. Select this folder's `manifest.json`.
 4. Open **Actions**, search for **MAS D365 Screen Builder**, and choose
-   **Generate all MAS D365 screens**.
+   **Choose screens and states…**.
+5. Select individual screens or use the **Case list**, **Public register** or
+   **Assessment journey** preset, then choose **Generate selected**.
+
+The picker lists the exact frames that will be added. The Assessment journey
+preset selects five frames in sequence: Case summary with gated tasks, Site check
+initial, Site check validation errors, Site check completed, and Case summary
+with the downstream tasks unlocked. Use **Generate all MAS D365 screens** from
+the Actions menu when you want every available screen without opening the picker.
 
 The plugin uses two stable pages:
 
 - `00 · D365 components` — reusable local components and component masters.
-- `01 - MAS D365 Screens` — all editable 1640 × 1232 application screens.
+- `01 - MAS D365 Screens` — all editable application screens.
 
 Each run appends a labelled `Run 01`, `Run 02`, and so on to the right of the
 existing material on these pages. Generation is additive: the plugin does not
@@ -61,10 +69,7 @@ descriptions.
 
 For an approved copy change, update `src/screen-descriptions.json` and the matching
 React source in the same change. The generated text overrides are practical for
-this proof, while the JSON file gives Codex a predictable interchange format. A
-small content panel would materially improve the workflow once content designers
-need to edit and export several journeys or conditional variants without opening
-nested Figma instances.
+this proof, while the JSON file gives Codex a predictable interchange format.
 
 ### Content resilience check
 

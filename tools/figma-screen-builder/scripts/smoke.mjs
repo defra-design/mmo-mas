@@ -94,14 +94,21 @@ const root = new MockNode('DOCUMENT');
 const textStyles = [];
 const paintStyles = [];
 const notifications = [];
+const uiMessages = [];
+let shownUi = null;
 let finish;
 const done = new Promise(resolve => { finish = resolve; });
 
 const figma = {
-  command: 'generate-all',
+  command: process.env.FIGMA_COMMAND || 'generate-all',
   root,
   currentPage: null,
   viewport: { scrollAndZoomIntoView() {} },
+  ui: {
+    onmessage: null,
+    postMessage(message) { uiMessages.push(message); },
+  },
+  showUI(html, options) { shownUi = { html, options }; },
   async loadFontAsync() {},
   getLocalTextStyles: () => textStyles,
   getLocalPaintStyles: () => paintStyles,
@@ -177,7 +184,25 @@ for (const name of ['00 · D365 components · Run 01', '01 · Screens · Run 01'
 const pageCountBeforeGeneration = root.children.length;
 
 const code = await readFile(new URL('../code.js', import.meta.url), 'utf8');
-vm.runInNewContext(code, { figma, console, structuredClone, setTimeout, clearTimeout });
+vm.runInNewContext(code, {
+  figma,
+  console,
+  structuredClone,
+  setTimeout,
+  clearTimeout,
+  __html__: '<html>picker</html>',
+});
+if (figma.command === 'choose-screens') {
+  if (!shownUi || shownUi.options?.themeColors !== true) throw new Error('Picker UI was not opened correctly');
+  const catalog = uiMessages.find(message => message.type === 'catalog');
+  if (catalog?.groups?.flatMap(group => group.screens).length !== 8) {
+    throw new Error('Picker did not receive the eight-screen catalog');
+  }
+  await figma.ui.onmessage({
+    type: 'generate',
+    screenIds: catalog.groups.flatMap(group => group.screens.map(screen => screen.id)),
+  });
+}
 await Promise.race([
   done,
   new Promise((_, reject) => setTimeout(() => reject(new Error('Plugin smoke test timed out')), 3000)),
@@ -191,16 +216,21 @@ const workflowPage = root.children.find(page => page.name === '02 · Workflow');
 if (!componentsPage || !screensPage || !workflowPage) throw new Error('Expected working pages were not found');
 if (root.children.length !== pageCountBeforeGeneration) throw new Error('Generation created extra pages');
 if (root.children.some(page => page.name === '01 · Screens')) throw new Error('Legacy screen page was not renamed');
-if (componentsPage.children.filter(node => node.type === 'COMPONENT').length < 15) {
+if (componentsPage.children.filter(node => node.type === 'COMPONENT').length < 20) {
   throw new Error('Reusable component library is incomplete');
 }
 const canonicalScreenNames = new Set([
   '01 · Marine licence cases',
   '02 · Public register task · Initial state',
   '03 · Public register task · Conditional fields shown',
+  '04 · Case summary · Site check to do',
+  '05 · Site check · Initial state',
+  '06 · Site check · Validation errors',
+  '07 · Site check · Completed',
+  '08 · Case summary · Tasks unlocked',
 ]);
-if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 4) {
-  throw new Error('Expected three generated screen frames');
+if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 9) {
+  throw new Error('Expected eight generated screen frames plus the retained same-name copy');
 }
 if (!screensPage.children.some(node => node.name === 'Generated Run 02')) throw new Error('Missing screen run label');
 if (workflowPage.children.length !== 1 || workflowPage.children[0] !== retainedWorkflowNote) {
@@ -275,5 +305,42 @@ const validationText = validationComponent?.findOne(
 if (!validationComponent || validationText?.textAutoResize !== 'HEIGHT') {
   throw new Error('Reusable validation messages are missing or cannot wrap');
 }
+const initialSummary = screensPage.children.find(
+  node => node.name === '04 · Case summary · Site check to do',
+);
+const unlockedSummary = screensPage.children.find(
+  node => node.name === '08 · Case summary · Tasks unlocked',
+);
+const initialStatuses = initialSummary?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Task status',
+).map(node => node.characters);
+const unlockedStatuses = unlockedSummary?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Task status',
+).map(node => node.characters);
+if (
+  initialStatuses?.filter(value => value === 'Cannot start yet').length !== 5 ||
+  initialStatuses?.filter(value => value === 'To do').length !== 1
+) {
+  throw new Error('Initial case summary does not show the correct gated task states');
+}
+if (
+  unlockedStatuses?.filter(value => value === 'To do').length !== 5 ||
+  unlockedStatuses?.filter(value => value === 'Done').length !== 1
+) {
+  throw new Error('Unlocked case summary does not show the Site check transition');
+}
+const validationScreen = screensPage.children.find(
+  node => node.name === '06 · Site check · Validation errors',
+);
+const validationMessages = validationScreen?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Validation message',
+).map(node => node.characters);
+if (
+  validationScreen?.findAll(node => node.name === 'Form notification').length !== 1 ||
+  !validationMessages?.includes('Coordinates and shape: Required fields must be filled in.') ||
+  !validationMessages?.includes('WFD assessment area: Required fields must be filled in.')
+) {
+  throw new Error('Site check validation state is incomplete');
+}
 
-console.log('Smoke test appended Run 02 to the component and screen pages without changing existing layers');
+console.log(`${figma.command} smoke test appended Run 02 without changing existing layers`);

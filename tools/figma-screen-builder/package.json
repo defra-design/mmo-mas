@@ -6,6 +6,6 @@
   "scripts": {
     "refresh-icons": "node scripts/extract-icons.mjs",
     "build": "node scripts/build.mjs",
-    "check": "node --check code.js && node scripts/validate.mjs && node scripts/smoke.mjs"
+    "check": "node --check code.js && node scripts/validate.mjs && node scripts/smoke.mjs && FIGMA_COMMAND=choose-screens node scripts/smoke.mjs"
   }
 }

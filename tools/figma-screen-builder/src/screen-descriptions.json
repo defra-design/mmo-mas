@@ -2,7 +2,7 @@
   "meta": {
     "name": "MAS D365 Screen Builder",
     "viewport": { "width": 1640, "height": 1232 },
-    "source": "MAS React prototype and the two supplied reference screenshots",
+    "source": "MAS React prototype, rendered application and supplied reference screenshots",
     "browserChromeExcluded": true
   },
   "shell": {
@@ -49,6 +49,126 @@
       { "reference": "MLA/2026/10015", "project": "Installation of floating pontoon, Teignmouth Harbour, Devon", "assignee": "Sam Evans", "status": "Assessment in progress", "age": "1", "notification": "" }
     ]
   },
+  "caseSummaryStates": [
+    {
+      "frameName": "04 · Case summary · Site check to do",
+      "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
+      "recordType": "Case",
+      "meta": [
+        { "label": "Reference", "value": "MLA/2026/10002" },
+        { "label": "Status", "value": "Assessment in progress" },
+        { "label": "Case age", "value": "1 day" },
+        { "label": "Assigned to", "value": "Sam Evans", "avatar": true }
+      ],
+      "tabs": ["Case summary", "Application details", "Sites and activities", "Marine plan policies", "Water Framework Directive", "Other permissions", "Public register"],
+      "fields": [
+        { "label": "Reference", "value": "MLA/2026/10002", "column": 1 },
+        { "label": "Application type", "value": "Marine licence application", "column": 1 },
+        { "label": "Submitted", "value": "08/09/2026", "column": 1 },
+        { "label": "Fee band", "value": "2A", "column": 1 },
+        { "label": "Applicant", "value": "Jenny Smith", "column": 2 },
+        { "label": "Organisation", "value": "South Devon Coast SUP Ltd", "column": 2 }
+      ],
+      "tasks": [
+        { "name": "Site check", "status": "To do" },
+        { "name": "Public register", "status": "Cannot start yet" },
+        { "name": "Water Framework Directive", "status": "Cannot start yet" },
+        { "name": "Prepare for consultation", "status": "Cannot start yet" },
+        { "name": "Marine plan policies", "status": "Cannot start yet" },
+        { "name": "Public notice", "status": "Cannot start yet" }
+      ]
+    },
+    {
+      "frameName": "08 · Case summary · Tasks unlocked",
+      "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
+      "recordType": "Case",
+      "meta": [
+        { "label": "Reference", "value": "MLA/2026/10002" },
+        { "label": "Status", "value": "Assessment in progress" },
+        { "label": "Case age", "value": "1 day" },
+        { "label": "Assigned to", "value": "Sam Evans", "avatar": true }
+      ],
+      "tabs": ["Case summary", "Application details", "Sites and activities", "Marine plan policies", "Water Framework Directive", "Other permissions", "Public register"],
+      "fields": [
+        { "label": "Reference", "value": "MLA/2026/10002", "column": 1 },
+        { "label": "Application type", "value": "Marine licence application", "column": 1 },
+        { "label": "Submitted", "value": "08/09/2026", "column": 1 },
+        { "label": "Fee band", "value": "2A", "column": 1 },
+        { "label": "Applicant", "value": "Jenny Smith", "column": 2 },
+        { "label": "Organisation", "value": "South Devon Coast SUP Ltd", "column": 2 }
+      ],
+      "tasks": [
+        { "name": "Site check", "status": "Done" },
+        { "name": "Public register", "status": "To do" },
+        { "name": "Water Framework Directive", "status": "To do" },
+        { "name": "Prepare for consultation", "status": "To do" },
+        { "name": "Marine plan policies", "status": "To do" },
+        { "name": "Public notice", "status": "To do" }
+      ]
+    }
+  ],
+  "siteCheckContent": {
+    "groupHeading": "Site coordinates",
+    "downloadLabel": "Download CSV",
+    "sections": [
+      {
+        "key": "coordinates",
+        "heading": "1. Coordinates and shape",
+        "description": "Check that the coordinates accurately represent the location of the works, that the shape and size are appropriate for the activity, and that the site is within MMO jurisdiction.",
+        "question": "Are the coordinates and shape correct and appropriate?",
+        "type": "dropdown"
+      },
+      {
+        "key": "withinWfd",
+        "heading": "2. Site located in the Water Framework Directive assessment (WFD) area",
+        "description": "Confirm whether the site is within the WFD assessment area. Within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and Mean High Water Springs.",
+        "question": "Is the site within the WFD assessment area?",
+        "type": "dropdown"
+      },
+      {
+        "key": "notes",
+        "heading": "3. Notes from your site check",
+        "question": "Record anything from your site check that is relevant to later stages of the assessment.",
+        "type": "textarea"
+      }
+    ]
+  },
+  "siteCheckStates": [
+    {
+      "frameName": "05 · Site check · Initial state",
+      "pageHeading": "Site check",
+      "saveState": "Unsaved",
+      "recordType": "Task",
+      "coordinates": "---",
+      "withinWfd": "---",
+      "notes": "",
+      "errors": []
+    },
+    {
+      "frameName": "06 · Site check · Validation errors",
+      "pageHeading": "Site check",
+      "saveState": "Unsaved",
+      "recordType": "Task",
+      "coordinates": "---",
+      "withinWfd": "---",
+      "notes": "",
+      "notification": "Coordinates and shape, WFD assessment area : Required fields must be filled in.",
+      "errors": [
+        { "field": "coordinates", "message": "Coordinates and shape: Required fields must be filled in." },
+        { "field": "withinWfd", "message": "WFD assessment area: Required fields must be filled in." }
+      ]
+    },
+    {
+      "frameName": "07 · Site check · Completed",
+      "pageHeading": "Site check",
+      "saveState": "Saved",
+      "recordType": "Task",
+      "coordinates": "Yes",
+      "withinWfd": "Yes",
+      "notes": "Coordinates and shape checked against the application drawings. The site is within the WFD assessment area.",
+      "errors": []
+    }
+  ],
   "publicRegister": {
     "frameName": "02 · Public register task · Initial state",
     "pageHeading": "Public register",

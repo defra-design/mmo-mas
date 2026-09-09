@@ -3,11 +3,11 @@
   "id": "1500000000000001",
   "api": "1.0.0",
   "main": "code.js",
+  "ui": "ui.html",
   "editorType": ["figma"],
   "menu": [
-    { "name": "Generate all MAS D365 screens", "command": "generate-all" },
-    { "name": "Generate Marine licence cases", "command": "generate-case-list" },
-    { "name": "Generate Public register states", "command": "generate-public-register" }
+    { "name": "Choose screens and states…", "command": "choose-screens" },
+    { "name": "Generate all MAS D365 screens", "command": "generate-all" }
   ],
   "networkAccess": {
     "allowedDomains": ["none"]
