@@ -36,6 +36,7 @@ import {
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 
 const COLS = { organisation: 320, notes: 400 };
 
@@ -134,7 +135,9 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
 
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
-  const locked = tasks.prepForConsultee === 'Cannot start yet';
+  const locked =
+    taskStatusForCase(caseId, 'prepForConsultee', tasks.prepForConsultee) ===
+    'Cannot start yet';
 
   const filled = prepForConsulteeForm.filter(r => r.organisation.trim());
 

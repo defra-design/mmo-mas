@@ -25,6 +25,7 @@ import {
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { asset } from '../../utils/asset';
 
 const useStyles = makeStyles({
@@ -122,7 +123,8 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
   const { tasks, wfdForm, saved, setWfdReview, markUnsaved, completeWfd } = useTasks();
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
-  const locked = tasks.wfdAssessment === 'Cannot start yet';
+  const locked =
+    taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment) === 'Cannot start yet';
   // Set on a failed save, cleared as soon as the field is given a value.
   const [error, setError] = useState(false);
 

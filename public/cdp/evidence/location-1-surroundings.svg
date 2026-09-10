@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <title>Prototype photograph showing the notice at Teignmouth Harbour entrance</title>
+  <rect width="1200" height="430" fill="#b9ddf3"/><rect y="430" width="1200" height="370" fill="#5d94b8"/>
+  <path d="M0 530L260 390l190 85 250-110 250 105 250-70v400H0z" fill="#777" opacity=".55"/>
+  <rect x="135" y="205" width="290" height="390" fill="#8a6848"/><rect x="175" y="245" width="210" height="270" fill="#fff" stroke="#444" stroke-width="7"/>
+  <text x="280" y="370" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">PUBLIC</text><text x="280" y="410" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">NOTICE</text>
+  <text x="600" y="750" text-anchor="middle" font-family="Arial" font-size="24" fill="#fff">Prototype evidence image — Teignmouth Harbour entrance</text>
+</svg>

@@ -28,6 +28,11 @@ import {
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import {
+  hasSubmittedPublicNoticeEvidence,
+  taskStatusForCase,
+} from '../../utils/publicNoticeEvidence';
+import { SITE_NOTICE } from '../../utils/publicNoticeRequirement';
 
 const useStyles = makeStyles({
   page: {
@@ -59,6 +64,19 @@ const PROPOSED_WORKS =
   'the eastern end. Materials will be delivered by road and placed using a tracked excavator ' +
   'working from the beach during low tide. The works are expected to take 14 weeks.';
 
+const COMPLETED_PROPOSED_WORKS =
+  'South Devon Coast SUP Ltd is a small paddleboarding hire and instruction business ' +
+  'operating in Teignmouth. We are applying for a marine licence to install a small ' +
+  'floating pontoon within Teignmouth Harbour to provide a safe and accessible launching ' +
+  'and landing platform for paddleboards and kayaks hired to our customers. The pontoon ' +
+  'would be attached to the existing harbour wall using H-frame wall guides and a short ' +
+  'hinged gangway, and the works will take place entirely within the outer harbour area.';
+
+const COMPLETED_SITE_NOTICE_SUMMARY =
+  'South Devon Coast SUP Ltd has applied to install a small floating pontoon within ' +
+  'Teignmouth Harbour to provide a safe and accessible launching and landing platform ' +
+  'for paddleboards and kayaks.';
+
 interface SiteNoticeTaskProps {
   caseId: string;
 }
@@ -66,11 +84,26 @@ interface SiteNoticeTaskProps {
 export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks, siteNoticeForm: form, saved, setSiteNoticeField, markUnsaved, saveSiteNotice } =
-    useTasks();
+  const {
+    tasks,
+    siteNoticeForm,
+    saved,
+    setSiteNoticeField,
+    markUnsaved,
+    saveSiteNotice,
+  } = useTasks();
+  const completedFixture = hasSubmittedPublicNoticeEvidence(caseId);
+  const form = completedFixture
+    ? {
+        needsNotice: siteNoticeForm.needsNotice || SITE_NOTICE,
+        rationale: siteNoticeForm.rationale,
+        summary: siteNoticeForm.summary || COMPLETED_SITE_NOTICE_SUMMARY,
+        groups: siteNoticeForm.groups || 'Both',
+      }
+    : siteNoticeForm;
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
-  const locked = tasks.siteNotice === 'Cannot start yet';
+  const locked = taskStatusForCase(caseId, 'siteNotice', tasks.siteNotice) === 'Cannot start yet';
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
   const [errors, setErrors] = useState<SiteNoticeField[]>([]);
 
@@ -112,7 +145,9 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
       <Card className={styles.headerCard}>
         <Title3>
           Public notice
-          <span className={styles.savedLabel}>- {saved.siteNotice ? 'Saved' : 'Unsaved'}</span>
+          <span className={styles.savedLabel}>
+            - {completedFixture || saved.siteNotice ? 'Saved' : 'Unsaved'}
+          </span>
         </Title3>
         <div><Body1>Task</Body1></div>
       </Card>
@@ -120,7 +155,7 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
       <Card className={styles.bodyCard}>
         <SiteNoticeAssessment
           form={form}
-          proposedWorks={PROPOSED_WORKS}
+          proposedWorks={completedFixture ? COMPLETED_PROPOSED_WORKS : PROPOSED_WORKS}
           locked={locked}
           errorFor={errorFor}
           onChange={update}
