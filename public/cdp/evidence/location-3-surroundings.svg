@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
   <title>Prototype photograph showing the notice at Back Beach access point</title>
-  <rect width="1200" height="390" fill="#b7daf0"/><rect y="390" width="1200" height="180" fill="#4f8dac"/><rect y="570" width="1200" height="230" fill="#d8c596"/>
-  <path d="M0 610h1200" stroke="#f5edd2" stroke-width="34"/><path d="M760 800V315h270v485z" fill="#806b55"/>
-  <rect x="805" y="365" width="180" height="245" fill="#fff" stroke="#444" stroke-width="7"/>
-  <text x="895" y="475" text-anchor="middle" font-family="Arial" font-size="26" font-weight="700">PUBLIC</text><text x="895" y="512" text-anchor="middle" font-family="Arial" font-size="26" font-weight="700">NOTICE</text>
-  <text x="600" y="750" text-anchor="middle" font-family="Arial" font-size="24">Prototype evidence image — Back Beach access point</text>
+  <g transform="translate(0 64)">
+    <rect width="1200" height="390" fill="#b7daf0"/><rect y="390" width="1200" height="180" fill="#4f8dac"/><rect y="570" width="1200" height="230" fill="#d8c596"/>
+    <path d="M0 610h1200" stroke="#f5edd2" stroke-width="34"/><path d="M760 800V315h270v485z" fill="#806b55"/>
+    <rect x="805" y="365" width="180" height="245" fill="#fff" stroke="#444" stroke-width="7"/>
+    <text x="895" y="475" text-anchor="middle" font-family="Arial" font-size="26" font-weight="700">PUBLIC</text><text x="895" y="512" text-anchor="middle" font-family="Arial" font-size="26" font-weight="700">NOTICE</text>
+  </g>
+  <rect width="1200" height="64" fill="#fff"/>
+  <text x="32" y="41" font-family="Arial" font-size="24">Location name: Back Beach access point</text>
 </svg>
