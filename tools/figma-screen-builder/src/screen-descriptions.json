@@ -252,5 +252,60 @@
       "completionLabel": "Select to mark the task as complete",
       "completed": false
     }
-  ]
+  ],
+  "publicNoticeEvidenceReview": {
+    "caseId": "MLA/2026/10014",
+    "pageHeading": "Review public notice evidence",
+    "recordType": "Task",
+    "sectionHeading": "Site notice evidence",
+    "intro": "The applicant submitted evidence for 3 locations on 20 August 2026.",
+    "completionLabel": "Select to mark the task as complete",
+    "locations": [
+      {
+        "name": "Teignmouth Harbour entrance noticeboard",
+        "date": "18 August 2026",
+        "closeUpLabel": "View close-up photograph of the notice (opens in new tab)",
+        "surroundingsLabel": "View photograph of the notice in its surroundings (opens in new tab)"
+      },
+      {
+        "name": "Fish Quay public noticeboard",
+        "date": "18 August 2026",
+        "closeUpLabel": "View close-up photograph of the notice (opens in new tab)",
+        "surroundingsLabel": "View photograph of the notice in its surroundings (opens in new tab)"
+      },
+      {
+        "name": "Back Beach access point",
+        "date": "19 August 2026",
+        "closeUpLabel": "View close-up photograph of the notice (opens in new tab)",
+        "surroundingsLabel": "View photograph of the notice in its surroundings (opens in new tab)"
+      }
+    ],
+    "states": [
+      {
+        "frameName": "09 · MLA/2026/10014 · Review public notice evidence · Default",
+        "frameHeight": 1480,
+        "saveState": "Unsaved",
+        "completed": false,
+        "reviews": [
+          { "decision": "---", "rejectionComments": "" },
+          { "decision": "---", "rejectionComments": "" },
+          { "decision": "---", "rejectionComments": "" }
+        ]
+      },
+      {
+        "frameName": "10 · MLA/2026/10014 · Review public notice evidence · Mixed decisions",
+        "frameHeight": 1640,
+        "saveState": "Saved",
+        "completed": true,
+        "reviews": [
+          {
+            "decision": "Reject",
+            "rejectionComments": "The surroundings photograph does not show enough of the location to confirm where the notice was displayed. Provide a wider photograph showing the notice and the harbour entrance."
+          },
+          { "decision": "Accept", "rejectionComments": "" },
+          { "decision": "Accept", "rejectionComments": "" }
+        ]
+      }
+    ]
+  }
 }

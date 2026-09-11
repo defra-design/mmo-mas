@@ -195,8 +195,8 @@ vm.runInNewContext(code, {
 if (figma.command === 'choose-screens') {
   if (!shownUi || shownUi.options?.themeColors !== true) throw new Error('Picker UI was not opened correctly');
   const catalog = uiMessages.find(message => message.type === 'catalog');
-  if (catalog?.groups?.flatMap(group => group.screens).length !== 8) {
-    throw new Error('Picker did not receive the eight-screen catalog');
+  if (catalog?.groups?.flatMap(group => group.screens).length !== 10) {
+    throw new Error('Picker did not receive the ten-screen catalog');
   }
   await figma.ui.onmessage({
     type: 'generate',
@@ -228,9 +228,11 @@ const canonicalScreenNames = new Set([
   '06 · Site check · Validation errors',
   '07 · Site check · Completed',
   '08 · Case summary · Tasks unlocked',
+  '09 · MLA/2026/10014 · Review public notice evidence · Default',
+  '10 · MLA/2026/10014 · Review public notice evidence · Mixed decisions',
 ]);
-if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 9) {
-  throw new Error('Expected eight generated screen frames plus the retained same-name copy');
+if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 11) {
+  throw new Error('Expected ten generated screen frames plus the retained same-name copy');
 }
 if (!screensPage.children.some(node => node.name === 'Generated Run 02')) throw new Error('Missing screen run label');
 if (workflowPage.children.length !== 1 || workflowPage.children[0] !== retainedWorkflowNote) {
@@ -341,6 +343,35 @@ if (
   !validationMessages?.includes('WFD assessment area: Required fields must be filled in.')
 ) {
   throw new Error('Site check validation state is incomplete');
+}
+
+const defaultEvidenceReview = screensPage.children.find(
+  node => node.name === '09 · MLA/2026/10014 · Review public notice evidence · Default',
+);
+const mixedEvidenceReview = screensPage.children.find(
+  node => node.name === '10 · MLA/2026/10014 · Review public notice evidence · Mixed decisions',
+);
+const defaultEvidenceValues = defaultEvidenceReview?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Field value',
+).map(node => node.characters);
+const mixedEvidenceValues = mixedEvidenceReview?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Field value',
+).map(node => node.characters);
+if (defaultEvidenceValues?.filter(value => value === '---').length !== 3) {
+  throw new Error('Default public notice evidence review does not show three empty decisions');
+}
+if (
+  mixedEvidenceValues?.filter(value => value === 'Reject').length !== 1 ||
+  mixedEvidenceValues?.filter(value => value === 'Accept').length !== 2 ||
+  !mixedEvidenceValues?.some(value => value.includes('Provide a wider photograph'))
+) {
+  throw new Error('Mixed public notice evidence review does not show one rejection and two acceptances');
+}
+if (
+  defaultEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible !== false ||
+  mixedEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible === false
+) {
+  throw new Error('Public notice evidence completion states are incorrect');
 }
 
 console.log(`${figma.command} smoke test appended Run 02 without changing existing layers`);

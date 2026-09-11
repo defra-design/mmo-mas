@@ -18,6 +18,7 @@ const names = [
   'ErrorCircleRegular',
   'GlobeRegular',
   'HomeRegular',
+  'ImageRegular',
   'LightbulbRegular',
   'LocationRegular',
   'LockClosedRegular',

@@ -30,14 +30,19 @@ only when that package is upgraded or the plugin needs another Fluent icon.
 3. Select this folder's `manifest.json`.
 4. Open **Actions**, search for **MAS D365 Screen Builder**, and choose
    **Choose screens and states…**.
-5. Select individual screens or use the **Case list**, **Public register** or
-   **Assessment journey** preset, then choose **Generate selected**.
+5. Select individual screens or use the **Case list**, **Public register**,
+   **Assessment journey** or **Notice evidence** preset, then choose
+   **Generate selected**.
 
 The picker lists the exact frames that will be added. The Assessment journey
 preset selects five frames in sequence: Case summary with gated tasks, Site check
 initial, Site check validation errors, Site check completed, and Case summary
 with the downstream tasks unlocked. Use **Generate all MAS D365 screens** from
 the Actions menu when you want every available screen without opening the picker.
+
+The Notice evidence preset generates the `MLA/2026/10014` Review public notice
+evidence task in two states: its default empty state, and its saved mixed-decision
+state with Location 1 rejected and Locations 2 and 3 accepted.
 
 The plugin uses two stable pages:
 

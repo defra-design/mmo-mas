@@ -418,6 +418,26 @@ function createFieldComponents(page) {
   url.appendChild(makeIcon('Open URL', 'GlobeRegular', 20, C.secondary));
   page.appendChild(url);
 
+  const imageLink = figma.createComponent();
+  imageLink.name = 'D365 / Evidence image link field';
+  imageLink.resize(900, 32);
+  imageLink.layoutMode = 'HORIZONTAL';
+  imageLink.primaryAxisSizingMode = 'FIXED';
+  imageLink.counterAxisSizingMode = 'FIXED';
+  imageLink.counterAxisAlignItems = 'CENTER';
+  imageLink.itemSpacing = 8;
+  imageLink.paddingLeft = 12;
+  imageLink.paddingRight = 12;
+  imageLink.cornerRadius = 2;
+  imageLink.fills = paint(C.field);
+  imageLink.fillStyleId = styles.paint.field.id;
+  imageLink.appendChild(makeIcon('Evidence image icon', 'ImageRegular', 20, C.brand));
+  const imageLinkText = makeText('Field value', 'View photograph (opens in new tab)', 'body', C.brand, 848);
+  imageLinkText.textTruncation = 'ENDING';
+  imageLinkText.maxLines = 1;
+  imageLink.appendChild(imageLinkText);
+  page.appendChild(imageLink);
+
   const help = figma.createComponent();
   help.name = 'D365 / Help link';
   help.resize(1128, 24);
@@ -442,7 +462,7 @@ function createFieldComponents(page) {
   validation.appendChild(makeText('Validation message', 'Enter a value before continuing.', 'body', C.red, 872));
   page.appendChild(validation);
 
-  return { readOnly, dropdown, url, help, validation };
+  return { readOnly, dropdown, url, imageLink, help, validation };
 }
 
 function createQuestionRow(page, name, fieldComponent, decoration, multiline = false, editable = false) {
@@ -869,6 +889,7 @@ function createComponentLibrary(page, runLabel) {
     textarea: createQuestionRow(page, 'Multiline text', fields.readOnly, 'required', true, true),
     textareaOptional: createQuestionRow(page, 'Multiline text optional', fields.readOnly, 'none', true, true),
     url: createQuestionRow(page, 'URL', fields.url, 'locked'),
+    imageLink: createQuestionRow(page, 'Evidence image link', fields.imageLink, 'none'),
   };
   const globalHeader = createGlobalHeader(page, DESCRIPTIONS.shell);
   const leftNav = createLeftNav(page, DESCRIPTIONS.shell);
@@ -1283,6 +1304,115 @@ function createPublicRegisterScreen(page, components, desc = DESCRIPTIONS.public
   return screen;
 }
 
+function createEvidenceReviewRow(components, type, question, value) {
+  const source = type === 'dropdown'
+    ? components.rows.dropdown
+    : type === 'textarea'
+      ? components.rows.textarea
+      : type === 'image-link'
+        ? components.rows.imageLink
+        : components.rows.readOnly;
+  const row = source.createInstance();
+  row.name = `Form question / ${question}`;
+  configureQuestionRow(row, { type, question, value });
+  if (type === 'image-link') {
+    const field = row.findOne(item => item.type === 'INSTANCE' && item.name === 'Read-only field');
+    if (field) field.name = 'Evidence image link field';
+  }
+  return row;
+}
+
+function createEvidenceLocation(components, number, location, review) {
+  const group = verticalFrame(`Location ${number}`, 1278, 16, 0);
+  group.appendChild(makeText('Location heading', `Location ${number}`, 'label', C.text, 1278));
+  group.appendChild(createEvidenceReviewRow(components, 'readonly', 'Location name', location.name));
+  group.appendChild(createEvidenceReviewRow(components, 'readonly', 'Date displayed', location.date));
+  group.appendChild(createEvidenceReviewRow(
+    components,
+    'image-link',
+    'Close-up photograph of the notice',
+    location.closeUpLabel,
+  ));
+  group.appendChild(createEvidenceReviewRow(
+    components,
+    'image-link',
+    'Photograph showing the notice in its surroundings',
+    location.surroundingsLabel,
+  ));
+  group.appendChild(createEvidenceReviewRow(
+    components,
+    'dropdown',
+    'What is your decision on the photographs for this location?',
+    review.decision,
+  ));
+  if (review.decision === 'Reject') {
+    group.appendChild(createEvidenceReviewRow(
+      components,
+      'textarea',
+      'Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant.',
+      review.rejectionComments,
+    ));
+  }
+  return group;
+}
+
+function createPublicNoticeEvidenceReviewScreen(page, components, state) {
+  const description = DESCRIPTIONS.publicNoticeEvidenceReview;
+  const screenHeight = state.frameHeight || 1480;
+  const screen = fixedFrame(state.frameName, 1640, screenHeight, C.canvas);
+  screen.clipsContent = true;
+  addShell(screen, components, true, screenHeight);
+
+  const headerCard = verticalFrame('Task header card', 1320, 12, 20, C.white);
+  headerCard.x = 268;
+  headerCard.y = 125;
+  applyCard(headerCard);
+  const headingLine = horizontalFrame('Task title', 1280, 32, 6, 0);
+  headingLine.primaryAxisSizingMode = 'AUTO';
+  headingLine.appendChild(makeText('Page heading', description.pageHeading, 'title', C.text));
+  headingLine.appendChild(makeText('Save state', `- ${state.saveState}`, 'body', C.secondary));
+  headerCard.appendChild(headingLine);
+  headerCard.appendChild(makeText('Record type', description.recordType, 'body', C.text));
+  screen.appendChild(headerCard);
+
+  const body = verticalFrame('Task form card', 1320, 24, 20, C.white);
+  body.x = 268;
+  body.y = 238;
+  applyCard(body);
+  const introduction = verticalFrame('Evidence introduction', 1278, 8, 0);
+  introduction.appendChild(makeText('Section heading', description.sectionHeading, 'section', C.text, 1278));
+  introduction.appendChild(makeText('Help text', description.intro, 'body', C.secondary, 1278));
+  body.appendChild(introduction);
+
+  description.locations.forEach((location, index) => {
+    if (index > 0) {
+      const divider = components.divider.createInstance();
+      divider.name = 'Location divider';
+      body.appendChild(divider);
+    }
+    body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index]));
+  });
+
+  const finalDivider = components.divider.createInstance();
+  finalDivider.name = 'Section divider';
+  body.appendChild(finalDivider);
+  const completion = horizontalFrame('Completion field', 1278, 32, 8, 0);
+  const checkbox = components.checkbox.createInstance();
+  checkbox.name = 'Checkbox';
+  if (!state.completed) {
+    const mark = checkbox.findOne(item => item.type === 'TEXT');
+    const box = checkbox.findOne(item => item.type === 'RECTANGLE');
+    if (mark) mark.visible = false;
+    if (box) { box.fills = []; box.strokes = paint(C.secondary); box.strokeWeight = 1; }
+  }
+  completion.appendChild(checkbox);
+  completion.appendChild(makeText('Question', description.completionLabel, 'body', C.text));
+  body.appendChild(completion);
+  screen.appendChild(body);
+  page.appendChild(screen);
+  return screen;
+}
+
 function nextRunNumber() {
   const pattern = /Run (\d+)/;
   let highest = 0;
@@ -1346,6 +1476,14 @@ const SCREEN_GROUPS = [
       { id: 'case-summary-unlocked', label: DESCRIPTIONS.caseSummaryStates[1].frameName },
     ],
   },
+  {
+    id: 'public-notice-evidence',
+    label: 'MLA/2026/10014 · Review public notice evidence',
+    screens: DESCRIPTIONS.publicNoticeEvidenceReview.states.map((state, index) => ({
+      id: `public-notice-evidence-${index}`,
+      label: state.frameName,
+    })),
+  },
 ];
 
 const ALL_SCREEN_IDS = SCREEN_GROUPS.flatMap(group => group.screens.map(screen => screen.id));
@@ -1370,6 +1508,11 @@ function renderScreenById(id, page, components) {
   }
   if (id === 'case-summary-unlocked') {
     return createCaseSummaryScreen(page, components, DESCRIPTIONS.caseSummaryStates[1]);
+  }
+  if (id.startsWith('public-notice-evidence-')) {
+    const index = Number(id.slice('public-notice-evidence-'.length));
+    const state = DESCRIPTIONS.publicNoticeEvidenceReview.states[index];
+    if (state) return createPublicNoticeEvidenceReviewScreen(page, components, state);
   }
   throw new Error(`Unknown screen selection: ${id}`);
 }

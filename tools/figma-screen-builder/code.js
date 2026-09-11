@@ -618,7 +618,77 @@ const DESCRIPTIONS = {
       "completionLabel": "Select to mark the task as complete",
       "completed": false
     }
-  ]
+  ],
+  "publicNoticeEvidenceReview": {
+    "caseId": "MLA/2026/10014",
+    "pageHeading": "Review public notice evidence",
+    "recordType": "Task",
+    "sectionHeading": "Site notice evidence",
+    "intro": "The applicant submitted evidence for 3 locations on 20 August 2026.",
+    "completionLabel": "Select to mark the task as complete",
+    "locations": [
+      {
+        "name": "Teignmouth Harbour entrance noticeboard",
+        "date": "18 August 2026",
+        "closeUpLabel": "View close-up photograph of the notice (opens in new tab)",
+        "surroundingsLabel": "View photograph of the notice in its surroundings (opens in new tab)"
+      },
+      {
+        "name": "Fish Quay public noticeboard",
+        "date": "18 August 2026",
+        "closeUpLabel": "View close-up photograph of the notice (opens in new tab)",
+        "surroundingsLabel": "View photograph of the notice in its surroundings (opens in new tab)"
+      },
+      {
+        "name": "Back Beach access point",
+        "date": "19 August 2026",
+        "closeUpLabel": "View close-up photograph of the notice (opens in new tab)",
+        "surroundingsLabel": "View photograph of the notice in its surroundings (opens in new tab)"
+      }
+    ],
+    "states": [
+      {
+        "frameName": "09 · MLA/2026/10014 · Review public notice evidence · Default",
+        "frameHeight": 1480,
+        "saveState": "Unsaved",
+        "completed": false,
+        "reviews": [
+          {
+            "decision": "---",
+            "rejectionComments": ""
+          },
+          {
+            "decision": "---",
+            "rejectionComments": ""
+          },
+          {
+            "decision": "---",
+            "rejectionComments": ""
+          }
+        ]
+      },
+      {
+        "frameName": "10 · MLA/2026/10014 · Review public notice evidence · Mixed decisions",
+        "frameHeight": 1640,
+        "saveState": "Saved",
+        "completed": true,
+        "reviews": [
+          {
+            "decision": "Reject",
+            "rejectionComments": "The surroundings photograph does not show enough of the location to confirm where the notice was displayed. Provide a wider photograph showing the notice and the harbour entrance."
+          },
+          {
+            "decision": "Accept",
+            "rejectionComments": ""
+          },
+          {
+            "decision": "Accept",
+            "rejectionComments": ""
+          }
+        ]
+      }
+    ]
+  }
 };
 const FLUENT_ICONS = {
   "AddRegular": [
@@ -665,6 +735,9 @@ const FLUENT_ICONS = {
   ],
   "HomeRegular": [
     "M9 2.39a1.5 1.5 0 0 1 2 0l5.5 4.94c.32.28.5.69.5 1.12v7.05c0 .83-.67 1.5-1.5 1.5H13a1.5 1.5 0 0 1-1.5-1.5V12a.5.5 0 0 0-.5-.5H9a.5.5 0 0 0-.5.5v3.5c0 .83-.67 1.5-1.5 1.5H4.5A1.5 1.5 0 0 1 3 15.5V8.45c0-.43.18-.84.5-1.12L9 2.39Zm1.33.74a.5.5 0 0 0-.66 0l-5.5 4.94a.5.5 0 0 0-.17.38v7.05c0 .28.22.5.5.5H7a.5.5 0 0 0 .5-.5V12c0-.83.67-1.5 1.5-1.5h2c.83 0 1.5.67 1.5 1.5v3.5c0 .28.22.5.5.5h2.5a.5.5 0 0 0 .5-.5V8.45a.5.5 0 0 0-.17-.38l-5.5-4.94Z"
+  ],
+  "ImageRegular": [
+    "M14 7.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0ZM3 6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm3-2a2 2 0 0 0-2 2v8c0 .37.1.72.28 1.02l4.67-4.59a1.5 1.5 0 0 1 2.1 0l4.67 4.59c.18-.3.28-.65.28-1.02V6a2 2 0 0 0-2-2H6Zm0 12h8a2 2 0 0 0 1.01-.27l-4.66-4.58a.5.5 0 0 0-.7 0l-4.66 4.58A2 2 0 0 0 6 16Z"
   ],
   "LightbulbRegular": [
     "M10 2c3.31 0 6 2.6 6 5.8 0 1.68-.75 3.22-2.2 4.6a.6.6 0 0 0-.15.2l-.02.09-.94 3.92a1.84 1.84 0 0 1-1.67 1.38l-.15.01H9.13c-.82 0-1.54-.52-1.78-1.26l-.04-.14-.93-3.91a.6.6 0 0 0-.17-.3A6.32 6.32 0 0 1 4 8.04L4 7.8v-.2A5.91 5.91 0 0 1 10 2Zm2.04 13H7.96l.31 1.33.03.1c.1.3.38.52.71.56l.12.01h1.81a.86.86 0 0 0 .75-.53l.03-.1.32-1.37ZM10 3a4.92 4.92 0 0 0-4.98 4.41L5 7.63V8c.06 1.3.68 2.52 1.9 3.67.18.17.32.4.4.64l.05.15.37 1.54h4.57l.38-1.61.05-.16c.09-.21.22-.4.39-.56C14.38 10.47 15 9.18 15 7.8A4.9 4.9 0 0 0 10 3Z"
@@ -1118,6 +1191,26 @@ function createFieldComponents(page) {
   url.appendChild(makeIcon('Open URL', 'GlobeRegular', 20, C.secondary));
   page.appendChild(url);
 
+  const imageLink = figma.createComponent();
+  imageLink.name = 'D365 / Evidence image link field';
+  imageLink.resize(900, 32);
+  imageLink.layoutMode = 'HORIZONTAL';
+  imageLink.primaryAxisSizingMode = 'FIXED';
+  imageLink.counterAxisSizingMode = 'FIXED';
+  imageLink.counterAxisAlignItems = 'CENTER';
+  imageLink.itemSpacing = 8;
+  imageLink.paddingLeft = 12;
+  imageLink.paddingRight = 12;
+  imageLink.cornerRadius = 2;
+  imageLink.fills = paint(C.field);
+  imageLink.fillStyleId = styles.paint.field.id;
+  imageLink.appendChild(makeIcon('Evidence image icon', 'ImageRegular', 20, C.brand));
+  const imageLinkText = makeText('Field value', 'View photograph (opens in new tab)', 'body', C.brand, 848);
+  imageLinkText.textTruncation = 'ENDING';
+  imageLinkText.maxLines = 1;
+  imageLink.appendChild(imageLinkText);
+  page.appendChild(imageLink);
+
   const help = figma.createComponent();
   help.name = 'D365 / Help link';
   help.resize(1128, 24);
@@ -1142,7 +1235,7 @@ function createFieldComponents(page) {
   validation.appendChild(makeText('Validation message', 'Enter a value before continuing.', 'body', C.red, 872));
   page.appendChild(validation);
 
-  return { readOnly, dropdown, url, help, validation };
+  return { readOnly, dropdown, url, imageLink, help, validation };
 }
 
 function createQuestionRow(page, name, fieldComponent, decoration, multiline = false, editable = false) {
@@ -1569,6 +1662,7 @@ function createComponentLibrary(page, runLabel) {
     textarea: createQuestionRow(page, 'Multiline text', fields.readOnly, 'required', true, true),
     textareaOptional: createQuestionRow(page, 'Multiline text optional', fields.readOnly, 'none', true, true),
     url: createQuestionRow(page, 'URL', fields.url, 'locked'),
+    imageLink: createQuestionRow(page, 'Evidence image link', fields.imageLink, 'none'),
   };
   const globalHeader = createGlobalHeader(page, DESCRIPTIONS.shell);
   const leftNav = createLeftNav(page, DESCRIPTIONS.shell);
@@ -1983,6 +2077,115 @@ function createPublicRegisterScreen(page, components, desc = DESCRIPTIONS.public
   return screen;
 }
 
+function createEvidenceReviewRow(components, type, question, value) {
+  const source = type === 'dropdown'
+    ? components.rows.dropdown
+    : type === 'textarea'
+      ? components.rows.textarea
+      : type === 'image-link'
+        ? components.rows.imageLink
+        : components.rows.readOnly;
+  const row = source.createInstance();
+  row.name = `Form question / ${question}`;
+  configureQuestionRow(row, { type, question, value });
+  if (type === 'image-link') {
+    const field = row.findOne(item => item.type === 'INSTANCE' && item.name === 'Read-only field');
+    if (field) field.name = 'Evidence image link field';
+  }
+  return row;
+}
+
+function createEvidenceLocation(components, number, location, review) {
+  const group = verticalFrame(`Location ${number}`, 1278, 16, 0);
+  group.appendChild(makeText('Location heading', `Location ${number}`, 'label', C.text, 1278));
+  group.appendChild(createEvidenceReviewRow(components, 'readonly', 'Location name', location.name));
+  group.appendChild(createEvidenceReviewRow(components, 'readonly', 'Date displayed', location.date));
+  group.appendChild(createEvidenceReviewRow(
+    components,
+    'image-link',
+    'Close-up photograph of the notice',
+    location.closeUpLabel,
+  ));
+  group.appendChild(createEvidenceReviewRow(
+    components,
+    'image-link',
+    'Photograph showing the notice in its surroundings',
+    location.surroundingsLabel,
+  ));
+  group.appendChild(createEvidenceReviewRow(
+    components,
+    'dropdown',
+    'What is your decision on the photographs for this location?',
+    review.decision,
+  ));
+  if (review.decision === 'Reject') {
+    group.appendChild(createEvidenceReviewRow(
+      components,
+      'textarea',
+      'Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant.',
+      review.rejectionComments,
+    ));
+  }
+  return group;
+}
+
+function createPublicNoticeEvidenceReviewScreen(page, components, state) {
+  const description = DESCRIPTIONS.publicNoticeEvidenceReview;
+  const screenHeight = state.frameHeight || 1480;
+  const screen = fixedFrame(state.frameName, 1640, screenHeight, C.canvas);
+  screen.clipsContent = true;
+  addShell(screen, components, true, screenHeight);
+
+  const headerCard = verticalFrame('Task header card', 1320, 12, 20, C.white);
+  headerCard.x = 268;
+  headerCard.y = 125;
+  applyCard(headerCard);
+  const headingLine = horizontalFrame('Task title', 1280, 32, 6, 0);
+  headingLine.primaryAxisSizingMode = 'AUTO';
+  headingLine.appendChild(makeText('Page heading', description.pageHeading, 'title', C.text));
+  headingLine.appendChild(makeText('Save state', `- ${state.saveState}`, 'body', C.secondary));
+  headerCard.appendChild(headingLine);
+  headerCard.appendChild(makeText('Record type', description.recordType, 'body', C.text));
+  screen.appendChild(headerCard);
+
+  const body = verticalFrame('Task form card', 1320, 24, 20, C.white);
+  body.x = 268;
+  body.y = 238;
+  applyCard(body);
+  const introduction = verticalFrame('Evidence introduction', 1278, 8, 0);
+  introduction.appendChild(makeText('Section heading', description.sectionHeading, 'section', C.text, 1278));
+  introduction.appendChild(makeText('Help text', description.intro, 'body', C.secondary, 1278));
+  body.appendChild(introduction);
+
+  description.locations.forEach((location, index) => {
+    if (index > 0) {
+      const divider = components.divider.createInstance();
+      divider.name = 'Location divider';
+      body.appendChild(divider);
+    }
+    body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index]));
+  });
+
+  const finalDivider = components.divider.createInstance();
+  finalDivider.name = 'Section divider';
+  body.appendChild(finalDivider);
+  const completion = horizontalFrame('Completion field', 1278, 32, 8, 0);
+  const checkbox = components.checkbox.createInstance();
+  checkbox.name = 'Checkbox';
+  if (!state.completed) {
+    const mark = checkbox.findOne(item => item.type === 'TEXT');
+    const box = checkbox.findOne(item => item.type === 'RECTANGLE');
+    if (mark) mark.visible = false;
+    if (box) { box.fills = []; box.strokes = paint(C.secondary); box.strokeWeight = 1; }
+  }
+  completion.appendChild(checkbox);
+  completion.appendChild(makeText('Question', description.completionLabel, 'body', C.text));
+  body.appendChild(completion);
+  screen.appendChild(body);
+  page.appendChild(screen);
+  return screen;
+}
+
 function nextRunNumber() {
   const pattern = /Run (\d+)/;
   let highest = 0;
@@ -2046,6 +2249,14 @@ const SCREEN_GROUPS = [
       { id: 'case-summary-unlocked', label: DESCRIPTIONS.caseSummaryStates[1].frameName },
     ],
   },
+  {
+    id: 'public-notice-evidence',
+    label: 'MLA/2026/10014 · Review public notice evidence',
+    screens: DESCRIPTIONS.publicNoticeEvidenceReview.states.map((state, index) => ({
+      id: `public-notice-evidence-${index}`,
+      label: state.frameName,
+    })),
+  },
 ];
 
 const ALL_SCREEN_IDS = SCREEN_GROUPS.flatMap(group => group.screens.map(screen => screen.id));
@@ -2070,6 +2281,11 @@ function renderScreenById(id, page, components) {
   }
   if (id === 'case-summary-unlocked') {
     return createCaseSummaryScreen(page, components, DESCRIPTIONS.caseSummaryStates[1]);
+  }
+  if (id.startsWith('public-notice-evidence-')) {
+    const index = Number(id.slice('public-notice-evidence-'.length));
+    const state = DESCRIPTIONS.publicNoticeEvidenceReview.states[index];
+    if (state) return createPublicNoticeEvidenceReviewScreen(page, components, state);
   }
   throw new Error(`Unknown screen selection: ${id}`);
 }
