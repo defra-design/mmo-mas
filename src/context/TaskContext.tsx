@@ -307,6 +307,13 @@ function loadState(): PersistedState {
       if (evidenceReviewNeedsMigration) {
         publicNoticeEvidenceMeta.completed = false;
         tasks.publicNoticeEvidence = 'In progress';
+      } else if (
+        publicNoticeEvidenceMeta.completed &&
+        publicNoticeEvidenceMeta.locations.some(location => location.decision === 'Reject')
+      ) {
+        // Existing saved reviews adopt the new hand-off rule as well: one
+        // rejected location means the applicant needs to provide new evidence.
+        tasks.publicNoticeEvidence = 'Awaiting applicant';
       }
 
       // Saved records from before the applicant-evidence hand-off marked a
@@ -664,13 +671,21 @@ export function TaskProvider({ children }: PropsWithChildren) {
     }));
 
   // Review is deliberately separate from Public notice and only appears once
-  // evidence exists (MLA/2026/10014 in this prototype fixture).
+  // evidence exists (MLA/2026/10014 in this prototype fixture). A completed
+  // review with any rejected location waits for replacement applicant evidence;
+  // only an all-accepted review is Done.
   const savePublicNoticeEvidence = () =>
     setState(prev => ({
       ...prev,
       tasks: {
         ...prev.tasks,
-        publicNoticeEvidence: prev.publicNoticeEvidenceMeta.completed ? 'Done' : 'In progress',
+        publicNoticeEvidence: !prev.publicNoticeEvidenceMeta.completed
+          ? 'In progress'
+          : prev.publicNoticeEvidenceMeta.locations.some(
+                location => location.decision === 'Reject',
+              )
+            ? 'Awaiting applicant'
+            : 'Done',
       },
       saved: { ...prev.saved, publicNoticeEvidence: true },
     }));
