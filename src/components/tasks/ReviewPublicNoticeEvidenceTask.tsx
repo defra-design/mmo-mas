@@ -1,6 +1,7 @@
 // Native D365 task form for reviewing evidence submitted by the applicant.
-// Applicant evidence is imported into D365 as read-only columns; photograph
-// references are OOB URL columns, so D365 displays the raw URL and globe button.
+// Location/date and review fields are native columns. Photograph links are the
+// agreed injected-HTML exception, matching WFD's "Assessment provided" field.
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -10,16 +11,16 @@ import {
   Title3,
   Body1,
   Checkbox,
-  Link,
   Text,
 } from '@fluentui/react-components';
-import { ImageRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
+import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskContext';
 import { useTasks } from '../../context/TaskContext';
 import { hasSubmittedPublicNoticeEvidence } from '../../utils/publicNoticeEvidence';
-import TaskRow from './TaskRow';
-import TaskValue from './TaskValue';
+import { notificationMessage } from '../../utils/validationMessages';
+import PublicNoticeEvidenceLocation from './PublicNoticeEvidenceLocation';
+import { publicNoticeEvidenceLocations } from './publicNoticeEvidenceLocations';
 
 const useStyles = makeStyles({
   page: {
@@ -41,29 +42,11 @@ const useStyles = makeStyles({
     marginBottom: tokens.spacingVerticalS,
   },
   intro: { color: tokens.colorNeutralForeground2 },
-  location: {
+  locationGroup: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalL,
+    gap: tokens.spacingVerticalXL,
   },
-  locationHeading: {
-    fontSize: tokens.fontSizeBase300,
-    fontWeight: tokens.fontWeightSemibold,
-  },
-  imageLinkValue: {
-    flexGrow: 1,
-    flexBasis: 0,
-    minWidth: '140px',
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
-    borderRadius: tokens.borderRadiusSmall,
-  },
-  imageLink: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  imageIcon: { flexShrink: 0 },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   completeRow: { display: 'flex', alignItems: 'flex-start' },
   savedLabel: {
@@ -74,26 +57,13 @@ const useStyles = makeStyles({
   },
 });
 
-const EVIDENCE = [
-  {
-    name: 'Teignmouth Harbour entrance noticeboard',
-    date: '18 August 2026',
-    closeUpHref: '/cdp/evidence/location-1-close-up.svg',
-    surroundingsHref: '/cdp/evidence/location-1-surroundings.svg',
-  },
-  {
-    name: 'Fish Quay public noticeboard',
-    date: '18 August 2026',
-    closeUpHref: '/cdp/evidence/location-2-close-up.svg',
-    surroundingsHref: '/cdp/evidence/location-2-surroundings.svg',
-  },
-  {
-    name: 'Back Beach access point',
-    date: '19 August 2026',
-    closeUpHref: '/cdp/evidence/location-3-close-up.svg',
-    surroundingsHref: '/cdp/evidence/location-3-surroundings.svg',
-  },
-];
+type ReviewField = keyof PublicNoticeEvidenceLocationReview;
+type ReviewError = { index: number; field: ReviewField };
+
+const errorName = ({ index, field }: ReviewError) =>
+  field === 'decision'
+    ? `Location ${index + 1} photograph decision`
+    : `Location ${index + 1} rejection comments`;
 
 type Props = { caseId: string };
 
@@ -104,15 +74,41 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
     publicNoticeEvidenceMeta,
     saved,
     setPublicNoticeEvidenceCompleted,
+    setPublicNoticeEvidenceLocationField,
     markUnsaved,
     savePublicNoticeEvidence,
   } = useTasks();
+  const [errors, setErrors] = useState<ReviewError[]>([]);
   const available = hasSubmittedPublicNoticeEvidence(caseId);
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
 
   const handleSave = () => {
+    if (publicNoticeEvidenceMeta.completed) {
+      const missing = publicNoticeEvidenceMeta.locations.flatMap((review, index) => {
+        const locationErrors: ReviewError[] = [];
+        if (!review.decision.trim()) locationErrors.push({ index, field: 'decision' });
+        if (review.decision === 'Reject' && !review.rejectionComments.trim()) {
+          locationErrors.push({ index, field: 'rejectionComments' });
+        }
+        return locationErrors;
+      });
+      setErrors(missing);
+      if (missing.length) return;
+    }
     savePublicNoticeEvidence();
     navigate(caseUrl);
+  };
+
+  const updateLocation = (index: number, field: ReviewField, value: string) => {
+    setPublicNoticeEvidenceLocationField(index, field, value);
+    setErrors(previous =>
+      previous.filter(error => {
+        if (error.index !== index) return true;
+        if (error.field === field) return false;
+        return !(field === 'decision' && value !== 'Reject' && error.field === 'rejectionComments');
+      }),
+    );
+    markUnsaved('publicNoticeEvidence');
   };
 
   return (
@@ -120,6 +116,12 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
       {!available && (
         <FormNotification level="read-only">
           This task is only available after the applicant submits public notice evidence.
+        </FormNotification>
+      )}
+
+      {errors.length > 0 && (
+        <FormNotification level="error">
+          {notificationMessage(errors.map(errorName))}
         </FormNotification>
       )}
 
@@ -148,42 +150,21 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
             </Body1>
           </div>
 
-          {EVIDENCE.map((location, index) => (
-            <div className={styles.location} key={location.name}>
+          {publicNoticeEvidenceLocations.map((location, index) => (
+            <div className={styles.locationGroup} key={location.name}>
               {index > 0 && <div className={styles.divider} />}
-              <Text block className={styles.locationHeading}>Location {index + 1}</Text>
-              <TaskRow label="Location name" locked>
-                <TaskValue>{location.name}</TaskValue>
-              </TaskRow>
-              <TaskRow label="Date displayed" locked>
-                <TaskValue>{location.date}</TaskValue>
-              </TaskRow>
-              <TaskRow label="Close-up photograph of the notice">
-                <div className={styles.imageLinkValue}>
-                  <Link
-                    className={styles.imageLink}
-                    href={location.closeUpHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ImageRegular className={styles.imageIcon} aria-hidden />
-                    View close-up photograph of the notice (opens in new tab)
-                  </Link>
-                </div>
-              </TaskRow>
-              <TaskRow label="Photograph showing the notice in its surroundings" top>
-                <div className={styles.imageLinkValue}>
-                  <Link
-                    className={styles.imageLink}
-                    href={location.surroundingsHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ImageRegular className={styles.imageIcon} aria-hidden />
-                    View photograph of the notice in its surroundings (opens in new tab)
-                  </Link>
-                </div>
-              </TaskRow>
+              <PublicNoticeEvidenceLocation
+                number={index + 1}
+                location={location}
+                review={publicNoticeEvidenceMeta.locations[index]}
+                decisionError={errors.some(
+                  error => error.index === index && error.field === 'decision',
+                )}
+                commentsError={errors.some(
+                  error => error.index === index && error.field === 'rejectionComments',
+                )}
+                onChange={(field, value) => updateLocation(index, field, value)}
+              />
             </div>
           ))}
 

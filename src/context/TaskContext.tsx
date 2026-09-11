@@ -93,10 +93,19 @@ export interface SiteNoticeForm {
   groups: string;
 }
 
-// Native Two Options field on the evidence-review task. Saving rolls the task
-// to Done when selected, or In progress when left clear.
+// One related public-notice-location record's native caseworker fields. The
+// decision is a Choice column; rejection comments are a Multiline Text column
+// revealed by a business rule when the decision is Reject.
+export interface PublicNoticeEvidenceLocationReview {
+  decision: string;
+  rejectionComments: string;
+}
+
+// Native fields on the evidence-review task. Saving rolls the task to Done when
+// its Two Options field is selected, or In progress when left clear.
 export interface PublicNoticeEvidenceMeta {
   completed: boolean;
+  locations: PublicNoticeEvidenceLocationReview[];
 }
 
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
@@ -216,7 +225,14 @@ const initialState: PersistedState = {
     completed: false,
   },
   siteNoticeForm: { needsNotice: '', rationale: '', summary: '', groups: '' },
-  publicNoticeEvidenceMeta: { completed: false },
+  publicNoticeEvidenceMeta: {
+    completed: false,
+    locations: [
+      { decision: '', rejectionComments: '' },
+      { decision: '', rejectionComments: '' },
+      { decision: '', rejectionComments: '' },
+    ],
+  },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
@@ -267,12 +283,30 @@ function loadState(): PersistedState {
         needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
       };
       const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
+      const savedEvidenceLocations = Array.isArray(parsed.publicNoticeEvidenceMeta?.locations)
+        ? parsed.publicNoticeEvidenceMeta.locations
+        : [];
       const publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta = {
         ...initialState.publicNoticeEvidenceMeta,
         ...parsed.publicNoticeEvidenceMeta,
+        locations: initialState.publicNoticeEvidenceMeta.locations.map((location, index) => ({
+          ...location,
+          ...savedEvidenceLocations[index],
+        })),
       };
       if (!parsed.publicNoticeEvidenceMeta && tasks.publicNoticeEvidence === 'Done') {
         publicNoticeEvidenceMeta.completed = true;
+      }
+      const completedEvidenceReviewIsValid = publicNoticeEvidenceMeta.locations.every(
+        location =>
+          Boolean(location.decision.trim()) &&
+          (location.decision !== 'Reject' || Boolean(location.rejectionComments.trim())),
+      );
+      const evidenceReviewNeedsMigration =
+        publicNoticeEvidenceMeta.completed && !completedEvidenceReviewIsValid;
+      if (evidenceReviewNeedsMigration) {
+        publicNoticeEvidenceMeta.completed = false;
+        tasks.publicNoticeEvidence = 'In progress';
       }
 
       // Saved records from before the applicant-evidence hand-off marked a
@@ -306,7 +340,11 @@ function loadState(): PersistedState {
         recentOrganisations: Array.isArray(parsed.recentOrganisations)
           ? parsed.recentOrganisations
           : initialState.recentOrganisations,
-        saved: { ...initialState.saved, ...parsed.saved },
+        saved: {
+          ...initialState.saved,
+          ...parsed.saved,
+          ...(evidenceReviewNeedsMigration ? { publicNoticeEvidence: false } : {}),
+        },
         // State saved before transfers were keyed by case held a single `transfer`
         // object carrying its own caseId; lift it into the map. Anything older than
         // the two-step split has no `requestedBy` and would render an empty card,
@@ -361,6 +399,11 @@ interface TaskContextValue {
   ) => void;
   setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
   setPublicNoticeEvidenceCompleted: (completed: boolean) => void;
+  setPublicNoticeEvidenceLocationField: (
+    index: number,
+    field: keyof PublicNoticeEvidenceLocationReview,
+    value: string,
+  ) => void;
   addRecentOrganisation: (name: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
@@ -522,7 +565,22 @@ export function TaskProvider({ children }: PropsWithChildren) {
   const setPublicNoticeEvidenceCompleted = (completed: boolean) =>
     setState(prev => ({
       ...prev,
-      publicNoticeEvidenceMeta: { completed },
+      publicNoticeEvidenceMeta: { ...prev.publicNoticeEvidenceMeta, completed },
+    }));
+
+  const setPublicNoticeEvidenceLocationField = (
+    index: number,
+    field: keyof PublicNoticeEvidenceLocationReview,
+    value: string,
+  ) =>
+    setState(prev => ({
+      ...prev,
+      publicNoticeEvidenceMeta: {
+        ...prev.publicNoticeEvidenceMeta,
+        locations: prev.publicNoticeEvidenceMeta.locations.map((location, locationIndex) =>
+          locationIndex === index ? { ...location, [field]: value } : location,
+        ),
+      },
     }));
 
   // Records a lookup pick as the most-recent organisation: moves it to the front,
@@ -662,6 +720,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setPublicRegisterField,
         setSiteNoticeField,
         setPublicNoticeEvidenceCompleted,
+        setPublicNoticeEvidenceLocationField,
         addRecentOrganisation,
         markUnsaved,
         completeSiteCheck,
