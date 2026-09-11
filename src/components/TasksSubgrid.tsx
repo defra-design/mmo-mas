@@ -22,6 +22,10 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
+import {
+  hasSubmittedPublicNoticeEvidence,
+  taskStatusForCase,
+} from '../utils/publicNoticeEvidence';
 
 // Column widths. table-layout:fixed + width:100% shares any extra space in
 // proportion to these, so Task grows most. The leading row-select column is
@@ -72,26 +76,50 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks } = useTasks();
+  const evidenceSubmitted = hasSubmittedPublicNoticeEvidence(caseId);
 
   // Every task opens, whatever its status. A task still gated behind Site check
   // ("Cannot start yet") opens read-only rather than being unclickable — D365
   // cannot lock a caseworker out of a record.
   const rows: TaskRow[] = [
-    { key: 'siteCheck', name: 'Site check', status: tasks.siteCheck, slug: 'site-check' },
+    {
+      key: 'siteCheck',
+      name: 'Site check',
+      status: taskStatusForCase(caseId, 'siteCheck', tasks.siteCheck),
+      slug: 'site-check',
+    },
     {
       key: 'publicRegister',
       name: 'Public register',
-      status: tasks.publicRegister,
+      status: taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister),
       slug: 'public-register',
     },
-    { key: 'wfd', name: 'Water Framework Directive', status: tasks.wfdAssessment, slug: 'wfd' },
+    {
+      key: 'wfd',
+      name: 'Water Framework Directive',
+      status: taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment),
+      slug: 'wfd',
+    },
     {
       key: 'prepForConsultee',
       name: 'Prepare for consultation',
-      status: tasks.prepForConsultee,
+      status: taskStatusForCase(caseId, 'prepForConsultee', tasks.prepForConsultee),
       slug: 'prep-for-consultee',
     },
-    { key: 'siteNotice', name: 'Public notice', status: tasks.siteNotice, slug: 'site-notice' },
+    {
+      key: 'siteNotice',
+      name: 'Public notice',
+      status: taskStatusForCase(caseId, 'siteNotice', tasks.siteNotice),
+      slug: 'site-notice',
+    },
+    ...(evidenceSubmitted
+      ? [{
+          key: 'publicNoticeEvidence',
+          name: 'Review public notice evidence',
+          status: tasks.publicNoticeEvidence,
+          slug: 'review-public-notice-evidence',
+        }]
+      : []),
   ];
 
   return (

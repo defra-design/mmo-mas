@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <title>Prototype photograph showing the notice at Fish Quay</title>
+  <g transform="translate(0 64)">
+    <rect width="1200" height="430" fill="#c8dfec"/><rect y="430" width="1200" height="370" fill="#4c86a3"/>
+    <path d="M520 485h440l-55 120H590z" fill="#e7e3d6"/><path d="M690 485V270l130 215z" fill="#fff"/><path d="M200 800V250h310v550z" fill="#8c735d"/>
+    <rect x="245" y="315" width="220" height="285" fill="#fff" stroke="#444" stroke-width="7"/>
+    <text x="355" y="445" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">PUBLIC</text><text x="355" y="485" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">NOTICE</text>
+  </g>
+  <rect width="1200" height="64" fill="#fff"/>
+  <text x="32" y="41" font-family="Arial" font-size="24">Location name: Fish Quay public noticeboard</text>
+</svg>
