@@ -24,6 +24,7 @@ import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
 import {
   hasSubmittedPublicNoticeEvidence,
+  publicNoticeEvidenceStatusForCase,
   taskStatusForCase,
 } from '../utils/publicNoticeEvidence';
 
@@ -116,7 +117,7 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
       ? [{
           key: 'publicNoticeEvidence',
           name: 'Review public notice evidence',
-          status: tasks.publicNoticeEvidence,
+          status: publicNoticeEvidenceStatusForCase(caseId, tasks),
           slug: 'review-public-notice-evidence',
         }]
       : []),
