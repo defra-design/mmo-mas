@@ -23,6 +23,7 @@ import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
 import {
   hasSubmittedPublicNoticeEvidence,
+  publicNoticeEvidenceStatusForCase,
   taskStatusForCase,
 } from '../utils/publicNoticeEvidence';
 
@@ -138,7 +139,7 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
     rows.push({
       key: 'publicNoticeEvidence',
       name: 'Review public notice evidence',
-      status: tasks.publicNoticeEvidence,
+      status: publicNoticeEvidenceStatusForCase(caseId, tasks),
       onClick: open('review-public-notice-evidence'),
     });
   }
