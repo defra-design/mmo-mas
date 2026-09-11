@@ -10,15 +10,16 @@ import {
   Title3,
   Body1,
   Checkbox,
+  Link,
   Text,
 } from '@fluentui/react-components';
+import { ImageRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import { useTasks } from '../../context/TaskContext';
 import { hasSubmittedPublicNoticeEvidence } from '../../utils/publicNoticeEvidence';
 import TaskRow from './TaskRow';
 import TaskValue from './TaskValue';
-import UrlField from './UrlField';
 
 const useStyles = makeStyles({
   page: {
@@ -49,6 +50,20 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
   },
+  imageLinkValue: {
+    flexGrow: 1,
+    flexBasis: 0,
+    minWidth: '140px',
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
+    borderRadius: tokens.borderRadiusSmall,
+  },
+  imageLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+  },
+  imageIcon: { flexShrink: 0 },
   divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   completeRow: { display: 'flex', alignItems: 'flex-start' },
   savedLabel: {
@@ -63,31 +78,19 @@ const EVIDENCE = [
   {
     name: 'Teignmouth Harbour entrance noticeboard',
     date: '18 August 2026',
-    closeUpUrl:
-      'https://marine-licensing-url/evidence/MLA-2026-10014/teignmouth-harbour-entrance-close-up.jpg',
     closeUpHref: '/cdp/evidence/location-1-close-up.svg',
-    surroundingsUrl:
-      'https://marine-licensing-url/evidence/MLA-2026-10014/teignmouth-harbour-entrance-surroundings.jpg',
     surroundingsHref: '/cdp/evidence/location-1-surroundings.svg',
   },
   {
     name: 'Fish Quay public noticeboard',
     date: '18 August 2026',
-    closeUpUrl:
-      'https://marine-licensing-url/evidence/MLA-2026-10014/fish-quay-close-up.jpg',
     closeUpHref: '/cdp/evidence/location-2-close-up.svg',
-    surroundingsUrl:
-      'https://marine-licensing-url/evidence/MLA-2026-10014/fish-quay-surroundings.jpg',
     surroundingsHref: '/cdp/evidence/location-2-surroundings.svg',
   },
   {
     name: 'Back Beach access point',
     date: '19 August 2026',
-    closeUpUrl:
-      'https://marine-licensing-url/evidence/MLA-2026-10014/back-beach-close-up.jpg',
     closeUpHref: '/cdp/evidence/location-3-close-up.svg',
-    surroundingsUrl:
-      'https://marine-licensing-url/evidence/MLA-2026-10014/back-beach-surroundings.jpg',
     surroundingsHref: '/cdp/evidence/location-3-surroundings.svg',
   },
 ];
@@ -155,19 +158,31 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
               <TaskRow label="Date displayed" locked>
                 <TaskValue>{location.date}</TaskValue>
               </TaskRow>
-              <TaskRow label="Close-up photograph of the notice" locked>
-                <UrlField
-                  url={location.closeUpUrl}
-                  href={location.closeUpHref}
-                  launchLabel={`Open close-up photograph for Location ${index + 1}`}
-                />
+              <TaskRow label="Close-up photograph of the notice">
+                <div className={styles.imageLinkValue}>
+                  <Link
+                    className={styles.imageLink}
+                    href={location.closeUpHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ImageRegular className={styles.imageIcon} aria-hidden />
+                    View close-up photograph of the notice (opens in new tab)
+                  </Link>
+                </div>
               </TaskRow>
-              <TaskRow label="Photograph showing the notice in its surroundings" locked top>
-                <UrlField
-                  url={location.surroundingsUrl}
-                  href={location.surroundingsHref}
-                  launchLabel={`Open surroundings photograph for Location ${index + 1}`}
-                />
+              <TaskRow label="Photograph showing the notice in its surroundings" top>
+                <div className={styles.imageLinkValue}>
+                  <Link
+                    className={styles.imageLink}
+                    href={location.surroundingsHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ImageRegular className={styles.imageIcon} aria-hidden />
+                    View photograph of the notice in its surroundings (opens in new tab)
+                  </Link>
+                </div>
               </TaskRow>
             </div>
           ))}
