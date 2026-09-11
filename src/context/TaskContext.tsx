@@ -2,9 +2,14 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import { policyCount } from '../utils/marinePlanPolicies';
-import { loadPublicNoticeRequirement } from '../utils/publicNoticeRequirement';
+import { loadPublicNoticeRequirement, SITE_NOTICE } from '../utils/publicNoticeRequirement';
 
-export type TaskStatus = 'Done' | 'To do' | 'In progress' | 'Cannot start yet';
+export type TaskStatus =
+  | 'Done'
+  | 'To do'
+  | 'In progress'
+  | 'Awaiting applicant'
+  | 'Cannot start yet';
 
 export interface TaskState {
   siteCheck: TaskStatus;
@@ -13,6 +18,7 @@ export interface TaskState {
   prepForConsultee: TaskStatus;
   publicRegister: TaskStatus;
   siteNotice: TaskStatus;
+  publicNoticeEvidence: TaskStatus;
 }
 
 export interface SiteCheckForm {
@@ -87,6 +93,21 @@ export interface SiteNoticeForm {
   groups: string;
 }
 
+// One related public-notice-location record's native caseworker fields. The
+// decision is a Choice column; rejection comments are a Multiline Text column
+// revealed by a business rule when the decision is Reject.
+export interface PublicNoticeEvidenceLocationReview {
+  decision: string;
+  rejectionComments: string;
+}
+
+// Native fields on the evidence-review task. Saving rolls the task to Done when
+// its Two Options field is selected, or In progress when left clear.
+export interface PublicNoticeEvidenceMeta {
+  completed: boolean;
+  locations: PublicNoticeEvidenceLocationReview[];
+}
+
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
 // task is saved; an edit flips it back to false (matches D365 dirty-tracking).
 export interface SavedState {
@@ -96,6 +117,7 @@ export interface SavedState {
   prepForConsultee: boolean;
   publicRegister: boolean;
   siteNotice: boolean;
+  publicNoticeEvidence: boolean;
 }
 
 // Records a "Transfer to MCMS" against one case. Two stages, done by two teams:
@@ -149,6 +171,7 @@ interface PersistedState {
   prepForConsulteeMeta: PrepForConsulteeMeta;
   publicRegisterForm: PublicRegisterForm;
   siteNoticeForm: SiteNoticeForm;
+  publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta;
   // Organisations the caseworker has recently picked in the lookup, most-recent
   // first. Shared across every consultee row/case (a per-user "Recent records"
   // list, like the real D365 lookup); empty until they select one.
@@ -180,6 +203,9 @@ const initialState: PersistedState = {
     prepForConsultee: 'Cannot start yet',
     publicRegister: 'Cannot start yet',
     siteNotice: 'Cannot start yet',
+    // MLA/2026/10014 represents the point after applicant evidence arrives.
+    // The row is only rendered for that case and is ready for officer review.
+    publicNoticeEvidence: 'To do',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
@@ -199,6 +225,14 @@ const initialState: PersistedState = {
     completed: false,
   },
   siteNoticeForm: { needsNotice: '', rationale: '', summary: '', groups: '' },
+  publicNoticeEvidenceMeta: {
+    completed: false,
+    locations: [
+      { decision: '', rejectionComments: '' },
+      { decision: '', rejectionComments: '' },
+      { decision: '', rejectionComments: '' },
+    ],
+  },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
@@ -207,6 +241,7 @@ const initialState: PersistedState = {
     prepForConsultee: false,
     publicRegister: false,
     siteNotice: false,
+    publicNoticeEvidence: false,
   },
   transfers: {},
   rejections: {},
@@ -242,12 +277,59 @@ function loadState(): PersistedState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
+      const siteNoticeForm: SiteNoticeForm = {
+        ...initialState.siteNoticeForm,
+        ...parsed.siteNoticeForm,
+        needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
+      };
+      const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
+      const savedEvidenceLocations = Array.isArray(parsed.publicNoticeEvidenceMeta?.locations)
+        ? parsed.publicNoticeEvidenceMeta.locations
+        : [];
+      const publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta = {
+        ...initialState.publicNoticeEvidenceMeta,
+        ...parsed.publicNoticeEvidenceMeta,
+        locations: initialState.publicNoticeEvidenceMeta.locations.map((location, index) => ({
+          ...location,
+          ...savedEvidenceLocations[index],
+        })),
+      };
+      if (!parsed.publicNoticeEvidenceMeta && tasks.publicNoticeEvidence === 'Done') {
+        publicNoticeEvidenceMeta.completed = true;
+      }
+      const completedEvidenceReviewIsValid = publicNoticeEvidenceMeta.locations.every(
+        location =>
+          Boolean(location.decision.trim()) &&
+          (location.decision !== 'Reject' || Boolean(location.rejectionComments.trim())),
+      );
+      const evidenceReviewNeedsMigration =
+        publicNoticeEvidenceMeta.completed && !completedEvidenceReviewIsValid;
+      if (evidenceReviewNeedsMigration) {
+        publicNoticeEvidenceMeta.completed = false;
+        tasks.publicNoticeEvidence = 'In progress';
+      } else if (
+        publicNoticeEvidenceMeta.completed &&
+        publicNoticeEvidenceMeta.locations.some(location => location.decision === 'Reject')
+      ) {
+        // Existing saved reviews adopt the new hand-off rule as well: one
+        // rejected location means the applicant needs to provide new evidence.
+        tasks.publicNoticeEvidence = 'Awaiting applicant';
+      }
+
+      // Saved records from before the applicant-evidence hand-off marked a
+      // required Site notice Done. Lift those records into the new waiting
+      // state; MLA/2026/10014 is presented as Done by its case fixture because
+      // its evidence has already arrived.
+      if (tasks.siteNotice === 'Done' && siteNoticeForm.needsNotice === SITE_NOTICE) {
+        tasks.siteNotice = 'Awaiting applicant';
+      }
+
       const prepRows: PrepForConsulteeForm =
         Array.isArray(parsed.prepForConsulteeForm) && parsed.prepForConsulteeForm.length > 0
           ? parsed.prepForConsulteeForm
           : initialState.prepForConsulteeForm;
       return {
-        tasks: { ...initialState.tasks, ...parsed.tasks },
+        tasks,
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
         mppForm: { ...initialState.mppForm, ...parsed.mppForm },
@@ -260,15 +342,16 @@ function loadState(): PersistedState {
           ...initialState.publicRegisterForm,
           ...parsed.publicRegisterForm,
         },
-        siteNoticeForm: {
-          ...initialState.siteNoticeForm,
-          ...parsed.siteNoticeForm,
-          needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
-        },
+        siteNoticeForm,
+        publicNoticeEvidenceMeta,
         recentOrganisations: Array.isArray(parsed.recentOrganisations)
           ? parsed.recentOrganisations
           : initialState.recentOrganisations,
-        saved: { ...initialState.saved, ...parsed.saved },
+        saved: {
+          ...initialState.saved,
+          ...parsed.saved,
+          ...(evidenceReviewNeedsMigration ? { publicNoticeEvidence: false } : {}),
+        },
         // State saved before transfers were keyed by case held a single `transfer`
         // object carrying its own caseId; lift it into the map. Anything older than
         // the two-step split has no `requestedBy` and would render an empty card,
@@ -293,6 +376,7 @@ interface TaskContextValue {
   prepForConsulteeMeta: PrepForConsulteeMeta;
   publicRegisterForm: PublicRegisterForm;
   siteNoticeForm: SiteNoticeForm;
+  publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta;
   recentOrganisations: string[];
   saved: SavedState;
   transfers: TransfersState;
@@ -321,6 +405,12 @@ interface TaskContextValue {
     value: PublicRegisterForm[K],
   ) => void;
   setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
+  setPublicNoticeEvidenceCompleted: (completed: boolean) => void;
+  setPublicNoticeEvidenceLocationField: (
+    index: number,
+    field: keyof PublicNoticeEvidenceLocationReview,
+    value: string,
+  ) => void;
   addRecentOrganisation: (name: string) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
@@ -328,6 +418,7 @@ interface TaskContextValue {
   savePrepForConsultee: () => void;
   savePublicRegister: () => void;
   saveSiteNotice: () => void;
+  savePublicNoticeEvidence: () => void;
   resetAll: () => void;
 }
 
@@ -478,6 +569,27 @@ export function TaskProvider({ children }: PropsWithChildren) {
   const setSiteNoticeField = (field: keyof SiteNoticeForm, value: string) =>
     setState(prev => ({ ...prev, siteNoticeForm: { ...prev.siteNoticeForm, [field]: value } }));
 
+  const setPublicNoticeEvidenceCompleted = (completed: boolean) =>
+    setState(prev => ({
+      ...prev,
+      publicNoticeEvidenceMeta: { ...prev.publicNoticeEvidenceMeta, completed },
+    }));
+
+  const setPublicNoticeEvidenceLocationField = (
+    index: number,
+    field: keyof PublicNoticeEvidenceLocationReview,
+    value: string,
+  ) =>
+    setState(prev => ({
+      ...prev,
+      publicNoticeEvidenceMeta: {
+        ...prev.publicNoticeEvidenceMeta,
+        locations: prev.publicNoticeEvidenceMeta.locations.map((location, locationIndex) =>
+          locationIndex === index ? { ...location, [field]: value } : location,
+        ),
+      },
+    }));
+
   // Records a lookup pick as the most-recent organisation: moves it to the front,
   // de-duplicates, and keeps at most the last 5 (matches D365's "Recent records").
   const RECENT_ORG_LIMIT = 5;
@@ -544,13 +656,38 @@ export function TaskProvider({ children }: PropsWithChildren) {
       saved: { ...prev.saved, publicRegister: true },
     }));
 
-  // Save the Public notice: the visible branch's fields are business-required, so
-  // a save that gets this far has completed the task. Nothing depends on it.
+  // A required Site notice hands work to the applicant, so the officer's save
+  // leaves the task open as Awaiting applicant. If no notice is required there
+  // is no applicant evidence to wait for and the task is Done immediately.
   const saveSiteNotice = () =>
     setState(prev => ({
       ...prev,
-      tasks: { ...prev.tasks, siteNotice: 'Done' },
+      tasks: {
+        ...prev.tasks,
+        siteNotice:
+          prev.siteNoticeForm.needsNotice === SITE_NOTICE ? 'Awaiting applicant' : 'Done',
+      },
       saved: { ...prev.saved, siteNotice: true },
+    }));
+
+  // Review is deliberately separate from Public notice and only appears once
+  // evidence exists (MLA/2026/10014 in this prototype fixture). A completed
+  // review with any rejected location waits for replacement applicant evidence;
+  // only an all-accepted review is Done.
+  const savePublicNoticeEvidence = () =>
+    setState(prev => ({
+      ...prev,
+      tasks: {
+        ...prev.tasks,
+        publicNoticeEvidence: !prev.publicNoticeEvidenceMeta.completed
+          ? 'In progress'
+          : prev.publicNoticeEvidenceMeta.locations.some(
+                location => location.decision === 'Reject',
+              )
+            ? 'Awaiting applicant'
+            : 'Done',
+      },
+      saved: { ...prev.saved, publicNoticeEvidence: true },
     }));
 
   // Clears every prototype key on this origin (live + all frozen iterations),
@@ -580,6 +717,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         prepForConsulteeMeta: state.prepForConsulteeMeta,
         publicRegisterForm: state.publicRegisterForm,
         siteNoticeForm: state.siteNoticeForm,
+        publicNoticeEvidenceMeta: state.publicNoticeEvidenceMeta,
         recentOrganisations: state.recentOrganisations,
         saved: state.saved,
         transfers: state.transfers,
@@ -596,6 +734,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setPrepForConsulteeCompleted,
         setPublicRegisterField,
         setSiteNoticeField,
+        setPublicNoticeEvidenceCompleted,
+        setPublicNoticeEvidenceLocationField,
         addRecentOrganisation,
         markUnsaved,
         completeSiteCheck,
@@ -603,6 +743,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         savePrepForConsultee,
         savePublicRegister,
         saveSiteNotice,
+        savePublicNoticeEvidence,
         resetAll,
       }}
     >

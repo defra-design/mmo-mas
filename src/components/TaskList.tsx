@@ -21,6 +21,10 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
+import {
+  hasSubmittedPublicNoticeEvidence,
+  taskStatusForCase,
+} from '../utils/publicNoticeEvidence';
 
 const useStyles = makeStyles({
   heading: {
@@ -76,6 +80,7 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks } = useTasks();
+  const evidenceSubmitted = hasSubmittedPublicNoticeEvidence(caseId);
 
   // Every task opens, whatever its status — D365 cannot lock a caseworker out of
   // a record. A task still gated behind Site check ("Cannot start yet") opens
@@ -87,41 +92,56 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
     {
       key: 'siteCheck',
       name: 'Site check',
-      status: tasks.siteCheck,
+      status: taskStatusForCase(caseId, 'siteCheck', tasks.siteCheck),
       onClick: open('site-check'),
     },
     {
       key: 'publicRegister',
       name: 'Public register',
-      status: tasks.publicRegister,
+      status: taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister),
       onClick: open('public-register'),
     },
     {
       key: 'wfd',
       name: 'Water Framework Directive',
-      status: tasks.wfdAssessment,
+      status: taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment),
       onClick: open('wfd'),
     },
     {
       key: 'prepForConsultee',
       name: 'Prepare for consultation',
-      status: tasks.prepForConsultee,
+      status: taskStatusForCase(caseId, 'prepForConsultee', tasks.prepForConsultee),
       onClick: open('prep-for-consultee'),
     },
   ];
 
   // Original single-row treatment (kept for the standard cases, e.g. MLA/2026/10002).
   if (!mppInSeparateList) {
-    rows.push({ key: 'mpp', name: 'Marine plan policies', status: tasks.marinePlanPolicies });
+    rows.push({
+      key: 'mpp',
+      name: 'Marine plan policies',
+      status: taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies),
+    });
   }
 
   // Sits at the bottom of the list whichever MPP treatment the case uses.
   rows.push({
     key: 'siteNotice',
     name: 'Public notice',
-    status: tasks.siteNotice,
+    // 10014 is the post-submission fixture: the parent task has completed and
+    // the newly created evidence-review task carries the remaining work.
+    status: taskStatusForCase(caseId, 'siteNotice', tasks.siteNotice),
     onClick: open('site-notice'),
   });
+
+  if (evidenceSubmitted) {
+    rows.push({
+      key: 'publicNoticeEvidence',
+      name: 'Review public notice evidence',
+      status: tasks.publicNoticeEvidence,
+      onClick: open('review-public-notice-evidence'),
+    });
+  }
 
   return (
     <div>

@@ -41,6 +41,7 @@ import {
   DismissRegular,
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
+import { taskStatusForCase } from '../utils/publicNoticeEvidence';
 import TruncatedCell from './TruncatedCell';
 import { policies } from '../utils/marinePlanPolicies';
 
@@ -200,7 +201,10 @@ export default function MarinePlanPoliciesSubgrid({
 
   // While locked the Outcome reads "Cannot start yet", but the policy still
   // opens — read-only — because D365 cannot lock a caseworker out of a record.
-  const locked = !ungated && tasks.marinePlanPolicies === 'Cannot start yet';
+  const locked =
+    !ungated &&
+    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) ===
+      'Cannot start yet';
 
   // Build the display rows (with the computed Outcome value) once, then filter
   // and sort them so both operate on what the caseworker actually sees.

@@ -50,6 +50,7 @@ import {
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 
 const useStyles = makeStyles({
   page: {
@@ -119,7 +120,8 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
     useTasks();
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
-  const locked = tasks.publicRegister === 'Cannot start yet';
+  const locked =
+    taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister) === 'Cannot start yet';
   const hideGuidance = GUIDANCE_AS_DISCLOSURE.includes(caseId);
   // Did the applicant ask for anything to be withheld? If not there is no
   // assessment to make, and sections 3 and 4 move up to 2 and 3.

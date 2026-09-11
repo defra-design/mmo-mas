@@ -23,6 +23,7 @@ import FieldDecorations from './FieldDecorations';
 import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import type { SiteCheckForm } from '../../context/TaskContext';
+import { hasSubmittedPublicNoticeEvidence } from '../../utils/publicNoticeEvidence';
 
 // Width of the label column on the Site check task. This is the knob to play
 // with — widen/narrow to taste. It's deliberately wider than the WFD task's
@@ -116,6 +117,14 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { siteCheckForm, saved, setSiteCheckField, markUnsaved, completeSiteCheck } = useTasks();
+  const completedFixture = hasSubmittedPublicNoticeEvidence(caseId);
+  const form: SiteCheckForm = completedFixture
+    ? {
+        coordinatesOk: siteCheckForm.coordinatesOk || 'Yes',
+        withinMile: siteCheckForm.withinMile || 'Yes',
+        notes: siteCheckForm.notes,
+      }
+    : siteCheckForm;
   // Empty required fields, populated on a failed save. D365 validates on save, not
   // as you type, then clears a field's error as soon as it is given a value.
   const [errors, setErrors] = useState<(keyof SiteCheckForm)[]>([]);
@@ -131,7 +140,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   };
 
   const handleSave = () => {
-    const empty = REQUIRED_FIELDS.filter(f => !siteCheckForm[f.field].trim()).map(f => f.field);
+    const empty = REQUIRED_FIELDS.filter(f => !form[f.field].trim()).map(f => f.field);
     if (empty.length > 0) {
       setErrors(empty);
       return;
@@ -157,7 +166,9 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
       <Card className={styles.headerCard}>
         <Title3>
           Site check
-          <span className={styles.savedLabel}>- {saved.siteCheck ? 'Saved' : 'Unsaved'}</span>
+          <span className={styles.savedLabel}>
+            - {completedFixture || saved.siteCheck ? 'Saved' : 'Unsaved'}
+          </span>
         </Title3>
         <div><Body1>Task</Body1></div>
       </Card>
@@ -191,7 +202,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
               validationMessageIcon={<DismissCircleRegular />}
             >
               <OutcomeDropdown
-                value={siteCheckForm.coordinatesOk}
+                value={form.coordinatesOk}
                 options={['Yes', 'No']}
                 onSelect={v => {
                   setField('coordinatesOk', v);
@@ -223,7 +234,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
               validationMessageIcon={<DismissCircleRegular />}
             >
               <OutcomeDropdown
-                value={siteCheckForm.withinMile}
+                value={form.withinMile}
                 options={['Yes', 'No']}
                 onSelect={v => {
                   setField('withinMile', v);
@@ -245,7 +256,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
               <Textarea
                 className={styles.textarea}
                 appearance="filled-lighter"
-                value={siteCheckForm.notes}
+                value={form.notes}
                 onChange={(_, d) => setField('notes', d.value)}
                 onBlur={() => markUnsaved('siteCheck')}
                 resize="vertical"

@@ -30,6 +30,7 @@ import {
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { policies, policyIndex } from '../../utils/marinePlanPolicies';
 
 const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required'];
@@ -147,7 +148,9 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   // Policies always open, but before Site check their assessment fields are
   // gated: read-only, padlocked, with the Outcome reading "Cannot start yet".
   // Completing Site check unlocks them (marinePlanPolicies → "To do").
-  const locked = tasks.marinePlanPolicies === 'Cannot start yet';
+  const locked =
+    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) ===
+    'Cannot start yet';
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   // Back and Save and close both return to the tab the policy was opened from,

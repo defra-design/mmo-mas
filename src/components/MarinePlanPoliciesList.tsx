@@ -21,6 +21,7 @@ import {
   PreviousRegular,
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
+import { taskStatusForCase } from '../utils/publicNoticeEvidence';
 import { policies } from '../utils/marinePlanPolicies';
 
 // The MPP task is 1-to-many, so the policies are their own list under Tasks,
@@ -74,7 +75,9 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
   const { tasks, mppForm } = useTasks();
   const [page, setPage] = useState(1);
 
-  const locked = tasks.marinePlanPolicies === 'Cannot start yet';
+  const locked =
+    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) ===
+    'Cannot start yet';
   const total = policies.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
