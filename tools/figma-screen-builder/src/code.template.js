@@ -486,11 +486,14 @@ function createQuestionRow(page, name, fieldComponent, decoration, multiline = f
 
   const marker = horizontalFrame('Field decoration', 26, 32, 0, 0);
   marker.primaryAxisAlignItems = 'MAX';
-  if (decoration === 'required') {
+  marker.itemSpacing = 2;
+  if (decoration === 'required' || decoration === 'required-locked') {
     marker.appendChild(makeText('Required indicator', '*', 'body', C.red));
-  } else if (decoration === 'locked') {
+  }
+  if (decoration === 'locked' || decoration === 'required-locked') {
     marker.appendChild(makeIcon('Read-only indicator', 'LockClosedRegular', 16, C.secondary));
-  } else {
+  }
+  if (decoration === 'none') {
     marker.appendChild(fixedFrame('No field decoration', 16, 16));
   }
   component.appendChild(marker);
@@ -885,6 +888,8 @@ function createComponentLibrary(page, runLabel) {
   const rows = {
     readOnly: createQuestionRow(page, 'Read only', fields.readOnly, 'locked'),
     readOnlyMultiline: createQuestionRow(page, 'Read only multiline', fields.readOnly, 'locked', true),
+    readOnlyRequired: createQuestionRow(page, 'Read only required', fields.readOnly, 'required-locked'),
+    readOnlyMultilineRequired: createQuestionRow(page, 'Read only multiline required', fields.readOnly, 'required-locked', true),
     dropdown: createQuestionRow(page, 'Dropdown', fields.dropdown, 'required'),
     textarea: createQuestionRow(page, 'Multiline text', fields.readOnly, 'required', true, true),
     textareaOptional: createQuestionRow(page, 'Multiline text optional', fields.readOnly, 'none', true, true),
@@ -1309,6 +1314,10 @@ function createEvidenceReviewRow(components, type, question, value) {
     ? components.rows.dropdown
     : type === 'textarea'
       ? components.rows.textarea
+      : type === 'locked-choice'
+        ? components.rows.readOnlyRequired
+        : type === 'locked-textarea'
+          ? components.rows.readOnlyMultilineRequired
       : type === 'image-link'
         ? components.rows.imageLink
         : components.rows.readOnly;
@@ -1322,7 +1331,7 @@ function createEvidenceReviewRow(components, type, question, value) {
   return row;
 }
 
-function createEvidenceLocation(components, number, location, review) {
+function createEvidenceLocation(components, number, location, review, options = {}) {
   const group = verticalFrame(`Location ${number}`, 1278, 16, 0);
   group.appendChild(makeText('Location heading', `Location ${number}`, 'label', C.text, 1278));
   group.appendChild(createEvidenceReviewRow(components, 'readonly', 'Location name', location.name));
@@ -1341,16 +1350,44 @@ function createEvidenceLocation(components, number, location, review) {
   ));
   group.appendChild(createEvidenceReviewRow(
     components,
-    'dropdown',
+    options.reviewLocked ? 'locked-choice' : 'dropdown',
     'What is your decision on the photographs for this location?',
     review.decision,
   ));
   if (review.decision === 'Reject') {
     group.appendChild(createEvidenceReviewRow(
       components,
-      'textarea',
+      options.reviewLocked ? 'locked-textarea' : 'textarea',
       'Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant.',
       review.rejectionComments,
+    ));
+  }
+  if (options.replacementEvidence) {
+    group.appendChild(makeText(
+      'Conditional section heading',
+      options.replacementEvidence.heading,
+      'label',
+      C.text,
+      1278,
+    ));
+    group.appendChild(makeText(
+      'Help text',
+      options.replacementEvidence.intro,
+      'body',
+      C.secondary,
+      1278,
+    ));
+    group.appendChild(createEvidenceReviewRow(
+      components,
+      'image-link',
+      options.replacementEvidence.closeUpQuestion,
+      options.replacementEvidence.closeUpLabel,
+    ));
+    group.appendChild(createEvidenceReviewRow(
+      components,
+      'image-link',
+      options.replacementEvidence.surroundingsQuestion,
+      options.replacementEvidence.surroundingsLabel,
     ));
   }
   return group;
@@ -1390,7 +1427,12 @@ function createPublicNoticeEvidenceReviewScreen(page, components, state) {
       divider.name = 'Location divider';
       body.appendChild(divider);
     }
-    body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index]));
+    body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index], {
+      reviewLocked: state.reviewLocked,
+      replacementEvidence: state.replacementEvidence?.locationIndex === index
+        ? state.replacementEvidence
+        : null,
+    }));
   });
 
   const finalDivider = components.divider.createInstance();
@@ -1478,7 +1520,7 @@ const SCREEN_GROUPS = [
   },
   {
     id: 'public-notice-evidence',
-    label: 'MLA/2026/10014 · Review public notice evidence',
+    label: 'Review public notice evidence',
     screens: DESCRIPTIONS.publicNoticeEvidenceReview.states.map((state, index) => ({
       id: `public-notice-evidence-${index}`,
       label: state.frameName,

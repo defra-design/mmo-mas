@@ -195,8 +195,8 @@ vm.runInNewContext(code, {
 if (figma.command === 'choose-screens') {
   if (!shownUi || shownUi.options?.themeColors !== true) throw new Error('Picker UI was not opened correctly');
   const catalog = uiMessages.find(message => message.type === 'catalog');
-  if (catalog?.groups?.flatMap(group => group.screens).length !== 10) {
-    throw new Error('Picker did not receive the ten-screen catalog');
+  if (catalog?.groups?.flatMap(group => group.screens).length !== 11) {
+    throw new Error('Picker did not receive the eleven-screen catalog');
   }
   await figma.ui.onmessage({
     type: 'generate',
@@ -230,9 +230,10 @@ const canonicalScreenNames = new Set([
   '08 · Case summary · Tasks unlocked',
   '09 · MLA/2026/10014 · Review public notice evidence · Default',
   '10 · MLA/2026/10014 · Review public notice evidence · Mixed decisions',
+  '11 · MLA/2026/10013 · Review public notice evidence · Replacement photographs',
 ]);
-if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 11) {
-  throw new Error('Expected ten generated screen frames plus the retained same-name copy');
+if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 12) {
+  throw new Error('Expected eleven generated screen frames plus the retained same-name copy');
 }
 if (!screensPage.children.some(node => node.name === 'Generated Run 02')) throw new Error('Missing screen run label');
 if (workflowPage.children.length !== 1 || workflowPage.children[0] !== retainedWorkflowNote) {
@@ -351,10 +352,16 @@ const defaultEvidenceReview = screensPage.children.find(
 const mixedEvidenceReview = screensPage.children.find(
   node => node.name === '10 · MLA/2026/10014 · Review public notice evidence · Mixed decisions',
 );
+const replacementEvidenceReview = screensPage.children.find(
+  node => node.name === '11 · MLA/2026/10013 · Review public notice evidence · Replacement photographs',
+);
 const defaultEvidenceValues = defaultEvidenceReview?.findAll(
   node => node.type === 'TEXT' && node.name === 'Field value',
 ).map(node => node.characters);
 const mixedEvidenceValues = mixedEvidenceReview?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Field value',
+).map(node => node.characters);
+const replacementEvidenceValues = replacementEvidenceReview?.findAll(
   node => node.type === 'TEXT' && node.name === 'Field value',
 ).map(node => node.characters);
 if (defaultEvidenceValues?.filter(value => value === '---').length !== 3) {
@@ -368,8 +375,28 @@ if (
   throw new Error('Mixed public notice evidence review does not show one rejection and two acceptances');
 }
 if (
+  replacementEvidenceValues?.filter(value => value === 'Reject').length !== 1 ||
+  replacementEvidenceValues?.filter(value => value === 'Accept').length !== 2 ||
+  !replacementEvidenceValues?.some(value => value.includes('Provide clear replacement photographs')) ||
+  !replacementEvidenceValues?.includes('View replacement close-up photograph of the notice (opens in new tab)') ||
+  !replacementEvidenceValues?.includes('View replacement photograph of the notice in its surroundings (opens in new tab)')
+) {
+  throw new Error('Replacement-evidence review does not show the prior decisions and resubmitted photographs');
+}
+const replacementText = replacementEvidenceReview?.findAll(
+  node => node.type === 'TEXT',
+).map(node => node.characters);
+if (!replacementText?.includes('Replacement photographs') ||
+  !replacementText?.includes('The applicant submitted replacement photographs for this location on 27 August 2026.')) {
+  throw new Error('Replacement-evidence review is missing its resubmission context');
+}
+if (replacementEvidenceReview?.findAll(node => node.name === 'Read-only indicator').length < 5) {
+  throw new Error('Replacement-evidence review does not keep prior review fields locked');
+}
+if (
   defaultEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible !== false ||
-  mixedEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible === false
+  mixedEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible === false ||
+  replacementEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible !== false
 ) {
   throw new Error('Public notice evidence completion states are incorrect');
 }

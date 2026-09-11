@@ -40,9 +40,10 @@ initial, Site check validation errors, Site check completed, and Case summary
 with the downstream tasks unlocked. Use **Generate all MAS D365 screens** from
 the Actions menu when you want every available screen without opening the picker.
 
-The Notice evidence preset generates the `MLA/2026/10014` Review public notice
-evidence task in two states: its default empty state, and its saved mixed-decision
-state with Location 1 rejected and Locations 2 and 3 accepted.
+The Notice evidence preset generates three Review public notice evidence screens:
+the `MLA/2026/10014` default empty state, its saved mixed-decision state with
+Location 1 rejected and Locations 2 and 3 accepted, and the `MLA/2026/10013`
+resubmission state with replacement photographs for Location 1.
 
 The plugin uses two stable pages:
 
