@@ -31,6 +31,13 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalS,
   },
   imageIcon: { flexShrink: 0 },
+  replacement: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalL,
+    marginTop: tokens.spacingVerticalS,
+  },
+  replacementIntro: { color: tokens.colorNeutralForeground2 },
 });
 
 const decisionOptions = ['Accept', 'Reject'];
@@ -42,6 +49,12 @@ type Props = {
   decisionError: boolean;
   commentsError: boolean;
   onChange: (field: keyof PublicNoticeEvidenceLocationReview, value: string) => void;
+  reviewLocked?: boolean;
+  replacementEvidence?: {
+    submittedDate: string;
+    closeUpHref: string;
+    surroundingsHref: string;
+  };
 };
 
 export default function PublicNoticeEvidenceLocation({
@@ -51,6 +64,8 @@ export default function PublicNoticeEvidenceLocation({
   decisionError,
   commentsError,
   onChange,
+  reviewLocked = false,
+  replacementEvidence,
 }: Props) {
   const styles = useStyles();
   const decisionName = `Location ${number} photograph decision`;
@@ -81,11 +96,17 @@ export default function PublicNoticeEvidenceLocation({
           </Link>
         </div>
       </TaskRow>
-      <TaskRow label="What is your decision on the photographs for this location?" required top>
+      <TaskRow
+        label="What is your decision on the photographs for this location?"
+        required
+        locked={reviewLocked}
+        top
+      >
         <TaskChoice
           value={review.decision}
           options={decisionOptions}
           onSelect={value => onChange('decision', value)}
+          locked={reviewLocked}
           error={decisionError ? requiredMessage(decisionName) : undefined}
         />
       </TaskRow>
@@ -94,14 +115,54 @@ export default function PublicNoticeEvidenceLocation({
         <TaskRow
           label="Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant."
           required
+          locked={reviewLocked}
           top
         >
           <TaskTextarea
             value={review.rejectionComments}
             onChange={value => onChange('rejectionComments', value)}
+            locked={reviewLocked}
             error={commentsError ? requiredMessage(commentsName) : undefined}
           />
         </TaskRow>
+      )}
+
+      {replacementEvidence && (
+        <div className={styles.replacement}>
+          <div>
+            <Text block className={styles.heading}>Replacement photographs</Text>
+            <Text block className={styles.replacementIntro}>
+              The applicant submitted replacement photographs for this location on{' '}
+              {replacementEvidence.submittedDate}.
+            </Text>
+          </div>
+          <TaskRow label="Replacement close-up photograph of the notice">
+            <div className={styles.imageLinkValue}>
+              <Link
+                className={styles.imageLink}
+                href={replacementEvidence.closeUpHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ImageRegular className={styles.imageIcon} aria-hidden />
+                View replacement close-up photograph of the notice (opens in new tab)
+              </Link>
+            </div>
+          </TaskRow>
+          <TaskRow label="Replacement photograph showing the notice in its surroundings" top>
+            <div className={styles.imageLinkValue}>
+              <Link
+                className={styles.imageLink}
+                href={replacementEvidence.surroundingsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ImageRegular className={styles.imageIcon} aria-hidden />
+                View replacement photograph of the notice in its surroundings (opens in new tab)
+              </Link>
+            </div>
+          </TaskRow>
+        </div>
       )}
     </div>
   );

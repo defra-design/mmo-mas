@@ -20,3 +20,19 @@ export const publicNoticeEvidenceLocations = [
 ];
 
 export type PublicNoticeEvidenceLocation = (typeof publicNoticeEvidenceLocations)[number];
+
+export const resubmittedPublicNoticeEvidenceReviews = [
+  {
+    decision: 'Reject',
+    rejectionComments:
+      'The close-up photograph does not clearly show the full notice and the surroundings photograph does not show where it was displayed. Provide clear replacement photographs showing the complete notice and its location.',
+  },
+  { decision: 'Accept', rejectionComments: '' },
+  { decision: 'Accept', rejectionComments: '' },
+];
+
+export const replacementPublicNoticeEvidence = {
+  submittedDate: '27 August 2026',
+  closeUpHref: '/cdp/evidence/location-1-replacement-close-up.svg',
+  surroundingsHref: '/cdp/evidence/location-1-replacement-surroundings.svg',
+};

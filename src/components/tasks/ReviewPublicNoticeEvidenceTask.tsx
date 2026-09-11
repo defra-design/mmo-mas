@@ -17,10 +17,17 @@ import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskContext';
 import { useTasks } from '../../context/TaskContext';
-import { hasSubmittedPublicNoticeEvidence } from '../../utils/publicNoticeEvidence';
+import {
+  hasResubmittedPublicNoticeEvidence,
+  hasSubmittedPublicNoticeEvidence,
+} from '../../utils/publicNoticeEvidence';
 import { notificationMessage } from '../../utils/validationMessages';
 import PublicNoticeEvidenceLocation from './PublicNoticeEvidenceLocation';
-import { publicNoticeEvidenceLocations } from './publicNoticeEvidenceLocations';
+import {
+  publicNoticeEvidenceLocations,
+  replacementPublicNoticeEvidence,
+  resubmittedPublicNoticeEvidenceReviews,
+} from './publicNoticeEvidenceLocations';
 
 const useStyles = makeStyles({
   page: {
@@ -72,17 +79,35 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
   const navigate = useNavigate();
   const {
     publicNoticeEvidenceMeta,
+    publicNoticeEvidenceResubmissionMeta,
     saved,
     setPublicNoticeEvidenceCompleted,
+    setPublicNoticeEvidenceResubmissionCompleted,
     setPublicNoticeEvidenceLocationField,
     markUnsaved,
     savePublicNoticeEvidence,
+    savePublicNoticeEvidenceResubmission,
   } = useTasks();
   const [errors, setErrors] = useState<ReviewError[]>([]);
   const available = hasSubmittedPublicNoticeEvidence(caseId);
+  const isResubmission = hasResubmittedPublicNoticeEvidence(caseId);
+  const reviews = isResubmission
+    ? resubmittedPublicNoticeEvidenceReviews
+    : publicNoticeEvidenceMeta.locations;
+  const completed = isResubmission
+    ? publicNoticeEvidenceResubmissionMeta.completed
+    : publicNoticeEvidenceMeta.completed;
+  const isSaved = isResubmission
+    ? saved.publicNoticeEvidenceResubmission
+    : saved.publicNoticeEvidence;
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
 
   const handleSave = () => {
+    if (isResubmission) {
+      savePublicNoticeEvidenceResubmission();
+      navigate(caseUrl);
+      return;
+    }
     if (publicNoticeEvidenceMeta.completed) {
       const missing = publicNoticeEvidenceMeta.locations.flatMap((review, index) => {
         const locationErrors: ReviewError[] = [];
@@ -135,7 +160,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
         <Title3>
           Review public notice evidence
           <span className={styles.savedLabel}>
-            - {saved.publicNoticeEvidence ? 'Saved' : 'Unsaved'}
+            - {isSaved ? 'Saved' : 'Unsaved'}
           </span>
         </Title3>
         <div><Body1>Task</Body1></div>
@@ -156,7 +181,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
               <PublicNoticeEvidenceLocation
                 number={index + 1}
                 location={location}
-                review={publicNoticeEvidenceMeta.locations[index]}
+                review={reviews[index]}
                 decisionError={errors.some(
                   error => error.index === index && error.field === 'decision',
                 )}
@@ -164,6 +189,10 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
                   error => error.index === index && error.field === 'rejectionComments',
                 )}
                 onChange={(field, value) => updateLocation(index, field, value)}
+                reviewLocked={isResubmission}
+                replacementEvidence={
+                  isResubmission && index === 0 ? replacementPublicNoticeEvidence : undefined
+                }
               />
             </div>
           ))}
@@ -172,10 +201,15 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
           <div className={styles.completeRow}>
             <Checkbox
               label="Select to mark the task as complete"
-              checked={publicNoticeEvidenceMeta.completed}
+              checked={completed}
               onChange={(_, data) => {
-                setPublicNoticeEvidenceCompleted(Boolean(data.checked));
-                markUnsaved('publicNoticeEvidence');
+                if (isResubmission) {
+                  setPublicNoticeEvidenceResubmissionCompleted(Boolean(data.checked));
+                  markUnsaved('publicNoticeEvidenceResubmission');
+                } else {
+                  setPublicNoticeEvidenceCompleted(Boolean(data.checked));
+                  markUnsaved('publicNoticeEvidence');
+                }
               }}
             />
           </div>

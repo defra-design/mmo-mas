@@ -19,6 +19,7 @@ export interface TaskState {
   publicRegister: TaskStatus;
   siteNotice: TaskStatus;
   publicNoticeEvidence: TaskStatus;
+  publicNoticeEvidenceResubmission: TaskStatus;
 }
 
 export interface SiteCheckForm {
@@ -108,6 +109,12 @@ export interface PublicNoticeEvidenceMeta {
   locations: PublicNoticeEvidenceLocationReview[];
 }
 
+// MLA/2026/10013 is the later resubmission-stage fixture. Its original review
+// is historical/read-only, so only the task-completion field remains mutable.
+export interface PublicNoticeEvidenceResubmissionMeta {
+  completed: boolean;
+}
+
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
 // task is saved; an edit flips it back to false (matches D365 dirty-tracking).
 export interface SavedState {
@@ -118,6 +125,7 @@ export interface SavedState {
   publicRegister: boolean;
   siteNotice: boolean;
   publicNoticeEvidence: boolean;
+  publicNoticeEvidenceResubmission: boolean;
 }
 
 // Records a "Transfer to MCMS" against one case. Two stages, done by two teams:
@@ -172,6 +180,7 @@ interface PersistedState {
   publicRegisterForm: PublicRegisterForm;
   siteNoticeForm: SiteNoticeForm;
   publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta;
+  publicNoticeEvidenceResubmissionMeta: PublicNoticeEvidenceResubmissionMeta;
   // Organisations the caseworker has recently picked in the lookup, most-recent
   // first. Shared across every consultee row/case (a per-user "Recent records"
   // list, like the real D365 lookup); empty until they select one.
@@ -206,6 +215,9 @@ const initialState: PersistedState = {
     // MLA/2026/10014 represents the point after applicant evidence arrives.
     // The row is only rendered for that case and is ready for officer review.
     publicNoticeEvidence: 'To do',
+    // MLA/2026/10013 has received replacement photographs and needs the
+    // existing evidence-review task brought back to the officer's queue.
+    publicNoticeEvidenceResubmission: 'To do',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
@@ -233,6 +245,7 @@ const initialState: PersistedState = {
       { decision: '', rejectionComments: '' },
     ],
   },
+  publicNoticeEvidenceResubmissionMeta: { completed: false },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
@@ -242,6 +255,7 @@ const initialState: PersistedState = {
     publicRegister: false,
     siteNotice: false,
     publicNoticeEvidence: false,
+    publicNoticeEvidenceResubmission: true,
   },
   transfers: {},
   rejections: {},
@@ -344,6 +358,10 @@ function loadState(): PersistedState {
         },
         siteNoticeForm,
         publicNoticeEvidenceMeta,
+        publicNoticeEvidenceResubmissionMeta: {
+          ...initialState.publicNoticeEvidenceResubmissionMeta,
+          ...parsed.publicNoticeEvidenceResubmissionMeta,
+        },
         recentOrganisations: Array.isArray(parsed.recentOrganisations)
           ? parsed.recentOrganisations
           : initialState.recentOrganisations,
@@ -377,6 +395,7 @@ interface TaskContextValue {
   publicRegisterForm: PublicRegisterForm;
   siteNoticeForm: SiteNoticeForm;
   publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta;
+  publicNoticeEvidenceResubmissionMeta: PublicNoticeEvidenceResubmissionMeta;
   recentOrganisations: string[];
   saved: SavedState;
   transfers: TransfersState;
@@ -406,6 +425,7 @@ interface TaskContextValue {
   ) => void;
   setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
   setPublicNoticeEvidenceCompleted: (completed: boolean) => void;
+  setPublicNoticeEvidenceResubmissionCompleted: (completed: boolean) => void;
   setPublicNoticeEvidenceLocationField: (
     index: number,
     field: keyof PublicNoticeEvidenceLocationReview,
@@ -419,6 +439,7 @@ interface TaskContextValue {
   savePublicRegister: () => void;
   saveSiteNotice: () => void;
   savePublicNoticeEvidence: () => void;
+  savePublicNoticeEvidenceResubmission: () => void;
   resetAll: () => void;
 }
 
@@ -575,6 +596,15 @@ export function TaskProvider({ children }: PropsWithChildren) {
       publicNoticeEvidenceMeta: { ...prev.publicNoticeEvidenceMeta, completed },
     }));
 
+  const setPublicNoticeEvidenceResubmissionCompleted = (completed: boolean) =>
+    setState(prev => ({
+      ...prev,
+      publicNoticeEvidenceResubmissionMeta: {
+        ...prev.publicNoticeEvidenceResubmissionMeta,
+        completed,
+      },
+    }));
+
   const setPublicNoticeEvidenceLocationField = (
     index: number,
     field: keyof PublicNoticeEvidenceLocationReview,
@@ -690,6 +720,21 @@ export function TaskProvider({ children }: PropsWithChildren) {
       saved: { ...prev.saved, publicNoticeEvidence: true },
     }));
 
+  // Replacement evidence is the final review step in this prototype. The
+  // officer does not accept/reject the photographs again: selecting complete
+  // closes the task, while saving without it leaves the task In progress.
+  const savePublicNoticeEvidenceResubmission = () =>
+    setState(prev => ({
+      ...prev,
+      tasks: {
+        ...prev.tasks,
+        publicNoticeEvidenceResubmission: prev.publicNoticeEvidenceResubmissionMeta.completed
+          ? 'Done'
+          : 'In progress',
+      },
+      saved: { ...prev.saved, publicNoticeEvidenceResubmission: true },
+    }));
+
   // Clears every prototype key on this origin (live + all frozen iterations),
   // not just this app's own key, so the index page's "Clear saved data" wipes
   // everything as it did before iterations got their own scoped keys. The
@@ -718,6 +763,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         publicRegisterForm: state.publicRegisterForm,
         siteNoticeForm: state.siteNoticeForm,
         publicNoticeEvidenceMeta: state.publicNoticeEvidenceMeta,
+        publicNoticeEvidenceResubmissionMeta: state.publicNoticeEvidenceResubmissionMeta,
         recentOrganisations: state.recentOrganisations,
         saved: state.saved,
         transfers: state.transfers,
@@ -735,6 +781,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setPublicRegisterField,
         setSiteNoticeField,
         setPublicNoticeEvidenceCompleted,
+        setPublicNoticeEvidenceResubmissionCompleted,
         setPublicNoticeEvidenceLocationField,
         addRecentOrganisation,
         markUnsaved,
@@ -744,6 +791,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         savePublicRegister,
         saveSiteNotice,
         savePublicNoticeEvidence,
+        savePublicNoticeEvidenceResubmission,
         resetAll,
       }}
     >
