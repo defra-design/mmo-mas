@@ -48,7 +48,12 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalS,
   },
-  intro: { color: tokens.colorNeutralForeground2 },
+  intro: {
+    color: tokens.colorNeutralForeground2,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalXXS,
+  },
   locationGroup: {
     display: 'flex',
     flexDirection: 'column',
@@ -69,8 +74,8 @@ type ReviewError = { index: number; field: ReviewField };
 
 const errorName = ({ index, field }: ReviewError) =>
   field === 'decision'
-    ? `Location ${index + 1} photograph decision`
-    : `Location ${index + 1} rejection comments`;
+    ? `Location ${index + 1} photograph acceptance`
+    : `Location ${index + 1} photograph comments`;
 
 type Props = { caseId: string };
 
@@ -83,12 +88,14 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
     saved,
     setPublicNoticeEvidenceCompleted,
     setPublicNoticeEvidenceResubmissionCompleted,
+    setPublicNoticeEvidenceResubmissionField,
     setPublicNoticeEvidenceLocationField,
     markUnsaved,
     savePublicNoticeEvidence,
     savePublicNoticeEvidenceResubmission,
   } = useTasks();
   const [errors, setErrors] = useState<ReviewError[]>([]);
+  const [resubmissionErrors, setResubmissionErrors] = useState<ReviewField[]>([]);
   const available = hasSubmittedPublicNoticeEvidence(caseId);
   const isResubmission = hasResubmittedPublicNoticeEvidence(caseId);
   const reviews = isResubmission
@@ -104,6 +111,16 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
 
   const handleSave = () => {
     if (isResubmission) {
+      if (publicNoticeEvidenceResubmissionMeta.completed) {
+        const review = publicNoticeEvidenceResubmissionMeta.review;
+        const missing: ReviewField[] = [];
+        if (!review.decision.trim()) missing.push('decision');
+        if (review.decision === 'No' && !review.rejectionComments.trim()) {
+          missing.push('rejectionComments');
+        }
+        setResubmissionErrors(missing);
+        if (missing.length) return;
+      }
       savePublicNoticeEvidenceResubmission();
       navigate(caseUrl);
       return;
@@ -112,7 +129,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
       const missing = publicNoticeEvidenceMeta.locations.flatMap((review, index) => {
         const locationErrors: ReviewError[] = [];
         if (!review.decision.trim()) locationErrors.push({ index, field: 'decision' });
-        if (review.decision === 'Reject' && !review.rejectionComments.trim()) {
+        if (review.decision === 'No' && !review.rejectionComments.trim()) {
           locationErrors.push({ index, field: 'rejectionComments' });
         }
         return locationErrors;
@@ -124,13 +141,24 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
     navigate(caseUrl);
   };
 
+  const updateResubmission = (field: ReviewField, value: string) => {
+    setPublicNoticeEvidenceResubmissionField(field, value);
+    setResubmissionErrors(previous =>
+      previous.filter(error => {
+        if (error === field) return false;
+        return !(field === 'decision' && value !== 'No' && error === 'rejectionComments');
+      }),
+    );
+    markUnsaved('publicNoticeEvidenceResubmission');
+  };
+
   const updateLocation = (index: number, field: ReviewField, value: string) => {
     setPublicNoticeEvidenceLocationField(index, field, value);
     setErrors(previous =>
       previous.filter(error => {
         if (error.index !== index) return true;
         if (error.field === field) return false;
-        return !(field === 'decision' && value !== 'Reject' && error.field === 'rejectionComments');
+        return !(field === 'decision' && value !== 'No' && error.field === 'rejectionComments');
       }),
     );
     markUnsaved('publicNoticeEvidence');
@@ -144,9 +172,16 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
         </FormNotification>
       )}
 
-      {errors.length > 0 && (
+      {(errors.length > 0 || resubmissionErrors.length > 0) && (
         <FormNotification level="error">
-          {notificationMessage(errors.map(errorName))}
+          {notificationMessage([
+            ...errors.map(errorName),
+            ...resubmissionErrors.map(field =>
+              field === 'decision'
+                ? 'Location 1 resubmitted photograph acceptance'
+                : 'Location 1 resubmitted photograph comments',
+            ),
+          ])}
         </FormNotification>
       )}
 
@@ -170,14 +205,17 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
         <Card className={styles.bodyCard}>
           <div>
             <Text block className={styles.sectionHeading}>Site notice evidence</Text>
-            <Body1 className={styles.intro}>
-              The applicant submitted evidence for 3 locations on 20 August 2026.
-            </Body1>
+            <div className={styles.intro}>
+              <Body1>The applicant submitted evidence on 20 August 2026.</Body1>
+              {isResubmission && (
+                <Body1>The applicant resubmitted evidence on 27 August 2026.</Body1>
+              )}
+            </div>
           </div>
 
           {publicNoticeEvidenceLocations.map((location, index) => (
             <div className={styles.locationGroup} key={location.name}>
-              {index > 0 && <div className={styles.divider} />}
+              <div className={styles.divider} />
               <PublicNoticeEvidenceLocation
                 number={index + 1}
                 location={location}
@@ -192,6 +230,16 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
                 reviewLocked={isResubmission}
                 replacementEvidence={
                   isResubmission && index === 0 ? replacementPublicNoticeEvidence : undefined
+                }
+                replacementReview={
+                  isResubmission && index === 0
+                    ? publicNoticeEvidenceResubmissionMeta.review
+                    : undefined
+                }
+                replacementDecisionError={resubmissionErrors.includes('decision')}
+                replacementCommentsError={resubmissionErrors.includes('rejectionComments')}
+                onReplacementChange={
+                  isResubmission && index === 0 ? updateResubmission : undefined
                 }
               />
             </div>

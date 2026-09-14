@@ -10,7 +10,6 @@ import TaskHint from './TaskHint';
 export function SummaryHint() {
   return (
     <TaskHint spaceAbove title="Help with writing the site notice summary">
-      <p><strong>Write a summary for the site notice</strong></p>
       <p>
         The notice needs a short, plain English description of the proposed activity, for
         members of the public to read.
@@ -28,7 +27,7 @@ export function SummaryHint() {
       <p>Do not include:</p>
       <ul>
         <li>
-          technical detail, methodology, or justification — this is available in full on the
+          technical detail, methodology, or justification - this is available in full on the
           Public Register
         </li>
         <li>information the applicant has asked to withhold, unless this has been resolved</li>
@@ -53,7 +52,8 @@ export function SummaryHint() {
 
 export function GroupsHint() {
   return (
-    <TaskHint spaceAbove title="What the applicant sees">
+    <TaskHint spaceAbove title="What guidance the applicant will see">
+      <p>This is the guidance the applicant will see, based on your selection.</p>
       <p><strong>Marine users</strong></p>
       <p>
         This means people who use the water nearby, such as boat users, sailors, or fishing

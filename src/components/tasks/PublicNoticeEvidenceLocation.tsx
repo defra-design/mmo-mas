@@ -7,10 +7,8 @@ import {
 } from '@fluentui/react-components';
 import { ImageRegular } from '@fluentui/react-icons';
 import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskContext';
-import { requiredMessage } from '../../utils/validationMessages';
-import TaskChoice from './TaskChoice';
+import PublicNoticeEvidenceDecision from './PublicNoticeEvidenceDecision';
 import TaskRow from './TaskRow';
-import TaskTextarea from './TaskTextarea';
 import TaskValue from './TaskValue';
 import type { PublicNoticeEvidenceLocation } from './publicNoticeEvidenceLocations';
 
@@ -40,8 +38,6 @@ const useStyles = makeStyles({
   replacementIntro: { color: tokens.colorNeutralForeground2 },
 });
 
-const decisionOptions = ['Accept', 'Reject'];
-
 type Props = {
   number: number;
   location: PublicNoticeEvidenceLocation;
@@ -55,6 +51,13 @@ type Props = {
     closeUpHref: string;
     surroundingsHref: string;
   };
+  replacementReview?: PublicNoticeEvidenceLocationReview;
+  replacementDecisionError?: boolean;
+  replacementCommentsError?: boolean;
+  onReplacementChange?: (
+    field: keyof PublicNoticeEvidenceLocationReview,
+    value: string,
+  ) => void;
 };
 
 export default function PublicNoticeEvidenceLocation({
@@ -66,10 +69,12 @@ export default function PublicNoticeEvidenceLocation({
   onChange,
   reviewLocked = false,
   replacementEvidence,
+  replacementReview,
+  replacementDecisionError = false,
+  replacementCommentsError = false,
+  onReplacementChange,
 }: Props) {
   const styles = useStyles();
-  const decisionName = `Location ${number} photograph decision`;
-  const commentsName = `Location ${number} rejection comments`;
 
   return (
     <div className={styles.location}>
@@ -96,41 +101,21 @@ export default function PublicNoticeEvidenceLocation({
           </Link>
         </div>
       </TaskRow>
-      <TaskRow
-        label="What is your decision on the photographs for this location?"
-        required
+      <PublicNoticeEvidenceDecision
+        number={number}
+        review={review}
+        decisionError={decisionError}
+        commentsError={commentsError}
+        onChange={onChange}
         locked={reviewLocked}
-        top
-      >
-        <TaskChoice
-          value={review.decision}
-          options={decisionOptions}
-          onSelect={value => onChange('decision', value)}
-          locked={reviewLocked}
-          error={decisionError ? requiredMessage(decisionName) : undefined}
-        />
-      </TaskRow>
-
-      {review.decision === 'Reject' && (
-        <TaskRow
-          label="Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant."
-          required
-          locked={reviewLocked}
-          top
-        >
-          <TaskTextarea
-            value={review.rejectionComments}
-            onChange={value => onChange('rejectionComments', value)}
-            locked={reviewLocked}
-            error={commentsError ? requiredMessage(commentsName) : undefined}
-          />
-        </TaskRow>
-      )}
+      />
 
       {replacementEvidence && (
         <div className={styles.replacement}>
           <div>
-            <Text block className={styles.heading}>Replacement photographs</Text>
+            <Text block className={styles.heading}>
+              Resubmitted photographs for location {number}
+            </Text>
             <Text block className={styles.replacementIntro}>
               The applicant submitted replacement photographs for this location on{' '}
               {replacementEvidence.submittedDate}.
@@ -162,6 +147,16 @@ export default function PublicNoticeEvidenceLocation({
               </Link>
             </div>
           </TaskRow>
+          {replacementReview && onReplacementChange && (
+            <PublicNoticeEvidenceDecision
+              number={number}
+              review={replacementReview}
+              decisionError={replacementDecisionError}
+              commentsError={replacementCommentsError}
+              onChange={onReplacementChange}
+              resubmitted
+            />
+          )}
         </div>
       )}
     </div>

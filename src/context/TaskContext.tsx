@@ -9,6 +9,7 @@ export type TaskStatus =
   | 'To do'
   | 'In progress'
   | 'Awaiting applicant'
+  | 'Resubmitted - to review'
   | 'Cannot start yet';
 
 export interface TaskState {
@@ -95,8 +96,8 @@ export interface SiteNoticeForm {
 }
 
 // One related public-notice-location record's native caseworker fields. The
-// decision is a Choice column; rejection comments are a Multiline Text column
-// revealed by a business rule when the decision is Reject.
+// decision is a Yes/No Choice column; rejection comments are a Multiline Text
+// column revealed by a business rule when the decision is No.
 export interface PublicNoticeEvidenceLocationReview {
   decision: string;
   rejectionComments: string;
@@ -110,9 +111,10 @@ export interface PublicNoticeEvidenceMeta {
 }
 
 // MLA/2026/10013 is the later resubmission-stage fixture. Its original review
-// is historical/read-only, so only the task-completion field remains mutable.
+// is historical/read-only; the replacement photographs get their own decision.
 export interface PublicNoticeEvidenceResubmissionMeta {
   completed: boolean;
+  review: PublicNoticeEvidenceLocationReview;
 }
 
 // Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
@@ -217,7 +219,7 @@ const initialState: PersistedState = {
     publicNoticeEvidence: 'To do',
     // MLA/2026/10013 has received replacement photographs and needs the
     // existing evidence-review task brought back to the officer's queue.
-    publicNoticeEvidenceResubmission: 'To do',
+    publicNoticeEvidenceResubmission: 'Resubmitted - to review',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
@@ -245,7 +247,10 @@ const initialState: PersistedState = {
       { decision: '', rejectionComments: '' },
     ],
   },
-  publicNoticeEvidenceResubmissionMeta: { completed: false },
+  publicNoticeEvidenceResubmissionMeta: {
+    completed: false,
+    review: { decision: '', rejectionComments: '' },
+  },
   recentOrganisations: [],
   saved: {
     siteCheck: false,
@@ -297,16 +302,34 @@ function loadState(): PersistedState {
         needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
       };
       const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
+      // Earlier saved prototype data used the generic To do label when
+      // replacement evidence returned to the officer. Adopt the more specific
+      // resubmission status without changing reviews already in progress or done.
+      if (tasks.publicNoticeEvidenceResubmission === 'To do') {
+        tasks.publicNoticeEvidenceResubmission = 'Resubmitted - to review';
+      }
       const savedEvidenceLocations = Array.isArray(parsed.publicNoticeEvidenceMeta?.locations)
         ? parsed.publicNoticeEvidenceMeta.locations
         : [];
       const publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta = {
         ...initialState.publicNoticeEvidenceMeta,
         ...parsed.publicNoticeEvidenceMeta,
-        locations: initialState.publicNoticeEvidenceMeta.locations.map((location, index) => ({
-          ...location,
-          ...savedEvidenceLocations[index],
-        })),
+        locations: initialState.publicNoticeEvidenceMeta.locations.map((location, index) => {
+          const savedLocation = savedEvidenceLocations[index];
+          const savedDecision = savedLocation?.decision;
+          return {
+            ...location,
+            ...savedLocation,
+            decision:
+              savedDecision === 'Accept'
+                ? 'Yes'
+                : savedDecision === 'Reject'
+                  ? 'No'
+                  : savedDecision === 'Yes' || savedDecision === 'No'
+                    ? savedDecision
+                    : location.decision,
+          };
+        }),
       };
       if (!parsed.publicNoticeEvidenceMeta && tasks.publicNoticeEvidence === 'Done') {
         publicNoticeEvidenceMeta.completed = true;
@@ -314,7 +337,7 @@ function loadState(): PersistedState {
       const completedEvidenceReviewIsValid = publicNoticeEvidenceMeta.locations.every(
         location =>
           Boolean(location.decision.trim()) &&
-          (location.decision !== 'Reject' || Boolean(location.rejectionComments.trim())),
+          (location.decision !== 'No' || Boolean(location.rejectionComments.trim())),
       );
       const evidenceReviewNeedsMigration =
         publicNoticeEvidenceMeta.completed && !completedEvidenceReviewIsValid;
@@ -323,10 +346,10 @@ function loadState(): PersistedState {
         tasks.publicNoticeEvidence = 'In progress';
       } else if (
         publicNoticeEvidenceMeta.completed &&
-        publicNoticeEvidenceMeta.locations.some(location => location.decision === 'Reject')
+        publicNoticeEvidenceMeta.locations.some(location => location.decision === 'No')
       ) {
         // Existing saved reviews adopt the new hand-off rule as well: one
-        // rejected location means the applicant needs to provide new evidence.
+        // location answered No means the applicant needs to provide new evidence.
         tasks.publicNoticeEvidence = 'Awaiting applicant';
       }
 
@@ -336,6 +359,25 @@ function loadState(): PersistedState {
       // its evidence has already arrived.
       if (tasks.siteNotice === 'Done' && siteNoticeForm.needsNotice === SITE_NOTICE) {
         tasks.siteNotice = 'Awaiting applicant';
+      }
+
+      const publicNoticeEvidenceResubmissionMeta: PublicNoticeEvidenceResubmissionMeta = {
+        ...initialState.publicNoticeEvidenceResubmissionMeta,
+        ...parsed.publicNoticeEvidenceResubmissionMeta,
+        review: {
+          ...initialState.publicNoticeEvidenceResubmissionMeta.review,
+          ...parsed.publicNoticeEvidenceResubmissionMeta?.review,
+        },
+      };
+      const resubmissionReviewIsValid =
+        Boolean(publicNoticeEvidenceResubmissionMeta.review.decision.trim()) &&
+        (publicNoticeEvidenceResubmissionMeta.review.decision !== 'No' ||
+          Boolean(publicNoticeEvidenceResubmissionMeta.review.rejectionComments.trim()));
+      const resubmissionReviewNeedsMigration =
+        publicNoticeEvidenceResubmissionMeta.completed && !resubmissionReviewIsValid;
+      if (resubmissionReviewNeedsMigration) {
+        publicNoticeEvidenceResubmissionMeta.completed = false;
+        tasks.publicNoticeEvidenceResubmission = 'Resubmitted - to review';
       }
 
       const prepRows: PrepForConsulteeForm =
@@ -358,10 +400,7 @@ function loadState(): PersistedState {
         },
         siteNoticeForm,
         publicNoticeEvidenceMeta,
-        publicNoticeEvidenceResubmissionMeta: {
-          ...initialState.publicNoticeEvidenceResubmissionMeta,
-          ...parsed.publicNoticeEvidenceResubmissionMeta,
-        },
+        publicNoticeEvidenceResubmissionMeta,
         recentOrganisations: Array.isArray(parsed.recentOrganisations)
           ? parsed.recentOrganisations
           : initialState.recentOrganisations,
@@ -369,6 +408,9 @@ function loadState(): PersistedState {
           ...initialState.saved,
           ...parsed.saved,
           ...(evidenceReviewNeedsMigration ? { publicNoticeEvidence: false } : {}),
+          ...(resubmissionReviewNeedsMigration
+            ? { publicNoticeEvidenceResubmission: false }
+            : {}),
         },
         // State saved before transfers were keyed by case held a single `transfer`
         // object carrying its own caseId; lift it into the map. Anything older than
@@ -426,6 +468,10 @@ interface TaskContextValue {
   setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
   setPublicNoticeEvidenceCompleted: (completed: boolean) => void;
   setPublicNoticeEvidenceResubmissionCompleted: (completed: boolean) => void;
+  setPublicNoticeEvidenceResubmissionField: (
+    field: keyof PublicNoticeEvidenceLocationReview,
+    value: string,
+  ) => void;
   setPublicNoticeEvidenceLocationField: (
     index: number,
     field: keyof PublicNoticeEvidenceLocationReview,
@@ -605,6 +651,21 @@ export function TaskProvider({ children }: PropsWithChildren) {
       },
     }));
 
+  const setPublicNoticeEvidenceResubmissionField = (
+    field: keyof PublicNoticeEvidenceLocationReview,
+    value: string,
+  ) =>
+    setState(prev => ({
+      ...prev,
+      publicNoticeEvidenceResubmissionMeta: {
+        ...prev.publicNoticeEvidenceResubmissionMeta,
+        review: {
+          ...prev.publicNoticeEvidenceResubmissionMeta.review,
+          [field]: value,
+        },
+      },
+    }));
+
   const setPublicNoticeEvidenceLocationField = (
     index: number,
     field: keyof PublicNoticeEvidenceLocationReview,
@@ -702,8 +763,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
 
   // Review is deliberately separate from Public notice and only appears once
   // evidence exists (MLA/2026/10014 in this prototype fixture). A completed
-  // review with any rejected location waits for replacement applicant evidence;
-  // only an all-accepted review is Done.
+  // review with any location answered No waits for replacement applicant
+  // evidence; only an all-Yes review is Done.
   const savePublicNoticeEvidence = () =>
     setState(prev => ({
       ...prev,
@@ -712,7 +773,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         publicNoticeEvidence: !prev.publicNoticeEvidenceMeta.completed
           ? 'In progress'
           : prev.publicNoticeEvidenceMeta.locations.some(
-                location => location.decision === 'Reject',
+                location => location.decision === 'No',
               )
             ? 'Awaiting applicant'
             : 'Done',
@@ -720,16 +781,17 @@ export function TaskProvider({ children }: PropsWithChildren) {
       saved: { ...prev.saved, publicNoticeEvidence: true },
     }));
 
-  // Replacement evidence is the final review step in this prototype. The
-  // officer does not accept/reject the photographs again: selecting complete
-  // closes the task, while saving without it leaves the task In progress.
+  // Replacement photographs follow the same hand-off rule as the original
+  // evidence: No returns the task to the applicant; Yes completes the review.
   const savePublicNoticeEvidenceResubmission = () =>
     setState(prev => ({
       ...prev,
       tasks: {
         ...prev.tasks,
         publicNoticeEvidenceResubmission: prev.publicNoticeEvidenceResubmissionMeta.completed
-          ? 'Done'
+          ? prev.publicNoticeEvidenceResubmissionMeta.review.decision === 'No'
+            ? 'Awaiting applicant'
+            : 'Done'
           : 'In progress',
       },
       saved: { ...prev.saved, publicNoticeEvidenceResubmission: true },
@@ -782,6 +844,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setSiteNoticeField,
         setPublicNoticeEvidenceCompleted,
         setPublicNoticeEvidenceResubmissionCompleted,
+        setPublicNoticeEvidenceResubmissionField,
         setPublicNoticeEvidenceLocationField,
         addRecentOrganisation,
         markUnsaved,
