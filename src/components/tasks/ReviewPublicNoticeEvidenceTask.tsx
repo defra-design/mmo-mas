@@ -48,7 +48,12 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalS,
   },
-  intro: { color: tokens.colorNeutralForeground2 },
+  intro: {
+    color: tokens.colorNeutralForeground2,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalXXS,
+  },
   locationGroup: {
     display: 'flex',
     flexDirection: 'column',
@@ -69,8 +74,8 @@ type ReviewError = { index: number; field: ReviewField };
 
 const errorName = ({ index, field }: ReviewError) =>
   field === 'decision'
-    ? `Location ${index + 1} photograph decision`
-    : `Location ${index + 1} rejection comments`;
+    ? `Location ${index + 1} photograph acceptance`
+    : `Location ${index + 1} photograph comments`;
 
 type Props = { caseId: string };
 
@@ -112,7 +117,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
       const missing = publicNoticeEvidenceMeta.locations.flatMap((review, index) => {
         const locationErrors: ReviewError[] = [];
         if (!review.decision.trim()) locationErrors.push({ index, field: 'decision' });
-        if (review.decision === 'Reject' && !review.rejectionComments.trim()) {
+        if (review.decision === 'No' && !review.rejectionComments.trim()) {
           locationErrors.push({ index, field: 'rejectionComments' });
         }
         return locationErrors;
@@ -130,7 +135,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
       previous.filter(error => {
         if (error.index !== index) return true;
         if (error.field === field) return false;
-        return !(field === 'decision' && value !== 'Reject' && error.field === 'rejectionComments');
+        return !(field === 'decision' && value !== 'No' && error.field === 'rejectionComments');
       }),
     );
     markUnsaved('publicNoticeEvidence');
@@ -170,9 +175,12 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
         <Card className={styles.bodyCard}>
           <div>
             <Text block className={styles.sectionHeading}>Site notice evidence</Text>
-            <Body1 className={styles.intro}>
-              The applicant submitted evidence for 3 locations on 20 August 2026.
-            </Body1>
+            <div className={styles.intro}>
+              <Body1>The applicant submitted evidence on 20 August 2026.</Body1>
+              {isResubmission && (
+                <Body1>The applicant resubmitted evidence on 27 August 2026.</Body1>
+              )}
+            </div>
           </div>
 
           {publicNoticeEvidenceLocations.map((location, index) => (

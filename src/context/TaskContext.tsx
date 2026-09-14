@@ -95,8 +95,8 @@ export interface SiteNoticeForm {
 }
 
 // One related public-notice-location record's native caseworker fields. The
-// decision is a Choice column; rejection comments are a Multiline Text column
-// revealed by a business rule when the decision is Reject.
+// decision is a Yes/No Choice column; rejection comments are a Multiline Text
+// column revealed by a business rule when the decision is No.
 export interface PublicNoticeEvidenceLocationReview {
   decision: string;
   rejectionComments: string;
@@ -303,10 +303,22 @@ function loadState(): PersistedState {
       const publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta = {
         ...initialState.publicNoticeEvidenceMeta,
         ...parsed.publicNoticeEvidenceMeta,
-        locations: initialState.publicNoticeEvidenceMeta.locations.map((location, index) => ({
-          ...location,
-          ...savedEvidenceLocations[index],
-        })),
+        locations: initialState.publicNoticeEvidenceMeta.locations.map((location, index) => {
+          const savedLocation = savedEvidenceLocations[index];
+          const savedDecision = savedLocation?.decision;
+          return {
+            ...location,
+            ...savedLocation,
+            decision:
+              savedDecision === 'Accept'
+                ? 'Yes'
+                : savedDecision === 'Reject'
+                  ? 'No'
+                  : savedDecision === 'Yes' || savedDecision === 'No'
+                    ? savedDecision
+                    : location.decision,
+          };
+        }),
       };
       if (!parsed.publicNoticeEvidenceMeta && tasks.publicNoticeEvidence === 'Done') {
         publicNoticeEvidenceMeta.completed = true;
@@ -314,7 +326,7 @@ function loadState(): PersistedState {
       const completedEvidenceReviewIsValid = publicNoticeEvidenceMeta.locations.every(
         location =>
           Boolean(location.decision.trim()) &&
-          (location.decision !== 'Reject' || Boolean(location.rejectionComments.trim())),
+          (location.decision !== 'No' || Boolean(location.rejectionComments.trim())),
       );
       const evidenceReviewNeedsMigration =
         publicNoticeEvidenceMeta.completed && !completedEvidenceReviewIsValid;
@@ -323,10 +335,10 @@ function loadState(): PersistedState {
         tasks.publicNoticeEvidence = 'In progress';
       } else if (
         publicNoticeEvidenceMeta.completed &&
-        publicNoticeEvidenceMeta.locations.some(location => location.decision === 'Reject')
+        publicNoticeEvidenceMeta.locations.some(location => location.decision === 'No')
       ) {
         // Existing saved reviews adopt the new hand-off rule as well: one
-        // rejected location means the applicant needs to provide new evidence.
+        // location answered No means the applicant needs to provide new evidence.
         tasks.publicNoticeEvidence = 'Awaiting applicant';
       }
 
@@ -702,8 +714,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
 
   // Review is deliberately separate from Public notice and only appears once
   // evidence exists (MLA/2026/10014 in this prototype fixture). A completed
-  // review with any rejected location waits for replacement applicant evidence;
-  // only an all-accepted review is Done.
+  // review with any location answered No waits for replacement applicant
+  // evidence; only an all-Yes review is Done.
   const savePublicNoticeEvidence = () =>
     setState(prev => ({
       ...prev,
@@ -712,7 +724,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         publicNoticeEvidence: !prev.publicNoticeEvidenceMeta.completed
           ? 'In progress'
           : prev.publicNoticeEvidenceMeta.locations.some(
-                location => location.decision === 'Reject',
+                location => location.decision === 'No',
               )
             ? 'Awaiting applicant'
             : 'Done',
