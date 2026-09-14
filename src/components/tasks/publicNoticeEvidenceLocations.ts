@@ -23,12 +23,12 @@ export type PublicNoticeEvidenceLocation = (typeof publicNoticeEvidenceLocations
 
 export const resubmittedPublicNoticeEvidenceReviews = [
   {
-    decision: 'Reject',
+    decision: 'No',
     rejectionComments:
       'The close-up photograph does not clearly show the full notice and the surroundings photograph does not show where it was displayed. Provide clear replacement photographs showing the complete notice and its location.',
   },
-  { decision: 'Accept', rejectionComments: '' },
-  { decision: 'Accept', rejectionComments: '' },
+  { decision: 'Yes', rejectionComments: '' },
+  { decision: 'Yes', rejectionComments: '' },
 ];
 
 export const replacementPublicNoticeEvidence = {

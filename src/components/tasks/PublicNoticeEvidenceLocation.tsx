@@ -38,9 +38,14 @@ const useStyles = makeStyles({
     marginTop: tokens.spacingVerticalS,
   },
   replacementIntro: { color: tokens.colorNeutralForeground2 },
+  commentsLabel: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalS,
+  },
 });
 
-const decisionOptions = ['Accept', 'Reject'];
+const decisionOptions = ['Yes', 'No'];
 
 type Props = {
   number: number;
@@ -68,8 +73,8 @@ export default function PublicNoticeEvidenceLocation({
   replacementEvidence,
 }: Props) {
   const styles = useStyles();
-  const decisionName = `Location ${number} photograph decision`;
-  const commentsName = `Location ${number} rejection comments`;
+  const decisionName = `Location ${number} photograph acceptance`;
+  const commentsName = `Location ${number} photograph comments`;
 
   return (
     <div className={styles.location}>
@@ -97,7 +102,7 @@ export default function PublicNoticeEvidenceLocation({
         </div>
       </TaskRow>
       <TaskRow
-        label="What is your decision on the photographs for this location?"
+        label="Do you accept the photographs for this location?"
         required
         locked={reviewLocked}
         top
@@ -111,9 +116,18 @@ export default function PublicNoticeEvidenceLocation({
         />
       </TaskRow>
 
-      {review.decision === 'Reject' && (
+      {review.decision === 'No' && (
         <TaskRow
-          label="Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant."
+          label={
+            <span className={styles.commentsLabel}>
+              <span>What is wrong with the photographs for this location?</span>
+              <span>
+                Say which photograph is affected - the close-up, the one showing the notice in
+                its surroundings or both. Tell the applicant what they need to provide instead.
+                This will be sent to the applicant, so keep it factual and clear.
+              </span>
+            </span>
+          }
           required
           locked={reviewLocked}
           top
@@ -130,7 +144,9 @@ export default function PublicNoticeEvidenceLocation({
       {replacementEvidence && (
         <div className={styles.replacement}>
           <div>
-            <Text block className={styles.heading}>Replacement photographs</Text>
+            <Text block className={styles.heading}>
+              Resubmitted photographs for location {number}
+            </Text>
             <Text block className={styles.replacementIntro}>
               The applicant submitted replacement photographs for this location on{' '}
               {replacementEvidence.submittedDate}.
