@@ -185,7 +185,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
 
           {publicNoticeEvidenceLocations.map((location, index) => (
             <div className={styles.locationGroup} key={location.name}>
-              {index > 0 && <div className={styles.divider} />}
+              <div className={styles.divider} />
               <PublicNoticeEvidenceLocation
                 number={index + 1}
                 location={location}
