@@ -35,8 +35,8 @@ if (!descriptions.publicRegisterVariations?.length) {
 if (descriptions.caseSummaryStates?.length !== 2 || descriptions.siteCheckStates?.length !== 3) {
   throw new Error('The first assessment journey must contain two case summaries and three Site check states');
 }
-if (descriptions.publicNoticeEvidenceReview?.states?.length !== 3) {
-  throw new Error('Review public notice evidence must include the default, mixed-decision and replacement-evidence states');
+if (descriptions.publicNoticeEvidenceReview?.states?.length !== 5) {
+  throw new Error('Review public notice evidence must include the original and resubmission review states');
 }
 if (!manifest.menu?.some(item => item.command === 'choose-screens')) {
   throw new Error('Missing screen and state picker command');

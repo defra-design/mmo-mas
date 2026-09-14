@@ -717,6 +717,86 @@ const DESCRIPTIONS = {
           "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
           "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
         }
+      },
+      {
+        "frameName": "12 · MLA/2026/10013 · Review public notice evidence · Resubmission default",
+        "caseId": "MLA/2026/10013",
+        "frameHeight": 1920,
+        "saveState": "Saved",
+        "completed": false,
+        "reviewLocked": true,
+        "acceptanceWording": true,
+        "introLines": [
+          "The applicant submitted evidence on 20 August 2026.",
+          "The applicant resubmitted evidence on 27 August 2026."
+        ],
+        "reviews": [
+          {
+            "decision": "No",
+            "rejectionComments": "The close-up photograph does not clearly show the full notice and the surroundings photograph does not show where it was displayed. Provide clear replacement photographs showing the complete notice and its location."
+          },
+          {
+            "decision": "Yes",
+            "rejectionComments": ""
+          },
+          {
+            "decision": "Yes",
+            "rejectionComments": ""
+          }
+        ],
+        "replacementEvidence": {
+          "locationIndex": 0,
+          "heading": "Resubmitted photographs for location 1",
+          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
+          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
+        },
+        "replacementReview": {
+          "decision": "---",
+          "rejectionComments": ""
+        }
+      },
+      {
+        "frameName": "13 · MLA/2026/10013 · Review public notice evidence · Resubmission rejected",
+        "caseId": "MLA/2026/10013",
+        "frameHeight": 2100,
+        "saveState": "Unsaved",
+        "completed": false,
+        "reviewLocked": true,
+        "acceptanceWording": true,
+        "introLines": [
+          "The applicant submitted evidence on 20 August 2026.",
+          "The applicant resubmitted evidence on 27 August 2026."
+        ],
+        "reviews": [
+          {
+            "decision": "No",
+            "rejectionComments": "The close-up photograph does not clearly show the full notice and the surroundings photograph does not show where it was displayed. Provide clear replacement photographs showing the complete notice and its location."
+          },
+          {
+            "decision": "Yes",
+            "rejectionComments": ""
+          },
+          {
+            "decision": "Yes",
+            "rejectionComments": ""
+          }
+        ],
+        "replacementEvidence": {
+          "locationIndex": 0,
+          "heading": "Resubmitted photographs for location 1",
+          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
+          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
+        },
+        "replacementReview": {
+          "decision": "No",
+          "rejectionComments": ""
+        }
       }
     ]
   }
@@ -2155,7 +2235,9 @@ function createEvidenceLocation(components, number, location, review, options = 
   group.appendChild(createEvidenceReviewRow(
     components,
     options.reviewLocked ? 'locked-choice' : 'dropdown',
-    'What is your decision on the photographs for this location?',
+    options.acceptanceWording
+      ? 'Do you accept the photographs for this location?'
+      : 'What is your decision on the photographs for this location?',
     review.decision,
   ));
   if (review.decision === 'Reject') {
@@ -2163,6 +2245,14 @@ function createEvidenceLocation(components, number, location, review, options = 
       components,
       options.reviewLocked ? 'locked-textarea' : 'textarea',
       'Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant.',
+      review.rejectionComments,
+    ));
+  }
+  if (options.acceptanceWording && review.decision === 'No') {
+    group.appendChild(createEvidenceReviewRow(
+      components,
+      options.reviewLocked ? 'locked-textarea' : 'textarea',
+      'What is wrong with the photographs for this location?\nSay which photograph is affected - the close-up, the one showing the notice in its surroundings or both. Tell the applicant what they need to provide instead. This will be sent to the applicant, so keep it factual and clear.',
       review.rejectionComments,
     ));
   }
@@ -2193,6 +2283,22 @@ function createEvidenceLocation(components, number, location, review, options = 
       options.replacementEvidence.surroundingsQuestion,
       options.replacementEvidence.surroundingsLabel,
     ));
+    if (options.replacementReview) {
+      group.appendChild(createEvidenceReviewRow(
+        components,
+        'dropdown',
+        'Do you accept the resubmitted photographs for this location?',
+        options.replacementReview.decision,
+      ));
+      if (options.replacementReview.decision === 'No') {
+        group.appendChild(createEvidenceReviewRow(
+          components,
+          'textarea',
+          'What is wrong with the photographs for this location?\nSay which photograph is affected - the close-up, the one showing the notice in its surroundings or both. Tell the applicant what they need to provide instead. This will be sent to the applicant, so keep it factual and clear.',
+          options.replacementReview.rejectionComments,
+        ));
+      }
+    }
   }
   return group;
 }
@@ -2222,7 +2328,9 @@ function createPublicNoticeEvidenceReviewScreen(page, components, state) {
   applyCard(body);
   const introduction = verticalFrame('Evidence introduction', 1278, 8, 0);
   introduction.appendChild(makeText('Section heading', description.sectionHeading, 'section', C.text, 1278));
-  introduction.appendChild(makeText('Help text', description.intro, 'body', C.secondary, 1278));
+  for (const line of state.introLines || [description.intro]) {
+    introduction.appendChild(makeText('Help text', line, 'body', C.secondary, 1278));
+  }
   body.appendChild(introduction);
 
   description.locations.forEach((location, index) => {
@@ -2233,8 +2341,12 @@ function createPublicNoticeEvidenceReviewScreen(page, components, state) {
     }
     body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index], {
       reviewLocked: state.reviewLocked,
+      acceptanceWording: state.acceptanceWording,
       replacementEvidence: state.replacementEvidence?.locationIndex === index
         ? state.replacementEvidence
+        : null,
+      replacementReview: state.replacementEvidence?.locationIndex === index
+        ? state.replacementReview
         : null,
     }));
   });

@@ -1351,7 +1351,9 @@ function createEvidenceLocation(components, number, location, review, options = 
   group.appendChild(createEvidenceReviewRow(
     components,
     options.reviewLocked ? 'locked-choice' : 'dropdown',
-    'What is your decision on the photographs for this location?',
+    options.acceptanceWording
+      ? 'Do you accept the photographs for this location?'
+      : 'What is your decision on the photographs for this location?',
     review.decision,
   ));
   if (review.decision === 'Reject') {
@@ -1359,6 +1361,14 @@ function createEvidenceLocation(components, number, location, review, options = 
       components,
       options.reviewLocked ? 'locked-textarea' : 'textarea',
       'Why are you rejecting the photographs for this location? Explain what is wrong and what the applicant needs to provide. Your comments will be sent to the applicant.',
+      review.rejectionComments,
+    ));
+  }
+  if (options.acceptanceWording && review.decision === 'No') {
+    group.appendChild(createEvidenceReviewRow(
+      components,
+      options.reviewLocked ? 'locked-textarea' : 'textarea',
+      'What is wrong with the photographs for this location?\nSay which photograph is affected - the close-up, the one showing the notice in its surroundings or both. Tell the applicant what they need to provide instead. This will be sent to the applicant, so keep it factual and clear.',
       review.rejectionComments,
     ));
   }
@@ -1389,6 +1399,22 @@ function createEvidenceLocation(components, number, location, review, options = 
       options.replacementEvidence.surroundingsQuestion,
       options.replacementEvidence.surroundingsLabel,
     ));
+    if (options.replacementReview) {
+      group.appendChild(createEvidenceReviewRow(
+        components,
+        'dropdown',
+        'Do you accept the resubmitted photographs for this location?',
+        options.replacementReview.decision,
+      ));
+      if (options.replacementReview.decision === 'No') {
+        group.appendChild(createEvidenceReviewRow(
+          components,
+          'textarea',
+          'What is wrong with the photographs for this location?\nSay which photograph is affected - the close-up, the one showing the notice in its surroundings or both. Tell the applicant what they need to provide instead. This will be sent to the applicant, so keep it factual and clear.',
+          options.replacementReview.rejectionComments,
+        ));
+      }
+    }
   }
   return group;
 }
@@ -1418,7 +1444,9 @@ function createPublicNoticeEvidenceReviewScreen(page, components, state) {
   applyCard(body);
   const introduction = verticalFrame('Evidence introduction', 1278, 8, 0);
   introduction.appendChild(makeText('Section heading', description.sectionHeading, 'section', C.text, 1278));
-  introduction.appendChild(makeText('Help text', description.intro, 'body', C.secondary, 1278));
+  for (const line of state.introLines || [description.intro]) {
+    introduction.appendChild(makeText('Help text', line, 'body', C.secondary, 1278));
+  }
   body.appendChild(introduction);
 
   description.locations.forEach((location, index) => {
@@ -1429,8 +1457,12 @@ function createPublicNoticeEvidenceReviewScreen(page, components, state) {
     }
     body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index], {
       reviewLocked: state.reviewLocked,
+      acceptanceWording: state.acceptanceWording,
       replacementEvidence: state.replacementEvidence?.locationIndex === index
         ? state.replacementEvidence
+        : null,
+      replacementReview: state.replacementEvidence?.locationIndex === index
+        ? state.replacementReview
         : null,
     }));
   });

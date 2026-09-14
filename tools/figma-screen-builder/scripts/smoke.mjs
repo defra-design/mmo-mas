@@ -195,8 +195,8 @@ vm.runInNewContext(code, {
 if (figma.command === 'choose-screens') {
   if (!shownUi || shownUi.options?.themeColors !== true) throw new Error('Picker UI was not opened correctly');
   const catalog = uiMessages.find(message => message.type === 'catalog');
-  if (catalog?.groups?.flatMap(group => group.screens).length !== 11) {
-    throw new Error('Picker did not receive the eleven-screen catalog');
+  if (catalog?.groups?.flatMap(group => group.screens).length !== 13) {
+    throw new Error('Picker did not receive the thirteen-screen catalog');
   }
   await figma.ui.onmessage({
     type: 'generate',
@@ -231,9 +231,11 @@ const canonicalScreenNames = new Set([
   '09 · MLA/2026/10014 · Review public notice evidence · Default',
   '10 · MLA/2026/10014 · Review public notice evidence · Mixed decisions',
   '11 · MLA/2026/10013 · Review public notice evidence · Replacement photographs',
+  '12 · MLA/2026/10013 · Review public notice evidence · Resubmission default',
+  '13 · MLA/2026/10013 · Review public notice evidence · Resubmission rejected',
 ]);
-if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 12) {
-  throw new Error('Expected eleven generated screen frames plus the retained same-name copy');
+if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 14) {
+  throw new Error('Expected thirteen generated screen frames plus the retained same-name copy');
 }
 if (!screensPage.children.some(node => node.name === 'Generated Run 02')) throw new Error('Missing screen run label');
 if (workflowPage.children.length !== 1 || workflowPage.children[0] !== retainedWorkflowNote) {
@@ -355,6 +357,12 @@ const mixedEvidenceReview = screensPage.children.find(
 const replacementEvidenceReview = screensPage.children.find(
   node => node.name === '11 · MLA/2026/10013 · Review public notice evidence · Replacement photographs',
 );
+const resubmissionDefault = screensPage.children.find(
+  node => node.name === '12 · MLA/2026/10013 · Review public notice evidence · Resubmission default',
+);
+const resubmissionRejected = screensPage.children.find(
+  node => node.name === '13 · MLA/2026/10013 · Review public notice evidence · Resubmission rejected',
+);
 const defaultEvidenceValues = defaultEvidenceReview?.findAll(
   node => node.type === 'TEXT' && node.name === 'Field value',
 ).map(node => node.characters);
@@ -393,10 +401,36 @@ if (!replacementText?.includes('Replacement photographs') ||
 if (replacementEvidenceReview?.findAll(node => node.name === 'Read-only indicator').length < 5) {
   throw new Error('Replacement-evidence review does not keep prior review fields locked');
 }
+const resubmissionDefaultValues = resubmissionDefault?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Field value',
+).map(node => node.characters);
+const resubmissionRejectedValues = resubmissionRejected?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Field value',
+).map(node => node.characters);
+if (
+  resubmissionDefaultValues?.filter(value => value === 'No').length !== 1 ||
+  resubmissionDefaultValues?.filter(value => value === 'Yes').length !== 2 ||
+  resubmissionDefaultValues?.filter(value => value === '---').length !== 1 ||
+  !resubmissionDefault?.findAll(node => node.type === 'TEXT')
+    .some(node => node.characters === 'Do you accept the resubmitted photographs for this location?')
+) {
+  throw new Error('Default resubmission review does not show the blank replacement decision');
+}
+if (
+  resubmissionRejectedValues?.filter(value => value === 'No').length !== 2 ||
+  resubmissionRejectedValues?.filter(value => value === 'Yes').length !== 2 ||
+  resubmissionRejected?.findAll(node => node.name === 'Multiline text field').length !== 1 ||
+  !resubmissionRejected?.findAll(node => node.type === 'TEXT' && node.name === 'Question')
+    .some(node => node.characters.startsWith('What is wrong with the photographs for this location?'))
+) {
+  throw new Error('Rejected resubmission review does not show the conditional comments field');
+}
 if (
   defaultEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible !== false ||
   mixedEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible === false ||
-  replacementEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible !== false
+  replacementEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible !== false ||
+  resubmissionDefault?.findOne(node => node.name === 'Checkbox mark')?.visible !== false ||
+  resubmissionRejected?.findOne(node => node.name === 'Checkbox mark')?.visible !== false
 ) {
   throw new Error('Public notice evidence completion states are incorrect');
 }
