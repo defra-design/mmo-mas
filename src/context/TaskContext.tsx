@@ -9,6 +9,7 @@ export type TaskStatus =
   | 'To do'
   | 'In progress'
   | 'Awaiting applicant'
+  | 'Resubmitted - to review'
   | 'Cannot start yet';
 
 export interface TaskState {
@@ -217,7 +218,7 @@ const initialState: PersistedState = {
     publicNoticeEvidence: 'To do',
     // MLA/2026/10013 has received replacement photographs and needs the
     // existing evidence-review task brought back to the officer's queue.
-    publicNoticeEvidenceResubmission: 'To do',
+    publicNoticeEvidenceResubmission: 'Resubmitted - to review',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '' },
@@ -297,6 +298,12 @@ function loadState(): PersistedState {
         needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
       };
       const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
+      // Earlier saved prototype data used the generic To do label when
+      // replacement evidence returned to the officer. Adopt the more specific
+      // resubmission status without changing reviews already in progress or done.
+      if (tasks.publicNoticeEvidenceResubmission === 'To do') {
+        tasks.publicNoticeEvidenceResubmission = 'Resubmitted - to review';
+      }
       const savedEvidenceLocations = Array.isArray(parsed.publicNoticeEvidenceMeta?.locations)
         ? parsed.publicNoticeEvidenceMeta.locations
         : [];
