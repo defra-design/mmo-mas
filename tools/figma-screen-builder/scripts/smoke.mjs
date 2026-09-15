@@ -394,8 +394,8 @@ if (
 const replacementText = replacementEvidenceReview?.findAll(
   node => node.type === 'TEXT',
 ).map(node => node.characters);
-if (!replacementText?.includes('Replacement photographs') ||
-  !replacementText?.includes('The applicant submitted replacement photographs for this location on 27 August 2026.')) {
+if (!replacementText?.includes('Resubmitted photographs for location 1') ||
+  !replacementText?.includes('The applicant resubmitted photographs for this location on 27 August 2026.')) {
   throw new Error('Replacement-evidence review is missing its resubmission context');
 }
 if (replacementEvidenceReview?.findAll(node => node.name === 'Read-only indicator').length < 5) {
@@ -424,6 +424,12 @@ if (
     .some(node => node.characters.startsWith('What is wrong with the photographs for this location?'))
 ) {
   throw new Error('Rejected resubmission review does not show the conditional comments field');
+}
+if (
+  resubmissionDefault?.findAll(node => node.name === 'Location divider').length !== 3 ||
+  resubmissionRejected?.findAll(node => node.name === 'Location divider').length !== 3
+) {
+  throw new Error('Resubmission reviews must include a divider before Location 1');
 }
 if (
   defaultEvidenceReview?.findOne(node => node.name === 'Checkbox mark')?.visible !== false ||

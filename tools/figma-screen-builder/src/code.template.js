@@ -1450,11 +1450,9 @@ function createPublicNoticeEvidenceReviewScreen(page, components, state) {
   body.appendChild(introduction);
 
   description.locations.forEach((location, index) => {
-    if (index > 0) {
-      const divider = components.divider.createInstance();
-      divider.name = 'Location divider';
-      body.appendChild(divider);
-    }
+    const divider = components.divider.createInstance();
+    divider.name = 'Location divider';
+    body.appendChild(divider);
     body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index], {
       reviewLocked: state.reviewLocked,
       acceptanceWording: state.acceptanceWording,

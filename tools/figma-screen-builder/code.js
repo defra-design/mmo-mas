@@ -710,11 +710,11 @@ const DESCRIPTIONS = {
         ],
         "replacementEvidence": {
           "locationIndex": 0,
-          "heading": "Replacement photographs",
-          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
-          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "heading": "Resubmitted photographs for location 1",
+          "intro": "The applicant resubmitted photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Resubmitted close-up photograph of the notice",
           "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
-          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsQuestion": "Resubmitted photograph showing the notice in its surroundings",
           "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
         }
       },
@@ -747,10 +747,10 @@ const DESCRIPTIONS = {
         "replacementEvidence": {
           "locationIndex": 0,
           "heading": "Resubmitted photographs for location 1",
-          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
-          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "intro": "The applicant resubmitted photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Resubmitted close-up photograph of the notice",
           "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
-          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsQuestion": "Resubmitted photograph showing the notice in its surroundings",
           "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
         },
         "replacementReview": {
@@ -787,10 +787,10 @@ const DESCRIPTIONS = {
         "replacementEvidence": {
           "locationIndex": 0,
           "heading": "Resubmitted photographs for location 1",
-          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
-          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "intro": "The applicant resubmitted photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Resubmitted close-up photograph of the notice",
           "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
-          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsQuestion": "Resubmitted photograph showing the notice in its surroundings",
           "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
         },
         "replacementReview": {
@@ -2334,11 +2334,9 @@ function createPublicNoticeEvidenceReviewScreen(page, components, state) {
   body.appendChild(introduction);
 
   description.locations.forEach((location, index) => {
-    if (index > 0) {
-      const divider = components.divider.createInstance();
-      divider.name = 'Location divider';
-      body.appendChild(divider);
-    }
+    const divider = components.divider.createInstance();
+    divider.name = 'Location divider';
+    body.appendChild(divider);
     body.appendChild(createEvidenceLocation(components, index + 1, location, state.reviews[index], {
       reviewLocked: state.reviewLocked,
       acceptanceWording: state.acceptanceWording,

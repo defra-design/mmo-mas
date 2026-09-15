@@ -323,11 +323,11 @@
         ],
         "replacementEvidence": {
           "locationIndex": 0,
-          "heading": "Replacement photographs",
-          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
-          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "heading": "Resubmitted photographs for location 1",
+          "intro": "The applicant resubmitted photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Resubmitted close-up photograph of the notice",
           "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
-          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsQuestion": "Resubmitted photograph showing the notice in its surroundings",
           "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
         }
       },
@@ -354,10 +354,10 @@
         "replacementEvidence": {
           "locationIndex": 0,
           "heading": "Resubmitted photographs for location 1",
-          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
-          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "intro": "The applicant resubmitted photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Resubmitted close-up photograph of the notice",
           "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
-          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsQuestion": "Resubmitted photograph showing the notice in its surroundings",
           "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
         },
         "replacementReview": { "decision": "---", "rejectionComments": "" }
@@ -385,10 +385,10 @@
         "replacementEvidence": {
           "locationIndex": 0,
           "heading": "Resubmitted photographs for location 1",
-          "intro": "The applicant submitted replacement photographs for this location on 27 August 2026.",
-          "closeUpQuestion": "Replacement close-up photograph of the notice",
+          "intro": "The applicant resubmitted photographs for this location on 27 August 2026.",
+          "closeUpQuestion": "Resubmitted close-up photograph of the notice",
           "closeUpLabel": "View replacement close-up photograph of the notice (opens in new tab)",
-          "surroundingsQuestion": "Replacement photograph showing the notice in its surroundings",
+          "surroundingsQuestion": "Resubmitted photograph showing the notice in its surroundings",
           "surroundingsLabel": "View replacement photograph of the notice in its surroundings (opens in new tab)"
         },
         "replacementReview": { "decision": "No", "rejectionComments": "" }
