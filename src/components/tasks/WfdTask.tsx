@@ -19,12 +19,14 @@ import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
 import FieldDecorations from './FieldDecorations';
+import TaskTextarea from './TaskTextarea';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import type { WfdForm } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { asset } from '../../utils/asset';
 
@@ -46,6 +48,7 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
+  reviewFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
   answers: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
   // Flex (not grid) so the value area can wrap under the label at narrow widths.
   row: {
@@ -104,8 +107,16 @@ const useStyles = makeStyles({
 
 const reviewOptions = ['Yes', 'No'];
 
-// Display name D365 would use for the one business-required field on this form.
-const REVIEW_FIELD = 'WFD review';
+const ASSESSMENT_DOCUMENT: { fileName: string; href: string } | undefined = {
+  fileName: 'WFD-Exmouth-2026.docx',
+  href: asset('documents/WFD-Exmouth-2026.docx'),
+};
+
+// D365 display names used in the inline and form-level validation messages.
+const FIELD_NAMES: Record<keyof WfdForm, string> = {
+  initialConsiderations: 'Record your considerations',
+  review: 'WFD review',
+};
 
 interface WfdTaskProps {
   caseId: string;
@@ -114,19 +125,34 @@ interface WfdTaskProps {
 export default function WfdTask({ caseId }: WfdTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks, wfdForm, saved, setWfdReview, markUnsaved, completeWfd } = useTasks();
+  const {
+    tasks,
+    wfdForm,
+    saved,
+    setWfdReview,
+    setWfdInitialConsiderations,
+    markUnsaved,
+    completeWfd,
+  } = useTasks();
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =
     taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment) === 'Cannot start yet';
+  const hasAssessment = Boolean(ASSESSMENT_DOCUMENT);
   // Set on a failed save, cleared as soon as the field is given a value.
-  const [error, setError] = useState(false);
+  const [errors, setErrors] = useState<(keyof WfdForm)[]>([]);
+
+  const errorFor = (field: keyof WfdForm) =>
+    errors.includes(field) ? requiredMessage(FIELD_NAMES[field]) : undefined;
 
   const handleSave = () => {
-    if (!wfdForm.review.trim()) {
-      setError(true);
-      return;
+    const missing: (keyof WfdForm)[] = [];
+    if (hasAssessment && !wfdForm.initialConsiderations.trim()) {
+      missing.push('initialConsiderations');
     }
+    if (!wfdForm.review.trim()) missing.push('review');
+    setErrors(missing);
+    if (missing.length) return;
     completeWfd();
     navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`);
   };
@@ -135,8 +161,10 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
     <div className={styles.page}>
       {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
 
-      {error && (
-        <FormNotification level="error">{notificationMessage([REVIEW_FIELD])}</FormNotification>
+      {errors.length > 0 && (
+        <FormNotification level="error">
+          {notificationMessage(errors.map(field => FIELD_NAMES[field]))}
+        </FormNotification>
       )}
 
       <FormCommandBar
@@ -195,7 +223,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                 surfaces - if you minimise bank or bed disturbance
               </li>
             </ul>
-            <div className={styles.row}>
+            {ASSESSMENT_DOCUMENT && <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
                 Assessment provided
               </TaskFieldLabel>
@@ -203,22 +231,23 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
-                    href={asset('documents/WFD-Exmouth-2026.docx')}
+                    href={ASSESSMENT_DOCUMENT.href}
                     target="_blank"
                     rel="noopener"
                     className={styles.docxLink}
                   >
-                    <ArrowDownloadRegular /> WFD-Exmouth-2026.docx
+                    <ArrowDownloadRegular /> {ASSESSMENT_DOCUMENT.fileName}
                   </Link>
                 </div>
               </div>
-            </div>
+            </div>}
         </div>
       </Card>
 
       <Card className={styles.sectionCard}>
         <Text block className={styles.sectionHeading}>WFD review</Text>
-        <div className={styles.row}>
+        <div className={styles.reviewFields}>
+          <div className={styles.row}>
             <TaskFieldLabel className={styles.label}>
               Is the WFD section complete and acceptable?
             </TaskFieldLabel>
@@ -233,8 +262,8 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               ) : (
                 <Field
                   className={styles.control}
-                  validationState={error ? 'error' : 'none'}
-                  validationMessage={error ? requiredMessage(REVIEW_FIELD) : undefined}
+                  validationState={errorFor('review') ? 'error' : 'none'}
+                  validationMessage={errorFor('review')}
                   validationMessageIcon={<DismissCircleRegular />}
                 >
                   <OutcomeDropdown
@@ -242,13 +271,39 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                     options={reviewOptions}
                     onSelect={v => {
                       setWfdReview(v);
-                      setError(false);
+                      setErrors(previous => previous.filter(field => field !== 'review'));
                       markUnsaved('wfdAssessment');
                     }}
                   />
                 </Field>
               )}
             </div>
+          </div>
+
+          {hasAssessment && (
+            <div className={styles.row}>
+              <TaskFieldLabel className={styles.label}>
+                Record your considerations
+              </TaskFieldLabel>
+              <FieldDecorations required locked={locked} />
+              <div className={styles.fields}>
+                <TaskTextarea
+                  value={wfdForm.initialConsiderations}
+                  onChange={value => {
+                    setWfdInitialConsiderations(value);
+                    if (value.trim()) {
+                      setErrors(previous =>
+                        previous.filter(field => field !== 'initialConsiderations'),
+                      );
+                    }
+                    markUnsaved('wfdAssessment');
+                  }}
+                  locked={locked}
+                  error={errorFor('initialConsiderations')}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>
