@@ -12,17 +12,16 @@ const useStyles = makeStyles({
   row: {
     display: 'flex',
     flexWrap: 'wrap',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     columnGap: 0,
     rowGap: tokens.spacingVerticalS,
   },
-  // Rows whose control can grow a validation message under it are top-aligned so
-  // the label stays level with the control instead of drifting with the message.
   topRow: { alignItems: 'flex-start' },
   label: {
     flexShrink: 0,
-    flexBasis: '320px',
-    minWidth: '320px',
+    flexBasis: '160px',
+    minWidth: '160px',
+    paddingTop: tokens.spacingVerticalXS,
     marginRight: tokens.spacingHorizontalL,
   },
   topLabel: { paddingTop: tokens.spacingVerticalXS },
@@ -43,7 +42,7 @@ interface TaskRowProps {
   required?: boolean;
   /** Read-only record — draws the padlock immediately before the control. */
   locked?: boolean;
-  /** Top-align the label, for controls that grow (textareas, validation messages). */
+  /** Identifies controls that can grow; all native D365 rows are top-aligned. */
   top?: boolean;
   children: ReactNode;
 }

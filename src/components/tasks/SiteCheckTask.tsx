@@ -25,11 +25,9 @@ import { useTasks } from '../../context/TaskContext';
 import type { SiteCheckForm } from '../../context/TaskContext';
 import { hasSubmittedPublicNoticeEvidence } from '../../utils/publicNoticeEvidence';
 
-// Width of the label column on the Site check task. This is the knob to play
-// with — widen/narrow to taste. It's deliberately wider than the WFD task's
-// 320px label. Once a row can't fit this label plus its control side by side,
-// the control wraps underneath (same behaviour as the WFD task).
-const LABEL_WIDTH = '360px';
+// Native D365 uses a narrow label column. Once a row cannot fit the label and
+// its control side by side, the control wraps underneath.
+const LABEL_WIDTH = '160px';
 
 const useStyles = makeStyles({
   page: {

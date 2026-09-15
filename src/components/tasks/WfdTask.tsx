@@ -51,21 +51,17 @@ const useStyles = makeStyles({
   row: {
     display: 'flex',
     flexWrap: 'wrap',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     columnGap: 0,
     rowGap: tokens.spacingVerticalS,
   },
   label: {
     flexShrink: 0,
-    flexBasis: '320px',
-    minWidth: '320px',
+    flexBasis: '160px',
+    minWidth: '160px',
+    paddingTop: tokens.spacingVerticalXS,
     marginRight: tokens.spacingHorizontalL,
   },
-  // The review row's control can grow a validation message under it, so top-align
-  // the row (rather than centring it, as the read-only answer rows do) to keep the
-  // label level with the select instead of drifting with the message.
-  reviewRow: { alignItems: 'flex-start' },
-  reviewLabel: { paddingTop: tokens.spacingVerticalXS },
   // Holds one or two field boxes; wraps them under each other when cramped.
   fields: {
     flexGrow: 1,
@@ -222,8 +218,8 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
       <Card className={styles.sectionCard}>
         <Text block className={styles.sectionHeading}>WFD review</Text>
-        <div className={mergeClasses(styles.row, styles.reviewRow)}>
-            <TaskFieldLabel className={mergeClasses(styles.label, styles.reviewLabel)}>
+        <div className={styles.row}>
+            <TaskFieldLabel className={styles.label}>
               Is the WFD section complete and acceptable?
             </TaskFieldLabel>
             <FieldDecorations required locked={locked} />

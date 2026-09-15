@@ -97,8 +97,8 @@ const useStyles = makeStyles({
   },
   label: {
     flexShrink: 0,
-    flexBasis: '220px',
-    minWidth: '220px',
+    flexBasis: '160px',
+    minWidth: '160px',
     paddingTop: tokens.spacingVerticalXS,
     marginRight: tokens.spacingHorizontalL,
   },

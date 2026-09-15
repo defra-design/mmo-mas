@@ -30,6 +30,7 @@ import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OrganisationLookup from './OrganisationLookup';
 import FieldDecorations from './FieldDecorations';
+import TaskRow from './TaskRow';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
@@ -104,10 +105,6 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightRegular,
     color: tokens.colorNeutralForeground2,
-  },
-  completeRow: {
-    display: 'flex',
-    alignItems: 'flex-start',
   },
 });
 
@@ -270,10 +267,9 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
 
       <Card className={styles.sectionCard}>
         <Text block className={styles.sectionHeading}>Complete task</Text>
-        <div className={styles.completeRow}>
-          {locked && <FieldDecorations locked />}
+        <TaskRow label="Select to mark the task as complete" locked={locked}>
           <Checkbox
-            label="Select to mark the task as complete"
+            aria-label="Select to mark the task as complete"
             checked={prepForConsulteeMeta.completed}
             disabled={locked}
             onChange={(_, data) => {
@@ -281,7 +277,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
               markUnsaved('prepForConsultee');
             }}
           />
-        </div>
+        </TaskRow>
       </Card>
     </div>
   );
