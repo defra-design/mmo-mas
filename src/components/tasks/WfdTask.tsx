@@ -161,7 +161,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
       <Card className={styles.bodyCard}>
         <div>
-          <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
+          <Text block className={styles.sectionHeading}>Applicant's answers</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
@@ -226,7 +226,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>2. WFD review</Text>
+          <Text block className={styles.sectionHeading}>WFD review</Text>
           <div className={mergeClasses(styles.row, styles.reviewRow)}>
             <TaskFieldLabel className={mergeClasses(styles.label, styles.reviewLabel)}>
               Is the WFD section complete and acceptable?

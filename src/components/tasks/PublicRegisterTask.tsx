@@ -126,8 +126,6 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
   // Did the applicant ask for anything to be withheld? If not there is no
   // assessment to make, and sections 3 and 4 move up to 2 and 3.
   const assessed = !NO_WITHHOLD_REQUEST.includes(caseId);
-  const personalInfoNo = assessed ? 3 : 2;
-  const redactNo = assessed ? 4 : 3;
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
   const [errors, setErrors] = useState<FieldKey[]>([]);
 
@@ -174,7 +172,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
       <Card className={styles.bodyCard}>
         <div>
-          <Text block className={styles.sectionHeading}>1. The applicant's request</Text>
+          <Text block className={styles.sectionHeading}>The applicant's request</Text>
           <div className={styles.answers}>
             <TaskRow label="Did the applicant ask for information to be withheld?" locked>
               <TaskValue>{assessed ? 'Yes' : 'No'}</TaskValue>
@@ -194,7 +192,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
             <div className={styles.divider} />
 
             <div>
-              <Text block className={styles.sectionHeading}>2. Your assessment</Text>
+              <Text block className={styles.sectionHeading}>Your assessment</Text>
               <div className={styles.answers}>
                 <TaskRow label="What does the request relate to?" required locked={locked} top>
                   <TaskChoice
@@ -246,7 +244,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
         <div>
           <Text block className={styles.sectionHeading}>
-            {personalInfoNo}. Personal information check
+            Personal information check
           </Text>
           <div className={styles.answers}>
             <TaskRow
@@ -283,7 +281,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
         <div>
           <Text block className={styles.sectionHeading}>
-            {redactNo}. Redact the application
+            Redact the application
           </Text>
           <TaskRow
             label="Select the link to redact the application. You will be able to choose which parts of the application to redact."

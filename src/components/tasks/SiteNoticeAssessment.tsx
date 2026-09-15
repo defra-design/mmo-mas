@@ -43,7 +43,7 @@ export default function SiteNoticeAssessment({
   return (
     <>
       <div>
-        <Text block className={styles.sectionHeading}>1. Public notice requirement</Text>
+        <Text block className={styles.sectionHeading}>Public notice requirement</Text>
         <div className={styles.answers}>
           <TaskRow
             label="Which public notices are required?"
@@ -83,7 +83,7 @@ export default function SiteNoticeAssessment({
           <div className={styles.divider} />
 
           <div>
-            <Text block className={styles.sectionHeading}>2. Site notice summary</Text>
+            <Text block className={styles.sectionHeading}>Site notice summary</Text>
             <div className={styles.answers}>
               <TaskRow label="Applicant's proposed works summary" locked top>
                 <TaskValue multiline>{proposedWorks}</TaskValue>
@@ -103,7 +103,7 @@ export default function SiteNoticeAssessment({
           <div className={styles.divider} />
 
           <div>
-            <Text block className={styles.sectionHeading}>3. Who the site notice is for</Text>
+            <Text block className={styles.sectionHeading}>Who the site notice is for</Text>
             <Text block className={styles.desc}>
               The applicant sees suggested notice locations for the group you choose.
             </Text>

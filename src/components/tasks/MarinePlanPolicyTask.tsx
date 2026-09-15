@@ -251,7 +251,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
       <Card className={styles.bodyCard}>
         <div>
           <Text block className={styles.sectionHeading}>
-            1. Policy and applicant's consideration
+            Policy and applicant's consideration
           </Text>
           <div className={styles.answers}>
             <div className={styles.row}>
@@ -287,7 +287,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
         <div className={styles.dividerLine} />
 
         <div>
-          <Text block className={styles.sectionHeading}>2. Your assessment</Text>
+          <Text block className={styles.sectionHeading}>Your assessment</Text>
           <div className={styles.answers}>
             <div className={styles.row}>
               {/* A locked field keeps its asterisk immediately before its padlock,

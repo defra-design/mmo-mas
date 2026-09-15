@@ -184,7 +184,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>1. Coordinates and shape</Text>
+          <Text block className={styles.sectionHeading}>Coordinates and shape</Text>
           <Text block className={styles.desc}>
             Check that the coordinates accurately represent the location of the works, that the
             shape and size are appropriate for the activity, and that the site is within MMO
@@ -216,7 +216,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>2. Site located in the Water Framework Directive assessment (WFD) area</Text>
+          <Text block className={styles.sectionHeading}>Site located in the Water Framework Directive assessment (WFD) area</Text>
           <Text block className={styles.desc}>
             Confirm whether the site is within the WFD assessment area. Within one nautical mile
             (1.85km) of the low water line, or in a tidal river or estuary - including the shore
@@ -248,7 +248,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div className={styles.divider} />
 
         <div>
-          <Text block className={styles.sectionHeading}>3. Notes from your site check</Text>
+          <Text block className={styles.sectionHeading}>Notes from your site check</Text>
           <div className={mergeClasses(styles.question, styles.notesRowGap)}>
             <Text className={styles.label}>Record anything from your site check that is relevant to later stages of the assessment.</Text>
             <FieldDecorations />
