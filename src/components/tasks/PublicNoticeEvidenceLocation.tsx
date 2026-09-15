@@ -148,11 +148,11 @@ export default function PublicNoticeEvidenceLocation({
               Resubmitted photographs for location {number}
             </Text>
             <Text block className={styles.replacementIntro}>
-              The applicant submitted replacement photographs for this location on{' '}
+              The applicant resubmitted photographs for this location on{' '}
               {replacementEvidence.submittedDate}.
             </Text>
           </div>
-          <TaskRow label="Replacement close-up photograph of the notice">
+          <TaskRow label="Resubmitted close-up photograph of the notice">
             <div className={styles.imageLinkValue}>
               <Link
                 className={styles.imageLink}
@@ -165,7 +165,7 @@ export default function PublicNoticeEvidenceLocation({
               </Link>
             </div>
           </TaskRow>
-          <TaskRow label="Replacement photograph showing the notice in its surroundings" top>
+          <TaskRow label="Resubmitted photograph showing the notice in its surroundings" top>
             <div className={styles.imageLinkValue}>
               <Link
                 className={styles.imageLink}
