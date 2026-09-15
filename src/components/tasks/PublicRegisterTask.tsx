@@ -60,11 +60,10 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
   },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
@@ -72,7 +71,6 @@ const useStyles = makeStyles({
     marginBottom: tokens.spacingVerticalL,
   },
   answers: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
     fontSize: tokens.fontSizeBase300,
@@ -170,148 +168,141 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
         <div><Body1>Task</Body1></div>
       </Card>
 
-      <Card className={styles.bodyCard}>
-        <div>
-          <Text block className={styles.sectionHeading}>The applicant's request</Text>
-          <div className={styles.answers}>
-            <TaskRow label="Did the applicant ask for information to be withheld?" locked>
-              <TaskValue>{assessed ? 'Yes' : 'No'}</TaskValue>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>The applicant's request</Text>
+        <div className={styles.answers}>
+          <TaskRow label="Did the applicant ask for information to be withheld?" locked>
+            <TaskValue>{assessed ? 'Yes' : 'No'}</TaskValue>
+          </TaskRow>
+          {/* Nothing was requested, so the applicant never gave a reason. */}
+          {assessed && (
+            <TaskRow label="What they want withheld and why" locked top>
+              <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
             </TaskRow>
-            {/* Nothing was requested, so the applicant never gave a reason. */}
-            {assessed && (
-              <TaskRow label="What they want withheld and why" locked top>
-                <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
-              </TaskRow>
-            )}
-          </div>
+          )}
         </div>
+      </Card>
 
-        {/* No request to assess when the applicant answered "No". */}
-        {assessed && (
-          <>
-            <div className={styles.divider} />
-
-            <div>
-              <Text block className={styles.sectionHeading}>Your assessment</Text>
-              <div className={styles.answers}>
-                <TaskRow label="What does the request relate to?" required locked={locked} top>
-                  <TaskChoice
-                    value={form.relatesTo}
-                    options={relatesOptions}
-                    onSelect={v => update('relatesTo', v)}
-                    locked={locked}
-                    error={errorFor('relatesTo')}
-                  />
-                </TaskRow>
-
-                {showsCommercial(form.relatesTo) && (
-                  <WithholdDecision
-                    heading={RELATES_COMMERCIAL}
-                    locked={locked}
-                    fields={{
-                      agree: 'commercialAgree',
-                      applicantText: 'commercialApplicantText',
-                      rationale: 'commercialRationale',
-                    }}
-                    values={form}
-                    errorFor={errorFor}
-                    onChange={update}
-                    guidance={<CommercialRationaleHint disclosure={hideGuidance} />}
-                  />
-                )}
-
-                {showsSecurity(form.relatesTo) && (
-                  <WithholdDecision
-                    heading={RELATES_SECURITY}
-                    locked={locked}
-                    fields={{
-                      agree: 'securityAgree',
-                      applicantText: 'securityApplicantText',
-                      rationale: 'securityRationale',
-                    }}
-                    values={form}
-                    errorFor={errorFor}
-                    onChange={update}
-                    guidance={<SecurityRationaleHint disclosure={hideGuidance} />}
-                  />
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        <div className={styles.divider} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>
-            Personal information check
-          </Text>
-          <div className={styles.answers}>
-            <TaskRow
-              label="Does the application, or any supporting documents, contain personal information about someone else that must be removed before publishing?"
-              required
-              locked={locked}
-              top
-            >
+      {/* No request to assess when the applicant answered "No". */}
+      {assessed && (
+        <>
+          <Card className={styles.sectionCard}>
+            <Text block className={styles.sectionHeading}>Your assessment</Text>
+            <TaskRow label="What does the request relate to?" required locked={locked} top>
               <TaskChoice
-                value={form.personalInfo}
-                options={yesNoOptions}
-                onSelect={v => update('personalInfo', v)}
+                value={form.relatesTo}
+                options={relatesOptions}
+                onSelect={v => update('relatesTo', v)}
                 locked={locked}
-                error={errorFor('personalInfo')}
+                error={errorFor('relatesTo')}
               />
             </TaskRow>
-            <PersonalInfoHint disclosure={hideGuidance} />
+          </Card>
 
-            {/* Internal only — the applicant isn't told, the information just goes. */}
-            {form.personalInfo === YES && (
-              <TaskRow label="What personal information needs to be redacted, and why?" required locked={locked} top>
-                <TaskTextarea
-                  value={form.personalInfoDetail}
-                  onChange={v => update('personalInfoDetail', v)}
-                  locked={locked}
-                  error={errorFor('personalInfoDetail')}
-                />
-              </TaskRow>
-            )}
-          </div>
-        </div>
+          {showsCommercial(form.relatesTo) && (
+            <WithholdDecision
+              heading={RELATES_COMMERCIAL}
+              locked={locked}
+              fields={{
+                agree: 'commercialAgree',
+                applicantText: 'commercialApplicantText',
+                rationale: 'commercialRationale',
+              }}
+              values={form}
+              errorFor={errorFor}
+              onChange={update}
+              guidance={<CommercialRationaleHint disclosure={hideGuidance} />}
+            />
+          )}
 
-        <div className={styles.divider} />
+          {showsSecurity(form.relatesTo) && (
+            <WithholdDecision
+              heading={RELATES_SECURITY}
+              locked={locked}
+              fields={{
+                agree: 'securityAgree',
+                applicantText: 'securityApplicantText',
+                rationale: 'securityRationale',
+              }}
+              values={form}
+              errorFor={errorFor}
+              onChange={update}
+              guidance={<SecurityRationaleHint disclosure={hideGuidance} />}
+            />
+          )}
+        </>
+      )}
 
-        <div>
-          <Text block className={styles.sectionHeading}>
-            Redact the application
-          </Text>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>
+          Personal information check
+        </Text>
+        <div className={styles.answers}>
           <TaskRow
-            label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
-            locked
+            label="Does the application, or any supporting documents, contain personal information about someone else that must be removed before publishing?"
+            required
+            locked={locked}
             top
           >
-            <UrlField
-              url={REDACT_URL}
-              href={REDACT_HREF}
-              launchLabel="Redact the application on CDP"
+            <TaskChoice
+              value={form.personalInfo}
+              options={yesNoOptions}
+              onSelect={v => update('personalInfo', v)}
+              locked={locked}
+              error={errorFor('personalInfo')}
             />
           </TaskRow>
+          <PersonalInfoHint disclosure={hideGuidance} />
+
+          {/* Internal only — the applicant isn't told, the information just goes. */}
+          {form.personalInfo === YES && (
+            <TaskRow label="What personal information needs to be redacted, and why?" required locked={locked} top>
+              <TaskTextarea
+                value={form.personalInfoDetail}
+                onChange={v => update('personalInfoDetail', v)}
+                locked={locked}
+                error={errorFor('personalInfoDetail')}
+              />
+            </TaskRow>
+          )}
         </div>
+      </Card>
 
-        <div className={styles.divider} />
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>
+          Redact the application
+        </Text>
+        <TaskRow
+          label="Select the link to redact the application. You will be able to choose which parts of the application to redact."
+          locked
+          top
+        >
+          <UrlField
+            url={REDACT_URL}
+            href={REDACT_HREF}
+            launchLabel="Redact the application on CDP"
+          />
+        </TaskRow>
+      </Card>
 
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Complete task</Text>
         {/* The task can't be completed while it's gated, so D365 renders the
             Two Options field disabled along with the rest of the locked form. */}
-        <Body1>
-          Any information for the applicant will be sent when the task is complete.
-        </Body1>
-        <Checkbox
-          label="Select to mark the task as complete"
-          checked={form.completed}
-          disabled={locked}
-          onChange={(_, data) => {
-            setPublicRegisterField('completed', Boolean(data.checked));
-            markUnsaved('publicRegister');
-          }}
-        />
+        <div className={styles.answers}>
+          <Body1>
+            Any information for the applicant will be sent when the task is complete.
+          </Body1>
+          <Checkbox
+            label="Select to mark the task as complete"
+            checked={form.completed}
+            disabled={locked}
+            onChange={(_, data) => {
+              setPublicRegisterField('completed', Boolean(data.checked));
+              markUnsaved('publicRegister');
+            }}
+          />
+        </div>
       </Card>
     </div>
   );

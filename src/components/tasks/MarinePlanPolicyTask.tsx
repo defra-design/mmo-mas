@@ -76,11 +76,10 @@ const useStyles = makeStyles({
     flexWrap: 'wrap',
     gap: tokens.spacingHorizontalL,
   },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
   },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
@@ -117,7 +116,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
   },
-  dividerLine: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   // Grey, borderless textarea matching the Site check notes / Case summary fields.
   reason: {
     width: '100%',
@@ -248,12 +246,11 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
         </div>
       </Card>
 
-      <Card className={styles.bodyCard}>
-        <div>
-          <Text block className={styles.sectionHeading}>
-            Policy and applicant's consideration
-          </Text>
-          <div className={styles.answers}>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>
+          Policy and applicant's consideration
+        </Text>
+        <div className={styles.answers}>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>Policy group</TaskFieldLabel>
               <FieldDecorations locked />
@@ -281,14 +278,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
                 </div>
               </div>
             </div>
-          </div>
         </div>
+      </Card>
 
-        <div className={styles.dividerLine} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>Your assessment</Text>
-          <div className={styles.answers}>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Your assessment</Text>
+        <div className={styles.answers}>
             <div className={styles.row}>
               {/* A locked field keeps its asterisk immediately before its padlock,
                   exactly as the real system renders a business-required field. */}
@@ -339,7 +334,6 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
                 </Field>
               </div>
             </div>
-          </div>
         </div>
       </Card>
     </div>

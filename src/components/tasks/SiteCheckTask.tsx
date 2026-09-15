@@ -39,13 +39,14 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
   },
-  sectionTitleRow: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalL },
+  coordinatesCard: {
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalXL),
+  },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -57,6 +58,11 @@ const useStyles = makeStyles({
   // none, so it needs this. Adjust to taste.
   notesRowGap: { marginTop: tokens.spacingVerticalM },
   csvLink: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalXS },
+  csvField: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
+    borderRadius: tokens.borderRadiusSmall,
+  },
   desc: {
     color: tokens.colorNeutralForeground2,
     marginTop: tokens.spacingVerticalS,
@@ -83,7 +89,6 @@ const useStyles = makeStyles({
     minWidth: '240px',
     marginLeft: tokens.spacingHorizontalS,
   },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
@@ -173,97 +178,94 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <div><Body1>Task</Body1></div>
       </Card>
 
-      <Card className={styles.bodyCard}>
-        <div className={styles.sectionTitleRow}>
-          <Text className={styles.sectionHeading}>Site coordinates</Text>
-          <Link href="#" className={styles.csvLink}>
-            <ArrowDownloadRegular /> Download CSV
-          </Link>
-        </div>
-
-        <div className={styles.divider} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>Coordinates and shape</Text>
-          <Text block className={styles.desc}>
-            Check that the coordinates accurately represent the location of the works, that the
-            shape and size are appropriate for the activity, and that the site is within MMO
-            jurisdiction.
-          </Text>
-          <div className={styles.question}>
-            <TaskFieldLabel className={styles.label}>
-              Are the coordinates and shape correct and appropriate?
-            </TaskFieldLabel>
-            <FieldDecorations required />
-            <Field
-              className={styles.control}
-              validationState={errorFor('coordinatesOk') ? 'error' : 'none'}
-              validationMessage={errorFor('coordinatesOk')}
-              validationMessageIcon={<DismissCircleRegular />}
-            >
-              <OutcomeDropdown
-                value={form.coordinatesOk}
-                options={['Yes', 'No']}
-                onSelect={v => {
-                  setField('coordinatesOk', v);
-                  markUnsaved('siteCheck');
-                }}
-              />
-            </Field>
+      <Card className={mergeClasses(styles.sectionCard, styles.coordinatesCard)}>
+        <div className={styles.question}>
+          <TaskFieldLabel className={styles.label}>Site coordinates</TaskFieldLabel>
+          <FieldDecorations />
+          <div className={mergeClasses(styles.control, styles.csvField)}>
+            <Link href="#" className={styles.csvLink}>
+              <ArrowDownloadRegular /> Download CSV
+            </Link>
           </div>
         </div>
+      </Card>
 
-        <div className={styles.divider} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>Site located in the Water Framework Directive assessment (WFD) area</Text>
-          <Text block className={styles.desc}>
-            Confirm whether the site is within the WFD assessment area. Within one nautical mile
-            (1.85km) of the low water line, or in a tidal river or estuary - including the shore
-            between low and Mean High Water Springs.
-          </Text>
-          <div className={styles.question}>
-            <TaskFieldLabel className={styles.label}>
-              Is the site within the WFD assessment area?
-            </TaskFieldLabel>
-            <FieldDecorations required />
-            <Field
-              className={styles.control}
-              validationState={errorFor('withinMile') ? 'error' : 'none'}
-              validationMessage={errorFor('withinMile')}
-              validationMessageIcon={<DismissCircleRegular />}
-            >
-              <OutcomeDropdown
-                value={form.withinMile}
-                options={['Yes', 'No']}
-                onSelect={v => {
-                  setField('withinMile', v);
-                  markUnsaved('siteCheck');
-                }}
-              />
-            </Field>
-          </div>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Coordinates and shape</Text>
+        <Text block className={styles.desc}>
+          Check that the coordinates accurately represent the location of the works, that the
+          shape and size are appropriate for the activity, and that the site is within MMO
+          jurisdiction.
+        </Text>
+        <div className={styles.question}>
+          <TaskFieldLabel className={styles.label}>
+            Are the coordinates and shape correct and appropriate?
+          </TaskFieldLabel>
+          <FieldDecorations required />
+          <Field
+            className={styles.control}
+            validationState={errorFor('coordinatesOk') ? 'error' : 'none'}
+            validationMessage={errorFor('coordinatesOk')}
+            validationMessageIcon={<DismissCircleRegular />}
+          >
+            <OutcomeDropdown
+              value={form.coordinatesOk}
+              options={['Yes', 'No']}
+              onSelect={v => {
+                setField('coordinatesOk', v);
+                markUnsaved('siteCheck');
+              }}
+            />
+          </Field>
         </div>
+      </Card>
 
-        <div className={styles.divider} />
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Site located in the Water Framework Directive assessment (WFD) area</Text>
+        <Text block className={styles.desc}>
+          Confirm whether the site is within the WFD assessment area. Within one nautical mile
+          (1.85km) of the low water line, or in a tidal river or estuary - including the shore
+          between low and Mean High Water Springs.
+        </Text>
+        <div className={styles.question}>
+          <TaskFieldLabel className={styles.label}>
+            Is the site within the WFD assessment area?
+          </TaskFieldLabel>
+          <FieldDecorations required />
+          <Field
+            className={styles.control}
+            validationState={errorFor('withinMile') ? 'error' : 'none'}
+            validationMessage={errorFor('withinMile')}
+            validationMessageIcon={<DismissCircleRegular />}
+          >
+            <OutcomeDropdown
+              value={form.withinMile}
+              options={['Yes', 'No']}
+              onSelect={v => {
+                setField('withinMile', v);
+                markUnsaved('siteCheck');
+              }}
+            />
+          </Field>
+        </div>
+      </Card>
 
-        <div>
-          <Text block className={styles.sectionHeading}>Notes from your site check</Text>
-          <div className={mergeClasses(styles.question, styles.notesRowGap)}>
-            <Text className={styles.label}>Record anything from your site check that is relevant to later stages of the assessment.</Text>
-            <FieldDecorations />
-            <Field className={styles.control}>
-              <Textarea
-                className={styles.textarea}
-                appearance="filled-lighter"
-                value={form.notes}
-                onChange={(_, d) => setField('notes', d.value)}
-                onBlur={() => markUnsaved('siteCheck')}
-                resize="vertical"
-                rows={5}
-              />
-            </Field>
-          </div>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Notes from your site check</Text>
+        <div className={mergeClasses(styles.question, styles.notesRowGap)}>
+          <Text className={styles.label}>Record anything from your site check that is relevant to later stages of the assessment.</Text>
+          <FieldDecorations />
+          <Field className={styles.control}>
+            <Textarea
+              className={styles.textarea}
+              appearance="filled-lighter"
+              value={form.notes}
+              onChange={(_, d) => setField('notes', d.value)}
+              onBlur={() => markUnsaved('siteCheck')}
+              resize="vertical"
+              rows={5}
+            />
+          </Field>
         </div>
       </Card>
     </div>
