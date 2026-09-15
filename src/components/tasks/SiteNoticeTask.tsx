@@ -42,12 +42,6 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
-    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
-  },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
     fontSize: tokens.fontSizeBase300,
@@ -152,15 +146,13 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
         <div><Body1>Task</Body1></div>
       </Card>
 
-      <Card className={styles.bodyCard}>
-        <SiteNoticeAssessment
-          form={form}
-          proposedWorks={completedFixture ? COMPLETED_PROPOSED_WORKS : PROPOSED_WORKS}
-          locked={locked}
-          errorFor={errorFor}
-          onChange={update}
-        />
-      </Card>
+      <SiteNoticeAssessment
+        form={form}
+        proposedWorks={completedFixture ? COMPLETED_PROPOSED_WORKS : PROPOSED_WORKS}
+        locked={locked}
+        errorFor={errorFor}
+        onChange={update}
+      />
     </div>
   );
 }

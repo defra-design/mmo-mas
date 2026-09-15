@@ -36,11 +36,10 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
   },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
@@ -97,7 +96,6 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalS,
     '& li': { lineHeight: tokens.lineHeightBase300 },
   },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
   // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
   savedLabel: {
@@ -159,10 +157,9 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
         <div><Body1>Task</Body1></div>
       </Card>
 
-      <Card className={styles.bodyCard}>
-        <div>
-          <Text block className={styles.sectionHeading}>Applicant's answers</Text>
-          <div className={styles.answers}>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Applicant's answers</Text>
+        <div className={styles.answers}>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
                 Are your proposed works within one nautical mile (1.85km) of the low-water line, or in a
@@ -220,14 +217,12 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                 </div>
               </div>
             </div>
-          </div>
         </div>
+      </Card>
 
-        <div className={styles.divider} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>WFD review</Text>
-          <div className={mergeClasses(styles.row, styles.reviewRow)}>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>WFD review</Text>
+        <div className={mergeClasses(styles.row, styles.reviewRow)}>
             <TaskFieldLabel className={mergeClasses(styles.label, styles.reviewLabel)}>
               Is the WFD section complete and acceptable?
             </TaskFieldLabel>
@@ -258,7 +253,6 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                 </Field>
               )}
             </div>
-          </div>
         </div>
       </Card>
     </div>

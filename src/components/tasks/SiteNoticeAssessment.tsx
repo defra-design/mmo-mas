@@ -1,4 +1,4 @@
-import { makeStyles, shorthands, tokens, Text } from '@fluentui/react-components';
+import { Card, makeStyles, shorthands, tokens, Text } from '@fluentui/react-components';
 import type { SiteNoticeForm } from '../../context/TaskContext';
 import { SITE_NOTICE, NO_NOTICES, publicNoticeOptions } from '../../utils/publicNoticeRequirement';
 import TaskChoice from './TaskChoice';
@@ -9,6 +9,11 @@ import { GroupsHint, SummaryHint } from './siteNoticeHints';
 import { groupOptions, type SiteNoticeField } from './siteNoticeFields';
 
 const useStyles = makeStyles({
+  sectionCard: {
+    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
+    display: 'flex',
+    flexDirection: 'column',
+  },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -20,7 +25,6 @@ const useStyles = makeStyles({
     marginTop: `calc(0px - ${tokens.spacingVerticalS})`,
     marginBottom: tokens.spacingVerticalL,
   },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
 });
 
 type Props = {
@@ -42,7 +46,7 @@ export default function SiteNoticeAssessment({
 
   return (
     <>
-      <div>
+      <Card className={styles.sectionCard}>
         <Text block className={styles.sectionHeading}>Public notice requirement</Text>
         <div className={styles.answers}>
           <TaskRow
@@ -76,13 +80,11 @@ export default function SiteNoticeAssessment({
             </TaskRow>
           )}
         </div>
-      </div>
+      </Card>
 
       {form.needsNotice === SITE_NOTICE && (
         <>
-          <div className={styles.divider} />
-
-          <div>
+          <Card className={styles.sectionCard}>
             <Text block className={styles.sectionHeading}>Site notice summary</Text>
             <div className={styles.answers}>
               <TaskRow label="Applicant's proposed works summary" locked top>
@@ -98,11 +100,9 @@ export default function SiteNoticeAssessment({
               </TaskRow>
             </div>
             <SummaryHint />
-          </div>
+          </Card>
 
-          <div className={styles.divider} />
-
-          <div>
+          <Card className={styles.sectionCard}>
             <Text block className={styles.sectionHeading}>Who the site notice is for</Text>
             <Text block className={styles.desc}>
               The applicant sees suggested notice locations for the group you choose.
@@ -122,7 +122,7 @@ export default function SiteNoticeAssessment({
               />
             </TaskRow>
             <GroupsHint />
-          </div>
+          </Card>
         </>
       )}
     </>

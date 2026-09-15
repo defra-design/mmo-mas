@@ -48,7 +48,7 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
@@ -108,7 +108,6 @@ const useStyles = makeStyles({
   completeRow: {
     display: 'flex',
     alignItems: 'flex-start',
-    paddingTop: tokens.spacingVerticalL,
   },
 });
 
@@ -185,7 +184,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         <div><Body1>Task</Body1></div>
       </Card>
 
-      <Card className={styles.bodyCard}>
+      <Card className={styles.sectionCard}>
         <div>
           <Text block className={styles.sectionHeading}>Consultees</Text>
           <Text block className={styles.desc}>
@@ -267,6 +266,10 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
           </Table>
         </div>
 
+      </Card>
+
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Complete task</Text>
         <div className={styles.completeRow}>
           {locked && <FieldDecorations locked />}
           <Checkbox

@@ -37,11 +37,10 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
   },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
@@ -54,12 +53,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalXXS,
   },
-  locationGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
-  },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   completeRow: { display: 'flex', alignItems: 'flex-start' },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
@@ -172,8 +165,8 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
       </Card>
 
       {available && (
-        <Card className={styles.bodyCard}>
-          <div>
+        <>
+          <Card className={styles.sectionCard}>
             <Text block className={styles.sectionHeading}>Site notice evidence</Text>
             <div className={styles.intro}>
               <Body1>The applicant submitted evidence on 20 August 2026.</Body1>
@@ -181,11 +174,10 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
                 <Body1>The applicant resubmitted evidence on 27 August 2026.</Body1>
               )}
             </div>
-          </div>
+          </Card>
 
           {publicNoticeEvidenceLocations.map((location, index) => (
-            <div className={styles.locationGroup} key={location.name}>
-              <div className={styles.divider} />
+            <Card className={styles.sectionCard} key={location.name}>
               <PublicNoticeEvidenceLocation
                 number={index + 1}
                 location={location}
@@ -202,26 +194,28 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
                   isResubmission && index === 0 ? replacementPublicNoticeEvidence : undefined
                 }
               />
-            </div>
+            </Card>
           ))}
 
-          <div className={styles.divider} />
-          <div className={styles.completeRow}>
-            <Checkbox
-              label="Select to mark the task as complete"
-              checked={completed}
-              onChange={(_, data) => {
-                if (isResubmission) {
-                  setPublicNoticeEvidenceResubmissionCompleted(Boolean(data.checked));
-                  markUnsaved('publicNoticeEvidenceResubmission');
-                } else {
-                  setPublicNoticeEvidenceCompleted(Boolean(data.checked));
-                  markUnsaved('publicNoticeEvidence');
-                }
-              }}
-            />
-          </div>
-        </Card>
+          <Card className={styles.sectionCard}>
+            <Text block className={styles.sectionHeading}>Complete task</Text>
+            <div className={styles.completeRow}>
+              <Checkbox
+                label="Select to mark the task as complete"
+                checked={completed}
+                onChange={(_, data) => {
+                  if (isResubmission) {
+                    setPublicNoticeEvidenceResubmissionCompleted(Boolean(data.checked));
+                    markUnsaved('publicNoticeEvidenceResubmission');
+                  } else {
+                    setPublicNoticeEvidenceCompleted(Boolean(data.checked));
+                    markUnsaved('publicNoticeEvidence');
+                  }
+                }}
+              />
+            </div>
+          </Card>
+        </>
       )}
     </div>
   );
