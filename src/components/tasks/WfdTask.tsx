@@ -138,7 +138,6 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =
     taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment) === 'Cannot start yet';
-  const hasAssessment = Boolean(ASSESSMENT_DOCUMENT);
   // Set on a failed save, cleared as soon as the field is given a value.
   const [errors, setErrors] = useState<(keyof WfdForm)[]>([]);
 
@@ -147,7 +146,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
 
   const handleSave = () => {
     const missing: (keyof WfdForm)[] = [];
-    if (hasAssessment && !wfdForm.initialConsiderations.trim()) {
+    if (wfdForm.review === 'Yes' && !wfdForm.initialConsiderations.trim()) {
       missing.push('initialConsiderations');
     }
     if (!wfdForm.review.trim()) missing.push('review');
@@ -271,7 +270,13 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                     options={reviewOptions}
                     onSelect={v => {
                       setWfdReview(v);
-                      setErrors(previous => previous.filter(field => field !== 'review'));
+                      setErrors(previous =>
+                        previous.filter(
+                          field =>
+                            field !== 'review' &&
+                            !(field === 'initialConsiderations' && v !== 'Yes'),
+                        ),
+                      );
                       markUnsaved('wfdAssessment');
                     }}
                   />
@@ -280,7 +285,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
             </div>
           </div>
 
-          {hasAssessment && (
+          {wfdForm.review === 'Yes' && (
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
                 Record your considerations
