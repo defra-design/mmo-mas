@@ -23,6 +23,7 @@ import {
 } from '../../utils/publicNoticeEvidence';
 import { notificationMessage } from '../../utils/validationMessages';
 import PublicNoticeEvidenceLocation from './PublicNoticeEvidenceLocation';
+import TaskRow from './TaskRow';
 import {
   publicNoticeEvidenceLocations,
   replacementPublicNoticeEvidence,
@@ -53,7 +54,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: tokens.spacingVerticalXXS,
   },
-  completeRow: { display: 'flex', alignItems: 'flex-start' },
   savedLabel: {
     marginLeft: tokens.spacingHorizontalXS,
     fontSize: tokens.fontSizeBase300,
@@ -199,9 +199,9 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
 
           <Card className={styles.sectionCard}>
             <Text block className={styles.sectionHeading}>Complete task</Text>
-            <div className={styles.completeRow}>
+            <TaskRow label="Select to mark the task as complete">
               <Checkbox
-                label="Select to mark the task as complete"
+                aria-label="Select to mark the task as complete"
                 checked={completed}
                 onChange={(_, data) => {
                   if (isResubmission) {
@@ -213,7 +213,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
                   }
                 }}
               />
-            </div>
+            </TaskRow>
           </Card>
         </>
       )}

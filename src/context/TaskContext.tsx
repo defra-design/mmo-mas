@@ -31,6 +31,7 @@ export interface SiteCheckForm {
 
 export interface WfdForm {
   review: string;
+  initialConsiderations: string;
 }
 
 // A caseworker's assessment of one marine plan policy.
@@ -221,7 +222,7 @@ const initialState: PersistedState = {
     publicNoticeEvidenceResubmission: 'Resubmitted - to review',
   },
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
-  wfdForm: { review: '' },
+  wfdForm: { review: '', initialConsiderations: '' },
   mppForm: {},
   prepForConsulteeForm: [emptyConsulteeRow()],
   prepForConsulteeMeta: { completed: false },
@@ -431,6 +432,7 @@ interface TaskContextValue {
   setTasksOnAllTabs: (value: boolean) => void;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
+  setWfdInitialConsiderations: (value: string) => void;
   setMppField: (code: string, field: keyof MppAnswer, value: string) => void;
   setPrepForConsulteeRow: (
     id: string,
@@ -530,6 +532,12 @@ export function TaskProvider({ children }: PropsWithChildren) {
 
   const setWfdReview = (value: string) =>
     setState(prev => ({ ...prev, wfdForm: { ...prev.wfdForm, review: value } }));
+
+  const setWfdInitialConsiderations = (value: string) =>
+    setState(prev => ({
+      ...prev,
+      wfdForm: { ...prev.wfdForm, initialConsiderations: value },
+    }));
 
   // Writes one field of one policy's assessment (live, like setSiteCheckField). A
   // policy only counts as assessed once it has both an outcome and a reason — the
@@ -794,6 +802,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setTasksOnAllTabs,
         setSiteCheckField,
         setWfdReview,
+        setWfdInitialConsiderations,
         setMppField,
         setPrepForConsulteeRow,
         setPrepForConsulteeCompleted,

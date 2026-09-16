@@ -293,15 +293,17 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           <Body1>
             Any information for the applicant will be sent when the task is complete.
           </Body1>
-          <Checkbox
-            label="Select to mark the task as complete"
-            checked={form.completed}
-            disabled={locked}
-            onChange={(_, data) => {
-              setPublicRegisterField('completed', Boolean(data.checked));
-              markUnsaved('publicRegister');
-            }}
-          />
+          <TaskRow label="Select to mark the task as complete" locked={locked}>
+            <Checkbox
+              aria-label="Select to mark the task as complete"
+              checked={form.completed}
+              disabled={locked}
+              onChange={(_, data) => {
+                setPublicRegisterField('completed', Boolean(data.checked));
+                markUnsaved('publicRegister');
+              }}
+            />
+          </TaskRow>
         </div>
       </Card>
     </div>
