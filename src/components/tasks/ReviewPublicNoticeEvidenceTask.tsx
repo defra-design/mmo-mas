@@ -81,12 +81,14 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
     saved,
     setPublicNoticeEvidenceCompleted,
     setPublicNoticeEvidenceResubmissionCompleted,
+    setPublicNoticeEvidenceResubmissionField,
     setPublicNoticeEvidenceLocationField,
     markUnsaved,
     savePublicNoticeEvidence,
     savePublicNoticeEvidenceResubmission,
   } = useTasks();
   const [errors, setErrors] = useState<ReviewError[]>([]);
+  const [resubmissionErrors, setResubmissionErrors] = useState<ReviewField[]>([]);
   const available = hasSubmittedPublicNoticeEvidence(caseId);
   const isResubmission = hasResubmittedPublicNoticeEvidence(caseId);
   const reviews = isResubmission
@@ -102,6 +104,16 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
 
   const handleSave = () => {
     if (isResubmission) {
+      if (publicNoticeEvidenceResubmissionMeta.completed) {
+        const review = publicNoticeEvidenceResubmissionMeta.review;
+        const missing: ReviewField[] = [];
+        if (!review.decision.trim()) missing.push('decision');
+        if (review.decision === 'No' && !review.rejectionComments.trim()) {
+          missing.push('rejectionComments');
+        }
+        setResubmissionErrors(missing);
+        if (missing.length) return;
+      }
       savePublicNoticeEvidenceResubmission();
       navigate(caseUrl);
       return;
@@ -120,6 +132,17 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
     }
     savePublicNoticeEvidence();
     navigate(caseUrl);
+  };
+
+  const updateResubmission = (field: ReviewField, value: string) => {
+    setPublicNoticeEvidenceResubmissionField(field, value);
+    setResubmissionErrors(previous =>
+      previous.filter(error => {
+        if (error === field) return false;
+        return !(field === 'decision' && value !== 'No' && error === 'rejectionComments');
+      }),
+    );
+    markUnsaved('publicNoticeEvidenceResubmission');
   };
 
   const updateLocation = (index: number, field: ReviewField, value: string) => {
@@ -142,9 +165,16 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
         </FormNotification>
       )}
 
-      {errors.length > 0 && (
+      {(errors.length > 0 || resubmissionErrors.length > 0) && (
         <FormNotification level="error">
-          {notificationMessage(errors.map(errorName))}
+          {notificationMessage([
+            ...errors.map(errorName),
+            ...resubmissionErrors.map(field =>
+              field === 'decision'
+                ? 'Location 1 resubmitted photograph acceptance'
+                : 'Location 1 resubmitted photograph comments',
+            ),
+          ])}
         </FormNotification>
       )}
 
@@ -192,6 +222,16 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
                 reviewLocked={isResubmission}
                 replacementEvidence={
                   isResubmission && index === 0 ? replacementPublicNoticeEvidence : undefined
+                }
+                replacementReview={
+                  isResubmission && index === 0
+                    ? publicNoticeEvidenceResubmissionMeta.review
+                    : undefined
+                }
+                replacementDecisionError={resubmissionErrors.includes('decision')}
+                replacementCommentsError={resubmissionErrors.includes('rejectionComments')}
+                onReplacementChange={
+                  isResubmission && index === 0 ? updateResubmission : undefined
                 }
               />
             </Card>
