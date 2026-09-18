@@ -212,7 +212,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                   <TableRow key={row.id} className={styles.row}>
                     <TableCell className={styles.cell} style={{ width: COLS.organisation }}>
                       <div className={styles.cellField}>
-                        <FieldDecorations locked={locked} />
+                        {locked && <FieldDecorations locked />}
                         <div className={styles.cellControl}>
                           {/* A read-only lookup has no search control in D365 — just
                               the record's name on the same grey background. */}
@@ -236,7 +236,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                     </TableCell>
                     <TableCell className={styles.cell} style={{ width: COLS.notes }}>
                       <div className={styles.cellField}>
-                        <FieldDecorations locked={locked} />
+                        {locked && <FieldDecorations locked />}
                         <Field className={styles.cellControl}>
                           <Textarea
                             className={mergeClasses(
