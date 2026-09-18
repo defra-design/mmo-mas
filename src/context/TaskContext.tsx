@@ -44,10 +44,12 @@ export interface MppAnswer {
 export type MppForm = Record<string, MppAnswer>;
 
 // One row in the Prep for consultee editable subgrid. Maps to a related
-// "Consultee" custom-table record: Organisation (lookup) + Notes (multiline text).
+// "Consultee" custom-table record: Organisation (lookup), Consultation type
+// (Choice) and Notes (multiline text revealed for a consultation request).
 export interface ConsulteeRow {
   id: string;
   organisation: string;
+  consultationType: string;
   notes: string;
 }
 
@@ -203,6 +205,7 @@ function emptyConsulteeRow(): ConsulteeRow {
   return {
     id: crypto.randomUUID(),
     organisation: '',
+    consultationType: '',
     notes: '',
   };
 }
@@ -383,7 +386,19 @@ function loadState(): PersistedState {
 
       const prepRows: PrepForConsulteeForm =
         Array.isArray(parsed.prepForConsulteeForm) && parsed.prepForConsulteeForm.length > 0
-          ? parsed.prepForConsulteeForm
+          ? parsed.prepForConsulteeForm.map((row: Partial<ConsulteeRow>) => ({
+              id: typeof row.id === 'string' ? row.id : crypto.randomUUID(),
+              organisation: typeof row.organisation === 'string' ? row.organisation : '',
+              // Before this Choice field existed, every consultee row behaved as
+              // a request and exposed Notes. Preserve that meaning on hydration.
+              consultationType:
+                typeof row.consultationType === 'string'
+                  ? row.consultationType
+                  : row.organisation?.trim()
+                    ? 'Request for consultation'
+                    : '',
+              notes: typeof row.notes === 'string' ? row.notes : '',
+            }))
           : initialState.prepForConsulteeForm;
       return {
         tasks,
@@ -617,8 +632,10 @@ export function TaskProvider({ children }: PropsWithChildren) {
         while (rows.length > 1) {
           const a = rows[rows.length - 1];
           const b = rows[rows.length - 2];
-          const aEmpty = !a.organisation.trim() && !a.notes.trim();
-          const bEmpty = !b.organisation.trim() && !b.notes.trim();
+          const aEmpty =
+            !a.organisation.trim() && !a.consultationType.trim() && !a.notes.trim();
+          const bEmpty =
+            !b.organisation.trim() && !b.consultationType.trim() && !b.notes.trim();
           if (aEmpty && bEmpty) rows = rows.slice(0, -1);
           else break;
         }
