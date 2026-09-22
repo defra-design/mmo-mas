@@ -41,7 +41,7 @@ import {
   DismissRegular,
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
-import { taskStatusForCase } from '../utils/publicNoticeEvidence';
+import { siteCheckCompleteForCase, taskStatusForCase } from '../utils/publicNoticeEvidence';
 import TruncatedCell from './TruncatedCell';
 import { mppAssessmentStatus, mppTaskStatus, policies } from '../utils/marinePlanPolicies';
 
@@ -79,7 +79,7 @@ type Filters = Partial<Record<ColKey, string | string[]>>;
 // Group and Status filter by an "equals one of" checkbox list.
 const EQUALS_OPTIONS: Partial<Record<ColKey, string[]>> = {
   group: Array.from(new Set(policies.map(p => p.group))),
-  status: ['To do', 'Done'],
+  status: ['Cannot start yet', 'To do', 'Done'],
 };
 
 const useStyles = makeStyles({
@@ -190,8 +190,9 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
   const [sort, setSort] = useState<SortState>({ key: 'group', dir: 'asc' });
   const [filters, setFilters] = useState<Filters>({});
 
-  const allPoliciesDone =
-    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) === 'Done';
+  const taskStatus = taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies);
+  const locked = !siteCheckCompleteForCase(caseId, tasks);
+  const allPoliciesDone = !locked && taskStatus === 'Done';
 
   // Build the display rows (with the computed lifecycle status) once, then filter
   // and sort them so both operate on what the caseworker actually sees.
@@ -202,7 +203,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
       group: policy.group,
       status: allPoliciesDone
         ? mppTaskStatus('Done')
-        : mppAssessmentStatus(mppForm[policy.code]),
+        : mppAssessmentStatus(mppForm[policy.code], locked),
     }));
 
     const filtered = built.filter(r =>
@@ -218,7 +219,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
       return sort.dir === 'asc' ? cmp : -cmp;
     });
     return sorted;
-  }, [allPoliciesDone, mppForm, filters, sort]);
+  }, [allPoliciesDone, locked, mppForm, filters, sort]);
 
   const total = rows.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -437,15 +438,17 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
           </TableHeader>
           <tbody>
             {pageRows.map(row => {
-              const openPolicy = () =>
-                navigate(
-                  `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${row.code}`
-                );
+              const openPolicy = locked
+                ? undefined
+                : () =>
+                    navigate(
+                      `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${row.code}`
+                    );
               return (
                 <TableRow key={row.code} className={styles.row}>
                   <TableCell style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
-                    {/* Primary column is a hyperlink that opens the record — OOB
-                        read-only grid behaviour; other cells stay plain text. */}
+                    {/* The primary column opens the record once its Site check
+                        prerequisite is complete; gated rows remain plain text. */}
                     <TruncatedCell
                       value={row.label}
                       onClick={openPolicy}

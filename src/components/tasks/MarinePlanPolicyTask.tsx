@@ -1,6 +1,6 @@
 // src/components/tasks/MarinePlanPolicyTask.tsx
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
   makeStyles,
   shorthands,
@@ -30,7 +30,7 @@ import {
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
-import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
+import { siteCheckCompleteForCase } from '../../utils/publicNoticeEvidence';
 import { policies, policyIndex } from '../../utils/marinePlanPolicies';
 
 const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required'];
@@ -143,12 +143,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   // record — a locked one has no Save command to fail against.
   const [errors, setErrors] = useState<MppField[]>([]);
 
-  // Policies always open, but before Site check their assessment fields are
-  // gated: read-only, padlocked, with the Outcome reading "Cannot start yet".
-  // Completing Site check unlocks them (marinePlanPolicies → "To do").
-  const locked =
-    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) ===
-    'Cannot start yet';
+  const locked = !siteCheckCompleteForCase(caseId, tasks);
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   // Back and Save and close both return to the tab the policy was opened from,
@@ -156,6 +151,11 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   // tab, and going back restores the case form with that tab still active.
   const returnToCase = () =>
     navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
+
+  // Gated MPP records are not openable from the UI. Apply the same guard to a
+  // pasted/bookmarked task URL so Site check cannot be bypassed.
+  if (locked) return <Navigate to={caseUrl} replace />;
+
   const index = policyCode ? policyIndex(policyCode) : -1;
   const policy = index >= 0 ? policies[index] : undefined;
 
