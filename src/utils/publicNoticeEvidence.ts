@@ -36,3 +36,7 @@ export function taskStatusForCase(
   if (task === 'publicNoticeEvidence') return status;
   return status === 'Cannot start yet' ? 'To do' : status;
 }
+
+export function siteCheckCompleteForCase(caseId: string, tasks: TaskState): boolean {
+  return taskStatusForCase(caseId, 'siteCheck', tasks.siteCheck) === 'Done';
+}

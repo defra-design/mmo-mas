@@ -1,7 +1,7 @@
 // src/context/TaskContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
-import { policyCount } from '../utils/marinePlanPolicies';
+import { allMppAssessmentsComplete } from '../utils/marinePlanPolicies';
 import { loadPublicNoticeRequirement, SITE_NOTICE } from '../utils/publicNoticeRequirement';
 
 export type TaskStatus =
@@ -305,16 +305,16 @@ function loadState(): PersistedState {
         ...parsed.siteNoticeForm,
         needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
       };
+      const mppForm: MppForm = { ...initialState.mppForm, ...parsed.mppForm };
       const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
-      // MPP outcomes have always belonged in mppForm. If older saved data put an
-      // outcome label into the task status, return it to the lifecycle instead.
-      if (
-        tasks.marinePlanPolicies !== 'Done' &&
-        tasks.marinePlanPolicies !== 'To do' &&
-        tasks.marinePlanPolicies !== 'Cannot start yet'
-      ) {
-        tasks.marinePlanPolicies = 'To do';
-      }
+      // Site check is the MPP prerequisite. Re-derive the roll-up on hydration
+      // so stale or legacy task-status values cannot expose assessments early.
+      tasks.marinePlanPolicies =
+        tasks.siteCheck !== 'Done'
+          ? 'Cannot start yet'
+          : allMppAssessmentsComplete(mppForm)
+            ? 'Done'
+            : 'To do';
       // Earlier saved prototype data used the generic To do label when
       // replacement evidence returned to the officer. Adopt the more specific
       // resubmission status without changing reviews already in progress or done.
@@ -413,7 +413,7 @@ function loadState(): PersistedState {
         tasks,
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
-        mppForm: { ...initialState.mppForm, ...parsed.mppForm },
+        mppForm,
         prepForConsulteeForm: prepRows,
         prepForConsulteeMeta: {
           ...initialState.prepForConsulteeMeta,
@@ -602,19 +602,15 @@ export function TaskProvider({ children }: PropsWithChildren) {
         ...prev.mppForm,
         [code]: { ...existing, [field]: value },
       };
-      const allAssessed =
-        policyCount > 0 &&
-        Object.values(mppForm).filter(a => a.outcome.trim() && a.reason.trim()).length ===
-          policyCount;
-      // Emptying a field on a policy that had been assessed takes the task back off
-      // Done. Any other status ("To do", or "Cannot start yet" on a locked case) is
-      // left alone — only the Done roll-up is derived from the answers.
-      const current = prev.tasks.marinePlanPolicies;
-      const marinePlanPolicies = allAssessed
-        ? 'Done'
-        : current === 'Done'
-          ? 'To do'
-          : current;
+      const allAssessed = allMppAssessmentsComplete(mppForm);
+      // Site check remains authoritative even if stale form data exists. Once it
+      // is complete, the MPP roll-up is derived from the 41 assessments.
+      const marinePlanPolicies =
+        prev.tasks.siteCheck !== 'Done'
+          ? 'Cannot start yet'
+          : allAssessed
+            ? 'Done'
+            : 'To do';
       return {
         ...prev,
         mppForm,
@@ -741,7 +737,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         ...prev.tasks,
         siteCheck: 'Done',
         wfdAssessment: 'To do',
-        marinePlanPolicies: 'To do',
+        marinePlanPolicies: allMppAssessmentsComplete(prev.mppForm) ? 'Done' : 'To do',
         prepForConsultee: 'To do',
         publicRegister: 'To do',
         siteNotice: 'To do',
