@@ -55,8 +55,8 @@ const PAGE_SIZE = 50;
 // Policy is deliberately narrower than its longest label: it holds the sum
 // (MIN_WIDTH) down so the horizontal scrollbar appears later on the narrow
 // 10014 tab, and over-long labels truncate to an ellipsis with a hover title.
-const COLS = { policy: 290, group: 180, status: 140, outcome: 180 };
-const MIN_WIDTH = COLS.policy + COLS.group + COLS.status + COLS.outcome;
+const COLS = { policy: 290, group: 180, status: 180 };
+const MIN_WIDTH = COLS.policy + COLS.group + COLS.status;
 
 // Left padding shared by every header and body cell so the heading text and the
 // cell values line up in one vertical edge. Applied on the cell (not the content)
@@ -68,21 +68,18 @@ const COLUMNS: { key: ColKey; name: string; width: number }[] = [
   { key: 'label', name: 'Policy', width: COLS.policy },
   { key: 'group', name: 'Group', width: COLS.group },
   { key: 'status', name: 'Status', width: COLS.status },
-  { key: 'outcome', name: 'Outcome', width: COLS.outcome },
 ];
 
-type ColKey = 'label' | 'group' | 'status' | 'outcome';
+type ColKey = 'label' | 'group' | 'status';
 type SortState = { key: ColKey; dir: 'asc' | 'desc' };
 // A string is a "contains" text filter (Policy); a string[] is an "equals one of"
-// filter (Group, Status and Outcome — matching the Case list Status column).
+// filter (Group and Status — matching the Case list Status column).
 type Filters = Partial<Record<ColKey, string | string[]>>;
 
-// Group, Status and Outcome filter by an "equals one of" checkbox list. Keeping
-// Status and Outcome as separate columns mirrors separate native D365 choices.
+// Group and Status filter by an "equals one of" checkbox list.
 const EQUALS_OPTIONS: Partial<Record<ColKey, string[]>> = {
   group: Array.from(new Set(policies.map(p => p.group))),
   status: ['To do', 'Done'],
-  outcome: ['Compliant', 'Non-compliant', 'Consultation required'],
 };
 
 const useStyles = makeStyles({
@@ -162,7 +159,7 @@ const useStyles = makeStyles({
     ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalS),
   },
   filterActions: { display: 'flex', gap: tokens.spacingHorizontalS },
-  // Vertical stack of checkboxes in the Group / Outcome "Equals" filter.
+  // Vertical stack of checkboxes in the Group / Status "Equals" filter.
   checkboxList: {
     display: 'flex',
     flexDirection: 'column',
@@ -206,7 +203,6 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
       status: allPoliciesDone
         ? mppTaskStatus('Done')
         : mppAssessmentStatus(mppForm[policy.code]),
-      outcome: mppForm[policy.code]?.outcome ?? '',
     }));
 
     const filtered = built.filter(r =>
@@ -460,9 +456,6 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
                   </TableCell>
                   <TableCell style={{ width: COLS.status, paddingLeft: CELL_PAD_LEFT }}>
                     <TruncatedCell value={row.status} className={styles.statusText} />
-                  </TableCell>
-                  <TableCell style={{ width: COLS.outcome, paddingLeft: CELL_PAD_LEFT }}>
-                    <TruncatedCell value={row.outcome} />
                   </TableCell>
                 </TableRow>
               );
