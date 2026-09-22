@@ -306,6 +306,15 @@ function loadState(): PersistedState {
         needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
       };
       const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
+      // MPP outcomes have always belonged in mppForm. If older saved data put an
+      // outcome label into the task status, return it to the lifecycle instead.
+      if (
+        tasks.marinePlanPolicies !== 'Done' &&
+        tasks.marinePlanPolicies !== 'To do' &&
+        tasks.marinePlanPolicies !== 'Cannot start yet'
+      ) {
+        tasks.marinePlanPolicies = 'To do';
+      }
       // Earlier saved prototype data used the generic To do label when
       // replacement evidence returned to the officer. Adopt the more specific
       // resubmission status without changing reviews already in progress or done.

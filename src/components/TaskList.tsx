@@ -26,6 +26,7 @@ import {
   publicNoticeEvidenceStatusForCase,
   taskStatusForCase,
 } from '../utils/publicNoticeEvidence';
+import { mppTaskStatus } from '../utils/marinePlanPolicies';
 
 const useStyles = makeStyles({
   heading: {
@@ -121,7 +122,9 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
     rows.push({
       key: 'mpp',
       name: 'Marine plan policies',
-      status: taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies),
+      status: mppTaskStatus(
+        taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies),
+      ),
     });
   }
 

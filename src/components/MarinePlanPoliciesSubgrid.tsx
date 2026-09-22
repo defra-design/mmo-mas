@@ -43,7 +43,7 @@ import {
 import { useTasks } from '../context/TaskContext';
 import { taskStatusForCase } from '../utils/publicNoticeEvidence';
 import TruncatedCell from './TruncatedCell';
-import { policies } from '../utils/marinePlanPolicies';
+import { mppAssessmentStatus, mppTaskStatus, policies } from '../utils/marinePlanPolicies';
 
 // OOB subgrids page their records, and "records per page" is set per subgrid on
 // the form. 50 is a standard value and puts all 41 policies on one page.
@@ -55,8 +55,8 @@ const PAGE_SIZE = 50;
 // Policy is deliberately narrower than its longest label: it holds the sum
 // (MIN_WIDTH) down so the horizontal scrollbar appears later on the narrow
 // 10014 tab, and over-long labels truncate to an ellipsis with a hover title.
-const COLS = { policy: 290, group: 180, outcome: 180 };
-const MIN_WIDTH = COLS.policy + COLS.group + COLS.outcome;
+const COLS = { policy: 290, group: 180, status: 140, outcome: 180 };
+const MIN_WIDTH = COLS.policy + COLS.group + COLS.status + COLS.outcome;
 
 // Left padding shared by every header and body cell so the heading text and the
 // cell values line up in one vertical edge. Applied on the cell (not the content)
@@ -67,20 +67,22 @@ const CELL_PAD_LEFT = tokens.spacingHorizontalS;
 const COLUMNS: { key: ColKey; name: string; width: number }[] = [
   { key: 'label', name: 'Policy', width: COLS.policy },
   { key: 'group', name: 'Group', width: COLS.group },
-  { key: 'status', name: 'Outcome', width: COLS.outcome },
+  { key: 'status', name: 'Status', width: COLS.status },
+  { key: 'outcome', name: 'Outcome', width: COLS.outcome },
 ];
 
-type ColKey = 'label' | 'group' | 'status';
+type ColKey = 'label' | 'group' | 'status' | 'outcome';
 type SortState = { key: ColKey; dir: 'asc' | 'desc' };
 // A string is a "contains" text filter (Policy); a string[] is an "equals one of"
-// filter (Group, Outcome — matching the Case list Status column).
+// filter (Group, Status and Outcome — matching the Case list Status column).
 type Filters = Partial<Record<ColKey, string | string[]>>;
 
-// The Group and Outcome columns filter by an "equals one of" checkbox list.
-// Group options follow the category order; Outcome the three assessment outcomes.
+// Group, Status and Outcome filter by an "equals one of" checkbox list. Keeping
+// Status and Outcome as separate columns mirrors separate native D365 choices.
 const EQUALS_OPTIONS: Partial<Record<ColKey, string[]>> = {
   group: Array.from(new Set(policies.map(p => p.group))),
-  status: ['Compliant', 'Non-compliant', 'Consultation required'],
+  status: ['To do', 'Done'],
+  outcome: ['Compliant', 'Non-compliant', 'Consultation required'],
 };
 
 const useStyles = makeStyles({
@@ -178,17 +180,9 @@ const useStyles = makeStyles({
 
 interface MarinePlanPoliciesSubgridProps {
   caseId: string;
-  /** Status shown for a policy that hasn't been assessed yet. */
-  defaultStatus?: string;
-  /** When true, ignore the task gating: the Outcome never reads "Cannot start yet". */
-  ungated?: boolean;
 }
 
-export default function MarinePlanPoliciesSubgrid({
-  caseId,
-  defaultStatus = 'To do',
-  ungated = false,
-}: MarinePlanPoliciesSubgridProps) {
+export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
@@ -199,23 +193,20 @@ export default function MarinePlanPoliciesSubgrid({
   const [sort, setSort] = useState<SortState>({ key: 'group', dir: 'asc' });
   const [filters, setFilters] = useState<Filters>({});
 
-  // While locked the Outcome reads "Cannot start yet", but the policy still
-  // opens — read-only — because D365 cannot lock a caseworker out of a record.
-  const locked =
-    !ungated &&
-    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) ===
-      'Cannot start yet';
+  const allPoliciesDone =
+    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) === 'Done';
 
-  // Build the display rows (with the computed Outcome value) once, then filter
+  // Build the display rows (with the computed lifecycle status) once, then filter
   // and sort them so both operate on what the caseworker actually sees.
   const rows = useMemo(() => {
     const built = policies.map(policy => ({
       code: policy.code,
       label: policy.label,
       group: policy.group,
-      status: locked
-        ? 'Cannot start yet'
-        : mppForm[policy.code]?.outcome || defaultStatus,
+      status: allPoliciesDone
+        ? mppTaskStatus('Done')
+        : mppAssessmentStatus(mppForm[policy.code]),
+      outcome: mppForm[policy.code]?.outcome ?? '',
     }));
 
     const filtered = built.filter(r =>
@@ -231,7 +222,7 @@ export default function MarinePlanPoliciesSubgrid({
       return sort.dir === 'asc' ? cmp : -cmp;
     });
     return sorted;
-  }, [locked, mppForm, defaultStatus, filters, sort]);
+  }, [allPoliciesDone, mppForm, filters, sort]);
 
   const total = rows.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -467,8 +458,11 @@ export default function MarinePlanPoliciesSubgrid({
                   <TableCell style={{ width: COLS.group, paddingLeft: CELL_PAD_LEFT }}>
                     <TruncatedCell value={row.group} />
                   </TableCell>
-                  <TableCell style={{ width: COLS.outcome, paddingLeft: CELL_PAD_LEFT }}>
+                  <TableCell style={{ width: COLS.status, paddingLeft: CELL_PAD_LEFT }}>
                     <TruncatedCell value={row.status} className={styles.statusText} />
+                  </TableCell>
+                  <TableCell style={{ width: COLS.outcome, paddingLeft: CELL_PAD_LEFT }}>
+                    <TruncatedCell value={row.outcome} />
                   </TableCell>
                 </TableRow>
               );
