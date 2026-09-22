@@ -22,7 +22,7 @@ import {
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
 import { taskStatusForCase } from '../utils/publicNoticeEvidence';
-import { policies } from '../utils/marinePlanPolicies';
+import { mppAssessmentStatus, mppTaskStatus, policies } from '../utils/marinePlanPolicies';
 
 // The MPP task is 1-to-many, so the policies are their own list under Tasks,
 // paginated to keep the narrow rail manageable (matching the D365 subgrid pager).
@@ -75,9 +75,8 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
   const { tasks, mppForm } = useTasks();
   const [page, setPage] = useState(1);
 
-  const locked =
-    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) ===
-    'Cannot start yet';
+  const allPoliciesDone =
+    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) === 'Done';
   const total = policies.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
@@ -92,8 +91,9 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
       </div>
 
       {pagePolicies.map(policy => {
-        const outcome = mppForm[policy.code]?.outcome;
-        const status = locked ? 'Cannot start yet' : outcome || 'To do';
+        const status = allPoliciesDone
+          ? mppTaskStatus('Done')
+          : mppAssessmentStatus(mppForm[policy.code]);
         // Openable whatever the status — a gated policy opens read-only.
         const onClick = () =>
           navigate(
