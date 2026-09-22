@@ -29,7 +29,9 @@ import { DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import OrganisationLookup from './OrganisationLookup';
+import OutcomeDropdown from './OutcomeDropdown';
 import FieldDecorations from './FieldDecorations';
+import TaskRow from './TaskRow';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
@@ -39,6 +41,7 @@ import { useTasks } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 
 const COLS = { organisation: 320, notes: 400 };
+const CONSULTATION_TYPES = ['Request for consultation', 'Consultation notice'];
 
 const useStyles = makeStyles({
   page: {
@@ -48,7 +51,7 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
@@ -77,6 +80,7 @@ const useStyles = makeStyles({
     ':focus-within': { backgroundColor: tokens.colorNeutralBackground1 },
   },
   headerCell: { fontWeight: tokens.fontWeightSemibold },
+  consultationHeaderCell: { paddingLeft: tokens.spacingHorizontalXS },
   cell: { verticalAlign: 'top', ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalXS) },
   cellField: {
     display: 'flex',
@@ -84,6 +88,28 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalS,
   },
   cellControl: { flexGrow: 1, minWidth: 0 },
+  consultationFields: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalM,
+  },
+  typeRow: {
+    display: 'flex',
+    alignItems: 'flex-start',
+  },
+  typeRowLabel: {
+    flexBasis: '140px',
+    flexShrink: 0,
+    fontWeight: tokens.fontWeightRegular,
+    paddingTop: tokens.spacingVerticalXS,
+  },
+  typeRowControl: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    flexGrow: 1,
+    minWidth: 0,
+    gap: tokens.spacingHorizontalS,
+  },
   // Read-only lookup cell: the value on the same grey background the lookup uses.
   readOnlyCell: {
     backgroundColor: tokens.colorNeutralBackground3,
@@ -104,11 +130,6 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightRegular,
     color: tokens.colorNeutralForeground2,
-  },
-  completeRow: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    paddingTop: tokens.spacingVerticalL,
   },
 });
 
@@ -140,9 +161,15 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     'Cannot start yet';
 
   const filled = prepForConsulteeForm.filter(r => r.organisation.trim());
+  const missingOrganisation = filled.length === 0;
+  const missingConsultationType = filled.some(row => !row.consultationType.trim());
+  const invalidFields = [
+    ...(missingOrganisation ? ['Organisation'] : []),
+    ...(missingConsultationType ? ['Consultation type'] : []),
+  ];
 
   const handleSave = () => {
-    if (filled.length === 0) {
+    if (invalidFields.length > 0) {
       setShowError(true);
       return;
     }
@@ -165,7 +192,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
 
       {showError && (
         <FormNotification level="error">
-          {notificationMessage(['Organisation'])}
+          {notificationMessage(invalidFields)}
         </FormNotification>
       )}
 
@@ -185,11 +212,11 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         <div><Body1>Task</Body1></div>
       </Card>
 
-      <Card className={styles.bodyCard}>
+      <Card className={styles.sectionCard}>
         <div>
           <Text block className={styles.sectionHeading}>Consultees</Text>
           <Text block className={styles.desc}>
-          Add each organisation you need to consult for this case. Include any notes. The service adds a new row underneath each organisation you select.
+          Add each organisation you need to consult for this case and select the consultation type. For a request for consultation, include notes explaining what the organisation needs to consider in the application. For a consultation notice, the organisation receives a standard notice and does not need to respond. The service adds a new row underneath each organisation you select.
           </Text>
         </div>
 
@@ -203,20 +230,25 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                 <TableHeaderCell className={styles.headerCell} style={{ width: COLS.organisation }}>
                   Organisation
                 </TableHeaderCell>
-                <TableHeaderCell className={styles.headerCell} style={{ width: COLS.notes }}>
-                  Notes for the organisation
+                <TableHeaderCell
+                  className={mergeClasses(styles.headerCell, styles.consultationHeaderCell)}
+                  style={{ width: COLS.notes }}
+                >
+                  Consultation details
                 </TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>
               {prepForConsulteeForm.map(row => {
-                const orgError = showError && !row.organisation.trim() && filled.length === 0
+                const orgError = showError && !row.organisation.trim() && missingOrganisation
                   && row.id === prepForConsulteeForm[0]?.id;
+                const typeError =
+                  showError && Boolean(row.organisation.trim()) && !row.consultationType.trim();
                 return (
                   <TableRow key={row.id} className={styles.row}>
                     <TableCell className={styles.cell} style={{ width: COLS.organisation }}>
                       <div className={styles.cellField}>
-                        <FieldDecorations locked={locked} />
+                        {locked && <FieldDecorations locked />}
                         <div className={styles.cellControl}>
                           {/* A read-only lookup has no search control in D365 — just
                               the record's name on the same grey background. */}
@@ -239,26 +271,70 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                       </div>
                     </TableCell>
                     <TableCell className={styles.cell} style={{ width: COLS.notes }}>
-                      <div className={styles.cellField}>
-                        <FieldDecorations locked={locked} />
-                        <Field className={styles.cellControl}>
-                          <Textarea
-                            className={mergeClasses(
-                              styles.textarea,
-                              locked && styles.textareaReadOnly,
-                            )}
-                            appearance="filled-lighter"
-                            value={row.notes}
-                            onChange={(_, d) => {
-                              setPrepForConsulteeRow(row.id, 'notes', d.value);
-                              markUnsaved('prepForConsultee');
-                            }}
-                            readOnly={locked}
-                            resize={locked ? 'none' : 'vertical'}
-                            rows={4}
-                          />
-                        </Field>
-                      </div>
+                      {Boolean(row.organisation.trim()) && (
+                        <div className={styles.consultationFields}>
+                          <div className={styles.typeRow}>
+                            <Text className={styles.typeRowLabel}>Consultation type</Text>
+                            <div className={styles.typeRowControl}>
+                              <FieldDecorations required locked={locked} />
+                              <Field
+                                className={styles.cellControl}
+                                validationState={typeError ? 'error' : 'none'}
+                                validationMessage={
+                                  typeError ? requiredMessage('Consultation type') : undefined
+                                }
+                                validationMessageIcon={<DismissCircleRegular />}
+                              >
+                                {locked ? (
+                                  <div className={styles.readOnlyCell}>
+                                    {row.consultationType || '\u00a0'}
+                                  </div>
+                                ) : (
+                                  <OutcomeDropdown
+                                    value={row.consultationType}
+                                    options={CONSULTATION_TYPES}
+                                    onSelect={value => {
+                                      setPrepForConsulteeRow(
+                                        row.id,
+                                        'consultationType',
+                                        value,
+                                      );
+                                      markUnsaved('prepForConsultee');
+                                    }}
+                                  />
+                                )}
+                              </Field>
+                            </div>
+                          </div>
+                          {row.consultationType === 'Request for consultation' && (
+                            <div className={styles.typeRow}>
+                              <Text className={styles.typeRowLabel}>
+                                Notes for the organisation
+                              </Text>
+                              <div className={styles.typeRowControl}>
+                                <FieldDecorations locked={locked} />
+                                <Field className={styles.cellControl}>
+                                  <Textarea
+                                    className={mergeClasses(
+                                      styles.textarea,
+                                      locked && styles.textareaReadOnly,
+                                    )}
+                                    appearance="filled-lighter"
+                                    value={row.notes}
+                                    onChange={(_, d) => {
+                                      setPrepForConsulteeRow(row.id, 'notes', d.value);
+                                      markUnsaved('prepForConsultee');
+                                    }}
+                                    readOnly={locked}
+                                    resize={locked ? 'none' : 'vertical'}
+                                    rows={8}
+                                  />
+                                </Field>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
@@ -267,10 +343,13 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
           </Table>
         </div>
 
-        <div className={styles.completeRow}>
-          {locked && <FieldDecorations locked />}
+      </Card>
+
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Complete task</Text>
+        <TaskRow label="Select to mark the task as complete" locked={locked}>
           <Checkbox
-            label="Select to mark the task as complete"
+            aria-label="Select to mark the task as complete"
             checked={prepForConsulteeMeta.completed}
             disabled={locked}
             onChange={(_, data) => {
@@ -278,7 +357,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
               markUnsaved('prepForConsultee');
             }}
           />
-        </div>
+        </TaskRow>
       </Card>
     </div>
   );

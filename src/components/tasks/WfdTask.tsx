@@ -19,12 +19,14 @@ import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
 import FieldDecorations from './FieldDecorations';
+import TaskTextarea from './TaskTextarea';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
   requiredMessage,
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
+import type { WfdForm } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { asset } from '../../utils/asset';
 
@@ -36,37 +38,33 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalM,
   },
   headerCard: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
-  bodyCard: {
+  sectionCard: {
     ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXL,
   },
   sectionHeading: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: tokens.spacingVerticalL,
   },
+  reviewFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
   answers: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
   // Flex (not grid) so the value area can wrap under the label at narrow widths.
   row: {
     display: 'flex',
     flexWrap: 'wrap',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     columnGap: 0,
     rowGap: tokens.spacingVerticalS,
   },
   label: {
     flexShrink: 0,
-    flexBasis: '320px',
-    minWidth: '320px',
+    flexBasis: '160px',
+    minWidth: '160px',
+    paddingTop: tokens.spacingVerticalXS,
     marginRight: tokens.spacingHorizontalL,
   },
-  // The review row's control can grow a validation message under it, so top-align
-  // the row (rather than centring it, as the read-only answer rows do) to keep the
-  // label level with the select instead of drifting with the message.
-  reviewRow: { alignItems: 'flex-start' },
-  reviewLabel: { paddingTop: tokens.spacingVerticalXS },
   // Holds one or two field boxes; wraps them under each other when cramped.
   fields: {
     flexGrow: 1,
@@ -97,7 +95,6 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalS,
     '& li': { lineHeight: tokens.lineHeightBase300 },
   },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
   // "- Unsaved" / "- Saved" indicator beside the task name (smaller, normal weight).
   savedLabel: {
@@ -110,8 +107,16 @@ const useStyles = makeStyles({
 
 const reviewOptions = ['Yes', 'No'];
 
-// Display name D365 would use for the one business-required field on this form.
-const REVIEW_FIELD = 'WFD review';
+const ASSESSMENT_DOCUMENT: { fileName: string; href: string } | undefined = {
+  fileName: 'WFD-Exmouth-2026.docx',
+  href: asset('documents/WFD-Exmouth-2026.docx'),
+};
+
+// D365 display names used in the inline and form-level validation messages.
+const FIELD_NAMES: Record<keyof WfdForm, string> = {
+  initialConsiderations: 'Record your considerations',
+  review: 'WFD review',
+};
 
 interface WfdTaskProps {
   caseId: string;
@@ -120,19 +125,33 @@ interface WfdTaskProps {
 export default function WfdTask({ caseId }: WfdTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks, wfdForm, saved, setWfdReview, markUnsaved, completeWfd } = useTasks();
+  const {
+    tasks,
+    wfdForm,
+    saved,
+    setWfdReview,
+    setWfdInitialConsiderations,
+    markUnsaved,
+    completeWfd,
+  } = useTasks();
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =
     taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment) === 'Cannot start yet';
   // Set on a failed save, cleared as soon as the field is given a value.
-  const [error, setError] = useState(false);
+  const [errors, setErrors] = useState<(keyof WfdForm)[]>([]);
+
+  const errorFor = (field: keyof WfdForm) =>
+    errors.includes(field) ? requiredMessage(FIELD_NAMES[field]) : undefined;
 
   const handleSave = () => {
-    if (!wfdForm.review.trim()) {
-      setError(true);
-      return;
+    const missing: (keyof WfdForm)[] = [];
+    if (wfdForm.review === 'Yes' && !wfdForm.initialConsiderations.trim()) {
+      missing.push('initialConsiderations');
     }
+    if (!wfdForm.review.trim()) missing.push('review');
+    setErrors(missing);
+    if (missing.length) return;
     completeWfd();
     navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`);
   };
@@ -141,8 +160,10 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
     <div className={styles.page}>
       {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
 
-      {error && (
-        <FormNotification level="error">{notificationMessage([REVIEW_FIELD])}</FormNotification>
+      {errors.length > 0 && (
+        <FormNotification level="error">
+          {notificationMessage(errors.map(field => FIELD_NAMES[field]))}
+        </FormNotification>
       )}
 
       <FormCommandBar
@@ -159,10 +180,9 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
         <div><Body1>Task</Body1></div>
       </Card>
 
-      <Card className={styles.bodyCard}>
-        <div>
-          <Text block className={styles.sectionHeading}>1. Applicant's answers</Text>
-          <div className={styles.answers}>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>Applicant's answers</Text>
+        <div className={styles.answers}>
             <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
                 Are your proposed works within one nautical mile (1.85km) of the low-water line, or in a
@@ -202,7 +222,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                 surfaces - if you minimise bank or bed disturbance
               </li>
             </ul>
-            <div className={styles.row}>
+            {ASSESSMENT_DOCUMENT && <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
                 Assessment provided
               </TaskFieldLabel>
@@ -210,25 +230,24 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
-                    href={asset('documents/WFD-Exmouth-2026.docx')}
+                    href={ASSESSMENT_DOCUMENT.href}
                     target="_blank"
                     rel="noopener"
                     className={styles.docxLink}
                   >
-                    <ArrowDownloadRegular /> WFD-Exmouth-2026.docx
+                    <ArrowDownloadRegular /> {ASSESSMENT_DOCUMENT.fileName}
                   </Link>
                 </div>
               </div>
-            </div>
-          </div>
+            </div>}
         </div>
+      </Card>
 
-        <div className={styles.divider} />
-
-        <div>
-          <Text block className={styles.sectionHeading}>2. WFD review</Text>
-          <div className={mergeClasses(styles.row, styles.reviewRow)}>
-            <TaskFieldLabel className={mergeClasses(styles.label, styles.reviewLabel)}>
+      <Card className={styles.sectionCard}>
+        <Text block className={styles.sectionHeading}>WFD review</Text>
+        <div className={styles.reviewFields}>
+          <div className={styles.row}>
+            <TaskFieldLabel className={styles.label}>
               Is the WFD section complete and acceptable?
             </TaskFieldLabel>
             <FieldDecorations required locked={locked} />
@@ -242,8 +261,8 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               ) : (
                 <Field
                   className={styles.control}
-                  validationState={error ? 'error' : 'none'}
-                  validationMessage={error ? requiredMessage(REVIEW_FIELD) : undefined}
+                  validationState={errorFor('review') ? 'error' : 'none'}
+                  validationMessage={errorFor('review')}
                   validationMessageIcon={<DismissCircleRegular />}
                 >
                   <OutcomeDropdown
@@ -251,7 +270,13 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                     options={reviewOptions}
                     onSelect={v => {
                       setWfdReview(v);
-                      setError(false);
+                      setErrors(previous =>
+                        previous.filter(
+                          field =>
+                            field !== 'review' &&
+                            !(field === 'initialConsiderations' && v !== 'Yes'),
+                        ),
+                      );
                       markUnsaved('wfdAssessment');
                     }}
                   />
@@ -259,6 +284,31 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               )}
             </div>
           </div>
+
+          {wfdForm.review === 'Yes' && (
+            <div className={styles.row}>
+              <TaskFieldLabel className={styles.label}>
+                Record your considerations
+              </TaskFieldLabel>
+              <FieldDecorations required locked={locked} />
+              <div className={styles.fields}>
+                <TaskTextarea
+                  value={wfdForm.initialConsiderations}
+                  onChange={value => {
+                    setWfdInitialConsiderations(value);
+                    if (value.trim()) {
+                      setErrors(previous =>
+                        previous.filter(field => field !== 'initialConsiderations'),
+                      );
+                    }
+                    markUnsaved('wfdAssessment');
+                  }}
+                  locked={locked}
+                  error={errorFor('initialConsiderations')}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>

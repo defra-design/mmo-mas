@@ -10,7 +10,7 @@
 // only the internal rationale, while a partial agreement or a refusal also needs
 // the wording the applicant will receive. The sub-heading is a form section header.
 import type { ReactNode } from 'react';
-import { makeStyles, shorthands, tokens, Text } from '@fluentui/react-components';
+import { Card, makeStyles, shorthands, tokens, Text } from '@fluentui/react-components';
 import TaskRow from './TaskRow';
 import TaskChoice from './TaskChoice';
 import TaskTextarea from './TaskTextarea';
@@ -23,11 +23,11 @@ import {
 
 const useStyles = makeStyles({
   block: {
+    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalXL),
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalL,
   },
-  divider: { ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke2) },
   heading: { fontWeight: tokens.fontWeightSemibold },
 });
 
@@ -63,8 +63,7 @@ export default function WithholdDecision({
   const agree = values[fields.agree];
 
   return (
-    <div className={styles.block}>
-      <div className={styles.divider} />
+    <Card className={styles.block}>
       <Text block className={styles.heading}>
         {heading}
       </Text>
@@ -102,6 +101,6 @@ export default function WithholdDecision({
           />
         </TaskRow>
       )}
-    </div>
+    </Card>
   );
 }

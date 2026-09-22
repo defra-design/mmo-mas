@@ -664,7 +664,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
             {nativeMppTab && (
               <div className={styles.nativeTabBody}>
                 <Card className={styles.mppFullWidthCard}>
-                  <MarinePlanPoliciesSubgrid caseId={caseId} defaultStatus="To do" />
+                  <MarinePlanPoliciesSubgrid caseId={caseId} />
                 </Card>
               </div>
             )}

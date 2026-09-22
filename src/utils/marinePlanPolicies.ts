@@ -35,6 +35,23 @@ export const policies: MarinePlanPolicy[] = (mppData.categories as RawCategory[]
 
 export const policyCount = policies.length;
 
+export type MppAssessmentStatus = 'To do' | 'Done';
+
+/**
+ * A policy assessment has its own task lifecycle. Its assessment outcome is
+ * separate data and must never be used as the task status.
+ */
+export function mppAssessmentStatus(
+  answer?: { outcome?: string; reason?: string },
+): MppAssessmentStatus {
+  return answer?.outcome?.trim() && answer?.reason?.trim() ? 'Done' : 'To do';
+}
+
+/** MPP task displays expose only the two lifecycle values used by assessments. */
+export function mppTaskStatus(status: string): MppAssessmentStatus {
+  return status === 'Done' ? 'Done' : 'To do';
+}
+
 /** Zero-based index of a policy in the flattened list, or -1 if not found. */
 export function policyIndex(code: string): number {
   return policies.findIndex(p => p.code === code);
