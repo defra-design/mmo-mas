@@ -106,8 +106,9 @@ export interface PublicNoticeEvidenceLocationReview {
   rejectionComments: string;
 }
 
-// Native fields on the evidence-review task. Saving rolls the task to Done when
-// its Two Options field is selected, or In progress when left clear.
+// Native fields on the evidence-review task. `completed` is retained only so
+// older persisted prototype state continues to hydrate safely; the current form
+// completes directly once all required location reviews are valid.
 export interface PublicNoticeEvidenceMeta {
   completed: boolean;
   locations: PublicNoticeEvidenceLocationReview[];
@@ -492,8 +493,6 @@ interface TaskContextValue {
     value: PublicRegisterForm[K],
   ) => void;
   setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
-  setPublicNoticeEvidenceCompleted: (completed: boolean) => void;
-  setPublicNoticeEvidenceResubmissionCompleted: (completed: boolean) => void;
   setPublicNoticeEvidenceResubmissionField: (
     field: keyof PublicNoticeEvidenceLocationReview,
     value: string,
@@ -666,21 +665,6 @@ export function TaskProvider({ children }: PropsWithChildren) {
   const setSiteNoticeField = (field: keyof SiteNoticeForm, value: string) =>
     setState(prev => ({ ...prev, siteNoticeForm: { ...prev.siteNoticeForm, [field]: value } }));
 
-  const setPublicNoticeEvidenceCompleted = (completed: boolean) =>
-    setState(prev => ({
-      ...prev,
-      publicNoticeEvidenceMeta: { ...prev.publicNoticeEvidenceMeta, completed },
-    }));
-
-  const setPublicNoticeEvidenceResubmissionCompleted = (completed: boolean) =>
-    setState(prev => ({
-      ...prev,
-      publicNoticeEvidenceResubmissionMeta: {
-        ...prev.publicNoticeEvidenceResubmissionMeta,
-        completed,
-      },
-    }));
-
   const setPublicNoticeEvidenceResubmissionField = (
     field: keyof PublicNoticeEvidenceLocationReview,
     value: string,
@@ -792,21 +776,19 @@ export function TaskProvider({ children }: PropsWithChildren) {
     }));
 
   // Review is deliberately separate from Public notice and only appears once
-  // evidence exists (MLA/2026/10014 in this prototype fixture). A completed
-  // review with any location answered No waits for replacement applicant
-  // evidence; only an all-Yes review is Done.
+  // evidence exists (MLA/2026/10014 in this prototype fixture). The form
+  // validates every required review before calling this action; any location
+  // answered No waits for replacement evidence, otherwise the task is Done.
   const savePublicNoticeEvidence = () =>
     setState(prev => ({
       ...prev,
       tasks: {
         ...prev.tasks,
-        publicNoticeEvidence: !prev.publicNoticeEvidenceMeta.completed
-          ? 'In progress'
-          : prev.publicNoticeEvidenceMeta.locations.some(
-                location => location.decision === 'No',
-              )
-            ? 'Awaiting applicant'
-            : 'Done',
+        publicNoticeEvidence: prev.publicNoticeEvidenceMeta.locations.some(
+          location => location.decision === 'No',
+        )
+          ? 'Awaiting applicant'
+          : 'Done',
       },
       saved: { ...prev.saved, publicNoticeEvidence: true },
     }));
@@ -818,11 +800,10 @@ export function TaskProvider({ children }: PropsWithChildren) {
       ...prev,
       tasks: {
         ...prev.tasks,
-        publicNoticeEvidenceResubmission: prev.publicNoticeEvidenceResubmissionMeta.completed
-          ? prev.publicNoticeEvidenceResubmissionMeta.review.decision === 'No'
+        publicNoticeEvidenceResubmission:
+          prev.publicNoticeEvidenceResubmissionMeta.review.decision === 'No'
             ? 'Awaiting applicant'
-            : 'Done'
-          : 'In progress',
+            : 'Done',
       },
       saved: { ...prev.saved, publicNoticeEvidenceResubmission: true },
     }));
@@ -873,8 +854,6 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setPrepForConsulteeCompleted,
         setPublicRegisterField,
         setSiteNoticeField,
-        setPublicNoticeEvidenceCompleted,
-        setPublicNoticeEvidenceResubmissionCompleted,
         setPublicNoticeEvidenceResubmissionField,
         setPublicNoticeEvidenceLocationField,
         addRecentOrganisation,

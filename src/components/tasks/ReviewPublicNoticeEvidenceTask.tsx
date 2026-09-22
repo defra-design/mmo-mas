@@ -10,7 +10,6 @@ import {
   Card,
   Title3,
   Body1,
-  Checkbox,
   Text,
 } from '@fluentui/react-components';
 import FormCommandBar from '../FormCommandBar';
@@ -23,7 +22,6 @@ import {
 } from '../../utils/publicNoticeEvidence';
 import { notificationMessage } from '../../utils/validationMessages';
 import PublicNoticeEvidenceLocation from './PublicNoticeEvidenceLocation';
-import TaskRow from './TaskRow';
 import {
   publicNoticeEvidenceLocations,
   replacementPublicNoticeEvidence,
@@ -79,8 +77,6 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
     publicNoticeEvidenceMeta,
     publicNoticeEvidenceResubmissionMeta,
     saved,
-    setPublicNoticeEvidenceCompleted,
-    setPublicNoticeEvidenceResubmissionCompleted,
     setPublicNoticeEvidenceResubmissionField,
     setPublicNoticeEvidenceLocationField,
     markUnsaved,
@@ -94,9 +90,6 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
   const reviews = isResubmission
     ? resubmittedPublicNoticeEvidenceReviews
     : publicNoticeEvidenceMeta.locations;
-  const completed = isResubmission
-    ? publicNoticeEvidenceResubmissionMeta.completed
-    : publicNoticeEvidenceMeta.completed;
   const isSaved = isResubmission
     ? saved.publicNoticeEvidenceResubmission
     : saved.publicNoticeEvidence;
@@ -104,32 +97,28 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
 
   const handleSave = () => {
     if (isResubmission) {
-      if (publicNoticeEvidenceResubmissionMeta.completed) {
-        const review = publicNoticeEvidenceResubmissionMeta.review;
-        const missing: ReviewField[] = [];
-        if (!review.decision.trim()) missing.push('decision');
-        if (review.decision === 'No' && !review.rejectionComments.trim()) {
-          missing.push('rejectionComments');
-        }
-        setResubmissionErrors(missing);
-        if (missing.length) return;
+      const review = publicNoticeEvidenceResubmissionMeta.review;
+      const missing: ReviewField[] = [];
+      if (!review.decision.trim()) missing.push('decision');
+      if (review.decision === 'No' && !review.rejectionComments.trim()) {
+        missing.push('rejectionComments');
       }
+      setResubmissionErrors(missing);
+      if (missing.length) return;
       savePublicNoticeEvidenceResubmission();
       navigate(caseUrl);
       return;
     }
-    if (publicNoticeEvidenceMeta.completed) {
-      const missing = publicNoticeEvidenceMeta.locations.flatMap((review, index) => {
-        const locationErrors: ReviewError[] = [];
-        if (!review.decision.trim()) locationErrors.push({ index, field: 'decision' });
-        if (review.decision === 'No' && !review.rejectionComments.trim()) {
-          locationErrors.push({ index, field: 'rejectionComments' });
-        }
-        return locationErrors;
-      });
-      setErrors(missing);
-      if (missing.length) return;
-    }
+    const missing = publicNoticeEvidenceMeta.locations.flatMap((review, index) => {
+      const locationErrors: ReviewError[] = [];
+      if (!review.decision.trim()) locationErrors.push({ index, field: 'decision' });
+      if (review.decision === 'No' && !review.rejectionComments.trim()) {
+        locationErrors.push({ index, field: 'rejectionComments' });
+      }
+      return locationErrors;
+    });
+    setErrors(missing);
+    if (missing.length) return;
     savePublicNoticeEvidence();
     navigate(caseUrl);
   };
@@ -236,25 +225,6 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
               />
             </Card>
           ))}
-
-          <Card className={styles.sectionCard}>
-            <Text block className={styles.sectionHeading}>Complete task</Text>
-            <TaskRow label="Select to mark the task as complete">
-              <Checkbox
-                aria-label="Select to mark the task as complete"
-                checked={completed}
-                onChange={(_, data) => {
-                  if (isResubmission) {
-                    setPublicNoticeEvidenceResubmissionCompleted(Boolean(data.checked));
-                    markUnsaved('publicNoticeEvidenceResubmission');
-                  } else {
-                    setPublicNoticeEvidenceCompleted(Boolean(data.checked));
-                    markUnsaved('publicNoticeEvidence');
-                  }
-                }}
-              />
-            </TaskRow>
-          </Card>
         </>
       )}
     </div>
