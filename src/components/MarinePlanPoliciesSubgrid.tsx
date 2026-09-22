@@ -438,17 +438,15 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
           </TableHeader>
           <tbody>
             {pageRows.map(row => {
-              const openPolicy = locked
-                ? undefined
-                : () =>
-                    navigate(
-                      `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${row.code}`
-                    );
+              const openPolicy = () =>
+                navigate(
+                  `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${row.code}`
+                );
               return (
                 <TableRow key={row.code} className={styles.row}>
                   <TableCell style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
-                    {/* The primary column opens the record once its Site check
-                        prerequisite is complete; gated rows remain plain text. */}
+                    {/* The primary column always opens the record. Gated policy
+                        assessments are shown read-only on the record form. */}
                     <TruncatedCell
                       value={row.label}
                       onClick={openPolicy}

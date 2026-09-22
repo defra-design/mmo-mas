@@ -1,6 +1,6 @@
 // src/components/tasks/MarinePlanPolicyTask.tsx
 import { useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   makeStyles,
   shorthands,
@@ -151,10 +151,6 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   // tab, and going back restores the case form with that tab still active.
   const returnToCase = () =>
     navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
-
-  // Gated MPP records are not openable from the UI. Apply the same guard to a
-  // pasted/bookmarked task URL so Site check cannot be bypassed.
-  if (locked) return <Navigate to={caseUrl} replace />;
 
   const index = policyCode ? policyIndex(policyCode) : -1;
   const policy = index >= 0 ? policies[index] : undefined;

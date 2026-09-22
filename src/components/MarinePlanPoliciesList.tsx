@@ -95,20 +95,29 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
         const status = allPoliciesDone
           ? mppTaskStatus('Done')
           : mppAssessmentStatus(mppForm[policy.code], locked);
-        const onClick = locked
-          ? undefined
-          : () =>
-              navigate(
-                `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${policy.code}`
-              );
+        // Policy records remain openable while gated; the form itself renders
+        // read-only until Site check is complete.
+        const onClick = () =>
+          navigate(
+            `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${policy.code}`
+          );
         return (
           <div
             key={policy.code}
-            className={`${styles.row} ${onClick ? styles.rowClickable : ''}`}
+            className={`${styles.row} ${styles.rowClickable}`}
             onClick={onClick}
           >
             <div className={styles.rowText}>
-              <Text className={styles.taskName}>{policy.label}</Text>
+              <button
+                type="button"
+                className={`link-button ${styles.taskName}`}
+                onClick={event => {
+                  event.stopPropagation();
+                  onClick();
+                }}
+              >
+                {policy.label}
+              </button>
               <Text className={styles.statusText}>{status}</Text>
             </div>
             <Menu>
