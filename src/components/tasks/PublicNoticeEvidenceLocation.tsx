@@ -35,7 +35,6 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalL,
     marginTop: tokens.spacingVerticalS,
   },
-  replacementIntro: { color: tokens.colorNeutralForeground2 },
 });
 
 type Props = {
@@ -112,15 +111,9 @@ export default function PublicNoticeEvidenceLocation({
 
       {replacementEvidence && (
         <div className={styles.replacement}>
-          <div>
-            <Text block className={styles.heading}>
-              Resubmitted photographs for location {number}
-            </Text>
-            <Text block className={styles.replacementIntro}>
-              The applicant resubmitted photographs for this location on{' '}
-              {replacementEvidence.submittedDate}.
-            </Text>
-          </div>
+          <Text block className={styles.heading}>
+            Photographs resubmitted for Location {number} on {replacementEvidence.submittedDate}
+          </Text>
           <TaskRow label="Resubmitted close-up photograph of the notice">
             <div className={styles.imageLinkValue}>
               <Link
