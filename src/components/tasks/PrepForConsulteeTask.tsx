@@ -216,8 +216,10 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         <div>
           <Text block className={styles.sectionHeading}>Consultees</Text>
           <Text block className={styles.desc}>
-            Add each organisation you need to tell about this application, then choose what to send them.<br />
-            A notification of application tells the organisation about the application. They do not need to respond.<br />
+            Add each organisation you need to tell about this application, then choose what to send them.
+          </Text>
+          <Text block className={styles.desc}>
+            A notification of application tells the organisation about the application. They do not need to respond.{' '}
             A request for advice asks the organisation for specific advice. You will need to explain what you need advice on.
           </Text>
         </div>
