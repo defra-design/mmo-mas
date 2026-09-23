@@ -41,7 +41,7 @@ import { useTasks } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 
 const COLS = { organisation: 320, notes: 400 };
-const CONSULTATION_TYPES = ['Request for consultation', 'Consultation notice'];
+const CONSULTATION_TYPES = ['Application notification', 'Request for advice'];
 
 const useStyles = makeStyles({
   page: {
@@ -216,7 +216,9 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         <div>
           <Text block className={styles.sectionHeading}>Consultees</Text>
           <Text block className={styles.desc}>
-          Add each organisation you need to consult for this case and select the consultation type. For a request for consultation, include notes explaining what the organisation needs to consider in the application. For a consultation notice, the organisation receives a standard notice and does not need to respond. The service adds a new row underneath each organisation you select.
+            Add each organisation you need to tell about this application, then choose what to send them.<br />
+            A notification of application tells the organisation about the application. They do not need to respond.<br />
+            A request for advice asks the organisation for specific advice. You will need to explain what you need advice on.
           </Text>
         </div>
 
@@ -306,7 +308,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
                               </Field>
                             </div>
                           </div>
-                          {row.consultationType === 'Request for consultation' && (
+                          {row.consultationType === 'Request for advice' && (
                             <div className={styles.typeRow}>
                               <Text className={styles.typeRowLabel}>
                                 Notes for the organisation

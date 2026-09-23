@@ -402,11 +402,15 @@ function loadState(): PersistedState {
               // Before this Choice field existed, every consultee row behaved as
               // a request and exposed Notes. Preserve that meaning on hydration.
               consultationType:
-                typeof row.consultationType === 'string'
-                  ? row.consultationType
-                  : row.organisation?.trim()
-                    ? 'Request for consultation'
-                    : '',
+                row.consultationType === 'Request for consultation'
+                  ? 'Request for advice'
+                  : row.consultationType === 'Consultation notice'
+                    ? 'Application notification'
+                    : typeof row.consultationType === 'string'
+                      ? row.consultationType
+                      : row.organisation?.trim()
+                        ? 'Request for advice'
+                        : '',
               notes: typeof row.notes === 'string' ? row.notes : '',
             }))
           : initialState.prepForConsulteeForm;
