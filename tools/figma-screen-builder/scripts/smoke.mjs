@@ -195,8 +195,8 @@ vm.runInNewContext(code, {
 if (figma.command === 'choose-screens') {
   if (!shownUi || shownUi.options?.themeColors !== true) throw new Error('Picker UI was not opened correctly');
   const catalog = uiMessages.find(message => message.type === 'catalog');
-  if (catalog?.groups?.flatMap(group => group.screens).length !== 13) {
-    throw new Error('Picker did not receive the thirteen-screen catalog');
+  if (catalog?.groups?.flatMap(group => group.screens).length !== 15) {
+    throw new Error('Picker did not receive the fifteen-screen catalog');
   }
   await figma.ui.onmessage({
     type: 'generate',
@@ -233,9 +233,11 @@ const canonicalScreenNames = new Set([
   '11 · MLA/2026/10013 · Review public notice evidence · Replacement photographs',
   '12 · MLA/2026/10013 · Review public notice evidence · Resubmission default',
   '13 · MLA/2026/10013 · Review public notice evidence · Resubmission rejected',
+  '14 · Prepare for consultation · To do',
+  '15 · Prepare for consultation · Two organisations selected',
 ]);
-if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 14) {
-  throw new Error('Expected thirteen generated screen frames plus the retained same-name copy');
+if (screensPage.children.filter(node => canonicalScreenNames.has(node.name)).length !== 16) {
+  throw new Error('Expected fifteen generated screen frames plus the retained same-name copy');
 }
 if (!screensPage.children.some(node => node.name === 'Generated Run 02')) throw new Error('Missing screen run label');
 if (workflowPage.children.length !== 1 || workflowPage.children[0] !== retainedWorkflowNote) {
@@ -439,6 +441,60 @@ if (
   resubmissionRejected?.findOne(node => node.name === 'Checkbox mark')?.visible !== false
 ) {
   throw new Error('Public notice evidence completion states are incorrect');
+}
+
+const consultationDefault = screensPage.children.find(
+  node => node.name === '14 · Prepare for consultation · To do',
+);
+const consultationSelected = screensPage.children.find(
+  node => node.name === '15 · Prepare for consultation · Two organisations selected',
+);
+const consultationText = consultationSelected?.findAll(node => node.type === 'TEXT').map(node => node.characters);
+if (
+  consultationDefault?.findAll(node => node.name === 'Organisation lookup').length !== 1 ||
+  consultationDefault?.findAll(node => node.name === 'Consultation type dropdown').length !== 0 ||
+  consultationDefault?.findAll(node => node.name === 'Notes for the organisation text box').length !== 0 ||
+  consultationSelected?.findAll(node => node.name === 'Organisation lookup').length !== 3 ||
+  consultationSelected?.findAll(node => node.name === 'Consultation type dropdown').length !== 2 ||
+  consultationSelected?.findAll(node => node.name === 'Notes for the organisation text box').length !== 1 ||
+  !consultationText?.includes('Natural England (NE)') ||
+  !consultationText?.includes('Application notification') ||
+  !consultationText?.includes('Historic England (HE)') ||
+  !consultationText?.includes('Request for advice')
+) {
+  throw new Error('Prepare for consultation states or conditional notes are incomplete');
+}
+const notes = consultationSelected?.findOne(node => node.name === 'Notes for the organisation text box');
+if (notes?.findOne(node => node.type === 'TEXT' && node.name === 'Field value')?.characters !== '') {
+  throw new Error('Historic England notes must begin empty');
+}
+const consultationColumns = consultationSelected?.findOne(node => node.name === 'Consultee row 1')?.children;
+const organisationNames = consultationSelected?.findAll(
+  node => node.type === 'TEXT' && node.name === 'Field value' &&
+    ['Natural England (NE)', 'Historic England (HE)'].includes(node.characters),
+);
+if (
+  consultationColumns?.[0]?.width !== 639 ||
+  consultationColumns?.[1]?.width !== 639 ||
+  organisationNames?.length !== 2 ||
+  organisationNames.some(node => node.textDecoration !== 'UNDERLINE') ||
+  consultationSelected?.findOne(node => node.name === 'Consultation type dropdown')?.width !== 441 ||
+  consultationSelected?.findOne(node => node.name === 'Consultation type row')?.findOne(
+    node => node.type === 'TEXT' && node.name === 'Question',
+  )?.width !== 140
+) {
+  throw new Error('Prepare for consultation lookup links or equal-width columns are incorrect');
+}
+for (const screen of [consultationDefault, consultationSelected]) {
+  const completion = screen?.findOne(node => node.name === 'Completion field');
+  if (
+    completion?.children?.[0]?.name !== 'Question' ||
+    completion.children[0].width !== 160 ||
+    completion.children[1]?.name !== 'Completion field spacing' ||
+    completion.children[2]?.name !== 'Checkbox'
+  ) {
+    throw new Error('Prepare for consultation completion label or checkbox alignment is incorrect');
+  }
 }
 
 console.log(`${figma.command} smoke test appended Run 02 without changing existing layers`);

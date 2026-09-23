@@ -19,6 +19,7 @@ const requiredScreens = [
   'siteCheckStates',
   'publicRegister',
   'publicNoticeEvidenceReview',
+  'prepareForConsultation',
 ];
 
 if (manifest.main !== 'code.js') throw new Error('manifest.json must load code.js');
@@ -38,12 +39,15 @@ if (descriptions.caseSummaryStates?.length !== 2 || descriptions.siteCheckStates
 if (descriptions.publicNoticeEvidenceReview?.states?.length !== 5) {
   throw new Error('Review public notice evidence must include the original and resubmission review states');
 }
+if (descriptions.prepareForConsultation?.states?.length !== 2) {
+  throw new Error('Prepare for consultation must include the untouched and two-organisation states');
+}
 if (!manifest.menu?.some(item => item.command === 'choose-screens')) {
   throw new Error('Missing screen and state picker command');
 }
 if (!code.includes('MAS D365 Screen Builder')) throw new Error('code.js was not built correctly');
 if (code.includes('.remove(')) throw new Error('The plugin must not delete existing Figma nodes');
-for (const marker of ['Select all', 'Public register', 'Assessment journey', 'Notice evidence', 'Generate selected']) {
+for (const marker of ['Select all', 'Public register', 'Assessment journey', 'Notice evidence', 'Consultation', 'Generate selected']) {
   if (!ui.includes(marker)) throw new Error(`Screen picker is missing: ${marker}`);
 }
 for (const screenId of [
@@ -54,6 +58,7 @@ for (const screenId of [
   'site-check-',
   'case-summary-unlocked',
   'public-notice-evidence-',
+  'prepare-for-consultation-',
 ]) {
   if (!code.includes(screenId)) throw new Error(`Screen picker cannot generate: ${screenId}`);
 }
@@ -69,6 +74,7 @@ for (const name of [
   'DismissCircleFilled',
   'DismissSquareRegular',
   'SendRegular',
+  'BuildingRegular',
 ]) {
   if (!icons[name]?.length) throw new Error(`Missing Fluent icon data: ${name}`);
 }

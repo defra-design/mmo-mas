@@ -253,6 +253,41 @@
       "completed": false
     }
   ],
+  "prepareForConsultation": {
+    "pageHeading": "Prepare for consultation",
+    "recordType": "Task",
+    "sectionHeading": "Consultees",
+    "intro": [
+      "Add each organisation you need to tell about this application, then choose what to send them.",
+      "A notification of application tells the organisation about the application. They do not need to respond. A request for advice asks the organisation for specific advice. You will need to explain what you need advice on."
+    ],
+    "organisationHeading": "Organisation",
+    "detailsHeading": "Consultation details",
+    "typeLabel": "Consultation type",
+    "notesLabel": "Notes for the organisation",
+    "completionHeading": "Complete task",
+    "completionLabel": "Select to mark the task as complete",
+    "states": [
+      {
+        "frameName": "14 · Prepare for consultation · To do",
+        "saveState": "Unsaved",
+        "completed": false,
+        "rows": [
+          { "organisation": "", "consultationType": "", "notes": "" }
+        ]
+      },
+      {
+        "frameName": "15 · Prepare for consultation · Two organisations selected",
+        "saveState": "Unsaved",
+        "completed": false,
+        "rows": [
+          { "organisation": "Natural England (NE)", "consultationType": "Application notification", "notes": "" },
+          { "organisation": "Historic England (HE)", "consultationType": "Request for advice", "notes": "" },
+          { "organisation": "", "consultationType": "", "notes": "" }
+        ]
+      }
+    ]
+  },
   "publicNoticeEvidenceReview": {
     "caseId": "MLA/2026/10014",
     "pageHeading": "Review public notice evidence",

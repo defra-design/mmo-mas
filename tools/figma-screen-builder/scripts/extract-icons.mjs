@@ -7,6 +7,7 @@ const names = [
   'ArrowLeftRegular',
   'ArrowDownloadRegular',
   'ArrowUpRegular',
+  'BuildingRegular',
   'ContactCardRegular',
   'ChevronDownRegular',
   'ChevronRightRegular',

@@ -31,7 +31,7 @@ only when that package is upgraded or the plugin needs another Fluent icon.
 4. Open **Actions**, search for **MAS D365 Screen Builder**, and choose
    **Choose screens and states…**.
 5. Select individual screens or use the **Case list**, **Public register**,
-   **Assessment journey** or **Notice evidence** preset, then choose
+   **Assessment journey**, **Notice evidence** or **Consultation** preset, then choose
    **Generate selected**.
 
 The picker lists the exact frames that will be added. The Assessment journey
@@ -47,6 +47,12 @@ resubmission journey with replacement photographs for Location 1. The latter
 includes the state before the new resubmission choice was introduced, the current
 default state with that choice blank, and the conditional state with **No**
 selected and its required comments field visible.
+
+The Consultation preset generates two Prepare for consultation screens: the
+unlocked, untouched task and an unsaved state with Natural England (NE) set to
+Application notification and Historic England (HE) set to Request for advice. The
+notes box for Historic England is empty, and the trailing organisation lookup
+remains available for another consultee.
 
 The plugin uses two stable pages:
 

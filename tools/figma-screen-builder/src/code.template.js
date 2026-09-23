@@ -44,6 +44,10 @@ const TEXT_SPECS = {
   product: { size: 16, line: 22, weight: 'semibold' },
 };
 
+const CONSULTATION_COLUMN_WIDTH = 639;
+const CONSULTATION_LOOKUP_WIDTH = 623;
+const CONSULTATION_FIELD_WIDTH = 441;
+
 let fonts;
 let styles;
 
@@ -398,6 +402,71 @@ function createFieldComponents(page) {
   dropdown.appendChild(makeIcon('Dropdown chevron', 'ChevronDownRegular', 16, C.secondary));
   page.appendChild(dropdown);
 
+  const consultationDropdown = figma.createComponent();
+  consultationDropdown.name = 'D365 / Dropdown field / Consultation type';
+  consultationDropdown.resize(CONSULTATION_FIELD_WIDTH, 32);
+  consultationDropdown.layoutMode = 'HORIZONTAL';
+  consultationDropdown.primaryAxisSizingMode = 'FIXED';
+  consultationDropdown.counterAxisSizingMode = 'FIXED';
+  consultationDropdown.primaryAxisAlignItems = 'SPACE_BETWEEN';
+  consultationDropdown.counterAxisAlignItems = 'CENTER';
+  consultationDropdown.paddingLeft = 12;
+  consultationDropdown.paddingRight = 10;
+  consultationDropdown.cornerRadius = 2;
+  consultationDropdown.fills = paint(C.field);
+  const consultationValue = makeText('Field value', '---', 'body', C.disabled, CONSULTATION_FIELD_WIDTH - 58);
+  consultationValue.textTruncation = 'ENDING';
+  consultationValue.maxLines = 1;
+  consultationDropdown.appendChild(consultationValue);
+  consultationDropdown.appendChild(makeIcon('Dropdown chevron', 'ChevronDownRegular', 16, C.secondary));
+  page.appendChild(consultationDropdown);
+
+  const organisationLookup = figma.createComponent();
+  organisationLookup.name = 'D365 / Organisation lookup field';
+  organisationLookup.resize(CONSULTATION_LOOKUP_WIDTH, 32);
+  organisationLookup.layoutMode = 'HORIZONTAL';
+  organisationLookup.primaryAxisSizingMode = 'FIXED';
+  organisationLookup.counterAxisSizingMode = 'FIXED';
+  organisationLookup.primaryAxisAlignItems = 'SPACE_BETWEEN';
+  organisationLookup.counterAxisAlignItems = 'CENTER';
+  organisationLookup.paddingLeft = 8;
+  organisationLookup.paddingRight = 8;
+  organisationLookup.cornerRadius = 2;
+  organisationLookup.fills = paint(C.field);
+  const lookupValue = horizontalFrame('Selected organisation', 262, 24, 4, 4, '#DCEBFA');
+  lookupValue.primaryAxisSizingMode = 'AUTO';
+  lookupValue.cornerRadius = 2;
+  lookupValue.appendChild(makeIcon('Organisation icon', 'BuildingRegular', 16, C.secondary));
+  const organisationName = makeText('Field value', 'Natural England', 'body', C.brand, 196);
+  organisationName.textDecoration = 'UNDERLINE';
+  lookupValue.appendChild(organisationName);
+  lookupValue.appendChild(makeText('Clear selection', '×', 'body', C.brand));
+  organisationLookup.appendChild(lookupValue);
+  organisationLookup.appendChild(makeText('Empty lookup value', '---', 'body', C.disabled));
+  organisationLookup.appendChild(makeIcon('Search organisations', 'SearchRegular', 16, C.secondary));
+  page.appendChild(organisationLookup);
+
+  const multiline = figma.createComponent();
+  multiline.name = 'D365 / Multiline text field';
+  multiline.resize(CONSULTATION_FIELD_WIDTH, 160);
+  multiline.layoutMode = 'VERTICAL';
+  multiline.primaryAxisSizingMode = 'FIXED';
+  multiline.counterAxisSizingMode = 'FIXED';
+  multiline.paddingTop = 8;
+  multiline.paddingRight = 12;
+  multiline.paddingBottom = 8;
+  multiline.paddingLeft = 12;
+  multiline.cornerRadius = 2;
+  multiline.fills = paint(C.field);
+  multiline.appendChild(makeText('Field value', '', 'body', C.text, CONSULTATION_FIELD_WIDTH - 24));
+  const grip = makeResizeGrip();
+  multiline.appendChild(grip);
+  grip.layoutPositioning = 'ABSOLUTE';
+  grip.x = CONSULTATION_FIELD_WIDTH - 14;
+  grip.y = 146;
+  grip.constraints = { horizontal: 'MAX', vertical: 'MAX' };
+  page.appendChild(multiline);
+
   const url = figma.createComponent();
   url.name = 'D365 / Read-only URL field';
   url.resize(900, 32);
@@ -462,7 +531,7 @@ function createFieldComponents(page) {
   validation.appendChild(makeText('Validation message', 'Enter a value before continuing.', 'body', C.red, 872));
   page.appendChild(validation);
 
-  return { readOnly, dropdown, url, imageLink, help, validation };
+  return { readOnly, dropdown, consultationDropdown, organisationLookup, multiline, url, imageLink, help, validation };
 }
 
 function createQuestionRow(page, name, fieldComponent, decoration, multiline = false, editable = false) {
@@ -1309,6 +1378,114 @@ function createPublicRegisterScreen(page, components, desc = DESCRIPTIONS.public
   return screen;
 }
 
+function createConsultationRow(components, row, index, description) {
+  const wrapper = horizontalFrame(`Consultee row ${index + 1}`, 1278, 1, 0, 0);
+  wrapper.counterAxisSizingMode = 'AUTO';
+  wrapper.counterAxisAlignItems = 'MIN';
+  wrapper.fills = [];
+
+  const organisationCell = verticalFrame('Organisation', CONSULTATION_COLUMN_WIDTH, 0, 8);
+  const lookup = components.fields.organisationLookup.createInstance();
+  lookup.name = 'Organisation lookup';
+  const selected = lookup.findOne(node => node.name === 'Selected organisation');
+  const empty = lookup.findOne(node => node.name === 'Empty lookup value');
+  if (selected) selected.visible = Boolean(row.organisation);
+  if (empty) empty.visible = !row.organisation;
+  if (row.organisation) setText(lookup, 'Field value', row.organisation);
+  organisationCell.appendChild(lookup);
+  wrapper.appendChild(organisationCell);
+
+  const detailsCell = verticalFrame('Consultation details', CONSULTATION_COLUMN_WIDTH, 16, 8);
+  if (row.organisation) {
+    const typeRow = horizontalFrame('Consultation type row', CONSULTATION_LOOKUP_WIDTH, 32, 8, 0);
+    typeRow.appendChild(makeText('Question', description.typeLabel, 'body', C.text, 140));
+    typeRow.appendChild(makeText('Required indicator', '*', 'body', C.red, 26));
+    const dropdown = components.fields.consultationDropdown.createInstance();
+    dropdown.name = 'Consultation type dropdown';
+    setText(dropdown, 'Field value', row.consultationType || '---');
+    if (row.consultationType) {
+      const value = dropdown.findOne(node => node.type === 'TEXT' && node.name === 'Field value');
+      if (value) value.fills = paint(C.text);
+    }
+    typeRow.appendChild(dropdown);
+    detailsCell.appendChild(typeRow);
+
+    if (row.consultationType === 'Request for advice') {
+      const notesRow = horizontalFrame('Notes for the organisation row', CONSULTATION_LOOKUP_WIDTH, 160, 8, 0);
+      notesRow.counterAxisAlignItems = 'MIN';
+      notesRow.appendChild(makeText('Question', description.notesLabel, 'body', C.text, 140));
+      notesRow.appendChild(fixedFrame('Optional field spacing', 26, 1));
+      const notes = components.fields.multiline.createInstance();
+      notes.name = 'Notes for the organisation text box';
+      setText(notes, 'Field value', row.notes);
+      notesRow.appendChild(notes);
+      detailsCell.appendChild(notesRow);
+    }
+  }
+  wrapper.appendChild(detailsCell);
+  return wrapper;
+}
+
+function createPrepareForConsultationScreen(page, components, state) {
+  const description = DESCRIPTIONS.prepareForConsultation;
+  const screen = fixedFrame(state.frameName, 1640, 1232, C.canvas);
+  screen.clipsContent = true;
+  addShell(screen, components, true);
+
+  const headerCard = verticalFrame('Task header card', 1320, 12, 20, C.white);
+  headerCard.x = 268;
+  headerCard.y = 125;
+  applyCard(headerCard);
+  const headingLine = horizontalFrame('Task title', 1280, 32, 6, 0);
+  headingLine.primaryAxisSizingMode = 'AUTO';
+  headingLine.appendChild(makeText('Page heading', description.pageHeading, 'title', C.text));
+  headingLine.appendChild(makeText('Save state', `- ${state.saveState}`, 'body', C.secondary));
+  headerCard.appendChild(headingLine);
+  headerCard.appendChild(makeText('Record type', description.recordType, 'body', C.text));
+  screen.appendChild(headerCard);
+
+  const body = verticalFrame('Consultees card', 1320, 24, 20, C.white);
+  body.x = 268;
+  body.y = 238;
+  applyCard(body);
+  const introduction = verticalFrame('Consultees introduction', 1278, 8, 0);
+  introduction.appendChild(makeText('Section heading', description.sectionHeading, 'section', C.text, 1278));
+  description.intro.forEach(line => introduction.appendChild(makeText('Help text', line, 'body', C.secondary, 1278)));
+  body.appendChild(introduction);
+
+  const table = verticalFrame('Consultees table', 1278, 0, 0);
+  const headings = horizontalFrame('Consultee table headings', 1278, 40, 0, 0);
+  headings.appendChild(makeText('Column heading', description.organisationHeading, 'label', C.text, CONSULTATION_COLUMN_WIDTH));
+  headings.appendChild(makeText('Column heading', description.detailsHeading, 'label', C.text, CONSULTATION_COLUMN_WIDTH));
+  table.appendChild(headings);
+  const headerDivider = components.divider.createInstance();
+  headerDivider.name = 'Table header divider';
+  table.appendChild(headerDivider);
+  state.rows.forEach((row, index) => {
+    table.appendChild(createConsultationRow(components, row, index, description));
+    const divider = components.divider.createInstance();
+    divider.name = 'Consultee row divider';
+    table.appendChild(divider);
+  });
+  body.appendChild(table);
+  screen.appendChild(body);
+
+  const completionCard = verticalFrame('Complete task card', 1320, 24, 20, C.white);
+  completionCard.x = 268;
+  completionCard.y = 238 + Math.max(body.height, 260) + 12;
+  applyCard(completionCard);
+  completionCard.appendChild(makeText('Section heading', description.completionHeading, 'section', C.text, 1278));
+  const completion = horizontalFrame('Completion field', 1278, 40, 8, 0);
+  completion.appendChild(makeText('Question', description.completionLabel, 'body', C.text, 160));
+  completion.appendChild(fixedFrame('Completion field spacing', 42, 1));
+  completion.appendChild(makeEmptyCheckbox('Checkbox'));
+  completionCard.appendChild(completion);
+  screen.appendChild(completionCard);
+
+  page.appendChild(screen);
+  return screen;
+}
+
 function createEvidenceReviewRow(components, type, question, value) {
   const source = type === 'dropdown'
     ? components.rows.dropdown
@@ -1556,6 +1733,14 @@ const SCREEN_GROUPS = [
       label: state.frameName,
     })),
   },
+  {
+    id: 'prepare-for-consultation',
+    label: 'Prepare for consultation',
+    screens: DESCRIPTIONS.prepareForConsultation.states.map((state, index) => ({
+      id: `prepare-for-consultation-${index}`,
+      label: state.frameName,
+    })),
+  },
 ];
 
 const ALL_SCREEN_IDS = SCREEN_GROUPS.flatMap(group => group.screens.map(screen => screen.id));
@@ -1585,6 +1770,11 @@ function renderScreenById(id, page, components) {
     const index = Number(id.slice('public-notice-evidence-'.length));
     const state = DESCRIPTIONS.publicNoticeEvidenceReview.states[index];
     if (state) return createPublicNoticeEvidenceReviewScreen(page, components, state);
+  }
+  if (id.startsWith('prepare-for-consultation-')) {
+    const index = Number(id.slice('prepare-for-consultation-'.length));
+    const state = DESCRIPTIONS.prepareForConsultation.states[index];
+    if (state) return createPrepareForConsultationScreen(page, components, state);
   }
   throw new Error(`Unknown screen selection: ${id}`);
 }
