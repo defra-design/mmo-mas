@@ -35,7 +35,7 @@ export const policies: MarinePlanPolicy[] = (mppData.categories as RawCategory[]
 
 export const policyCount = policies.length;
 
-export type MppAssessmentStatus = 'To do' | 'Done';
+export type MppAssessmentStatus = 'Cannot start yet' | 'To do' | 'Done';
 
 /**
  * A policy assessment has its own task lifecycle. Its assessment outcome is
@@ -43,12 +43,24 @@ export type MppAssessmentStatus = 'To do' | 'Done';
  */
 export function mppAssessmentStatus(
   answer?: { outcome?: string; reason?: string },
+  locked = false,
 ): MppAssessmentStatus {
+  if (locked) return 'Cannot start yet';
   return answer?.outcome?.trim() && answer?.reason?.trim() ? 'Done' : 'To do';
 }
 
-/** MPP task displays expose only the two lifecycle values used by assessments. */
-export function mppTaskStatus(status: string): MppAssessmentStatus {
+export function allMppAssessmentsComplete(
+  answers: Record<string, { outcome?: string; reason?: string }>,
+): boolean {
+  return (
+    policyCount > 0 &&
+    policies.every(policy => mppAssessmentStatus(answers[policy.code]) === 'Done')
+  );
+}
+
+/** Apply the Site-check prerequisite while normalising other MPP task statuses. */
+export function mppTaskStatus(status: string, locked = false): MppAssessmentStatus {
+  if (locked || status === 'Cannot start yet') return 'Cannot start yet';
   return status === 'Done' ? 'Done' : 'To do';
 }
 

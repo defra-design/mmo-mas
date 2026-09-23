@@ -21,7 +21,7 @@ import {
   PreviousRegular,
 } from '@fluentui/react-icons';
 import { useTasks } from '../context/TaskContext';
-import { taskStatusForCase } from '../utils/publicNoticeEvidence';
+import { siteCheckCompleteForCase, taskStatusForCase } from '../utils/publicNoticeEvidence';
 import { mppAssessmentStatus, mppTaskStatus, policies } from '../utils/marinePlanPolicies';
 
 // The MPP task is 1-to-many, so the policies are their own list under Tasks,
@@ -75,8 +75,9 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
   const { tasks, mppForm } = useTasks();
   const [page, setPage] = useState(1);
 
-  const allPoliciesDone =
-    taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies) === 'Done';
+  const taskStatus = taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies);
+  const locked = !siteCheckCompleteForCase(caseId, tasks);
+  const allPoliciesDone = !locked && taskStatus === 'Done';
   const total = policies.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
@@ -93,8 +94,9 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
       {pagePolicies.map(policy => {
         const status = allPoliciesDone
           ? mppTaskStatus('Done')
-          : mppAssessmentStatus(mppForm[policy.code]);
-        // Openable whatever the status — a gated policy opens read-only.
+          : mppAssessmentStatus(mppForm[policy.code], locked);
+        // Policy records remain openable while gated; the form itself renders
+        // read-only until Site check is complete.
         const onClick = () =>
           navigate(
             `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${policy.code}`
@@ -106,7 +108,16 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
             onClick={onClick}
           >
             <div className={styles.rowText}>
-              <Text className={styles.taskName}>{policy.label}</Text>
+              <button
+                type="button"
+                className={`link-button ${styles.taskName}`}
+                onClick={event => {
+                  event.stopPropagation();
+                  onClick();
+                }}
+              >
+                {policy.label}
+              </button>
               <Text className={styles.statusText}>{status}</Text>
             </div>
             <Menu>
@@ -115,14 +126,15 @@ export default function MarinePlanPoliciesList({ caseId }: MarinePlanPoliciesLis
                   appearance="subtle"
                   icon={<MoreHorizontalRegular />}
                   aria-label={`${policy.label} actions`}
+                  disabled={locked}
                   onClick={e => e.stopPropagation()}
                 />
               </MenuTrigger>
               <MenuPopover>
                 <MenuList>
-                  <MenuItem>Open</MenuItem>
-                  <MenuItem>Mark complete</MenuItem>
-                  <MenuItem>Assign</MenuItem>
+                  <MenuItem disabled={locked}>Open</MenuItem>
+                  <MenuItem disabled={locked}>Mark complete</MenuItem>
+                  <MenuItem disabled={locked}>Assign</MenuItem>
                 </MenuList>
               </MenuPopover>
             </Menu>

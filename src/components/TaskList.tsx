@@ -24,6 +24,7 @@ import type { TaskStatus } from '../context/TaskContext';
 import {
   hasSubmittedPublicNoticeEvidence,
   publicNoticeEvidenceStatusForCase,
+  siteCheckCompleteForCase,
   taskStatusForCase,
 } from '../utils/publicNoticeEvidence';
 import { mppTaskStatus } from '../utils/marinePlanPolicies';
@@ -69,6 +70,7 @@ interface TaskRow {
   name: string;
   status: TaskStatus;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 interface TaskListProps {
@@ -119,12 +121,15 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
 
   // Original single-row treatment (kept for the standard cases, e.g. MLA/2026/10002).
   if (!mppInSeparateList) {
+    const mppLocked = !siteCheckCompleteForCase(caseId, tasks);
     rows.push({
       key: 'mpp',
       name: 'Marine plan policies',
       status: mppTaskStatus(
         taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies),
+        mppLocked,
       ),
+      disabled: mppLocked,
     });
   }
 
@@ -171,14 +176,15 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
                 appearance="subtle"
                 icon={<MoreHorizontalRegular />}
                 aria-label={`${row.name} actions`}
+                disabled={row.disabled}
                 onClick={e => e.stopPropagation()}
               />
             </MenuTrigger>
             <MenuPopover>
               <MenuList>
-                <MenuItem>Open</MenuItem>
-                <MenuItem>Mark complete</MenuItem>
-                <MenuItem>Assign</MenuItem>
+                <MenuItem disabled={row.disabled}>Open</MenuItem>
+                <MenuItem disabled={row.disabled}>Mark complete</MenuItem>
+                <MenuItem disabled={row.disabled}>Assign</MenuItem>
               </MenuList>
             </MenuPopover>
           </Menu>

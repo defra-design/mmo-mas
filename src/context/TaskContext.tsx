@@ -1,7 +1,7 @@
 // src/context/TaskContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
-import { policyCount } from '../utils/marinePlanPolicies';
+import { allMppAssessmentsComplete } from '../utils/marinePlanPolicies';
 import { loadPublicNoticeRequirement, SITE_NOTICE } from '../utils/publicNoticeRequirement';
 
 export type TaskStatus =
@@ -106,8 +106,9 @@ export interface PublicNoticeEvidenceLocationReview {
   rejectionComments: string;
 }
 
-// Native fields on the evidence-review task. Saving rolls the task to Done when
-// its Two Options field is selected, or In progress when left clear.
+// Native fields on the evidence-review task. `completed` is retained only so
+// older persisted prototype state continues to hydrate safely; the current form
+// completes directly once all required location reviews are valid.
 export interface PublicNoticeEvidenceMeta {
   completed: boolean;
   locations: PublicNoticeEvidenceLocationReview[];
@@ -305,16 +306,16 @@ function loadState(): PersistedState {
         ...parsed.siteNoticeForm,
         needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
       };
+      const mppForm: MppForm = { ...initialState.mppForm, ...parsed.mppForm };
       const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
-      // MPP outcomes have always belonged in mppForm. If older saved data put an
-      // outcome label into the task status, return it to the lifecycle instead.
-      if (
-        tasks.marinePlanPolicies !== 'Done' &&
-        tasks.marinePlanPolicies !== 'To do' &&
-        tasks.marinePlanPolicies !== 'Cannot start yet'
-      ) {
-        tasks.marinePlanPolicies = 'To do';
-      }
+      // Site check is the MPP prerequisite. Re-derive the roll-up on hydration
+      // so stale or legacy task-status values cannot expose assessments early.
+      tasks.marinePlanPolicies =
+        tasks.siteCheck !== 'Done'
+          ? 'Cannot start yet'
+          : allMppAssessmentsComplete(mppForm)
+            ? 'Done'
+            : 'To do';
       // Earlier saved prototype data used the generic To do label when
       // replacement evidence returned to the officer. Adopt the more specific
       // resubmission status without changing reviews already in progress or done.
@@ -401,11 +402,15 @@ function loadState(): PersistedState {
               // Before this Choice field existed, every consultee row behaved as
               // a request and exposed Notes. Preserve that meaning on hydration.
               consultationType:
-                typeof row.consultationType === 'string'
-                  ? row.consultationType
-                  : row.organisation?.trim()
-                    ? 'Request for consultation'
-                    : '',
+                row.consultationType === 'Request for consultation'
+                  ? 'Request for advice'
+                  : row.consultationType === 'Consultation notice'
+                    ? 'Application notification'
+                    : typeof row.consultationType === 'string'
+                      ? row.consultationType
+                      : row.organisation?.trim()
+                        ? 'Request for advice'
+                        : '',
               notes: typeof row.notes === 'string' ? row.notes : '',
             }))
           : initialState.prepForConsulteeForm;
@@ -413,7 +418,7 @@ function loadState(): PersistedState {
         tasks,
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
-        mppForm: { ...initialState.mppForm, ...parsed.mppForm },
+        mppForm,
         prepForConsulteeForm: prepRows,
         prepForConsulteeMeta: {
           ...initialState.prepForConsulteeMeta,
@@ -492,8 +497,6 @@ interface TaskContextValue {
     value: PublicRegisterForm[K],
   ) => void;
   setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
-  setPublicNoticeEvidenceCompleted: (completed: boolean) => void;
-  setPublicNoticeEvidenceResubmissionCompleted: (completed: boolean) => void;
   setPublicNoticeEvidenceResubmissionField: (
     field: keyof PublicNoticeEvidenceLocationReview,
     value: string,
@@ -602,19 +605,15 @@ export function TaskProvider({ children }: PropsWithChildren) {
         ...prev.mppForm,
         [code]: { ...existing, [field]: value },
       };
-      const allAssessed =
-        policyCount > 0 &&
-        Object.values(mppForm).filter(a => a.outcome.trim() && a.reason.trim()).length ===
-          policyCount;
-      // Emptying a field on a policy that had been assessed takes the task back off
-      // Done. Any other status ("To do", or "Cannot start yet" on a locked case) is
-      // left alone — only the Done roll-up is derived from the answers.
-      const current = prev.tasks.marinePlanPolicies;
-      const marinePlanPolicies = allAssessed
-        ? 'Done'
-        : current === 'Done'
-          ? 'To do'
-          : current;
+      const allAssessed = allMppAssessmentsComplete(mppForm);
+      // Site check remains authoritative even if stale form data exists. Once it
+      // is complete, the MPP roll-up is derived from the 41 assessments.
+      const marinePlanPolicies =
+        prev.tasks.siteCheck !== 'Done'
+          ? 'Cannot start yet'
+          : allAssessed
+            ? 'Done'
+            : 'To do';
       return {
         ...prev,
         mppForm,
@@ -669,21 +668,6 @@ export function TaskProvider({ children }: PropsWithChildren) {
 
   const setSiteNoticeField = (field: keyof SiteNoticeForm, value: string) =>
     setState(prev => ({ ...prev, siteNoticeForm: { ...prev.siteNoticeForm, [field]: value } }));
-
-  const setPublicNoticeEvidenceCompleted = (completed: boolean) =>
-    setState(prev => ({
-      ...prev,
-      publicNoticeEvidenceMeta: { ...prev.publicNoticeEvidenceMeta, completed },
-    }));
-
-  const setPublicNoticeEvidenceResubmissionCompleted = (completed: boolean) =>
-    setState(prev => ({
-      ...prev,
-      publicNoticeEvidenceResubmissionMeta: {
-        ...prev.publicNoticeEvidenceResubmissionMeta,
-        completed,
-      },
-    }));
 
   const setPublicNoticeEvidenceResubmissionField = (
     field: keyof PublicNoticeEvidenceLocationReview,
@@ -741,7 +725,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         ...prev.tasks,
         siteCheck: 'Done',
         wfdAssessment: 'To do',
-        marinePlanPolicies: 'To do',
+        marinePlanPolicies: allMppAssessmentsComplete(prev.mppForm) ? 'Done' : 'To do',
         prepForConsultee: 'To do',
         publicRegister: 'To do',
         siteNotice: 'To do',
@@ -796,21 +780,19 @@ export function TaskProvider({ children }: PropsWithChildren) {
     }));
 
   // Review is deliberately separate from Public notice and only appears once
-  // evidence exists (MLA/2026/10014 in this prototype fixture). A completed
-  // review with any location answered No waits for replacement applicant
-  // evidence; only an all-Yes review is Done.
+  // evidence exists (MLA/2026/10014 in this prototype fixture). The form
+  // validates every required review before calling this action; any location
+  // answered No waits for replacement evidence, otherwise the task is Done.
   const savePublicNoticeEvidence = () =>
     setState(prev => ({
       ...prev,
       tasks: {
         ...prev.tasks,
-        publicNoticeEvidence: !prev.publicNoticeEvidenceMeta.completed
-          ? 'In progress'
-          : prev.publicNoticeEvidenceMeta.locations.some(
-                location => location.decision === 'No',
-              )
-            ? 'Awaiting applicant'
-            : 'Done',
+        publicNoticeEvidence: prev.publicNoticeEvidenceMeta.locations.some(
+          location => location.decision === 'No',
+        )
+          ? 'Awaiting applicant'
+          : 'Done',
       },
       saved: { ...prev.saved, publicNoticeEvidence: true },
     }));
@@ -822,11 +804,10 @@ export function TaskProvider({ children }: PropsWithChildren) {
       ...prev,
       tasks: {
         ...prev.tasks,
-        publicNoticeEvidenceResubmission: prev.publicNoticeEvidenceResubmissionMeta.completed
-          ? prev.publicNoticeEvidenceResubmissionMeta.review.decision === 'No'
+        publicNoticeEvidenceResubmission:
+          prev.publicNoticeEvidenceResubmissionMeta.review.decision === 'No'
             ? 'Awaiting applicant'
-            : 'Done'
-          : 'In progress',
+            : 'Done',
       },
       saved: { ...prev.saved, publicNoticeEvidenceResubmission: true },
     }));
@@ -877,8 +858,6 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setPrepForConsulteeCompleted,
         setPublicRegisterField,
         setSiteNoticeField,
-        setPublicNoticeEvidenceCompleted,
-        setPublicNoticeEvidenceResubmissionCompleted,
         setPublicNoticeEvidenceResubmissionField,
         setPublicNoticeEvidenceLocationField,
         addRecentOrganisation,
