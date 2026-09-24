@@ -30,6 +30,7 @@ import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { asset } from '../utils/asset';
 import { useTasks } from '../context/TaskContext';
 import { caseStatus } from '../utils/caseStatus';
+import { sanitizeRichText } from '../utils/richText';
 import { RequestTransferDialog, CompleteTransferDialog } from './TransferMcmsDialogs';
 import RejectApplicationDialog from './RejectApplicationDialog';
 import FormCommandBar from './FormCommandBar';
@@ -221,6 +222,11 @@ const useStyles = makeStyles({
   // (styles.field) line up on their own.
   topAlignedLabel: { paddingTop: tokens.spacingVerticalS },
   transferDetailsValue: { whiteSpace: 'pre-wrap', minHeight: '160px' },
+  richTextValue: {
+    '& p, & div': { marginTop: 0, marginBottom: tokens.spacingVerticalS },
+    '& > :last-child': { marginBottom: 0 },
+    '& ul, & ol': { paddingLeft: '28px' },
+  },
   transferFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
 });
 
@@ -641,7 +647,14 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         </Text>
                         <FieldDecorations locked />
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
-                          <Body1>{caseRejection.notes}</Body1>
+                          {caseId === 'MLA/2026/10015' ? (
+                            <div
+                              className={styles.richTextValue}
+                              dangerouslySetInnerHTML={{ __html: sanitizeRichText(caseRejection.notes) }}
+                            />
+                          ) : (
+                            <Body1>{caseRejection.notes}</Body1>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -715,7 +728,10 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
         <CompleteTransferDialog onCancel={cancelDialog} onConfirm={confirmComplete} />
       )}
       {openDialog === 'reject' && (
-        <RejectApplicationDialog onCancel={cancelDialog} onConfirm={confirmReject} />
+        <RejectApplicationDialog
+          onCancel={cancelDialog} onConfirm={confirmReject}
+          richText={caseId === 'MLA/2026/10015'}
+        />
       )}
     </div>
   );

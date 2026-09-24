@@ -10,7 +10,9 @@ import { useState } from 'react';
 import { mergeClasses, Body1, Field, Dropdown, Option, Textarea } from '@fluentui/react-components';
 import { DismissCircleRegular } from '@fluentui/react-icons';
 import { requiredMessage } from '../utils/validationMessages';
+import { richTextPlainText, sanitizeRichText } from '../utils/richText';
 import CaseDialogShell, { useDialogFieldStyles } from './CaseDialogShell';
+import RichTextEditor from './RichTextEditor';
 
 // The field names, used as both the labels and the names in the required-field
 // messages, so the two can't drift apart.
@@ -34,9 +36,11 @@ export const REJECTION_REASONS = [
 export default function RejectApplicationDialog({
   onCancel,
   onConfirm,
+  richText = false,
 }: {
   onCancel: () => void;
   onConfirm: (reasons: string[], notes: string) => void;
+  richText?: boolean;
 }) {
   const styles = useDialogFieldStyles();
   const [reasons, setReasons] = useState<string[]>([]);
@@ -50,14 +54,14 @@ export default function RejectApplicationDialog({
     if (reasons.length === 0) {
       next.reasons = requiredMessage(REASONS_FIELD);
     }
-    if (!notes.trim()) {
+    if (!(richText ? richTextPlainText(notes) : notes.trim())) {
       next.notes = requiredMessage(NOTES_FIELD);
     }
     if (next.reasons || next.notes) {
       setErrors(next);
       return;
     }
-    onConfirm(reasons, notes.trim());
+    onConfirm(reasons, richText ? sanitizeRichText(notes) : notes.trim());
   };
 
   return (
@@ -106,15 +110,26 @@ export default function RejectApplicationDialog({
           validationMessage={errors.notes}
           validationMessageIcon={<DismissCircleRegular />}
         >
-          <Textarea
-            className={mergeClasses(styles.field, styles.textarea)}
-            appearance="filled-lighter"
-            value={notes}
-            onChange={(_, d) => {
-              setNotes(d.value);
-              if (errors.notes) setErrors(e => ({ ...e, notes: undefined }));
-            }}
-          />
+          {richText ? (
+            <RichTextEditor
+              label={NOTES_FIELD}
+              invalid={Boolean(errors.notes)}
+              onChange={html => {
+                setNotes(html);
+                if (errors.notes) setErrors(e => ({ ...e, notes: undefined }));
+              }}
+            />
+          ) : (
+            <Textarea
+              className={mergeClasses(styles.field, styles.textarea)}
+              appearance="filled-lighter"
+              value={notes}
+              onChange={(_, d) => {
+                setNotes(d.value);
+                if (errors.notes) setErrors(e => ({ ...e, notes: undefined }));
+              }}
+            />
+          )}
         </Field>
       </div>
     </CaseDialogShell>
