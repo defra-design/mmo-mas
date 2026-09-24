@@ -17,6 +17,7 @@ import RichTextEditor from './RichTextEditor';
 // The field names, used as both the labels and the names in the required-field
 // messages, so the two can't drift apart.
 const REASONS_FIELD = 'Sections of the application with issues';
+const CASE_10015_REASONS_FIELD = 'Sections  with issues';
 const NOTES_FIELD = 'Provide details for each issue';
 
 // The option-set values a caseworker can reject an application for.
@@ -46,13 +47,14 @@ export default function RejectApplicationDialog({
   const [reasons, setReasons] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ reasons?: string; notes?: string }>({});
+  const reasonsField = richText ? CASE_10015_REASONS_FIELD : REASONS_FIELD;
 
   // Both fields are business-required, so a caseworker who fills in neither sees
   // both messages at once rather than one after the other.
   const confirm = () => {
     const next: { reasons?: string; notes?: string } = {};
     if (reasons.length === 0) {
-      next.reasons = requiredMessage(REASONS_FIELD);
+      next.reasons = requiredMessage(reasonsField);
     }
     if (!(richText ? richTextPlainText(notes) : notes.trim())) {
       next.notes = requiredMessage(NOTES_FIELD);
@@ -73,11 +75,21 @@ export default function RejectApplicationDialog({
     >
       <div className={styles.fields}>
         <Body1>
-          What you enter here will be visible to the applicant. Their application will show a
-          status of rejected.
+          {richText ? (
+            <>
+              What you enter here will be visible to the applicant.
+              <br />
+              Select the sections with issues. Then in the text box, type each section name, make it bold using the formatting tools, and explain underneath what is wrong and how the applicant can fix it. Keep it brief and specific.
+            </>
+          ) : (
+            <>
+              What you enter here will be visible to the applicant. Their application will show a
+              status of rejected.
+            </>
+          )}
         </Body1>
         <Field
-          label={REASONS_FIELD}
+          label={reasonsField}
           required
           validationState={errors.reasons ? 'error' : 'none'}
           validationMessage={errors.reasons}
