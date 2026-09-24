@@ -19,7 +19,7 @@ const NOTES_FIELD = 'Provide details for each issue';
 
 // The option-set values a caseworker can reject an application for.
 export const REJECTION_REASONS = [
-  'Project details',
+  'Application details',
   'Site location',
   'Site activities',
   'Marine plan policies',
@@ -70,7 +70,7 @@ export default function RejectApplicationDialog({
       <div className={styles.fields}>
         <Body1>
           What you enter here will be visible to the applicant. Their application will show a
-          status of unable to progress.
+          status of rejected.
         </Body1>
         <Field
           label={REASONS_FIELD}
