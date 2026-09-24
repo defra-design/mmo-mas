@@ -79,7 +79,7 @@ export default function RejectApplicationDialog({
             <>
               What you enter here will be visible to the applicant.
               <br />
-              Select the sections with issues. Then in the text box, type each section name, make it bold using the formatting tools, and explain underneath what is wrong and how the applicant can fix it. Keep it brief and specific.
+              Select the sections with issues. Then in the text box, type a section name, make it bold using the formatting tools, and explain underneath what is wrong with that section and how the applicant can fix it. Repeat for each section with an issue. Keep it brief and specific.
             </>
           ) : (
             <>
