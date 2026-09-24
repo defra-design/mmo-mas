@@ -1,32 +1,17 @@
-import { useRef } from 'react';
-import {
-  makeStyles, shorthands, tokens, Toolbar, ToolbarButton, Menu, MenuButton,
-  MenuItem, MenuList, MenuPopover, MenuTrigger,
-} from '@fluentui/react-components';
-import {
-  ArrowRedoRegular, ArrowUndoRegular, TextBoldRegular, TextBulletListRegular,
-  TextClearFormattingRegular, TextItalicRegular, TextNumberListLtrRegular,
-  TextUnderlineRegular,
-} from '@fluentui/react-icons';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { makeStyles, shorthands, tokens } from '@fluentui/react-components';
+import { sanitizeRichText } from '../utils/richText';
+import RichTextToolbar from './RichTextToolbar';
+import type { EditorFormatState } from './RichTextToolbar';
 
 const useStyles = makeStyles({
   wrapper: {
     backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    borderRadius: tokens.borderRadiusSmall,
+    ...shorthands.border('1px', 'solid', '#bdbdbd'),
+    borderRadius: 0,
     overflow: 'hidden',
   },
-  toolbar: {
-    display: 'flex', alignItems: 'center', flexWrap: 'wrap',
-    gap: tokens.spacingHorizontalXS,
-    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
-    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke1),
-  },
-  divider: {
-    width: '1px', height: '24px', marginLeft: tokens.spacingHorizontalXS,
-    marginRight: tokens.spacingHorizontalXS, backgroundColor: tokens.colorNeutralStroke1,
-  },
-  history: { marginLeft: 'auto', display: 'flex' },
+  toolbarBorder: { height: '3px', backgroundColor: '#c9c9c9' },
   editor: {
     minHeight: '220px', maxHeight: '420px', overflowY: 'auto', outline: 'none',
     resize: 'vertical',
@@ -35,22 +20,53 @@ const useStyles = makeStyles({
     '& h1': { fontSize: '24px', marginTop: '0', marginBottom: '8px' },
     '& h2': { fontSize: '20px', marginTop: '0', marginBottom: '8px' },
     '& ul, & ol': { paddingLeft: '28px' },
+    '& blockquote': { marginLeft: '40px' },
   },
 });
 
 type Props = { label: string; invalid?: boolean; onChange: (html: string) => void };
+const commands = [
+  'bold', 'italic', 'underline', 'strikeThrough', 'superscript', 'subscript',
+  'insertUnorderedList', 'insertOrderedList',
+];
 
 export default function RichTextEditor({ label, invalid = false, onChange }: Props) {
   const styles = useStyles();
   const editor = useRef<HTMLDivElement>(null);
   const selection = useRef<Range | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [format, setFormat] = useState<EditorFormatState>({
+    block: 'p', active: {}, alignment: 'justifyLeft', hasLink: false, canOutdent: false,
+  });
 
-  const rememberSelection = () => {
+  const rememberSelection = useCallback(() => {
     const selected = window.getSelection();
     if (editor.current && selected?.rangeCount && editor.current.contains(selected.anchorNode)) {
       selection.current = selected.getRangeAt(0).cloneRange();
     }
-  };
+  }, []);
+
+  const updateFormat = useCallback(() => {
+    const selected = window.getSelection();
+    if (!editor.current || !selected?.anchorNode || !editor.current.contains(selected.anchorNode)) return;
+    rememberSelection();
+    const anchor = selected.anchorNode instanceof Element
+      ? selected.anchorNode : selected.anchorNode.parentElement;
+    const active = Object.fromEntries(commands.map(command => [command, document.queryCommandState(command)]));
+    const alignment = ['justifyCenter', 'justifyRight', 'justifyFull']
+      .find(command => document.queryCommandState(command)) ?? 'justifyLeft';
+    const block = anchor?.closest('h1, h2')?.tagName.toLowerCase() ?? 'p';
+    setFormat({
+      block, active, alignment,
+      hasLink: Boolean(anchor?.closest('a')),
+      canOutdent: Boolean(anchor?.closest('blockquote, [style*="margin-left"]')),
+    });
+  }, [rememberSelection]);
+
+  useEffect(() => {
+    document.addEventListener('selectionchange', updateFormat);
+    return () => document.removeEventListener('selectionchange', updateFormat);
+  }, [updateFormat]);
 
   const run = (command: string, value?: string) => {
     editor.current?.focus();
@@ -61,57 +77,42 @@ export default function RichTextEditor({ label, invalid = false, onChange }: Pro
     }
     document.execCommand(command, false, value);
     if (command === 'removeFormat') document.execCommand('formatBlock', false, 'p');
-    rememberSelection();
+    updateFormat();
     onChange(editor.current?.innerHTML ?? '');
   };
 
-  const tool = (labelText: string, icon: React.ReactElement, command: string) => (
-    <ToolbarButton
-      appearance="subtle" icon={icon} aria-label={labelText} title={labelText}
-      onMouseDown={event => event.preventDefault()}
-      onClick={() => run(command)}
-    />
-  );
+  const insertLink = (text: string, url: string) => {
+    if (selection.current?.toString() === text) {
+      run('createLink', url);
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = url;
+    link.textContent = text;
+    run('insertHTML', link.outerHTML);
+  };
 
   return (
     <div className={styles.wrapper}>
-      <Toolbar className={styles.toolbar} aria-label="Text formatting">
-        <Menu>
-          <MenuTrigger disableButtonEnhancement>
-            <MenuButton appearance="subtle" size="small" onMouseDown={rememberSelection}>
-              Paragraph
-            </MenuButton>
-          </MenuTrigger>
-          <MenuPopover><MenuList>
-            <MenuItem onClick={() => run('formatBlock', 'p')}>Paragraph</MenuItem>
-            <MenuItem onClick={() => run('formatBlock', 'h1')}>Heading 1</MenuItem>
-            <MenuItem onClick={() => run('formatBlock', 'h2')}>Heading 2</MenuItem>
-          </MenuList></MenuPopover>
-        </Menu>
-        <span className={styles.divider} aria-hidden="true" />
-        {tool('Bold', <TextBoldRegular />, 'bold')}
-        {tool('Italic', <TextItalicRegular />, 'italic')}
-        {tool('Underline', <TextUnderlineRegular />, 'underline')}
-        <span className={styles.divider} aria-hidden="true" />
-        {tool('Bulleted list', <TextBulletListRegular />, 'insertUnorderedList')}
-        {tool('Numbered list', <TextNumberListLtrRegular />, 'insertOrderedList')}
-        <span className={styles.divider} aria-hidden="true" />
-        {tool('Remove formatting', <TextClearFormattingRegular />, 'removeFormat')}
-        <span className={styles.history}>
-          {tool('Undo', <ArrowUndoRegular />, 'undo')}
-          {tool('Redo', <ArrowRedoRegular />, 'redo')}
-        </span>
-      </Toolbar>
+      <RichTextToolbar
+        expanded={expanded} onToggleExpanded={() => setExpanded(value => !value)}
+        format={format} run={run} rememberSelection={rememberSelection}
+        getSelectedText={() => selection.current?.toString() ?? ''}
+        insertLink={insertLink}
+      />
+      <div className={styles.toolbarBorder} aria-hidden="true" />
       <div
         ref={editor} className={styles.editor} contentEditable role="textbox"
         aria-label={label} aria-multiline="true" aria-invalid={invalid}
         suppressContentEditableWarning
-        onInput={event => onChange(event.currentTarget.innerHTML)}
-        onKeyUp={rememberSelection} onMouseUp={rememberSelection}
+        onInput={event => { onChange(event.currentTarget.innerHTML); updateFormat(); }}
+        onKeyUp={updateFormat} onMouseUp={updateFormat}
         onBlur={rememberSelection}
         onPaste={event => {
           event.preventDefault();
-          document.execCommand('insertText', false, event.clipboardData.getData('text/plain'));
+          const html = event.clipboardData.getData('text/html');
+          if (html) document.execCommand('insertHTML', false, sanitizeRichText(html));
+          else document.execCommand('insertText', false, event.clipboardData.getData('text/plain'));
         }}
         onDrop={event => event.preventDefault()}
       />
