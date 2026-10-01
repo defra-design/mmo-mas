@@ -10,14 +10,11 @@ import { useState } from 'react';
 import { mergeClasses, Body1, Field, Dropdown, Option, Textarea } from '@fluentui/react-components';
 import { DismissCircleRegular } from '@fluentui/react-icons';
 import { requiredMessage } from '../utils/validationMessages';
-import { richTextPlainText, sanitizeRichText } from '../utils/richText';
 import CaseDialogShell, { useDialogFieldStyles } from './CaseDialogShell';
-import RichTextEditor from './RichTextEditor';
 
 // The field names, used as both the labels and the names in the required-field
 // messages, so the two can't drift apart.
 const REASONS_FIELD = 'Sections of the application with issues';
-const CASE_10015_REASONS_FIELD = 'Sections  with issues';
 const NOTES_FIELD = 'Provide details for each issue';
 
 // The option-set values a caseworker can reject an application for.
@@ -37,33 +34,30 @@ export const REJECTION_REASONS = [
 export default function RejectApplicationDialog({
   onCancel,
   onConfirm,
-  richText = false,
 }: {
   onCancel: () => void;
   onConfirm: (reasons: string[], notes: string) => void;
-  richText?: boolean;
 }) {
   const styles = useDialogFieldStyles();
   const [reasons, setReasons] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ reasons?: string; notes?: string }>({});
-  const reasonsField = richText ? CASE_10015_REASONS_FIELD : REASONS_FIELD;
 
   // Both fields are business-required, so a caseworker who fills in neither sees
   // both messages at once rather than one after the other.
   const confirm = () => {
     const next: { reasons?: string; notes?: string } = {};
     if (reasons.length === 0) {
-      next.reasons = requiredMessage(reasonsField);
+      next.reasons = requiredMessage(REASONS_FIELD);
     }
-    if (!(richText ? richTextPlainText(notes) : notes.trim())) {
+    if (!notes.trim()) {
       next.notes = requiredMessage(NOTES_FIELD);
     }
     if (next.reasons || next.notes) {
       setErrors(next);
       return;
     }
-    onConfirm(reasons, richText ? sanitizeRichText(notes) : notes.trim());
+    onConfirm(reasons, notes.trim());
   };
 
   return (
@@ -75,21 +69,12 @@ export default function RejectApplicationDialog({
     >
       <div className={styles.fields}>
         <Body1>
-          {richText ? (
-            <>
-              What you enter here will be visible to the applicant.
-              <br />
-              Select the sections with issues. Then in the text box, type each section name, make it bold using the formatting tools, and explain underneath what is wrong and how the applicant can fix it. Keep it brief and specific.
-            </>
-          ) : (
-            <>
-              What you enter here will be visible to the applicant. Their application will show a
-              status of rejected.
-            </>
-          )}
+          What you enter here will be visible to the applicant. Write a separate paragraph for
+          each issue. Keep it brief and be specific - name the question, site, activity or policy,
+          not just the section.
         </Body1>
         <Field
-          label={reasonsField}
+          label={REASONS_FIELD}
           required
           validationState={errors.reasons ? 'error' : 'none'}
           validationMessage={errors.reasons}
@@ -122,26 +107,15 @@ export default function RejectApplicationDialog({
           validationMessage={errors.notes}
           validationMessageIcon={<DismissCircleRegular />}
         >
-          {richText ? (
-            <RichTextEditor
-              label={NOTES_FIELD}
-              invalid={Boolean(errors.notes)}
-              onChange={html => {
-                setNotes(html);
-                if (errors.notes) setErrors(e => ({ ...e, notes: undefined }));
-              }}
-            />
-          ) : (
-            <Textarea
-              className={mergeClasses(styles.field, styles.textarea)}
-              appearance="filled-lighter"
-              value={notes}
-              onChange={(_, d) => {
-                setNotes(d.value);
-                if (errors.notes) setErrors(e => ({ ...e, notes: undefined }));
-              }}
-            />
-          )}
+          <Textarea
+            className={mergeClasses(styles.field, styles.textarea)}
+            appearance="filled-lighter"
+            value={notes}
+            onChange={(_, d) => {
+              setNotes(d.value);
+              if (errors.notes) setErrors(e => ({ ...e, notes: undefined }));
+            }}
+          />
         </Field>
       </div>
     </CaseDialogShell>

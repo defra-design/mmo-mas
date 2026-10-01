@@ -30,7 +30,6 @@ import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { asset } from '../utils/asset';
 import { useTasks } from '../context/TaskContext';
 import { caseStatus } from '../utils/caseStatus';
-import { sanitizeRichText } from '../utils/richText';
 import { RequestTransferDialog, CompleteTransferDialog } from './TransferMcmsDialogs';
 import RejectApplicationDialog from './RejectApplicationDialog';
 import FormCommandBar from './FormCommandBar';
@@ -222,13 +221,23 @@ const useStyles = makeStyles({
   // (styles.field) line up on their own.
   topAlignedLabel: { paddingTop: tokens.spacingVerticalS },
   transferDetailsValue: { whiteSpace: 'pre-wrap', minHeight: '160px' },
-  richTextValue: {
-    '& p, & div': { marginTop: 0, marginBottom: tokens.spacingVerticalS },
-    '& > :last-child': { marginBottom: 0 },
-    '& ul, & ol': { paddingLeft: '28px' },
-  },
   transferFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
 });
+
+// Older MLA/2026/10015 rejection records may contain markup from the trial editor.
+// Show them as plain text without changing the saved record.
+function rejectionNotesAsPlainText(notes: string, caseId: string) {
+  if (caseId !== 'MLA/2026/10015' ||
+      !/<\/?(?:p|div|br|b|strong|i|em|u|s|ul|ol|li|h[12]|span|font|a|sup|sub|blockquote)\b/i.test(notes)) {
+    return notes;
+  }
+  const body = new DOMParser().parseFromString(notes, 'text/html').body;
+  body.querySelectorAll('script, style, svg, math, iframe, object').forEach(node => node.remove());
+  body.querySelectorAll('br').forEach(node => node.replaceWith('\n'));
+  body.querySelectorAll('p, div, li, h1, h2, blockquote').forEach(node => node.append('\n'));
+  return body.textContent?.replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n').trim() ?? notes;
+}
 
 interface MarineCaseSummaryProps {
   caseId: string;
@@ -647,14 +656,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         </Text>
                         <FieldDecorations locked />
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
-                          {caseId === 'MLA/2026/10015' ? (
-                            <div
-                              className={styles.richTextValue}
-                              dangerouslySetInnerHTML={{ __html: sanitizeRichText(caseRejection.notes) }}
-                            />
-                          ) : (
-                            <Body1>{caseRejection.notes}</Body1>
-                          )}
+                          <Body1>{rejectionNotesAsPlainText(caseRejection.notes, caseId)}</Body1>
                         </div>
                       </div>
                     </div>
@@ -728,10 +730,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
         <CompleteTransferDialog onCancel={cancelDialog} onConfirm={confirmComplete} />
       )}
       {openDialog === 'reject' && (
-        <RejectApplicationDialog
-          onCancel={cancelDialog} onConfirm={confirmReject}
-          richText={caseId === 'MLA/2026/10015'}
-        />
+        <RejectApplicationDialog onCancel={cancelDialog} onConfirm={confirmReject} />
       )}
     </div>
   );
