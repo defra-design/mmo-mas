@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Start consultation – task design</title>
+  <title>Start consultation – read-only, revised wording</title>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; color: #323130; background: #faf9f8; font: 14px/1.5 'Segoe UI', Arial, sans-serif; }
@@ -43,6 +43,11 @@
     li { margin: 6px 0; }
     @media (max-width: 850px) { aside { width: 205px; } main { padding: 0 16px 20px; } .card { padding: 20px; } .brand { font-size: 14px; } }
     @media (max-width: 620px) { aside { display: none; } header { padding: 0 16px; } .brand span { padding: 0 4px; } .brand { font-size: 12px; } h1 { font-size: 22px; } }
+    .read-only-strip { display: flex; align-items: center; gap: 8px; background: #f3f2f1; border-bottom: 1px solid #e1dfdd; padding: 6px 12px; margin: 0 -24px; }
+    .read-only-strip svg, .field-decoration svg { width: 16px; height: 16px; fill: none; stroke: #323130; stroke-width: 1.5; flex-shrink: 0; }
+    .field-decoration { padding-top: 6px; text-align: right; }
+    .completion-row input:disabled { cursor: not-allowed; }
+    @media (max-width: 850px) { .read-only-strip { margin: 0 -16px; } }
   </style>
 </head>
 <body>
@@ -69,20 +74,18 @@
       <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌖</span>Case Marine Plan Areas</div>
     </aside>
     <main>
+      <div class="read-only-strip" role="note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Read-only: You cannot start consultation until the required assessment tasks are complete.</span></div>
       <div class="commands" role="toolbar" aria-label="Task commands, illustration only">
         <button class="command" type="button" aria-label="Back, illustration only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5l-7 7 7 7M7 12h14"/></svg></button>
         <button class="command" type="button" aria-label="Open in new window, illustration only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4h7v7m0-7L10 14M10 5H4v15h15v-6"/></svg></button>
-        <span class="divider"></span>
-        <button class="command" type="button" aria-label="Start consultation, illustration only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6l6 6-6 6"/></svg>Start consultation</button>
       </div>
       <section class="card record" aria-labelledby="title">
-        <h1 id="title">Start consultation <span>– Unsaved</span></h1>
+        <h1 id="title">Start consultation <span>– Read-only</span></h1>
         <div>Task</div>
       </section>
       <section class="card" aria-labelledby="readiness">
-        <h2 id="readiness">Ready for consultation</h2>
-        <p class="intro">The required assessment tasks are complete. You can now start consultation for this case.</p>
-        <p>The applicant has not yet submitted their site notice evidence. You can start consultation before this evidence is received. Use the Review public notice evidence task to review it when it arrives, including any resubmitted evidence.</p>
+        <h2 id="readiness">Cannot start consultation yet</h2>
+        <p class="intro">Complete the required assessment tasks before starting consultation. Check the case task list for outstanding work.</p>
         <p>When you start consultation:</p>
         <ul>
           <li>The application is published on the public register.</li>
@@ -94,8 +97,8 @@
         <h2 id="complete">Start consultation</h2>
         <div class="completion-row">
           <label for="complete-task">I confirm that this case is ready to start consultation</label>
-          <span class="field-decoration" aria-hidden="true"></span>
-          <input id="complete-task" type="checkbox">
+          <span class="field-decoration" aria-label="Read-only"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+          <input id="complete-task" type="checkbox" disabled>
         </div>
       </section>
     </main>
