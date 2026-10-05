@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Start consultation — task design</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #323130; background: #faf9f8; font: 14px/1.5 'Segoe UI', Arial, sans-serif; }
+    header { height: 48px; background: #243a5e; color: white; display: flex; align-items: center; gap: 18px; padding: 0 24px; }
+    .waffle { display: grid; grid-template-columns: repeat(3, 3px); gap: 4px; }
+    .waffle i { width: 3px; height: 3px; background: white; }
+    .brand { font-size: 16px; font-weight: 600; }
+    .brand span { font-weight: 400; opacity: .55; padding: 0 10px; }
+    .avatar { margin-left: auto; border-radius: 50%; background: #dce9f5; color: #243a5e; width: 32px; height: 32px; display: grid; place-items: center; font-size: 12px; }
+    .shell { display: flex; min-height: calc(100vh - 48px); }
+    aside { width: 248px; flex-shrink: 0; background: #f3f2f1; border-right: 1px solid #e1dfdd; box-shadow: inset -5px 0 8px #00000009; padding-top: 12px; }
+    .nav-item { padding: 9px 16px; min-height: 40px; display: flex; align-items: center; gap: 12px; }
+    .nav-icon { width: 18px; text-align: center; color: #605e5c; }
+    .nav-group { font-weight: 600; padding: 22px 16px 5px; }
+    .selected { background: white; border-left: 3px solid #0078d4; padding-left: 13px; }
+    main { min-width: 0; flex: 1; padding: 0 24px 24px; }
+    .commands { display: flex; gap: 4px; align-items: center; background: white; border-radius: 4px; padding: 4px 12px; margin: 12px 0 20px; box-shadow: 0 1px 3px #00000015; }
+    button { font: inherit; }
+    .command { background: transparent; border: 0; padding: 6px 10px; min-height: 32px; color: #323130; display: inline-flex; gap: 8px; align-items: center; cursor: default; }
+    .command:hover { background: #f3f2f1; border-radius: 4px; }
+    .command:focus-visible { outline: 2px solid #0078d4; outline-offset: 1px; }
+    .command svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+    .divider { height: 20px; width: 1px; background: #edebe9; margin: 0 4px; }
+    .card { background: white; border: 1px solid #edebe9; border-radius: 4px; box-shadow: 0 2px 4px #00000008; padding: 24px 32px; margin-bottom: 12px; }
+    .record { padding-top: 16px; padding-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 600; line-height: 32px; margin: 0; }
+    h1 span { color: #605e5c; font-size: 14px; font-weight: 400; }
+    h2 { font-size: 16px; line-height: 24px; font-weight: 600; margin: 0 0 12px; }
+    p { margin: 0 0 12px; }
+    p:last-child { margin-bottom: 0; }
+    .completion-row { display: flex; align-items: flex-start; gap: 0; }
+    .completion-row label { width: 160px; flex-shrink: 0; margin-right: 16px; padding-top: 4px; }
+    .field-decoration { width: 26px; flex-shrink: 0; }
+    .completion-row input { width: 16px; height: 16px; margin: 8px; accent-color: #0078d4; }
+    .intro { color: #605e5c; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 6px 0; }
+    @media (max-width: 850px) { aside { width: 205px; } main { padding: 0 16px 20px; } .card { padding: 20px; } .brand { font-size: 14px; } }
+    @media (max-width: 620px) { aside { display: none; } header { padding: 0 16px; } .brand span { padding: 0 4px; } .brand { font-size: 12px; } h1 { font-size: 22px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="waffle" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <div class="brand">Dynamics 365 <span>|</span> Marine Applications System</div>
+    <div class="avatar" aria-label="Sam Evans">SE</div>
+  </header>
+  <div class="shell">
+    <aside aria-label="Application navigation, illustration only">
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">☰</span></div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌂</span>Home</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">◷</span>Recent <span style="margin-left:auto">∨</span></div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">♧</span>Pinned <span style="margin-left:auto">∨</span></div>
+      <div class="nav-group">My work</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">▦</span>Applications dashboard</div>
+      <div class="nav-group">Customers</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">▤</span>Organisations</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">♙</span>Applicants</div>
+      <div class="nav-group">Service</div>
+      <div class="nav-item selected"><span class="nav-icon" aria-hidden="true">▣</span>Marine licence cases</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">▤</span>Exemption cases</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌖</span>Case Coastal Operations Areas</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌖</span>Case Marine Plan Areas</div>
+    </aside>
+    <main>
+      <div class="commands" role="toolbar" aria-label="Task commands, illustration only">
+        <button class="command" type="button" aria-label="Back, illustration only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5l-7 7 7 7M7 12h14"/></svg></button>
+        <button class="command" type="button" aria-label="Open in new window, illustration only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4h7v7m0-7L10 14M10 5H4v15h15v-6"/></svg></button>
+        <span class="divider"></span>
+        <button class="command" type="button" aria-label="Start consultation, illustration only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6l6 6-6 6"/></svg>Start consultation</button>
+      </div>
+      <section class="card record" aria-labelledby="title">
+        <h1 id="title">Start consultation <span>– Unsaved</span></h1>
+        <div>Task</div>
+      </section>
+      <section class="card" aria-labelledby="readiness">
+        <h2 id="readiness">Ready for consultation</h2>
+        <p class="intro">The required assessment tasks are complete. You can now start consultation for this case.</p>
+        <p>The applicant has submitted their site notice evidence. It is awaiting review. You can start consultation before this evidence is accepted. Use the Review public notice evidence task to review it and request resubmission if needed.</p>
+        <p>When you start consultation:</p>
+        <ul>
+          <li>The application is published on the public register.</li>
+          <li>Application notifications and requests for advice are sent as recorded in Prepare for consultation.</li>
+          <li>The case status changes to Consultation.</li>
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="complete">
+        <h2 id="complete">Start consultation</h2>
+        <div class="completion-row">
+          <label for="complete-task">I confirm that this case is ready to start consultation</label>
+          <span class="field-decoration" aria-hidden="true"></span>
+          <input id="complete-task" type="checkbox">
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
