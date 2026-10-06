@@ -76,6 +76,11 @@ export default function IndexPage() {
               Iteration 1 (as usability-tested)
             </a>
           </div>
+          <p style={{ margin: '8px 0 0', fontSize: '14px' }}>
+            <a href={asset('docs/version-1-design-overview.html')} style={{ color: '#0078d4' }}>
+              Version 1 – design overview
+            </a>
+          </p>
           <p style={{
             margin: '12px 0 0',
             fontSize: '14px',
