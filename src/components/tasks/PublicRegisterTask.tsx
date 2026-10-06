@@ -155,8 +155,8 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
       )}
 
       <FormCommandBar
-        saveLabel={locked ? undefined : 'Save and close'}
-        onSave={locked ? undefined : handleSave}
+        saveLabel="Save and close"
+        onSave={locked ? () => navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}`) : handleSave}
         backTo={`/receive-assess/cases/${encodeURIComponent(caseId)}`}
       />
 

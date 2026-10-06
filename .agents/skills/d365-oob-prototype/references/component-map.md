@@ -17,6 +17,8 @@ Check this before introducing a component that isn't already used elsewhere in t
 | Anything a caseworker needs to act on (assessment tasks, decisions) | Native form/control | Real Fluent form components — never an iFrame |
 | Tabbed navigation within a record | Form tabs | Fluent TabList |
 | Filtering/searching a list view | View + column filters | Fluent SearchBox + DataGrid column filtering |
+| Lookup to another record (e.g. Organisation / Account) | Lookup column | Custom-styled Input + results flyout (`OrganisationLookup`) simulating the OOB Lookup — not Combobox, not a PCF |
+| Related records edited inline on a form (e.g. Consultees) | Editable subgrid (Power Apps grid) | Fluent Table of rows with inline fields; trailing empty row for quick-create |
 
 ## Things that don't have an OOB equivalent — treat with caution
 

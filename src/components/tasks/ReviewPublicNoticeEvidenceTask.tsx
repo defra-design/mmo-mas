@@ -168,8 +168,8 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
       )}
 
       <FormCommandBar
-        saveLabel={available ? 'Save and close' : undefined}
-        onSave={available ? handleSave : undefined}
+        saveLabel="Save and close"
+        onSave={available ? handleSave : () => navigate(caseUrl)}
         backTo={caseUrl}
       />
 

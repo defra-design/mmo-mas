@@ -31,6 +31,21 @@ These come directly from how the real D365 build will work, so they're not styli
 - **Wait/processing states use OOB affordances.** Model these with Fluent's Spinner/MessageBar in the space a real async D365 operation would occupy, not a custom loading page.
 - **Notifications and alerts map to D365's own notification surface** (form-level and command-bar-level alerts), not an invented banner design.
 
+## Task form conventions
+
+Every task form follows these rules. They mirror how a real D365 form behaves, so apply them to new tasks without being asked.
+
+- **Header save state.** The task header reads `Task name - Saved` by default, for every task, including a read-only one. It becomes `Unsaved` as soon as the caseworker changes any field, and returns to `Saved` when the task is saved. State lives in `saved` in `TaskContext` (initial values `true`; edits call `markUnsaved`).
+- **Read-only tasks (not yet unlocked).** A task that cannot start yet still opens, because D365 cannot lock a caseworker out of a record. It shows:
+  - a read-only form notification at the top, with a lock icon, explaining why;
+  - a padlock (`FieldLock`, via `FieldDecorations`) on every field the caseworker would edit;
+  - fields that are not editable but also not disabled-styled: no greyed-out look and no disabled cursor (D365 greys nothing out; only the text caret is dropped);
+  - `Saved` in the header;
+  - the **Save and close** command, which just returns to the Case summary without changing any status.
+- **Live tasks.** The applicant's data carries a padlock (the same `FieldLock`) because the caseworker cannot edit it. Caseworker outcome fields have no padlock.
+- **Text fields.** All single-line and multi-line text fields have the grey background (`colorNeutralBackground3`) and no border, including on focus, as in the existing tasks. Use `TaskTextarea` for multi-line text rather than a new Textarea.
+- **Accordion help text.** Guidance under a field uses `TaskHint`. Open, it is an info icon with the guidance always visible. Pass `title` to collapse it behind a "Help with ..." accordion instead: link-coloured text, start-position chevron, no icon, and the open panel sits flush beneath it (the GOV.UK details pattern drawn in Fluent). Closed, it uses a small bottom gap; open, the full gap. In real D365 this is injected HTML in a web resource, not a native control.
+
 ## When you're unsure
 
 If a design need doesn't have an obvious OOB match, say so out loud instead of quietly building a custom solution. Flag it plainly: "this would need a PCF control / canvas app / custom page in real D365" — so the cost is visible and it can be a deliberate decision, not a silent one baked into the prototype.
