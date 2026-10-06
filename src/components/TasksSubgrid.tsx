@@ -1,3 +1,4 @@
+import { startConsultationStatus } from '../utils/startConsultation';
 // src/components/TasksSubgrid.tsx
 // Full-width D365 subgrid (read-only grid) of the case's caseworker tasks — the
 // columnar rendering a related-records list gets at full width, with the status
@@ -76,7 +77,8 @@ interface TasksSubgridProps {
 export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks } = useTasks();
+  const taskContext = useTasks();
+  const { tasks } = taskContext;
   const evidenceSubmitted = hasSubmittedPublicNoticeEvidence(caseId);
 
   // Every task opens, whatever its status. A task still gated behind Site check
@@ -122,6 +124,13 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
         }]
       : []),
   ];
+
+  rows.push({
+    key: 'startConsultation',
+    name: 'Start consultation',
+    status: startConsultationStatus(caseId, taskContext),
+    slug: 'start-consultation',
+  });
 
   return (
     <div>

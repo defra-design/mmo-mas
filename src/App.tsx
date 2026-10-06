@@ -1,8 +1,10 @@
+import StartConsultationTask from './components/tasks/StartConsultationTask';
 // src/App.tsx
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import Shell, { reviewAssessNavGroups } from './components/Shell';
 import IndexPage from './components/IndexPage';
+import ConsultationExample from './components/ConsultationExample';
 import ListView from './components/ListView';
 import CaseView from './components/CaseView';
 import MarineLicenceListView from './components/MarineLicenceListView';
@@ -29,6 +31,7 @@ function App() {
             <Routes>
               {/* Clean index page without Shell */}
               <Route path="/" element={<IndexPage />} />
+              <Route path="/examples/start-consultation" element={<ConsultationExample />} />
 
               {/* Proof of concept journey */}
               <Route
@@ -103,6 +106,14 @@ function App() {
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <PublicRegisterTask caseId={id} />} />
+                  </Shell>
+                }
+              />
+              <Route
+                path="/receive-assess/cases/:caseId/tasks/start-consultation"
+                element={
+                  <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
+                    <MarineCaseWrapper render={(id) => <StartConsultationTask caseId={id} />} />
                   </Shell>
                 }
               />

@@ -1,8 +1,10 @@
 // src/context/TaskContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
-import { allMppAssessmentsComplete } from '../utils/marinePlanPolicies';
-import { loadPublicNoticeRequirement, SITE_NOTICE } from '../utils/publicNoticeRequirement';
+import { allMppAssessmentsComplete, policies } from '../utils/marinePlanPolicies';
+import { startConsultationStatus } from '../utils/startConsultation';
+import type { ConsultationsState } from '../utils/startConsultation';
+import { loadPublicNoticeRequirement, NO_NOTICES, SITE_NOTICE } from '../utils/publicNoticeRequirement';
 
 export type TaskStatus =
   | 'Done'
@@ -196,6 +198,7 @@ interface PersistedState {
   transfers: TransfersState;
   // Every case's rejection record, keyed by case reference.
   rejections: RejectionsState;
+  consultations: ConsultationsState;
   // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
   // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
   // on every case tab. See IndexPage.
@@ -269,6 +272,7 @@ const initialState: PersistedState = {
   },
   transfers: {},
   rejections: {},
+  consultations: {},
   // Default to the "tasks on all tabs" experience — the tested Iteration 1
   // behaviour (formerly the "Version 1" index link). The untested "Version 2"
   // variant that turned this off has been dropped.
@@ -448,6 +452,18 @@ function loadState(): PersistedState {
         // so it is dropped rather than migrated.
         transfers: parsed.transfers ?? migrateSingleTransfer(parsed.transfer),
         rejections: parsed.rejections ?? initialState.rejections,
+        consultations: Object.fromEntries(
+          Object.entries(parsed.consultations ?? {}).flatMap(([caseId, value]) => {
+            if (!value || typeof value !== 'object') return [];
+            const record = value as Record<string, unknown>;
+            return [[caseId, {
+              confirmed: record.confirmed === true,
+              saved: record.saved !== false,
+              ...(typeof record.startedAt === 'string' && record.startedAt
+                ? { startedAt: record.startedAt } : {}),
+            }]];
+          }),
+        ),
         tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
       };
     }
@@ -472,6 +488,7 @@ interface TaskContextValue {
   saved: SavedState;
   transfers: TransfersState;
   rejections: RejectionsState;
+  consultations: ConsultationsState;
   tasksOnAllTabs: boolean;
   requestTransferToMcms: (caseId: string, reasons: string, requestedBy: string) => void;
   completeTransferToMcms: (caseId: string, mcmsReference: string, completedBy: string) => void;
@@ -515,6 +532,9 @@ interface TaskContextValue {
   saveSiteNotice: () => void;
   savePublicNoticeEvidence: () => void;
   savePublicNoticeEvidenceResubmission: () => void;
+  setConsultationConfirmed: (caseId: string, confirmed: boolean) => void;
+  saveStartConsultation: (caseId: string) => void;
+  loadConsultationExample: () => void;
   resetAll: () => void;
 }
 
@@ -523,6 +543,38 @@ const TaskContext = createContext<TaskContextValue | undefined>(undefined);
 export function TaskProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState<PersistedState>(loadState);
 
+  // Index-page shortcut. Assessment answers are shared in this prototype;
+  // only MLA 15's case-level decisions are cleared when replaying the example.
+  const loadConsultationExample = () => setState(prev => {
+    const caseId = 'MLA/2026/10015';
+    const consultations = { ...prev.consultations };
+    const transfers = { ...prev.transfers };
+    const rejections = { ...prev.rejections };
+    delete consultations[caseId];
+    delete transfers[caseId];
+    delete rejections[caseId];
+    return {
+      ...prev,
+      tasks: { ...prev.tasks, siteCheck: 'Done', wfdAssessment: 'Done',
+        marinePlanPolicies: 'Done', prepForConsultee: 'Done', publicRegister: 'Done', siteNotice: 'Done' },
+      saved: { ...prev.saved, siteCheck: true, wfdAssessment: true,
+        marinePlanPolicies: true, prepForConsultee: true, publicRegister: true, siteNotice: true },
+      siteCheckForm: { coordinatesOk: 'Yes', withinMile: 'Yes', notes: 'Site and coordinates checked for this example.' },
+      wfdForm: { review: 'Yes', initialConsiderations: 'WFD information reviewed. No further assessment required for this example.' },
+      mppForm: Object.fromEntries(policies.map(policy => [policy.code, {
+        outcome: 'Compliant', reason: `The proposal is consistent with ${policy.code} for this example.`,
+      }])),
+      prepForConsulteeForm: [{ ...emptyConsulteeRow(), organisation: 'Environment Agency (EA)',
+        consultationType: 'Request for advice', notes: 'Please provide advice on the proposed works.' }, emptyConsulteeRow()],
+      prepForConsulteeMeta: { completed: true },
+      publicRegisterForm: { ...initialState.publicRegisterForm, completed: true, personalInfo: 'No',
+        relatesTo: 'Commercial or industrial confidentiality', commercialAgree: 'Agree - withhold all of it',
+        commercialRationale: 'Commercially sensitive information checked and redacted for this example.' },
+      siteNoticeForm: { needsNotice: NO_NOTICES, rationale: 'No public notice is required for this example.', summary: '', groups: '' },
+      consultations, transfers, rejections,
+    };
+  });
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -530,6 +582,27 @@ export function TaskProvider({ children }: PropsWithChildren) {
       /* ignore quota / privacy-mode errors */
     }
   }, [state]);
+
+  const setConsultationConfirmed = (caseId: string, confirmed: boolean) =>
+    setState(prev => {
+      if (startConsultationStatus(caseId, prev) !== 'To do') return prev;
+      return { ...prev, consultations: { ...prev.consultations,
+        [caseId]: { confirmed, saved: false },
+      } };
+    });
+
+  const saveStartConsultation = (caseId: string) =>
+    setState(prev => {
+      // Recheck at the action boundary: locked/direct URLs and repeated saves
+      // cannot bypass prerequisites or start a consultation twice.
+      if (startConsultationStatus(caseId, prev) !== 'To do') return prev;
+      const confirmed = prev.consultations[caseId]?.confirmed === true;
+      return { ...prev, consultations: { ...prev.consultations,
+        [caseId]: { confirmed, saved: true,
+          ...(confirmed ? { startedAt: new Date().toISOString() } : {}),
+        },
+      } };
+    });
 
   const setTasksOnAllTabs = (value: boolean) =>
     setState(prev => ({ ...prev, tasksOnAllTabs: value }));
@@ -845,6 +918,10 @@ export function TaskProvider({ children }: PropsWithChildren) {
         saved: state.saved,
         transfers: state.transfers,
         rejections: state.rejections,
+        consultations: state.consultations,
+        setConsultationConfirmed,
+        saveStartConsultation,
+        loadConsultationExample,
         tasksOnAllTabs: state.tasksOnAllTabs,
         requestTransferToMcms,
         completeTransferToMcms,
