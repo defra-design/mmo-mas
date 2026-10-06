@@ -1,7 +1,8 @@
+import type { ConsultationsState } from './startConsultation';
 // src/utils/caseStatus.ts
 import type { TransfersState, RejectionsState } from '../context/TaskContext';
 
-export type DerivedCaseStatus = 'Rejected' | 'Transfer pending' | 'Transferred';
+export type DerivedCaseStatus = 'Rejected' | 'Transfer pending' | 'Transferred' | 'Consultation';
 
 // A case's Status once a caseworker has acted on it from the command bar.
 // Derived, never stored, so the case header and the case list can't drift apart.
@@ -13,9 +14,10 @@ export function caseStatus(
   transfers: TransfersState,
   rejections: RejectionsState,
   caseId: string,
+  consultations: ConsultationsState = {},
 ): DerivedCaseStatus | null {
   if (rejections[caseId]) return 'Rejected';
   const transfer = transfers[caseId];
-  if (!transfer) return null;
+  if (!transfer) return consultations[caseId]?.startedAt ? 'Consultation' : null;
   return transfer.mcmsReference ? 'Transferred' : 'Transfer pending';
 }

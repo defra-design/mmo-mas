@@ -227,7 +227,7 @@ export default function MarineLicenceListView({
 }: MarineLicenceListViewProps) {
   const columns = entityConfig.list.columns;
   const defaultSort = entityConfig.list.defaultSort;
-  const { transfers, rejections } = useTasks();
+  const { transfers, rejections, consultations } = useTasks();
 
   // Overlay each case's runtime status ("Transfer pending", then "Transferred",
   // or "Rejected") onto its own row, so the grid reflects the case-summary action
@@ -236,10 +236,10 @@ export default function MarineLicenceListView({
   const overlaidItems = useMemo(
     () =>
       items.map(i => {
-        const status = caseStatus(transfers, rejections, i.reference);
+        const status = caseStatus(transfers, rejections, i.reference, consultations);
         return status ? { ...i, status } : i;
       }),
-    [items, transfers, rejections],
+    [items, transfers, rejections, consultations],
   );
 
   // Like D365: the grid always has a sort, and it remembers the column you last

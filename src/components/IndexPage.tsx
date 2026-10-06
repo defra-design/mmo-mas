@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Badge, Button, makeStyles, mergeClasses, shorthands, tokens } from '@fluentui/react-components';
 import { useTasks } from '../context/TaskContext';
 import { asset } from '../utils/asset';
+import TaskHint from './tasks/TaskHint';
 
 const useStyles = makeStyles({
   page: {
@@ -32,10 +33,15 @@ const useStyles = makeStyles({
   tested: { backgroundColor: tokens.colorPaletteGreenBackground2, color: tokens.colorPaletteGreenForeground2 },
   description: { margin: '0 0 18px', maxWidth: '590px' },
   prototypeLink: { fontWeight: 'inherit' },
-  explorationsTitle: { margin: '24px 0 8px', fontSize: '16px', fontWeight: 600 },
+  shortcuts: {
+    '& .fui-Accordion': { marginBottom: 0 },
+    '& .fui-AccordionHeader button': { fontSize: '16px', lineHeight: '1.6', minHeight: '32px' },
+    '& .fui-AccordionPanel > div': { fontSize: '16px', lineHeight: '1.6' },
+  },
+  explorationsTitle: { margin: '8px 0 8px', fontSize: '16px', fontWeight: 600 },
   explorationsList: { margin: 0, paddingLeft: 0, listStyleType: 'none', '& li + li': { marginTop: '8px' } },
   resources: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px', paddingTop: '4px', fontSize: '15px' },
-  resourceTitle: { margin: 0, fontWeight: 600, color: '#323130' },
+  resourceTitle: { margin: 0, fontSize: '16px', fontWeight: 600, color: '#323130' },
   pending: { color: '#605e5c' },
   caseGuidance: { margin: '16px 0 0', paddingLeft: '20px', maxWidth: '590px' },
   resetActions: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '36px' },
@@ -106,6 +112,14 @@ export default function IndexPage() {
                     <ul className={styles.caseGuidance}>
                       <li>MLA/2026/1002 is the active case. After completing the tasks, clear the saved data to start again.</li>
                     </ul>
+                  )}
+                  {iteration === 2 && (
+                    <div className={styles.shortcuts}>
+                      <TaskHint title="Shortcuts">
+                        <Link to="/examples/start-consultation">The Start consultation task</Link>
+                        <p>Loads an example with all assessment tasks and marine plan policies Done, and Start consultation To do.</p>
+                      </TaskHint>
+                    </div>
                   )}
                   {iteration === 2 && (
                     <section aria-labelledby="explorations-heading">

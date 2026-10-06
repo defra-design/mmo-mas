@@ -326,6 +326,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     tasksOnAllTabs,
     transfers,
     rejections,
+    consultations,
     requestTransferToMcms,
     completeTransferToMcms,
     rejectApplication,
@@ -413,7 +414,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
   const meta = [
     { label: 'Reference', value: data.reference },
-    { label: 'Status', value: caseStatus(transfers, rejections, caseId) ?? data.status },
+    { label: 'Status', value: caseStatus(transfers, rejections, caseId, consultations) ?? data.status },
     { label: 'Case age', value: data.caseAge },
     { label: 'Assigned to', value: data.assignedTo },
   ];

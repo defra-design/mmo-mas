@@ -1,3 +1,4 @@
+import { startConsultationStatus } from '../utils/startConsultation';
 // src/components/TaskList.tsx
 import { useNavigate } from 'react-router-dom';
 import {
@@ -83,7 +84,8 @@ interface TaskListProps {
 export default function TaskList({ caseId, mppInSeparateList = false }: TaskListProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks } = useTasks();
+  const taskContext = useTasks();
+  const { tasks } = taskContext;
   const evidenceSubmitted = hasSubmittedPublicNoticeEvidence(caseId);
 
   // Every task opens, whatever its status — D365 cannot lock a caseworker out of
@@ -151,6 +153,13 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
       onClick: open('review-public-notice-evidence'),
     });
   }
+
+  rows.push({
+    key: 'startConsultation',
+    name: 'Start consultation',
+    status: startConsultationStatus(caseId, taskContext),
+    onClick: open('start-consultation'),
+  });
 
   return (
     <div>
