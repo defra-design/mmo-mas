@@ -121,8 +121,8 @@ export interface PublicNoticeEvidenceResubmissionMeta {
   review: PublicNoticeEvidenceLocationReview;
 }
 
-// Tracks whether each task's form has unsaved edits. False = "Unsaved" until the
-// task is saved; an edit flips it back to false (matches D365 dirty-tracking).
+// Tracks whether each task's form has unsaved edits. Every task starts Saved (true); an
+// edit flips it to false ("Unsaved") until the task is saved (matches D365 dirty-tracking).
 export interface SavedState {
   siteCheck: boolean;
   wfdAssessment: boolean;
@@ -258,13 +258,13 @@ const initialState: PersistedState = {
   },
   recentOrganisations: [],
   saved: {
-    siteCheck: false,
-    wfdAssessment: false,
-    marinePlanPolicies: false,
-    prepForConsultee: false,
-    publicRegister: false,
-    siteNotice: false,
-    publicNoticeEvidence: false,
+    siteCheck: true,
+    wfdAssessment: true,
+    marinePlanPolicies: true,
+    prepForConsultee: true,
+    publicRegister: true,
+    siteNotice: true,
+    publicNoticeEvidence: true,
     publicNoticeEvidenceResubmission: true,
   },
   transfers: {},
