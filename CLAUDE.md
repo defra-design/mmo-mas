@@ -8,8 +8,7 @@ and test UX patterns for the Marine Applications System (MAS) caseworker system 
 decisions are locked in D365 build.
 
 The visual target is the real D365 instance — navy top bar, white left nav rail, Fluent UI
-typography and spacing throughout. Screenshots of the real instance are in `/docs/reference/`
-if they exist; otherwise treat Image 1 (case list) and Image 2 (case summary) as the reference.
+typography and spacing throughout.
 
 ---
 
@@ -69,7 +68,7 @@ Tasks are accessed from the task list on the Case summary. The pattern for all t
 2. Task form shows: applicant's answers (read-only display), then caseworker outcome fields
    (Dropdowns / ComboBoxes for selects and multi-selects).
 3. Saving the task → returns user to Case summary with that task's status updated to
-   **Completed** and any downstream task dependencies updated (e.g. WFD unlocked after
+   **Done** and any downstream task dependencies updated (e.g. WFD unlocked after
    Site check).
 4. Tasks that cannot start yet show status **Cannot start yet** and are not clickable.
 
@@ -146,9 +145,10 @@ and to avoid duplicating the data into D365 — it is rendered as **static HTML 
   `.fields` / `.field` / `.field__label` / `.field__value` — rather than inventing new ones.
   Fields sit label-beside-value and wrap value-under-label when the column is too narrow.
 - **Data:** baked into the HTML for simple sections (e.g. `project-details.html`). For
-  list/detail sections (Marine plan policies, Other permissions) the data is a sibling
-  `<section>.json` fetched by a sibling `<section>.js` that builds the nav + detail (see
-  `marine-plan-policies.{html,js,json}`).
+  Marine plan policies the data is a sibling `<section>.json` fetched by a sibling
+  `<section>.js` that builds the nav + detail (see `marine-plan-policies.{html,js,json}`).
+  Other permissions reuses the same nav/detail layout, with its panes pre-rendered in the
+  HTML and `other-permissions.js` only toggling them.
 - **Rendering:** `src/components/CdpFrame.tsx` renders the `<iframe>`, fills the height left
   under the sticky case header, and scrolls its own content. It is wired through the
   `cdpPages` lookup in `MarineCaseSummary.tsx` — `tab value → { src, title }`. The command
@@ -177,19 +177,18 @@ and to avoid duplicating the data into D365 — it is rendered as **static HTML 
 
 When adding a new task type, complete these steps in order:
 
-1. Add/update task entry in the relevant case's mock data (`src/mock-data/cases.json` or
-   equivalent) with status `to-do`, `completed`, or `cannot-start-yet`.
-2. Extend `TaskContext.tsx`: add the task's status to `TaskState`, add a form-answers
+1. Extend `TaskContext.tsx`: add the task's status (`To do`, `Done` or `Cannot start yet`)
+   to `TaskState`, add a form-answers
    interface + field to `PersistedState`, seed both in `initialState`, and add the
    save/setter actions (mirrors `completeSiteCheck` / `setSiteCheckField`). This is what
    makes the answers persist and survive refresh; do not store task state anywhere else.
-3. Create `src/components/tasks/<TaskName>Task.tsx` — the task form component. Read and
+2. Create `src/components/tasks/<TaskName>Task.tsx` — the task form component. Read and
    write its state only through `useTasks()`.
-4. Add a route in `App.tsx`: `/cases/:caseId/tasks/<task-slug>`.
-5. Wire the task list item in `CaseSummary.tsx` to navigate to the route on click
-   (only when status is not `cannot-start-yet`).
-6. On save, call the task's context action to set status `Done`, unlock any downstream
-   tasks, and navigate back to `/cases/:caseId`.
+3. Add a route in `App.tsx`: `/receive-assess/cases/:caseId/tasks/<task-slug>`.
+4. Wire the task list item in `TaskList.tsx` to navigate to the route on click
+   (only when status is not `Cannot start yet`).
+5. On save, call the task's context action to set status `Done`, unlock any downstream
+   tasks, and navigate back to `/receive-assess/cases/:caseId`.
 
 ---
 
@@ -214,7 +213,8 @@ pattern for new list views:
   `white-space: nowrap; overflow: hidden; text-overflow: ellipsis`).
 - **Truncation-only hover card.** The project name uses a Fluent v9 `Tooltip`
   (`showDelay={0}`, `positioning="below"`) shown **only** when the text is actually clipped
-  (`scrollWidth > clientWidth`), via the `ProjectNameCell` helper. Don't use the native
+  (`scrollWidth > clientWidth`), via the `TruncatedCell` helper
+  (`src/components/TruncatedCell.tsx`). Don't use the native
   `title` for it — it's slow and always-on.
 - **Fixed layout + horizontal scroll.** `table-layout: fixed`, `width: 100%` with a
   `min-width` = sum of column widths, inside an `overflow-x: auto` wrapper. Columns hold their
@@ -231,9 +231,9 @@ pattern for new list views:
 src/
   components/
     tasks/          ← one file per task type, e.g. SiteCheckTask.tsx
-    CaseSummary.tsx
+    MarineCaseSummary.tsx
     CdpFrame.tsx    ← embeds a CDP application-data page in an iframe
-    CaseList.tsx (or ListView.tsx)
+    ListView.tsx / MarineLicenceListView.tsx
     Nav.tsx / Nav.css
     TopBar.tsx
   config/
