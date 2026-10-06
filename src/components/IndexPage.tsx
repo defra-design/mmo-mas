@@ -11,8 +11,8 @@ const useStyles = makeStyles({
     color: '#323130', fontFamily: '"Segoe UI", Arial, sans-serif', fontSize: '16px', lineHeight: '1.6',
     borderTop: '8px solid #009d45',
     '& a': { color: '#0078d4', textDecoration: 'underline', textDecorationThickness: '1px', textUnderlineOffset: '3px' },
-    '& a:hover': { color: tokens.colorBrandForegroundLinkPressed, textDecoration: 'none' },
-    '& a:active': { color: tokens.colorBrandForegroundLinkPressed },
+    '& a:hover': { color: '#0078d4', textDecoration: 'none' },
+    '& a:active': { color: '#0078d4' },
     '& a:focus-visible': { outline: '3px solid #0078d4', outlineOffset: '4px' },
   },
   container: { maxWidth: '1000px', margin: '0 auto', padding: '40px 32px 28px', '@media (max-width: 600px)': { padding: '28px 24px' } },
@@ -31,11 +31,13 @@ const useStyles = makeStyles({
   inProgress: { backgroundColor: '#cfe4f8', color: '#0c2d4a' },
   tested: { backgroundColor: tokens.colorPaletteGreenBackground2, color: tokens.colorPaletteGreenForeground2 },
   description: { margin: '0 0 18px', maxWidth: '590px' },
-  prototypeLink: { fontWeight: 600 },
+  prototypeLink: { fontWeight: 'inherit' },
+  explorationsTitle: { margin: '24px 0 8px', fontSize: '16px', fontWeight: 600 },
+  explorationsList: { margin: 0, paddingLeft: 0, listStyleType: 'none', '& li + li': { marginTop: '8px' } },
   resources: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px', paddingTop: '4px', fontSize: '15px' },
   resourceTitle: { margin: 0, fontWeight: 600, color: '#323130' },
   pending: { color: '#605e5c' },
-  caseGuidance: { margin: '16px 0 0', color: '#605e5c', maxWidth: '590px', fontSize: '15px' },
+  caseGuidance: { margin: '16px 0 0', paddingLeft: '20px', maxWidth: '590px' },
   resetActions: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '36px' },
   resetButton: {
     ':hover': { backgroundColor: tokens.colorBrandBackgroundSelected },
@@ -84,7 +86,13 @@ export default function IndexPage() {
               <article key={iteration} className={styles.iteration} aria-labelledby={`iteration-${iteration}`}>
                 <div>
                   <div className={styles.iterationHeading}>
-                    <h3 id={`iteration-${iteration}`} className={styles.iterationTitle}>Iteration {iteration}</h3>
+                    <h3 id={`iteration-${iteration}`} className={styles.iterationTitle}>
+                      {iteration === 2 ? (
+                        <Link className={styles.prototypeLink} to="/receive-assess">Iteration 2</Link>
+                      ) : (
+                        <a className={styles.prototypeLink} href="/iteration-1/receive-assess">Iteration 1</a>
+                      )}
+                    </h3>
                     <Badge className={mergeClasses(styles.status, iteration === 2 ? styles.inProgress : styles.tested)}>
                       {iteration === 2 ? 'In progress' : 'As usability-tested'}
                     </Badge>
@@ -94,13 +102,18 @@ export default function IndexPage() {
                       ? 'Develops the assessment journey with marine plan policy assessments, consultation preparation, public register decisions and public notice evidence review.'
                       : 'The first application review journey, with the Case list, applicant review tabs, Site check and Water Framework Directive tasks.'}
                   </p>
-                  {iteration === 2 ? (
-                    <Link className={styles.prototypeLink} to="/receive-assess">Iteration 2 prototype</Link>
-                  ) : (
-                    <a className={styles.prototypeLink} href="/iteration-1/receive-assess">Iteration 1 prototype</a>
-                  )}
                   {iteration === 1 && (
-                    <p className={styles.caseGuidance}>MLA/2026/1002 is the active case. After completing the tasks, clear the saved data to start again.</p>
+                    <ul className={styles.caseGuidance}>
+                      <li>MLA/2026/1002 is the active case. After completing the tasks, clear the saved data to start again.</li>
+                    </ul>
+                  )}
+                  {iteration === 2 && (
+                    <section aria-labelledby="explorations-heading">
+                      <h4 id="explorations-heading" className={styles.explorationsTitle}>Design explorations</h4>
+                      <ul className={styles.explorationsList}>
+                        <li><a href={asset('mockups/index.html')}>Start consultation task mockups</a></li>
+                      </ul>
+                    </section>
                   )}
                 </div>
                 <div className={styles.resources}>
