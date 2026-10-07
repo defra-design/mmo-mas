@@ -35,7 +35,12 @@ const useStyles = makeStyles({
   prototypeLink: { fontWeight: 'inherit' },
   shortcuts: {
     '& .fui-Accordion': { marginBottom: 0 },
-    '& .fui-AccordionHeader button': { fontSize: '16px', lineHeight: '1.6', minHeight: '32px' },
+    '& .fui-AccordionHeader button': {
+      fontSize: '16px', lineHeight: '1.6', minHeight: '32px', fontWeight: 600, alignItems: 'center',
+      textDecorationLine: 'underline', textDecorationThickness: '1px', textUnderlineOffset: '3px',
+    },
+    '& .fui-AccordionHeader button:hover': { textDecorationLine: 'none' },
+    '& .fui-AccordionHeader__expandIcon': { marginTop: 0 },
     '& .fui-AccordionPanel > div': { fontSize: '16px', lineHeight: '1.6' },
   },
   explorationsTitle: { margin: '8px 0 8px', fontSize: '16px', fontWeight: 600 },
