@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iteration 1 – design overview | Marine Applications System prototype</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; color: #323130; background: #fff; font: 16px/1.6 "Segoe UI", Arial, sans-serif; }
+      main { max-width: 840px; margin: 0 auto; padding: 40px 24px 64px; }
+      a { color: #0078d4; text-underline-offset: 3px; }
+      a:focus-visible { outline: 3px solid #0078d4; outline-offset: 4px; }
+      h1 { font-size: 32px; line-height: 1.25; margin: 32px 0 24px; }
+      h2 { font-size: 24px; line-height: 1.3; margin: 40px 0 16px; }
+      h3 { font-size: 18px; line-height: 1.4; margin: 0 0 12px; }
+      h1, h2, h3 { font-weight: 600; }
+      p { margin: 0 0 16px; }
+      ul { padding-left: 24px; }
+      li { padding-left: 4px; margin-bottom: 28px; }
+      @media print { main { max-width: none; padding: 0; } .back { display: none; } h2, h3 { break-after: avoid; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="back" href="../">Back to prototype index</a>
+      <h1>Iteration 1 – design overview</h1>
+      <p>Iteration 1 established the initial caseworker journey for receiving and assessing a marine licence application. The intended approach is for the caseworker to open a case and review the submitted application across the tabs, checking that everything is in order before beginning the assessment tasks.</p>
+
+      <h2>Case list</h2>
+      <p>The Case list provides the starting point for finding and opening a marine licence case. It brings together the reference, project name, assigned caseworker, status, case age in days and notifications.</p>
+      <p>Caseworkers can sort the list through the column headings and apply filters to narrow the results. The list remembers the last-used sort order. Status and assigned-caseworker filters allow selections from the values in the list.</p>
+      <p>The grid follows the Dynamics 365 presentation: single-line rows, truncated long text and horizontal scrolling where needed. Longer project names can be read by hovering over clipped text.</p>
+      <p>Case references provide access to the developed example cases. The list also includes illustrative records and controls that do not yet have a complete onward journey.</p>
+
+      <h2>Review tabs</h2>
+      <p>The review tabs display the information submitted by the applicant so the caseworker can check the application before beginning the assessment tasks. Applicant information is read-only.</p>
+      <ul>
+        <li>
+          <h3>Case summary</h3>
+          <p>Displays the reference, application type, submission date, fee band, applicant, organisation and case officer.</p>
+          <p>The header shows the project name, reference, status, case age and assignment across the tabs. In Iteration 1, the Tasks panel remains visible on the right.</p>
+        </li>
+        <li>
+          <h3>Project details</h3>
+          <p>Displays the applicant’s project name, project background and preferred licence start and end dates.</p>
+        </li>
+        <li>
+          <h3>Sites and activities</h3>
+          <p>Displays the method used to provide the site location, site name and map view, followed by the activity type, what is being constructed, activity description, duration, timing restrictions and working hours.</p>
+        </li>
+        <li>
+          <h3>Marine plan policies</h3>
+          <p>Displays policy information alongside the applicant’s consideration of each policy. Policies are grouped in a navigation list, with the selected policy’s details shown alongside it. Where no consideration has been provided, this is stated.</p>
+        </li>
+        <li>
+          <h3>Water Framework Directive</h3>
+          <p>Displays the applicant’s answers about the project’s location in relation to the WFD assessment area, whether it is limited to an excluded activity, and any assessment document provided.</p>
+          <p>In the application journey, applicants do not need to carry out or provide a WFD assessment if they answer that the site is outside the WFD assessment area, or that it is within the area but the activity is excluded. The area includes sites within one nautical mile of the coast, or in a tidal river or estuary.</p>
+        </li>
+        <li>
+          <h3>Other permissions</h3>
+          <p>Displays the applicant’s information about special legal powers, the harbour authority, other authorities and pre-application consultation. The caseworker selects a topic to read its details.</p>
+        </li>
+        <li>
+          <h3>Public register</h3>
+          <p>Displays the applicant’s response to “Consent to publish your project information”.</p>
+        </li>
+      </ul>
+
+      <h2>Tasks</h2>
+      <ul>
+        <li>
+          <h3>Site check</h3>
+          <p>After reviewing the application, the caseworker can open the Site check task from the Tasks panel.</p>
+          <p>The intention is that Site check must be completed before any of the other tasks become available. This is to identify problems early, such as a site being outside MMO jurisdiction, coordinates that do not accurately represent the location of the works, or a site whose location, shape or size is inappropriate for the proposed activity.</p>
+          <p>The task asks the caseworker to check that the coordinates accurately represent the location of the works, that the shape and size are appropriate for the activity, and that the site is within MMO jurisdiction.</p>
+          <p>Case Officers carry out their location checks in another system called SPIRIT. The <strong>Download CSV</strong> link represents a download of the site coordinates for upload to SPIRIT, intended to replace the several manual steps currently needed to prepare the coordinates.</p>
+          <p>The task also asks whether the site is within the WFD assessment area. As Case Officers are already checking the location in SPIRIT, Iteration 1 explores whether it makes sense to answer this question during Site check. The intention is to play this answer back in the WFD task.</p>
+          <p>Caseworkers can also enter notes relevant to later stages of the assessment.</p>
+          <p>Selecting <strong>Save task</strong> returns the caseworker to the Case summary, marks Site check as <strong>Done</strong>, and changes the WFD and Marine plan policies task statuses from <strong>Cannot start yet</strong> to <strong>To do</strong>.</p>
+        </li>
+        <li>
+          <h3>Water Framework Directive</h3>
+          <p>The WFD task becomes available after Site check has been completed.</p>
+          <p>It brings the applicant’s key WFD answers and any assessment document provided into the task form. Applicants do not need to carry out or provide an assessment if they answer that the site is outside the WFD assessment area, or that it is within the area but the activity is excluded. The area includes sites within one nautical mile of the coast, or in a tidal river or estuary.</p>
+          <p>The task also shows the WFD location confirmation from Site check, labelled “Confirmed in Site check”. This explores playing back the Case Officer’s earlier location check alongside the applicant’s answers. In the Iteration 1 example, this confirmation is illustrative rather than dynamically linked to the saved Site check answer.</p>
+          <p>The caseworker then answers: “Is the WFD section complete and acceptable?”</p>
+          <p>The caseworker records a Yes or No answer. Selecting <strong>Save task</strong> marks the task as <strong>Done</strong> and returns them to the Case summary.</p>
+          <p>In this iteration, <strong>Done</strong> indicates that the review task has been completed; it does not itself mean that the caseworker answered Yes.</p>
+        </li>
+        <li>
+          <h3>Marine plan policies</h3>
+          <p>Marine plan policies appears in the Iteration 1 task list to show its place in the assessment sequence.</p>
+          <p>It initially displays <strong>Cannot start yet</strong>, changing to <strong>To do</strong> after Site check is saved. At this stage, it is a task-list placeholder: the applicant’s policy responses can be reviewed in the tab, but the assessment task itself is not implemented.</p>
+        </li>
+      </ul>
+
+      <h2>Saving and returning to work</h2>
+      <p>Iteration 1 retains task answers and statuses in the browser so they remain available after refreshing the page. Task forms also display a Saved or Unsaved indicator.</p>
+      <p>A reset option supports returning the prototype to its initial state for another walkthrough or testing session.</p>
+      <p>This is a prototype using example application data and browser storage. The draft describes the supported review and task journey, rather than implying that every visible command or external-system connection is functional.</p>
+    </main>
+  </body>
+</html>

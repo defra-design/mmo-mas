@@ -132,9 +132,7 @@ export default function IndexPage() {
                 </div>
                 <div className={styles.resources}>
                   <p className={styles.resourceTitle}>Design and research</p>
-                  {iteration === 1 ? (
-                    <a href={asset('docs/version-1-design-overview.html')}>Version 1 – design overview</a>
-                  ) : <span className={styles.pending}>Design overview to follow</span>}
+                  <a href={asset(`docs/iteration-${iteration}-design-overview.html`)}>Iteration {iteration} – design overview</a>
                   {playbackUrls[iteration] ? (
                     <a href={playbackUrls[iteration]} target="_blank" rel="noopener noreferrer">UR playback (opens in a new tab)</a>
                   ) : <span className={styles.pending}>UR playback link to be added</span>}
