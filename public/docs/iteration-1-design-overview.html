@@ -6,9 +6,13 @@
     <title>Iteration 1 – design overview | Marine Applications System prototype</title>
     <style>
       * { box-sizing: border-box; }
-      body { margin: 0; color: #323130; background: #fff; font: 16px/1.6 "Segoe UI", Arial, sans-serif; }
+      body { margin: 0; border-top: 8px solid #009d45; color: #323130; background: #fff; font: 16px/1.6 "Segoe UI", Arial, sans-serif; }
       main { max-width: 840px; margin: 0 auto; padding: 40px 24px 64px; }
-      a { color: #0078d4; text-underline-offset: 3px; }
+      a { color: #0078d4; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+      a:hover { text-decoration: none; }
+      .back { position: relative; display: inline-flex; align-items: center; }
+      .back svg { position: absolute; right: calc(100% + 4px); top: 50%; display: block; width: 20px; height: 20px; transform: translateY(-50%) rotate(180deg); }
+      .back-to-top { margin: 40px 0 0; }
       a:focus-visible { outline: 3px solid #0078d4; outline-offset: 4px; }
       h1 { font-size: 32px; line-height: 1.25; margin: 32px 0 24px; }
       h2 { font-size: 24px; line-height: 1.3; margin: 40px 0 16px; }
@@ -17,12 +21,12 @@
       p { margin: 0 0 16px; }
       ul { padding-left: 24px; }
       li { padding-left: 4px; margin-bottom: 28px; }
-      @media print { main { max-width: none; padding: 0; } .back { display: none; } h2, h3 { break-after: avoid; } }
+      @media print { main { max-width: none; padding: 0; } body { border-top: 0; } .back, .back-to-top { display: none; } h2, h3 { break-after: avoid; } }
     </style>
   </head>
-  <body>
+  <body id="top">
     <main>
-      <a class="back" href="../">Back to prototype index</a>
+      <a class="back" href="../"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7.65 4.15c.2-.2.5-.2.7 0l5.49 5.46c.21.22.21.57 0 .78l-5.49 5.46a.5.5 0 0 1-.7-.7L12.8 10 7.65 4.85a.5.5 0 0 1 0-.7Z" /></svg><span>Back to prototype index</span></a>
       <h1>Iteration 1 – design overview</h1>
       <p>Iteration 1 established the initial caseworker journey for receiving and assessing a marine licence application. The intended approach is for the caseworker to open a case and review the submitted application across the tabs, checking that everything is in order before beginning the assessment tasks.</p>
 
@@ -99,6 +103,7 @@
       <p>Iteration 1 retains task answers and statuses in the browser so they remain available after refreshing the page. Task forms also display a Saved or Unsaved indicator.</p>
       <p>A reset option supports returning the prototype to its initial state for another walkthrough or testing session.</p>
       <p>This is a prototype using example application data and browser storage. The draft describes the supported review and task journey, rather than implying that every visible command or external-system connection is functional.</p>
+      <p class="back-to-top"><a href="#top">Back to top</a></p>
     </main>
   </body>
 </html>
