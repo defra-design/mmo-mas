@@ -1,7 +1,7 @@
 // Read-only subgrid of the case's related Consultee records, with the subgrid's
-// own command bar: Add consultee opens a new record full page, and Remove
-// appears once rows are selected (the OOB Delete command, relabelled in the
-// command designer). Notes are left out of the view because they can be long.
+// own command bar: Add consultee opens a new record full page. Selecting rows
+// swaps it for Edit (one record opens its form; several open the OOB bulk edit
+// panel) and Remove (the OOB Delete command, relabelled in the command designer). Notes are left out of the view because they can be long.
 // Only the Organisation column opens the record; Consultation type has no
 // width, so it takes the spare space.
 import { useEffect, useState } from 'react';
@@ -9,11 +9,12 @@ import {
   Button, Checkbox, makeStyles, Table, TableBody, TableCell, TableHeader,
   TableHeaderCell, TableRow, Text, tokens,
 } from '@fluentui/react-components';
-import { AddRegular, DeleteRegular } from '@fluentui/react-icons';
+import { AddRegular, DeleteRegular, EditRegular } from '@fluentui/react-icons';
 import GridColumnMenu from '../GridColumnMenu';
 import type { ColumnFilter } from '../GridColumnMenu';
 import TruncatedCell from '../TruncatedCell';
 import CaseDialogShell from '../CaseDialogShell';
+import ConsulteeBulkEdit from './ConsulteeBulkEdit';
 import type { ConsulteeRow } from '../../context/TaskContext';
 
 type Key = 'organisation' | 'consultationType';
@@ -45,7 +46,7 @@ const useStyles = makeStyles({
   row: { height: '42px', ':hover': { backgroundColor: '#edebe9' } },
   filtered: { outline: '1px solid #0078d4', outlineOffset: '-1px', borderRadius: tokens.borderRadiusMedium },
   empty: { color: '#605e5c' },
-  footer: { paddingTop: tokens.spacingVerticalM, color: '#605e5c' },
+  footer: { display: 'flex', gap: tokens.spacingHorizontalL, paddingTop: tokens.spacingVerticalM, color: '#605e5c' },
 });
 
 type Props = {
@@ -55,13 +56,15 @@ type Props = {
   onAdd: () => void;
   onOpen: (id: string) => void;
   onRemove: (ids: string[]) => void;
+  onUpdate: (rows: ConsulteeRow[]) => void;
 };
 
-export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onRemove }: Props) {
+export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onRemove, onUpdate }: Props) {
   const styles = useStyles();
   const [view, setView] = useState(() => loadView(caseId));
   const [selected, setSelected] = useState<string[]>([]);
   const [confirming, setConfirming] = useState(false);
+  const [bulkEditing, setBulkEditing] = useState(false);
   useEffect(() => {
     try {
       sessionStorage.setItem(storageKey(caseId), JSON.stringify(view));
@@ -84,12 +87,15 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onR
   const allSelected = shown.length > 0 && shown.every(row => selected.includes(row.id));
   const toggle = (id: string, on: boolean) =>
     setSelected(previous => (on ? [...previous, id] : previous.filter(value => value !== id)));
-  const removing = rows.filter(row => selected.includes(row.id));
+  const chosen = rows.filter(row => selected.includes(row.id));
+  const edit = () => (chosen.length === 1 ? onOpen(chosen[0].id) : setBulkEditing(true));
 
   return <>
     {!locked && <div className={styles.commands}>
-      {selected.length > 0 && <Button appearance="subtle" icon={<DeleteRegular />} onClick={() => setConfirming(true)}>Remove</Button>}
-      <Button appearance="subtle" icon={<AddRegular />} onClick={onAdd}>Add consultee</Button>
+      {selected.length > 0 ? <>
+        <Button appearance="subtle" icon={<EditRegular />} onClick={edit}>Edit</Button>
+        <Button appearance="subtle" icon={<DeleteRegular />} onClick={() => setConfirming(true)}>Remove</Button>
+      </> : <Button appearance="subtle" icon={<AddRegular />} onClick={onAdd}>Add consultee</Button>}
     </div>}
     <div className={styles.grid}>
       <Table className={styles.table} aria-label="Consultees">
@@ -131,14 +137,26 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onR
         </TableBody>
       </Table>
     </div>
-    <Text block className={styles.footer}>Rows: {shown.length}</Text>
+    <div className={styles.footer}>
+      <Text>Rows: {shown.length}</Text>
+      {selected.length > 0 && <Text>Selected: {selected.length}</Text>}
+    </div>
+    {bulkEditing && <ConsulteeBulkEdit
+      count={chosen.length}
+      onCancel={() => setBulkEditing(false)}
+      onSave={changes => {
+        onUpdate(chosen.map(row => ({ ...row, ...changes })));
+        setSelected([]);
+        setBulkEditing(false);
+      }}
+    />}
     {confirming && <CaseDialogShell
-      title={removing.length === 1 ? 'Remove consultee' : 'Remove consultees'}
+      title={chosen.length === 1 ? 'Remove consultee' : 'Remove consultees'}
       confirmLabel="Remove"
       onCancel={() => setConfirming(false)}
-      onConfirm={() => { onRemove(removing.map(row => row.id)); setSelected([]); setConfirming(false); }}
+      onConfirm={() => { onRemove(chosen.map(row => row.id)); setSelected([]); setConfirming(false); }}
     >
-      {removing.length === 1 ? removing[0].organisation : `${removing.length} organisations`} will be removed
+      {chosen.length === 1 ? chosen[0].organisation : `${chosen.length} organisations`} will be removed
       from the consultees for this application.
     </CaseDialogShell>}
   </>;

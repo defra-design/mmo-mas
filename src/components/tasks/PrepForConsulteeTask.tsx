@@ -71,6 +71,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     saved,
     setPrepForConsulteeCompleted,
     removeConsultees,
+    saveConsultee,
     markUnsaved,
     savePrepForConsultee,
   } = useTasks();
@@ -138,6 +139,9 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
               removeConsultees(caseId, ids);
               setShowError(false);
             }}
+            // Notes only belong to a request for advice, as on the consultee form.
+            onUpdate={updated => updated.forEach(row => saveConsultee(caseId,
+              row.consultationType === 'Request for advice' ? row : { ...row, notes: '' }))}
           />
         </div>
       </Card>

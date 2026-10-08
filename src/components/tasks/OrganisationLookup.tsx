@@ -222,7 +222,9 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
           top: pos.top,
           left: pos.left,
           width: pos.width,
-          zIndex: 10000,
+          // Above Fluent portals (Dialog / Drawer layer at 1000000), so the
+          // results still show when the lookup sits in the bulk edit panel.
+          zIndex: 1000001,
           minWidth: 340,
           maxHeight: 320,
           overflowY: 'auto',
@@ -383,7 +385,11 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
             }}
             onClick={e => e.stopPropagation()}
             onKeyDown={e => {
-              if (e.key === 'Escape') setOpen(false);
+              // Escape closes only the results, not a panel or dialog around the lookup.
+              if (e.key === 'Escape' && open) {
+                e.stopPropagation();
+                setOpen(false);
+              }
               if (e.key === 'Enter' && results[0]) {
                 e.preventDefault();
                 pick(results[0]);
