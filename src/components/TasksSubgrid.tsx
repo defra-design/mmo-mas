@@ -8,6 +8,7 @@ import { startConsultationStatus } from '../utils/startConsultation';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
+  mergeClasses,
   tokens,
   Text,
   Button,
@@ -16,6 +17,7 @@ import {
   TableRow,
   TableCell,
 } from '@fluentui/react-components';
+import { useSubgridStyles } from './subgridStyles';
 import {
   ChevronLeftRegular,
   ChevronRightRegular,
@@ -43,7 +45,6 @@ const useStyles = makeStyles({
   },
   scroll: { overflowX: 'auto' },
   headerCell: { fontWeight: tokens.fontWeightSemibold },
-  row: { ':hover': { backgroundColor: tokens.colorNeutralBackground3 } },
   cellText: {
     display: 'block',
     minWidth: 0,
@@ -76,6 +77,7 @@ interface TasksSubgridProps {
 
 export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   const styles = useStyles();
+  const grid = useSubgridStyles();
   const navigate = useNavigate();
   const taskContext = useTasks();
   const { tasks } = taskContext;
@@ -143,8 +145,8 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
         >
           <TableHeader>
             <TableRow>
-              <TableCell className={styles.headerCell} style={{ width: COLS.task }}>Task</TableCell>
-              <TableCell className={styles.headerCell} style={{ width: COLS.status }}>Status</TableCell>
+              <TableCell className={mergeClasses(styles.headerCell, grid.headerCell)} style={{ width: COLS.task }}>Task</TableCell>
+              <TableCell className={mergeClasses(styles.headerCell, grid.headerCell)} style={{ width: COLS.status }}>Status</TableCell>
             </TableRow>
           </TableHeader>
           <tbody>
@@ -152,8 +154,13 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
               const openTask = () =>
                 navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/${row.slug}`);
               return (
-                <TableRow key={row.key} className={styles.row}>
-                  <TableCell style={{ width: COLS.task }}>
+                <TableRow
+                  key={row.key}
+                  className={grid.row}
+                  // Double-clicking a row opens the record, as in D365.
+                  onDoubleClick={event => { if (!(event.target as HTMLElement).closest('button')) openTask(); }}
+                >
+                  <TableCell tabIndex={0} className={grid.cell} style={{ width: COLS.task }}>
                     {/* Primary column is a hyperlink that opens the record — OOB
                         read-only grid behaviour. Gated rows open read-only. */}
                     <button
@@ -164,7 +171,7 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
                       {row.name}
                     </button>
                   </TableCell>
-                  <TableCell style={{ width: COLS.status }}>
+                  <TableCell tabIndex={0} className={grid.cell} style={{ width: COLS.status }}>
                     <span className={`${styles.cellText} ${styles.statusText}`} title={row.status}>{row.status}</span>
                   </TableCell>
                 </TableRow>

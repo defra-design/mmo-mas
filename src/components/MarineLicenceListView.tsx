@@ -1,5 +1,6 @@
 // src/components/MarineLicenceListView.tsx
 import { useEffect, useMemo, useState } from 'react';
+import type { MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
@@ -35,6 +36,8 @@ import {
 } from '@fluentui/react-icons';
 import FormCommandBar from './FormCommandBar';
 import TruncatedCell from './TruncatedCell';
+import GridCheckbox from './GridCheckbox';
+import { useSubgridStyles } from './subgridStyles';
 import { useTasks } from '../context/TaskContext';
 import { caseStatus } from '../utils/caseStatus';
 import { getAssigneeAvatarColor, getContrastText } from '../utils/avatarColors';
@@ -131,9 +134,8 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
   },
   staticLink: { color: '#0078d4' },
-  tableRow: {
-    ':hover': { backgroundColor: tokens.colorNeutralBackground3 },
-  },
+  // Column headings use the shared grid header hover (blue outline), not grey.
+  columnTrigger: { ':hover': { backgroundColor: tokens.colorNeutralBackground1 } },
   // Horizontal scroll when the columns are wider than the panel (like D365).
   tableScroll: {
     overflowX: 'auto',
@@ -261,6 +263,7 @@ export default function MarineLicenceListView({
   const [filters, setFilters] = useState<Filters>({});
   const navigate = useNavigate();
   const styles = useStyles();
+  const grid = useSubgridStyles();
 
   useEffect(() => {
     document.title = `${title} - MMO Marine Applications System`;
@@ -383,7 +386,7 @@ export default function MarineLicenceListView({
         <PopoverTrigger>
           <Button
             appearance="transparent"
-            className={styles.headerMenuTrigger}
+            className={mergeClasses(styles.headerMenuTrigger, styles.columnTrigger)}
             aria-label={`${col.name} column menu`}
             icon={null}
             style={{
@@ -560,6 +563,9 @@ export default function MarineLicenceListView({
 
   const allDisplayedSelected =
     displayed.length > 0 && displayed.every(i => selectedRows.includes(i.reference));
+  // Clicking a row selects just that row and double-clicking opens the case, as
+  // in D365; its own controls (checkbox, link) handle their own clicks.
+  const onControl = (event: MouseEvent) => Boolean((event.target as HTMLElement).closest('button, input, a'));
 
   // Sum of column widths (+ checkbox) — the table floor before it scrolls.
   const minTableWidth = 32 + columns.reduce((sum, c) => sum + c.width, 0);
@@ -592,8 +598,8 @@ export default function MarineLicenceListView({
             <TableHeader>
               <TableRow>
                 <TableCell style={{ width: 32, paddingLeft: 8, paddingRight: 8 }}>
-                  <Checkbox
-                    checked={allDisplayedSelected}
+                  <GridCheckbox
+                    checked={allDisplayedSelected ? true : selectedRows.length > 0 ? 'mixed' : false}
                     onChange={(_, data) =>
                       setSelectedRows(data.checked ? displayed.map(i => i.reference) : [])
                     }
@@ -603,7 +609,7 @@ export default function MarineLicenceListView({
                 {columns.map(col => (
                   <TableCell
                     key={col.key}
-                    className={filters[col.key] ? styles.filteredHeaderCell : undefined}
+                    className={mergeClasses(grid.headerCell, filters[col.key] && styles.filteredHeaderCell)}
                     style={{ width: col.width, fontWeight: 600, ...(col.align === 'right' ? { paddingRight: 12 } : {}) }}
                   >
                     <ColumnHeaderMenu col={col} />
@@ -613,9 +619,14 @@ export default function MarineLicenceListView({
             </TableHeader>
             <tbody>
               {displayed.map(item => (
-                <TableRow key={item.reference} className={styles.tableRow}>
+                <TableRow
+                  key={item.reference}
+                  className={mergeClasses(grid.row, selectedRows.includes(item.reference) && grid.selectedRow)}
+                  onClick={event => { if (!onControl(event)) setSelectedRows([item.reference]); }}
+                  onDoubleClick={event => { if (!onControl(event) && isClickable(item.reference)) navigateToCase(item.reference); }}
+                >
                   <TableCell style={{ width: 32, paddingLeft: 8, paddingRight: 8 }}>
-                    <Checkbox
+                    <GridCheckbox
                       checked={selectedRows.includes(item.reference)}
                       onChange={(_, data) =>
                         setSelectedRows(rows =>
@@ -628,6 +639,8 @@ export default function MarineLicenceListView({
                   {columns.map(col => (
                     <TableCell
                       key={col.key}
+                      tabIndex={0}
+                      className={mergeClasses(grid.cell, selectedRows.includes(item.reference) && grid.selectedCell)}
                       style={{ width: col.width, ...(col.align === 'right' ? { paddingRight: 12 } : {}) }}
                     >
                       {renderCell(col, item)}

@@ -119,9 +119,12 @@ interface OrganisationLookupProps {
   // parent (TaskContext) so the list is shared and persists like a real
   // "Recent records" lookup; this control just displays what it's given.
   recent: string[];
+  // Opens the chosen organisation's record from the selected-value link, as the
+  // D365 lookup does. Without it the link does nothing.
+  onOpen?: (value: string) => void;
 }
 
-export default function OrganisationLookup({ value, onSelect, recent }: OrganisationLookupProps) {
+export default function OrganisationLookup({ value, onSelect, recent, onOpen }: OrganisationLookupProps) {
   const styles = useStyles();
   const rootRef = useRef<HTMLDivElement>(null);
   const flyoutRef = useRef<HTMLDivElement>(null);
@@ -222,7 +225,9 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
           top: pos.top,
           left: pos.left,
           width: pos.width,
-          zIndex: 10000,
+          // Above Fluent portals (Dialog / Drawer layer at 1000000), so the
+          // results still show when the lookup sits in the bulk edit panel.
+          zIndex: 1000001,
           minWidth: 340,
           maxHeight: 320,
           overflowY: 'auto',
@@ -352,7 +357,12 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
             <a
               className={styles.pillLink}
               href="#"
-              onClick={e => e.preventDefault()}
+              onClick={e => {
+                e.preventDefault();
+                if (!onOpen) return;
+                e.stopPropagation();
+                onOpen(value);
+              }}
               title={value}
             >
               {value}
@@ -383,7 +393,11 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
             }}
             onClick={e => e.stopPropagation()}
             onKeyDown={e => {
-              if (e.key === 'Escape') setOpen(false);
+              // Escape closes only the results, not a panel or dialog around the lookup.
+              if (e.key === 'Escape' && open) {
+                e.stopPropagation();
+                setOpen(false);
+              }
               if (e.key === 'Enter' && results[0]) {
                 e.preventDefault();
                 pick(results[0]);

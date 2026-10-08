@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   makeStyles,
+  mergeClasses,
   shorthands,
   tokens,
   Text,
@@ -26,6 +27,7 @@ import {
   Input,
   Checkbox,
 } from '@fluentui/react-components';
+import { useSubgridStyles } from './subgridStyles';
 import {
   ChevronLeftRegular,
   ChevronRightRegular,
@@ -89,7 +91,6 @@ const useStyles = makeStyles({
     marginBottom: tokens.spacingVerticalL,
   },
   scroll: { overflowX: 'auto' },
-  row: { ':hover': { backgroundColor: tokens.colorNeutralBackground3 } },
   statusText: { color: tokens.colorNeutralForeground3 },
   // Header cell: click-to-open menu trigger, matching the Case list grid.
   headerMenuTrigger: {
@@ -102,7 +103,6 @@ const useStyles = makeStyles({
     ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground1,
-    ':hover': { backgroundColor: tokens.colorNeutralBackground3 },
   },
   chevron: { marginLeft: tokens.spacingHorizontalXS, fontSize: tokens.fontSizeBase400 },
   activeSortIcon: {
@@ -181,6 +181,7 @@ interface MarinePlanPoliciesSubgridProps {
 
 export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();
+  const grid = useSubgridStyles();
   const navigate = useNavigate();
   const { tasks, mppForm } = useTasks();
   const [page, setPage] = useState(1);
@@ -428,7 +429,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
               {COLUMNS.map(col => (
                 <TableCell
                   key={col.key}
-                  className={filters[col.key] ? styles.filteredHeaderCell : undefined}
+                  className={mergeClasses(grid.headerCell, filters[col.key] && styles.filteredHeaderCell)}
                   style={{ width: col.width, fontWeight: 600, paddingLeft: CELL_PAD_LEFT }}
                 >
                   <ColumnHeaderMenu col={col} />
@@ -443,8 +444,13 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
                   `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${row.code}`
                 );
               return (
-                <TableRow key={row.code} className={styles.row}>
-                  <TableCell style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
+                <TableRow
+                  key={row.code}
+                  className={grid.row}
+                  // Double-clicking a row opens the record, as in D365.
+                  onDoubleClick={event => { if (!(event.target as HTMLElement).closest('button')) openPolicy(); }}
+                >
+                  <TableCell tabIndex={0} className={grid.cell} style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
                     {/* The primary column always opens the record. Gated policy
                         assessments are shown read-only on the record form. */}
                     <TruncatedCell
@@ -452,10 +458,10 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
                       onClick={openPolicy}
                     />
                   </TableCell>
-                  <TableCell style={{ width: COLS.group, paddingLeft: CELL_PAD_LEFT }}>
+                  <TableCell tabIndex={0} className={grid.cell} style={{ width: COLS.group, paddingLeft: CELL_PAD_LEFT }}>
                     <TruncatedCell value={row.group} />
                   </TableCell>
-                  <TableCell style={{ width: COLS.status, paddingLeft: CELL_PAD_LEFT }}>
+                  <TableCell tabIndex={0} className={grid.cell} style={{ width: COLS.status, paddingLeft: CELL_PAD_LEFT }}>
                     <TruncatedCell value={row.status} className={styles.statusText} />
                   </TableCell>
                 </TableRow>
