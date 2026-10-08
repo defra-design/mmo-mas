@@ -10,13 +10,14 @@
 import { useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 import {
-  Button, Checkbox, makeStyles, mergeClasses, Table, TableBody, TableCell, TableHeader,
+  Button, makeStyles, mergeClasses, Table, TableBody, TableCell, TableHeader,
   TableHeaderCell, TableRow, Text, Tooltip, tokens,
 } from '@fluentui/react-components';
 import { AddRegular, DeleteRegular, EditRegular, OpenRegular } from '@fluentui/react-icons';
 import GridColumnMenu from '../GridColumnMenu';
 import type { ColumnFilter } from '../GridColumnMenu';
 import TruncatedCell from '../TruncatedCell';
+import GridCheckbox from '../GridCheckbox';
 import { useSubgridStyles } from '../subgridStyles';
 import CaseDialogShell from '../CaseDialogShell';
 import ConsulteeBulkEdit from './ConsulteeBulkEdit';
@@ -119,7 +120,7 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onO
         </colgroup>
         <TableHeader><TableRow>
           <TableHeaderCell>
-            <Checkbox aria-label="Select all" disabled={locked || shown.length === 0}
+            <GridCheckbox aria-label="Select all" disabled={locked || shown.length === 0}
               checked={allSelected ? true : selected.length > 0 ? 'mixed' : false}
               onChange={() => setSelected(allSelected ? [] : shown.map(row => row.id))} />
           </TableHeaderCell>
@@ -136,7 +137,7 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onO
             </TableHeaderCell>,
           )}
           <TableHeaderCell>
-            <Tooltip content="See all records" relationship="label" positioning="above">
+            <Tooltip content="Navigate" relationship="label" positioning="above">
               <Button appearance="transparent" size="small" className={styles.navigate} icon={<OpenRegular />} />
             </Tooltip>
           </TableHeaderCell>
@@ -151,7 +152,7 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onO
               onDoubleClick={event => { if (!onControl(event)) onOpen(row.id); }}
             >
               <TableCell>
-                <Checkbox aria-label={`Select ${row.organisation}`} disabled={locked}
+                <GridCheckbox aria-label={`Select ${row.organisation}`} disabled={locked}
                   checked={selected.includes(row.id)} onChange={(_, data) => toggle(row.id, Boolean(data.checked))} />
               </TableCell>
               {[

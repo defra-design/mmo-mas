@@ -3,7 +3,10 @@
 // display name. Location name is the record's primary column, so it is the
 // link that opens the record. The last column has no width, so it takes the
 // spare space and Location name truncates like Application name on the case list.
+// Rows can be selected (checkbox, or clicking the row) but the subgrid has no
+// commands that act on a selection yet.
 import { useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
 import {
   makeStyles, mergeClasses, Table, TableBody, TableCell, TableHeader,
   TableHeaderCell, TableRow, Text, tokens,
@@ -11,6 +14,7 @@ import {
 import GridColumnMenu from '../GridColumnMenu';
 import type { ColumnFilter } from '../GridColumnMenu';
 import TruncatedCell from '../TruncatedCell';
+import GridCheckbox from '../GridCheckbox';
 import { useSubgridStyles } from '../subgridStyles';
 import { d365Date, sortableDate } from '../../utils/dates';
 
@@ -47,12 +51,12 @@ function loadView(caseId: string): View {
 
 const useStyles = makeStyles({
   grid: { overflowX: 'auto' },
-  table: { tableLayout: 'fixed', minWidth: '880px', width: '100%' },
+  table: { tableLayout: 'fixed', minWidth: '924px', width: '100%' },
   row: { height: '42px' },
   // Subgrid links are underlined by default; .link-button removes it with !important.
   link: { textDecorationLine: 'underline !important' },
   filtered: { outline: '1px solid #0078d4', outlineOffset: '-1px', borderRadius: tokens.borderRadiusMedium },
-  footer: { paddingTop: tokens.spacingVerticalM, color: '#605e5c' },
+  footer: { display: 'flex', gap: tokens.spacingHorizontalL, paddingTop: tokens.spacingVerticalM, color: '#605e5c' },
 });
 
 type Props = { caseId: string; rows: LocationRow[]; onOpen: (index: number) => void };
@@ -61,6 +65,7 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
   const styles = useStyles();
   const grid = useSubgridStyles();
   const [view, setView] = useState(() => loadView(caseId));
+  const [selected, setSelected] = useState<number[]>([]);
   useEffect(() => {
     try {
       sessionStorage.setItem(storageKey(caseId), JSON.stringify(view));
@@ -81,12 +86,26 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
       return sort.dir === 'asc' ? compare : -compare;
     });
   const optionsFor = (key: Key) => Array.from(new Set(rows.map(row => row[key]))).sort();
+  const allSelected = shown.length > 0 && shown.every(row => selected.includes(row.index));
+  const toggle = (index: number, on: boolean) =>
+    setSelected(previous => (on ? [...previous, index] : previous.filter(value => value !== index)));
+  // Clicks on the row's own controls (checkbox, link) are left to them.
+  const onControl = (event: MouseEvent) => Boolean((event.target as HTMLElement).closest('button, input, a'));
 
   return <>
     <div className={styles.grid}>
       <Table className={styles.table} aria-label="Site notice locations">
-        <colgroup>{columns.map(({ key, width }) => <col key={key} style={width ? { width: `${width}px` } : undefined} />)}</colgroup>
-        <TableHeader><TableRow>{columns.map(column =>
+        <colgroup>
+          <col style={{ width: '44px' }} />
+          {columns.map(({ key, width }) => <col key={key} style={width ? { width: `${width}px` } : undefined} />)}
+        </colgroup>
+        <TableHeader><TableRow>
+          <TableHeaderCell>
+            <GridCheckbox aria-label="Select all" disabled={shown.length === 0}
+              checked={allSelected ? true : selected.length > 0 ? 'mixed' : false}
+              onChange={() => setSelected(allSelected ? [] : shown.map(row => row.index))} />
+          </TableHeaderCell>
+          {columns.map(column =>
           <TableHeaderCell key={column.key} className={mergeClasses(grid.headerCell, filters[column.key] && styles.filtered)}>
             <GridColumnMenu
               label={column.label}
@@ -98,20 +117,33 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
               onFilter={filter => setView({ ...view, filters: { ...filters, [column.key]: filter } })}
             />
           </TableHeaderCell>,
-        )}</TableRow></TableHeader>
+        )}
+        </TableRow></TableHeader>
         <TableBody>{shown.map(row =>
-          <TableRow className={mergeClasses(grid.row, styles.row)} key={row.index}>
+          <TableRow
+            key={row.index}
+            className={mergeClasses(grid.row, styles.row, selected.includes(row.index) && grid.selectedRow)}
+            onClick={event => { if (!onControl(event)) setSelected([row.index]); }}
+          >
+            <TableCell>
+              <GridCheckbox aria-label={`Select ${row.name}`} checked={selected.includes(row.index)}
+                onChange={(_, data) => toggle(row.index, Boolean(data.checked))} />
+            </TableCell>
             {[
               <TruncatedCell key="location" value={row.location} />,
               <TruncatedCell key="name" value={row.name} className={styles.link} onClick={() => onOpen(row.index)} />,
               <TruncatedCell key="date" value={d365Date(row.date)} />,
               <TruncatedCell key="status" value={row.status} />,
               <TruncatedCell key="accepted" value={row.accepted} />,
-            ].map(content => <TableCell key={content.key} tabIndex={0} className={grid.cell}>{content}</TableCell>)}
+            ].map(content => <TableCell key={content.key} tabIndex={0}
+              className={mergeClasses(grid.cell, selected.includes(row.index) && grid.selectedCell)}>{content}</TableCell>)}
           </TableRow>,
         )}</TableBody>
       </Table>
     </div>
-    <Text className={styles.footer}>Rows: {shown.length}</Text>
+    <div className={styles.footer}>
+      <Text>Rows: {shown.length}</Text>
+      {selected.length > 0 && <Text>Selected: {selected.length}</Text>}
+    </div>
   </>;
 }
