@@ -5,8 +5,10 @@
 // same Regular outline treatment as FieldLock — native D365 puts (i) on the
 // field label, not beside the body copy.
 //
-// Two presentations, so both can be usability tested:
+// Three presentations:
 //   · default — the guidance sits open on the form behind an (i)
+//   · `plain` — open, with no icon: standard visible help text, as on the WFD
+//     excluded-activities list
 //   · `title` given — it collapses behind a "Help with ..." disclosure the
 //     caseworker opens on demand (the GOV.UK details pattern, Fluent-styled)
 // Both are the same injected HTML in the real build: the disclosure is a plain
@@ -107,9 +109,11 @@ interface TaskHintProps {
   /** When given, the guidance collapses behind a disclosure with this label
    *  (e.g. "Help with personal information") instead of sitting open. */
   title?: string;
+  /** Open guidance with no (i) icon — standard visible help text. */
+  plain?: boolean;
 }
 
-export default function TaskHint({ children, spaceAbove, title }: TaskHintProps) {
+export default function TaskHint({ children, spaceAbove, title, plain }: TaskHintProps) {
   const styles = useStyles();
   // Controlled so the closed state can be styled — Fluent puts no open/closed
   // marker on the Accordion root to hang CSS off.
@@ -143,7 +147,7 @@ export default function TaskHint({ children, spaceAbove, title }: TaskHintProps)
 
   return (
     <div className={mergeClasses(styles.hint, spaceAbove && styles.spaceAbove)}>
-      <InfoRegular className={styles.icon} aria-hidden />
+      {!plain && <InfoRegular className={styles.icon} aria-hidden />}
       <div className={styles.body}>{children}</div>
     </div>
   );
