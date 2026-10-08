@@ -13,6 +13,7 @@ import SiteCheckTask from './components/tasks/SiteCheckTask';
 import WfdTask from './components/tasks/WfdTask';
 import MarinePlanPolicyTask from './components/tasks/MarinePlanPolicyTask';
 import PrepForConsulteeTask from './components/tasks/PrepForConsulteeTask';
+import PrepForConsulteeConsultee from './components/tasks/PrepForConsulteeConsultee';
 import PublicRegisterTask from './components/tasks/PublicRegisterTask';
 import SiteNoticeTask from './components/tasks/SiteNoticeTask';
 import ReviewPublicNoticeEvidenceTask from './components/tasks/ReviewPublicNoticeEvidenceTask';
@@ -98,6 +99,14 @@ function App() {
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <PrepForConsulteeTask caseId={id} />} />
+                  </Shell>
+                }
+              />
+              <Route
+                path="/receive-assess/cases/:caseId/tasks/prep-for-consultee/consultees/:consulteeId"
+                element={
+                  <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
+                    <MarineCaseWrapper render={(id) => <PrepForConsulteeConsultee caseId={id} />} />
                   </Shell>
                 }
               />

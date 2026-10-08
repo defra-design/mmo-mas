@@ -45,9 +45,9 @@ export interface MppAnswer {
 // The MPP task is 1-to-many: one answer per policy, keyed by policy code.
 export type MppForm = Record<string, MppAnswer>;
 
-// One row in the Prep for consultee editable subgrid. Maps to a related
-// "Consultee" custom-table record: Organisation (lookup), Consultation type
-// (Choice) and Notes (multiline text revealed for a consultation request).
+// A related "Consultee" custom-table record, listed in the Prep for consultee
+// subgrid and opened full page: Organisation (lookup), Consultation type (Choice)
+// and Notes (multiline text revealed for a request for advice).
 export interface ConsulteeRow {
   id: string;
   organisation: string;
@@ -55,9 +55,8 @@ export interface ConsulteeRow {
   notes: string;
 }
 
-// Editable-subgrid rows for Prep for consultee. Always keep a trailing empty row
-// so the caseworker can add another (OOB Power Apps grid quick-create behaviour).
-export type PrepForConsulteeForm = ConsulteeRow[];
+// Every case's Consultee records, keyed by case reference.
+export type ConsulteesState = Record<string, ConsulteeRow[]>;
 
 // Two-options (Yes/No) field on the Prep for consultee task form. Ticked → status
 // Done on save; unticked → In progress. Maps to an OOB boolean / Two Options column.
@@ -183,14 +182,14 @@ interface PersistedState {
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   mppForm: MppForm;
-  prepForConsulteeForm: PrepForConsulteeForm;
+  consultees: ConsulteesState;
   prepForConsulteeMeta: PrepForConsulteeMeta;
   publicRegisterForm: PublicRegisterForm;
   siteNoticeForm: SiteNoticeForm;
   publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta;
   publicNoticeEvidenceResubmissionMeta: PublicNoticeEvidenceResubmissionMeta;
   // Organisations the caseworker has recently picked in the lookup, most-recent
-  // first. Shared across every consultee row/case (a per-user "Recent records"
+  // first. Shared across every consultee record/case (a per-user "Recent records"
   // list, like the real D365 lookup); empty until they select one.
   recentOrganisations: string[];
   saved: SavedState;
@@ -203,15 +202,6 @@ interface PersistedState {
   // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
   // on every case tab. See IndexPage.
   tasksOnAllTabs: boolean;
-}
-
-function emptyConsulteeRow(): ConsulteeRow {
-  return {
-    id: crypto.randomUUID(),
-    organisation: '',
-    consultationType: '',
-    notes: '',
-  };
 }
 
 const initialState: PersistedState = {
@@ -232,7 +222,7 @@ const initialState: PersistedState = {
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '', initialConsiderations: '' },
   mppForm: {},
-  prepForConsulteeForm: [emptyConsulteeRow()],
+  consultees: {},
   prepForConsulteeMeta: { completed: false },
   publicRegisterForm: {
     relatesTo: '',
@@ -398,32 +388,24 @@ function loadState(): PersistedState {
         tasks.publicNoticeEvidenceResubmission = 'Resubmitted - to review';
       }
 
-      const prepRows: PrepForConsulteeForm =
-        Array.isArray(parsed.prepForConsulteeForm) && parsed.prepForConsulteeForm.length > 0
-          ? parsed.prepForConsulteeForm.map((row: Partial<ConsulteeRow>) => ({
-              id: typeof row.id === 'string' ? row.id : crypto.randomUUID(),
-              organisation: typeof row.organisation === 'string' ? row.organisation : '',
-              // Before this Choice field existed, every consultee row behaved as
-              // a request and exposed Notes. Preserve that meaning on hydration.
-              consultationType:
-                row.consultationType === 'Request for consultation'
-                  ? 'Request for advice'
-                  : row.consultationType === 'Consultation notice'
-                    ? 'Application notification'
-                    : typeof row.consultationType === 'string'
-                      ? row.consultationType
-                      : row.organisation?.trim()
-                        ? 'Request for advice'
-                        : '',
-              notes: typeof row.notes === 'string' ? row.notes : '',
-            }))
-          : initialState.prepForConsulteeForm;
       return {
         tasks,
         siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
         wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
         mppForm,
-        prepForConsulteeForm: prepRows,
+        // Older saved state held one consultee list shared by every case. It
+        // cannot be assigned to a case, so it is dropped.
+        consultees: Object.fromEntries(
+          Object.entries(parsed.consultees ?? {}).flatMap(([caseId, rows]) =>
+            Array.isArray(rows) ? [[caseId, (rows as Partial<ConsulteeRow>[])
+              .filter(row => typeof row.id === 'string' && typeof row.organisation === 'string')
+              .map(row => ({
+                id: row.id as string,
+                organisation: row.organisation as string,
+                consultationType: typeof row.consultationType === 'string' ? row.consultationType : '',
+                notes: typeof row.notes === 'string' ? row.notes : '',
+              }))]] : []),
+        ),
         prepForConsulteeMeta: {
           ...initialState.prepForConsulteeMeta,
           ...parsed.prepForConsulteeMeta,
@@ -478,7 +460,7 @@ interface TaskContextValue {
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   mppForm: MppForm;
-  prepForConsulteeForm: PrepForConsulteeForm;
+  consultees: ConsulteesState;
   prepForConsulteeMeta: PrepForConsulteeMeta;
   publicRegisterForm: PublicRegisterForm;
   siteNoticeForm: SiteNoticeForm;
@@ -503,11 +485,8 @@ interface TaskContextValue {
   setWfdReview: (value: string) => void;
   setWfdInitialConsiderations: (value: string) => void;
   setMppField: (code: string, field: keyof MppAnswer, value: string) => void;
-  setPrepForConsulteeRow: (
-    id: string,
-    field: keyof Omit<ConsulteeRow, 'id'>,
-    value: string,
-  ) => void;
+  saveConsultee: (caseId: string, consultee: ConsulteeRow) => void;
+  removeConsultees: (caseId: string, ids: string[]) => void;
   setPrepForConsulteeCompleted: (completed: boolean) => void;
   setPublicRegisterField: <K extends keyof PublicRegisterForm>(
     field: K,
@@ -564,8 +543,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
       mppForm: Object.fromEntries(policies.map(policy => [policy.code, {
         outcome: 'Compliant', reason: `The proposal is consistent with ${policy.code} for this example.`,
       }])),
-      prepForConsulteeForm: [{ ...emptyConsulteeRow(), organisation: 'Environment Agency (EA)',
-        consultationType: 'Request for advice', notes: 'Please provide advice on the proposed works.' }, emptyConsulteeRow()],
+      consultees: { ...prev.consultees, [caseId]: [{ id: crypto.randomUUID(), organisation: 'Environment Agency (EA)',
+        consultationType: 'Request for advice', notes: 'Please provide advice on the proposed works.' }] },
       prepForConsulteeMeta: { completed: true },
       publicRegisterForm: { ...initialState.publicRegisterForm, completed: true, personalInfo: 'No',
         relatesTo: 'Commercial or industrial confidentiality', commercialAgree: 'Agree - withhold all of it',
@@ -694,35 +673,26 @@ export function TaskProvider({ children }: PropsWithChildren) {
       };
     });
 
-  // Updates one field on one consultee row. Selecting an organisation on the
-  // trailing empty row appends another empty row (editable-subgrid quick-create).
-  // Clearing a row collapses surplus empty trailing rows back to one.
-  const setPrepForConsulteeRow = (
-    id: string,
-    field: keyof Omit<ConsulteeRow, 'id'>,
-    value: string,
-  ) =>
+  // Save and close on a Consultee record: adds it to the case's subgrid, or
+  // replaces the existing record with the same id.
+  const saveConsultee = (caseId: string, consultee: ConsulteeRow) =>
     setState(prev => {
-      let rows = prev.prepForConsulteeForm.map(row =>
-        row.id === id ? { ...row, [field]: value } : row,
-      );
-      const last = rows[rows.length - 1];
-      if (last?.organisation.trim()) {
-        rows = [...rows, emptyConsulteeRow()];
-      } else {
-        while (rows.length > 1) {
-          const a = rows[rows.length - 1];
-          const b = rows[rows.length - 2];
-          const aEmpty =
-            !a.organisation.trim() && !a.consultationType.trim() && !a.notes.trim();
-          const bEmpty =
-            !b.organisation.trim() && !b.consultationType.trim() && !b.notes.trim();
-          if (aEmpty && bEmpty) rows = rows.slice(0, -1);
-          else break;
-        }
-      }
-      return { ...prev, prepForConsulteeForm: rows };
+      const rows = prev.consultees[caseId] ?? [];
+      const next = rows.some(row => row.id === consultee.id)
+        ? rows.map(row => (row.id === consultee.id ? consultee : row))
+        : [...rows, consultee];
+      return { ...prev, consultees: { ...prev.consultees, [caseId]: next } };
     });
+
+  // The subgrid's Remove command, for the selected records.
+  const removeConsultees = (caseId: string, ids: string[]) =>
+    setState(prev => ({
+      ...prev,
+      consultees: {
+        ...prev.consultees,
+        [caseId]: (prev.consultees[caseId] ?? []).filter(row => !ids.includes(row.id)),
+      },
+    }));
 
   const setPrepForConsulteeCompleted = (completed: boolean) =>
     setState(prev => ({
@@ -908,7 +878,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         siteCheckForm: state.siteCheckForm,
         wfdForm: state.wfdForm,
         mppForm: state.mppForm,
-        prepForConsulteeForm: state.prepForConsulteeForm,
+        consultees: state.consultees,
         prepForConsulteeMeta: state.prepForConsulteeMeta,
         publicRegisterForm: state.publicRegisterForm,
         siteNoticeForm: state.siteNoticeForm,
@@ -931,7 +901,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
         setWfdReview,
         setWfdInitialConsiderations,
         setMppField,
-        setPrepForConsulteeRow,
+        saveConsultee,
+        removeConsultees,
         setPrepForConsulteeCompleted,
         setPublicRegisterField,
         setSiteNoticeField,
