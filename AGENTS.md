@@ -212,10 +212,10 @@ pattern for new list views:
 - **No wrapping.** Every cell is a single line that truncates with an ellipsis (`.cellText`:
   `white-space: nowrap; overflow: hidden; text-overflow: ellipsis`).
 - **Truncation-only hover card.** The project name uses a Fluent v9 `Tooltip`
-  (`showDelay={0}`, `positioning="below"`) shown **only** when the text is actually clipped
+  (`showDelay={300}` with a fade-in, `positioning="below"`) shown **only** when the text is actually clipped
   (`scrollWidth > clientWidth`), via the `TruncatedCell` helper
   (`src/components/TruncatedCell.tsx`). Don't use the native
-  `title` for it — it's slow and always-on.
+  `title` for it — it's always-on.
 - **Fixed layout + horizontal scroll.** `table-layout: fixed`, `width: 100%` with a
   `min-width` = sum of column widths, inside an `overflow-x: auto` wrapper. Columns hold their
   widths and the grid scrolls when narrower (instead of squeezing/overlapping); on wider

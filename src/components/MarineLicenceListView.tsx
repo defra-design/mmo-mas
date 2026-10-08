@@ -159,7 +159,7 @@ const useStyles = makeStyles({
 
 // Link cell (Reference column): every reference looks like a blue link, but only
 // fully-built cases actually navigate (the rest are non-functional in this
-// prototype). Only shows the (immediate) hover card when the value is actually
+// prototype). Only shows the hover card when the value is actually
 // truncated, mirroring the D365 grid.
 function LinkCell({
   value,
