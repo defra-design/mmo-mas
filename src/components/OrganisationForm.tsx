@@ -1,9 +1,10 @@
 // The Organisation (Account) main form, opened full page from an Organisation
-// lookup link, e.g. in the Prep for consultee subgrid. Account information and
+// lookup link: the case's applicant organisation on the Case summary, or a
+// consultee in the Prep for consultee subgrid. Account information and
 // Registered address sections plus the Timeline; the Companies House section and
 // the related-records column on the real form are left out for now. Values are
 // shown read-only: the prototype has nothing to save them to. Back returns to
-// the page that opened the record (passed as router state), else the task.
+// the page that opened the record (passed as router state), else the case.
 import type { ReactNode } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { makeStyles, mergeClasses, shorthands, tokens, Avatar, Body1, Card, Tab, TabList, Text, Title3 } from '@fluentui/react-components';
@@ -60,7 +61,7 @@ export default function OrganisationForm({ caseId }: Props) {
   const styles = useStyles();
   const { organisationId = '' } = useParams<{ organisationId: string }>();
   const from = (useLocation().state as { from?: string } | null)?.from;
-  const backTo = from ?? `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/prep-for-consultee`;
+  const backTo = from ?? `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   const organisation = organisationById(organisationId);
 
   if (!organisation) {

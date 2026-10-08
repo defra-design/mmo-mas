@@ -113,7 +113,7 @@ function App() {
                 }
               />
               <Route
-                path="/receive-assess/cases/:caseId/tasks/prep-for-consultee/organisations/:organisationId"
+                path="/receive-assess/cases/:caseId/organisations/:organisationId"
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <OrganisationForm caseId={id} />} />

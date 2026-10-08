@@ -138,7 +138,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
             onOpen={id => navigate(`${taskUrl}/consultees/${id}`)}
             onOpenOrganisation={name => {
               const organisation = organisationByName(name);
-              if (organisation) navigate(`${taskUrl}/organisations/${organisation.id}`, { state: { from: taskUrl } });
+              if (organisation) navigate(`${caseUrl}/organisations/${organisation.id}`, { state: { from: taskUrl } });
             }}
             onRemove={ids => {
               removeConsultees(caseId, ids);

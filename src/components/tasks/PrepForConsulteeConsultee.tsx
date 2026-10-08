@@ -122,7 +122,7 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
                   value={draft.organisation}
                   onOpen={name => {
                     const organisation = organisationByName(name);
-                    if (organisation) navigate(`${taskUrl}/organisations/${organisation.id}`, { state: { from: pathname } });
+                    if (organisation) navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/organisations/${organisation.id}`, { state: { from: pathname } });
                   }}
                   recent={recentOrganisations}
                   onSelect={value => {

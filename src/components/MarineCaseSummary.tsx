@@ -37,6 +37,7 @@ import TaskList from './TaskList';
 import MarinePlanPoliciesList from './MarinePlanPoliciesList';
 import MarinePlanPoliciesSubgrid from './MarinePlanPoliciesSubgrid';
 import FieldDecorations from './tasks/FieldDecorations';
+import OrganisationLink from './OrganisationLink';
 import TasksSubgrid from './TasksSubgrid';
 import CdpFrame from './CdpFrame';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
@@ -428,7 +429,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
 
   const rightFields = [
     { label: 'Applicant', value: data.applicant },
-    { label: 'Organisation', value: data.organisation },
+    { label: 'Organisation', value: <OrganisationLink caseId={caseId} name={data.organisation} /> },
   ];
 
   // The command bar drives whichever transfer step is next; once transferred it disappears.

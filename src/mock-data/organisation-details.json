@@ -1650,5 +1650,19 @@
     "postcode": "FY6 7SS",
     "country": "United Kingdom of Great Britain and Northern Ireland",
     "createdOn": "25/01/2025 16:05"
+  },
+  {
+    "id": "south-devon-coast-sup-ltd",
+    "name": "South Devon Coast SUP Ltd",
+    "phone": "01632 960712",
+    "type": "Limited Company (LTD)",
+    "buildingNumber": "4",
+    "buildingName": "The Boathouse",
+    "street": "Island Street",
+    "town": "Salcombe",
+    "county": "Devon",
+    "postcode": "TQ8 8DP",
+    "country": "United Kingdom of Great Britain and Northern Ireland",
+    "createdOn": "14/03/2025 11:20"
   }
 ]
