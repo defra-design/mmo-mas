@@ -1,18 +1,23 @@
 // Read-only subgrid of the case's related Consultee records, with the subgrid's
 // own command bar: Add consultee opens a new record full page. Selecting rows
 // swaps it for Edit (one record opens its form; several open the OOB bulk edit
-// panel) and Remove (the OOB Delete command, relabelled in the command designer). Notes are left out of the view because they can be long.
-// Only the Organisation column opens the record; Consultation type has no
-// width, so it takes the spare space.
+// panel) and Remove (the OOB Delete command, relabelled in the command designer).
+// Notes are left out of the view because they can be long. As in D365, the
+// Organisation link opens the Organisation (Account) record, not the Consultee:
+// clicking a row selects it, and double-clicking it, Edit, or the row's Navigate
+// icon in the last column opens the Consultee. Consultation type has no width,
+// so it takes the spare space.
 import { useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
 import {
-  Button, Checkbox, makeStyles, Table, TableBody, TableCell, TableHeader,
-  TableHeaderCell, TableRow, Text, tokens,
+  Button, Checkbox, makeStyles, mergeClasses, Table, TableBody, TableCell, TableHeader,
+  TableHeaderCell, TableRow, Text, Tooltip, tokens,
 } from '@fluentui/react-components';
-import { AddRegular, DeleteRegular, EditRegular } from '@fluentui/react-icons';
+import { AddRegular, DeleteRegular, EditRegular, OpenRegular } from '@fluentui/react-icons';
 import GridColumnMenu from '../GridColumnMenu';
 import type { ColumnFilter } from '../GridColumnMenu';
 import TruncatedCell from '../TruncatedCell';
+import { useSubgridStyles } from '../subgridStyles';
 import CaseDialogShell from '../CaseDialogShell';
 import ConsulteeBulkEdit from './ConsulteeBulkEdit';
 import type { ConsulteeRow } from '../../context/TaskContext';
@@ -43,7 +48,11 @@ const useStyles = makeStyles({
   commands: { display: 'flex', justifyContent: 'flex-end', gap: tokens.spacingHorizontalXS },
   grid: { overflowX: 'auto' },
   table: { tableLayout: 'fixed', minWidth: '600px', width: '100%' },
-  row: { height: '42px', ':hover': { backgroundColor: '#edebe9' } },
+  row: { height: '42px' },
+  navigate: {
+    color: '#0078d4',
+    ':hover': { color: '#0078d4', outline: '2px solid #0078d4', outlineOffset: '-2px' },
+  },
   filtered: { outline: '1px solid #0078d4', outlineOffset: '-1px', borderRadius: tokens.borderRadiusMedium },
   empty: { color: '#605e5c' },
   footer: { display: 'flex', gap: tokens.spacingHorizontalL, paddingTop: tokens.spacingVerticalM, color: '#605e5c' },
@@ -55,12 +64,14 @@ type Props = {
   locked: boolean;
   onAdd: () => void;
   onOpen: (id: string) => void;
+  onOpenOrganisation: (name: string) => void;
   onRemove: (ids: string[]) => void;
   onUpdate: (rows: ConsulteeRow[]) => void;
 };
 
-export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onRemove, onUpdate }: Props) {
+export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onOpenOrganisation, onRemove, onUpdate }: Props) {
   const styles = useStyles();
+  const grid = useSubgridStyles();
   const [view, setView] = useState(() => loadView(caseId));
   const [selected, setSelected] = useState<string[]>([]);
   const [confirming, setConfirming] = useState(false);
@@ -88,6 +99,8 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onR
   const toggle = (id: string, on: boolean) =>
     setSelected(previous => (on ? [...previous, id] : previous.filter(value => value !== id)));
   const chosen = rows.filter(row => selected.includes(row.id));
+  // Clicks on the row's own controls (checkbox, link) are left to them.
+  const onControl = (event: MouseEvent) => Boolean((event.target as HTMLElement).closest('button, input, a'));
   const edit = () => (chosen.length === 1 ? onOpen(chosen[0].id) : setBulkEditing(true));
 
   return <>
@@ -102,6 +115,7 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onR
         <colgroup>
           <col style={{ width: '44px' }} />
           {columns.map(({ key, width }) => <col key={key} style={width ? { width: `${width}px` } : undefined} />)}
+          <col style={{ width: '48px' }} />
         </colgroup>
         <TableHeader><TableRow>
           <TableHeaderCell>
@@ -110,7 +124,7 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onR
               onChange={() => setSelected(allSelected ? [] : shown.map(row => row.id))} />
           </TableHeaderCell>
           {columns.map(column =>
-            <TableHeaderCell key={column.key} className={filters[column.key] ? styles.filtered : undefined}>
+            <TableHeaderCell key={column.key} className={mergeClasses(grid.headerCell, filters[column.key] && styles.filtered)}>
               <GridColumnMenu
                 label={column.label}
                 sort={sort.key === column.key ? sort.dir : undefined}
@@ -121,17 +135,37 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onR
               />
             </TableHeaderCell>,
           )}
+          <TableHeaderCell>
+            <Tooltip content="See all records" relationship="label" positioning="above">
+              <Button appearance="transparent" size="small" className={styles.navigate} icon={<OpenRegular />} />
+            </Tooltip>
+          </TableHeaderCell>
         </TableRow></TableHeader>
         <TableBody>
-          {shown.length === 0 && <TableRow><TableCell colSpan={3}><Text className={styles.empty}>No data available</Text></TableCell></TableRow>}
+          {shown.length === 0 && <TableRow><TableCell colSpan={4}><Text className={styles.empty}>No data available</Text></TableCell></TableRow>}
           {shown.map(row =>
-            <TableRow className={styles.row} key={row.id}>
+            <TableRow
+              key={row.id}
+              className={mergeClasses(grid.row, styles.row, selected.includes(row.id) && grid.selectedRow)}
+              onClick={event => { if (!locked && !onControl(event)) setSelected([row.id]); }}
+              onDoubleClick={event => { if (!onControl(event)) onOpen(row.id); }}
+            >
               <TableCell>
                 <Checkbox aria-label={`Select ${row.organisation}`} disabled={locked}
                   checked={selected.includes(row.id)} onChange={(_, data) => toggle(row.id, Boolean(data.checked))} />
               </TableCell>
-              <TableCell><TruncatedCell value={row.organisation} onClick={() => onOpen(row.id)} /></TableCell>
-              <TableCell><TruncatedCell value={row.consultationType} /></TableCell>
+              {[
+                <TruncatedCell key="organisation" value={row.organisation} onClick={() => onOpenOrganisation(row.organisation)} />,
+                <TruncatedCell key="type" value={row.consultationType} />,
+              ].map(content =>
+                <TableCell key={content.key} tabIndex={0}
+                  className={mergeClasses(grid.cell, selected.includes(row.id) && grid.selectedCell)}>{content}</TableCell>)}
+              <TableCell>
+                <Tooltip content="Navigate" relationship="label" positioning="above">
+                  <Button appearance="transparent" size="small" className={styles.navigate} icon={<OpenRegular />}
+                    onClick={() => onOpen(row.id)} />
+                </Tooltip>
+              </TableCell>
             </TableRow>,
           )}
         </TableBody>

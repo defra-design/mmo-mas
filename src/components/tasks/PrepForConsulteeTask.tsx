@@ -24,6 +24,7 @@ import TaskRow from './TaskRow';
 import { CANNOT_START_MESSAGE } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
+import { organisationByName } from '../../utils/organisations';
 
 const NO_CONSULTEES_MESSAGE = 'Add at least one consultee before you mark the task as complete';
 
@@ -135,6 +136,10 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
             locked={locked}
             onAdd={() => navigate(`${taskUrl}/consultees/new`)}
             onOpen={id => navigate(`${taskUrl}/consultees/${id}`)}
+            onOpenOrganisation={name => {
+              const organisation = organisationByName(name);
+              if (organisation) navigate(`${taskUrl}/organisations/${organisation.id}`, { state: { from: taskUrl } });
+            }}
             onRemove={ids => {
               removeConsultees(caseId, ids);
               setShowError(false);

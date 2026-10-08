@@ -5,12 +5,13 @@
 // spare space and Location name truncates like Application name on the case list.
 import { useEffect, useState } from 'react';
 import {
-  makeStyles, Table, TableBody, TableCell, TableHeader,
+  makeStyles, mergeClasses, Table, TableBody, TableCell, TableHeader,
   TableHeaderCell, TableRow, Text, tokens,
 } from '@fluentui/react-components';
 import GridColumnMenu from '../GridColumnMenu';
 import type { ColumnFilter } from '../GridColumnMenu';
 import TruncatedCell from '../TruncatedCell';
+import { useSubgridStyles } from '../subgridStyles';
 import { d365Date, sortableDate } from '../../utils/dates';
 
 export type LocationRow = {
@@ -47,7 +48,7 @@ function loadView(caseId: string): View {
 const useStyles = makeStyles({
   grid: { overflowX: 'auto' },
   table: { tableLayout: 'fixed', minWidth: '880px', width: '100%' },
-  row: { height: '42px', ':hover': { backgroundColor: '#edebe9' } },
+  row: { height: '42px' },
   // Subgrid links are underlined by default; .link-button removes it with !important.
   link: { textDecorationLine: 'underline !important' },
   filtered: { outline: '1px solid #0078d4', outlineOffset: '-1px', borderRadius: tokens.borderRadiusMedium },
@@ -58,6 +59,7 @@ type Props = { caseId: string; rows: LocationRow[]; onOpen: (index: number) => v
 
 export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props) {
   const styles = useStyles();
+  const grid = useSubgridStyles();
   const [view, setView] = useState(() => loadView(caseId));
   useEffect(() => {
     try {
@@ -85,7 +87,7 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
       <Table className={styles.table} aria-label="Site notice locations">
         <colgroup>{columns.map(({ key, width }) => <col key={key} style={width ? { width: `${width}px` } : undefined} />)}</colgroup>
         <TableHeader><TableRow>{columns.map(column =>
-          <TableHeaderCell key={column.key} className={filters[column.key] ? styles.filtered : undefined}>
+          <TableHeaderCell key={column.key} className={mergeClasses(grid.headerCell, filters[column.key] && styles.filtered)}>
             <GridColumnMenu
               label={column.label}
               sort={sort.key === column.key ? sort.dir : undefined}
@@ -98,12 +100,14 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
           </TableHeaderCell>,
         )}</TableRow></TableHeader>
         <TableBody>{shown.map(row =>
-          <TableRow className={styles.row} key={row.index}>
-            <TableCell><TruncatedCell value={row.location} /></TableCell>
-            <TableCell><TruncatedCell value={row.name} className={styles.link} onClick={() => onOpen(row.index)} /></TableCell>
-            <TableCell><TruncatedCell value={d365Date(row.date)} /></TableCell>
-            <TableCell><TruncatedCell value={row.status} /></TableCell>
-            <TableCell><TruncatedCell value={row.accepted} /></TableCell>
+          <TableRow className={mergeClasses(grid.row, styles.row)} key={row.index}>
+            {[
+              <TruncatedCell key="location" value={row.location} />,
+              <TruncatedCell key="name" value={row.name} className={styles.link} onClick={() => onOpen(row.index)} />,
+              <TruncatedCell key="date" value={d365Date(row.date)} />,
+              <TruncatedCell key="status" value={row.status} />,
+              <TruncatedCell key="accepted" value={row.accepted} />,
+            ].map(content => <TableCell key={content.key} tabIndex={0} className={grid.cell}>{content}</TableCell>)}
           </TableRow>,
         )}</TableBody>
       </Table>

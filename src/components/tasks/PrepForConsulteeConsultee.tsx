@@ -4,7 +4,7 @@
 // leaves without saving them. Notes is revealed by a business rule when the
 // consultation type is a request for advice.
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { makeStyles, mergeClasses, shorthands, tokens, Body1, Card, Field, Title3 } from '@fluentui/react-components';
 import { DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
@@ -16,6 +16,7 @@ import TaskTextarea from './TaskTextarea';
 import type { ConsulteeRow } from '../../context/TaskContext';
 import { useTasks } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
+import { organisationByName } from '../../utils/organisations';
 import { CANNOT_START_MESSAGE, notificationMessage, requiredMessage } from '../../utils/validationMessages';
 
 const CONSULTATION_TYPES = ['Application notification', 'Request for advice'];
@@ -54,6 +55,7 @@ type Props = { caseId: string };
 export default function PrepForConsulteeConsultee({ caseId }: Props) {
   const styles = useStyles();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { tasks, consultees, recentOrganisations, addRecentOrganisation, saveConsultee } = useTasks();
   const { consulteeId } = useParams<{ consulteeId: string }>();
   const existing = (consultees[caseId] ?? []).find(row => row.id === consulteeId);
@@ -106,7 +108,7 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
       <FormCommandBar backTo={taskUrl} saveLabel="Save and close" onSave={save} />
       <Card className={styles.card}>
         <Title3>
-          {draft.organisation || 'Add consultee'}
+          {isNew ? 'New consultee request' : 'Consultee request'}
           <span className={styles.savedLabel}>- {isNew || dirty ? 'Unsaved' : 'Saved'}</span>
         </Title3>
         <div><Body1>Consultee</Body1></div>
@@ -118,6 +120,10 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
               <Field {...required('organisation')}>
                 <OrganisationLookup
                   value={draft.organisation}
+                  onOpen={name => {
+                    const organisation = organisationByName(name);
+                    if (organisation) navigate(`${taskUrl}/organisations/${organisation.id}`, { state: { from: pathname } });
+                  }}
                   recent={recentOrganisations}
                   onSelect={value => {
                     update('organisation', value);

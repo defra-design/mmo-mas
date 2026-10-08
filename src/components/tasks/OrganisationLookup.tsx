@@ -119,9 +119,12 @@ interface OrganisationLookupProps {
   // parent (TaskContext) so the list is shared and persists like a real
   // "Recent records" lookup; this control just displays what it's given.
   recent: string[];
+  // Opens the chosen organisation's record from the selected-value link, as the
+  // D365 lookup does. Without it the link does nothing.
+  onOpen?: (value: string) => void;
 }
 
-export default function OrganisationLookup({ value, onSelect, recent }: OrganisationLookupProps) {
+export default function OrganisationLookup({ value, onSelect, recent, onOpen }: OrganisationLookupProps) {
   const styles = useStyles();
   const rootRef = useRef<HTMLDivElement>(null);
   const flyoutRef = useRef<HTMLDivElement>(null);
@@ -354,7 +357,12 @@ export default function OrganisationLookup({ value, onSelect, recent }: Organisa
             <a
               className={styles.pillLink}
               href="#"
-              onClick={e => e.preventDefault()}
+              onClick={e => {
+                e.preventDefault();
+                if (!onOpen) return;
+                e.stopPropagation();
+                onOpen(value);
+              }}
               title={value}
             >
               {value}
