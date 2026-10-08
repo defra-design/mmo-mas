@@ -1,18 +1,10 @@
-import { makeStyles, tokens } from '@fluentui/react-components';
 import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskContext';
 import { NOT_ACCEPTED } from '../../utils/publicNoticeEvidence';
 import { requiredMessage } from '../../utils/validationMessages';
 import TaskChoice from './TaskChoice';
+import TaskHint from './TaskHint';
 import TaskRow from './TaskRow';
 import TaskTextarea from './TaskTextarea';
-
-const useStyles = makeStyles({
-  commentsLabel: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-  },
-});
 
 const decisionOptions = ['Yes', NOT_ACCEPTED];
 
@@ -35,7 +27,6 @@ export default function PublicNoticeEvidenceDecision({
   locked = false,
   resubmitted = false,
 }: Props) {
-  const styles = useStyles();
   const qualifier = resubmitted ? 'resubmitted ' : '';
   const decisionName = `Location ${number} ${qualifier}photograph acceptance`;
   const commentsName = `Location ${number} ${qualifier}photograph comments`;
@@ -58,28 +49,30 @@ export default function PublicNoticeEvidenceDecision({
       </TaskRow>
 
       {review.decision === NOT_ACCEPTED && (
-        <TaskRow
-          label={
-            <span className={styles.commentsLabel}>
-              <span>What is wrong with the photographs for this location?</span>
-              <span>
-                Say which photograph is affected - the close-up, the one showing the notice in
-                its surroundings or both. Tell the applicant what they need to provide instead.
-                This will be sent to the applicant, so keep it factual and clear.
-              </span>
-            </span>
-          }
-          required
-          locked={locked}
-          top
-        >
-          <TaskTextarea
-            value={review.rejectionComments}
-            onChange={value => onChange('rejectionComments', value)}
+        <>
+          <TaskRow
+            label="What is wrong with the photographs for this location?"
+            required
             locked={locked}
-            error={commentsError ? requiredMessage(commentsName) : undefined}
-          />
-        </TaskRow>
+            top
+          >
+            <TaskTextarea
+              value={review.rejectionComments}
+              onChange={value => onChange('rejectionComments', value)}
+              locked={locked}
+              error={commentsError ? requiredMessage(commentsName) : undefined}
+            />
+          </TaskRow>
+          {/* Full-width help text under the field, with no icon as on WFD:
+              injected HTML in the real build. */}
+          <TaskHint plain>
+            <p>
+              Say which photograph is affected - the close-up, the one showing the notice in its
+              surroundings or both. Tell the applicant what they need to provide instead. This will
+              be sent to the applicant, so keep it factual and clear.
+            </p>
+          </TaskHint>
+        </>
       )}
     </>
   );
