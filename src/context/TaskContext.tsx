@@ -532,21 +532,23 @@ export function TaskProvider({ children }: PropsWithChildren) {
 
   const setConsultationConfirmed = (caseId: string, confirmed: boolean) =>
     setState(prev => {
-      if (startConsultationStatus(caseId, prev) !== 'To do') return prev;
+      if (startConsultationStatus(caseId, prev) === 'Cannot start yet') return prev;
       return { ...prev, consultations: { ...prev.consultations,
-        [caseId]: { confirmed, saved: false },
+        [caseId]: { ...prev.consultations[caseId], confirmed, saved: false },
       } };
     });
 
   const saveStartConsultation = (caseId: string) =>
     setState(prev => {
-      // Recheck at the action boundary: locked/direct URLs and repeated saves
-      // cannot bypass prerequisites or start a consultation twice.
-      if (startConsultationStatus(caseId, prev) !== 'To do') return prev;
-      const confirmed = prev.consultations[caseId]?.confirmed === true;
+      // Keep the form editable after consultation starts without reversing or
+      // repeating the case transition when the confirmation is edited.
+      const status = startConsultationStatus(caseId, prev);
+      if (status === 'Cannot start yet') return prev;
+      const form = prev.consultations[caseId];
+      const confirmed = form?.confirmed ?? status === 'Done';
       return { ...prev, consultations: { ...prev.consultations,
-        [caseId]: { confirmed, saved: true,
-          ...(confirmed ? { startedAt: new Date().toISOString() } : {}),
+        [caseId]: { ...form, confirmed, saved: true,
+          ...(confirmed && status === 'To do' ? { startedAt: new Date().toISOString() } : {}),
         },
       } };
     });
