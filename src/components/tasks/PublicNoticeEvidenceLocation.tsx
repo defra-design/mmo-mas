@@ -10,6 +10,7 @@ import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskConte
 import PublicNoticeEvidenceDecision from './PublicNoticeEvidenceDecision';
 import TaskRow from './TaskRow';
 import TaskValue from './TaskValue';
+import { d365Date } from '../../utils/dates';
 import type { PublicNoticeEvidenceLocation } from './publicNoticeEvidenceLocations';
 
 const useStyles = makeStyles({
@@ -82,7 +83,7 @@ export default function PublicNoticeEvidenceLocation({
         <TaskValue>{location.name}</TaskValue>
       </TaskRow>
       <TaskRow label="Date displayed" locked>
-        <TaskValue>{location.date}</TaskValue>
+        <TaskValue>{d365Date(location.date)}</TaskValue>
       </TaskRow>
       <TaskRow label="Close-up photograph of the notice">
         <div className={styles.imageLinkValue}>

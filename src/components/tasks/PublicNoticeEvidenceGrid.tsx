@@ -11,6 +11,7 @@ import {
 import GridColumnMenu from '../GridColumnMenu';
 import type { ColumnFilter } from '../GridColumnMenu';
 import TruncatedCell from '../TruncatedCell';
+import { d365Date, sortableDate } from '../../utils/dates';
 
 export type LocationRow = {
   index: number; location: string; name: string; date: string; status: string; accepted: string;
@@ -28,24 +29,8 @@ const columns: Column[] = [
 ];
 // The view's default sort is Location, ascending; the caseworker can change it.
 const defaultView: View = { sort: { key: 'location', dir: 'asc' }, filters: {} };
-// Dates arrive as e.g. "18 August 2026"; the grid shows them as 18/08/2026 and
-// sorts them as yyyymmdd.
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-  'August', 'September', 'October', 'November', 'December'];
-const dateParts = (date: string) => {
-  const [day, month, year] = date.split(' ');
-  return { day: day.padStart(2, '0'), month: String(months.indexOf(month) + 1).padStart(2, '0'), year };
-};
-const gridDate = (date: string) => {
-  const { day, month, year } = dateParts(date);
-  return `${day}/${month}/${year}`;
-};
-const sortValue = (row: LocationRow, key: Key) => {
-  if (key !== 'date') return row[key];
-  const { day, month, year } = dateParts(row.date);
-  return `${year}${month}${day}`;
-};
-const cellValue = (row: LocationRow, key: Key) => key === 'date' ? gridDate(row.date) : row[key];
+const sortValue = (row: LocationRow, key: Key) => key === 'date' ? sortableDate(row.date) : row[key];
+const cellValue = (row: LocationRow, key: Key) => key === 'date' ? d365Date(row.date) : row[key];
 
 // D365 remembers a grid's sort and filters while the caseworker opens a record
 // and comes back, so keep them per case for the browser session.
@@ -116,7 +101,7 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
           <TableRow className={styles.row} key={row.index}>
             <TableCell><TruncatedCell value={row.location} /></TableCell>
             <TableCell><TruncatedCell value={row.name} className={styles.link} onClick={() => onOpen(row.index)} /></TableCell>
-            <TableCell><TruncatedCell value={gridDate(row.date)} /></TableCell>
+            <TableCell><TruncatedCell value={d365Date(row.date)} /></TableCell>
             <TableCell><TruncatedCell value={row.status} /></TableCell>
             <TableCell><TruncatedCell value={row.accepted} /></TableCell>
           </TableRow>,
