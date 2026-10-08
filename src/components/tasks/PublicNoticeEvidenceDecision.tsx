@@ -1,5 +1,6 @@
 import { makeStyles, tokens } from '@fluentui/react-components';
 import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskContext';
+import { NOT_ACCEPTED } from '../../utils/publicNoticeEvidence';
 import { requiredMessage } from '../../utils/validationMessages';
 import TaskChoice from './TaskChoice';
 import TaskRow from './TaskRow';
@@ -13,7 +14,7 @@ const useStyles = makeStyles({
   },
 });
 
-const decisionOptions = ['Yes', 'No'];
+const decisionOptions = ['Yes', NOT_ACCEPTED];
 
 type Props = {
   number: number;
@@ -56,7 +57,7 @@ export default function PublicNoticeEvidenceDecision({
         />
       </TaskRow>
 
-      {review.decision === 'No' && (
+      {review.decision === NOT_ACCEPTED && (
         <TaskRow
           label={
             <span className={styles.commentsLabel}>

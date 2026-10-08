@@ -1,9 +1,9 @@
 // src/components/TruncatedCell.tsx
 // A single-line grid cell that truncates with an ellipsis and shows a Fluent
-// hover card with the full value — but only when the text is actually clipped,
-// and with no delay. This is the D365 read-only grid behaviour. The native
-// `title` attribute is not a substitute: it waits ~1s and fires even when the
-// whole value is already on screen.
+// hover card with the full value — but only when the text is actually clipped.
+// The card appears after 0.3 seconds and fades in, so it doesn't flash up while the
+// pointer passes over the grid. The native `title` attribute is not a substitute:
+// it fires even when the whole value is already on screen.
 import { useRef, useState } from 'react';
 import { makeStyles, mergeClasses, Tooltip } from '@fluentui/react-components';
 
@@ -15,6 +15,11 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+  },
+  fadeIn: {
+    animationName: { from: { opacity: 0 }, to: { opacity: 1 } },
+    animationDuration: '300ms',
+    animationTimingFunction: 'ease-in',
   },
 });
 
@@ -51,11 +56,11 @@ export default function TruncatedCell({ value, className, onClick }: TruncatedCe
 
   return (
     <Tooltip
-      content={value}
+      content={{ children: value, className: styles.fadeIn }}
       relationship="label"
       positioning="below"
       withArrow={false}
-      showDelay={0}
+      showDelay={300}
       visible={open}
       onVisibleChange={(_, data) => {
         const el = triggerRef.current;
