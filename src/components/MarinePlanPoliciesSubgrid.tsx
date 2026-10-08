@@ -444,7 +444,12 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
                   `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/marine-plan-policies/${row.code}`
                 );
               return (
-                <TableRow key={row.code} className={grid.row}>
+                <TableRow
+                  key={row.code}
+                  className={grid.row}
+                  // Double-clicking a row opens the record, as in D365.
+                  onDoubleClick={event => { if (!(event.target as HTMLElement).closest('button')) openPolicy(); }}
+                >
                   <TableCell tabIndex={0} className={grid.cell} style={{ width: COLS.policy, paddingLeft: CELL_PAD_LEFT }}>
                     {/* The primary column always opens the record. Gated policy
                         assessments are shown read-only on the record form. */}

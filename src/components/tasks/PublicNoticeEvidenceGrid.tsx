@@ -4,7 +4,7 @@
 // link that opens the record. The last column has no width, so it takes the
 // spare space and Location name truncates like Application name on the case list.
 // Rows can be selected (checkbox, or clicking the row) but the subgrid has no
-// commands that act on a selection yet.
+// commands that act on a selection yet. Double-clicking a row opens the record.
 import { useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 import {
@@ -124,6 +124,7 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
             key={row.index}
             className={mergeClasses(grid.row, styles.row, selected.includes(row.index) && grid.selectedRow)}
             onClick={event => { if (!onControl(event)) setSelected([row.index]); }}
+            onDoubleClick={event => { if (!onControl(event)) onOpen(row.index); }}
           >
             <TableCell>
               <GridCheckbox aria-label={`Select ${row.name}`} checked={selected.includes(row.index)}

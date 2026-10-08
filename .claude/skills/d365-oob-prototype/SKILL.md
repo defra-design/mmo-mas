@@ -46,6 +46,26 @@ Every task form follows these rules. They mirror how a real D365 form behaves, s
 - **Text fields.** All single-line and multi-line text fields have the grey background (`colorNeutralBackground3`) and no border, including on focus, as in the existing tasks. Use `TaskTextarea` for multi-line text rather than a new Textarea.
 - **Accordion help text.** Guidance under a field uses `TaskHint`. Open, it is an info icon with the guidance always visible. Pass `title` to collapse it behind a "Help with ..." accordion instead: link-coloured text, start-position chevron, no icon, and the open panel sits flush beneath it (the GOV.UK details pattern drawn in Fluent). Closed, it uses a small bottom gap; open, the full gap. In real D365 this is injected HTML in a web resource, not a native control.
 
+## Grid and subgrid conventions
+
+Every read-only grid (the case list and every subgrid) mirrors the OOB D365 grid. The full
+list of behaviours is in CLAUDE.md under **Grid and subgrid (D365 grid) conventions**; apply
+it to new grids without being asked. In short:
+
+- **Hover and focus** come from the shared `useSubgridStyles`: light grey row, darker grey
+  cell, blue tones when selected, a dark border on a clicked cell until focus moves, and a
+  blue outline on a hovered column header.
+- **Selecting:** `GridCheckbox` for the select column (grey square and preview tick on
+  hover); clicking a row selects just that row; `Rows: N  Selected: N` in the footer.
+- **Opening:** the primary link and a row double-click both open the row's record. A link to
+  another table (e.g. Organisation on Consultees) opens that record instead, and the row
+  then gets a last **Navigate** icon column for its own record.
+- **Subgrid command bar:** create command with nothing selected; Edit and Remove with rows
+  selected. Edit on several rows is the OOB "Edit multiple records" panel, not a custom
+  form. Remove is the OOB Delete command relabelled in the command designer (no code).
+- Related records are added and edited on their own full-page main form, opened from the
+  subgrid, not inline in the grid.
+
 ## When you're unsure
 
 If a design need doesn't have an obvious OOB match, say so out loud instead of quietly building a custom solution. Flag it plainly: "this would need a PCF control / canvas app / custom page in real D365" — so the cost is visible and it can be a deliberate decision, not a silent one baked into the prototype.

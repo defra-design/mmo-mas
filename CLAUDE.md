@@ -204,10 +204,10 @@ When adding a new list view / entity (not a task):
 
 ---
 
-## Case list (D365 grid) conventions
+## Grid and subgrid (D365 grid) conventions
 
 `MarineLicenceListView.tsx` is tuned to match the real D365 read-only grid — follow the same
-pattern for new list views:
+pattern for new list views and subgrids:
 
 - **No wrapping.** Every cell is a single line that truncates with an ellipsis (`.cellText`:
   `white-space: nowrap; overflow: hidden; text-overflow: ellipsis`).
@@ -222,6 +222,37 @@ pattern for new list views:
   screens the columns fill the width.
 - Column widths and labels come from `src/config/entities/<entity>.json`. Size choice columns
   (status badges) wide enough that the badge isn't truncated.
+
+### Interaction behaviour
+
+Every read-only grid (the case list and every subgrid) behaves like the D365 grid. Apply
+these to new grids without being asked:
+
+- **Hover and focus.** Use the shared `useSubgridStyles` (`src/components/subgridStyles.ts`)
+  rather than per-grid hover colours. A row turns light grey on hover and the cell under the
+  pointer darker grey (blue tones on a selected row). Data cells are `tabIndex={0}`, so
+  clicking one draws a dark border that stays until focus moves elsewhere. A column header
+  gets a blue outline on hover.
+- **Selecting.** Grids with a select column use `GridCheckbox` (a grey square and a grey
+  preview tick on hover). Clicking a row, away from its link or checkbox, selects just that
+  row. The header checkbox selects every shown row and shows a part tick when only some are
+  ticked. Selected rows are light blue, and the footer reads `Rows: N  Selected: N`.
+  Subgrids configured without a select column (Tasks, Marine plan policies) keep none.
+- **Opening.** The primary column's link opens the row's record, and double-clicking the row
+  opens the same record. Where a column links to a *different* table (the Organisation lookup
+  on Consultees), that link opens the other record instead, and double-click, Edit or the
+  Navigate icon is the way to the row's own record.
+- **Navigate column.** Only on subgrids whose first link goes to another table (Consultees):
+  a last column of `OpenRegular` icons with a "Navigate" tooltip and a blue border on hover.
+  The row icon opens the row's record; the header icon does nothing.
+- **Subgrid command bar.** Right-aligned above the grid. With nothing selected it shows the
+  create command; with rows selected, Edit and Remove. Edit on one row opens its form; on
+  several it opens the OOB "Edit multiple records" panel (`OverlayDrawer`, see
+  `ConsulteeBulkEdit.tsx`), which writes only the fields filled in. Remove asks for
+  confirmation in a dialog. Labels follow the GOV.UK style guide: sentence case, "Add …" and
+  "Remove" rather than "New …" and "Delete".
+- **View state.** `GridColumnMenu` for column header menus (sort and filter), the sort and
+  filters kept per case in `sessionStorage`, and a `Rows: N` footer.
 
 ---
 

@@ -154,7 +154,12 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
               const openTask = () =>
                 navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/${row.slug}`);
               return (
-                <TableRow key={row.key} className={grid.row}>
+                <TableRow
+                  key={row.key}
+                  className={grid.row}
+                  // Double-clicking a row opens the record, as in D365.
+                  onDoubleClick={event => { if (!(event.target as HTMLElement).closest('button')) openTask(); }}
+                >
                   <TableCell tabIndex={0} className={grid.cell} style={{ width: COLS.task }}>
                     {/* Primary column is a hyperlink that opens the record — OOB
                         read-only grid behaviour. Gated rows open read-only. */}

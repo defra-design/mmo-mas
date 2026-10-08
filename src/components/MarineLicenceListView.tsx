@@ -563,8 +563,8 @@ export default function MarineLicenceListView({
 
   const allDisplayedSelected =
     displayed.length > 0 && displayed.every(i => selectedRows.includes(i.reference));
-  // Clicking a row selects just that row, as in D365; its own controls (checkbox,
-  // link) handle their own clicks.
+  // Clicking a row selects just that row and double-clicking opens the case, as
+  // in D365; its own controls (checkbox, link) handle their own clicks.
   const onControl = (event: MouseEvent) => Boolean((event.target as HTMLElement).closest('button, input, a'));
 
   // Sum of column widths (+ checkbox) — the table floor before it scrolls.
@@ -623,6 +623,7 @@ export default function MarineLicenceListView({
                   key={item.reference}
                   className={mergeClasses(grid.row, selectedRows.includes(item.reference) && grid.selectedRow)}
                   onClick={event => { if (!onControl(event)) setSelectedRows([item.reference]); }}
+                  onDoubleClick={event => { if (!onControl(event) && isClickable(item.reference)) navigateToCase(item.reference); }}
                 >
                   <TableCell style={{ width: 32, paddingLeft: 8, paddingRight: 8 }}>
                     <GridCheckbox
