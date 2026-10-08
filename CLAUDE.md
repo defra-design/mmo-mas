@@ -270,5 +270,3 @@ Do not add: `moment`, `lodash`, any CSS-in-JS library, any other component libra
 This is a prototype — keep commit messages short and in plain English,
 describing what changed (e.g. "Add Public register tab" or "Fix Case age
 column alignment"). Don't use `feat:` / `fix:` / `chore:` prefixes.
-
-Keep commits focused. Aim for under ~300 lines changed per commit.

@@ -1,4 +1,8 @@
-import type { TaskState, TaskStatus } from '../context/TaskContext';
+import type {
+  PublicNoticeEvidenceLocationReview,
+  TaskState,
+  TaskStatus,
+} from '../context/TaskContext';
 
 export const PUBLIC_NOTICE_EVIDENCE_CASE_ID = 'MLA/2026/10014';
 export const PUBLIC_NOTICE_EVIDENCE_RESUBMISSION_CASE_ID = 'MLA/2026/10013';
@@ -39,4 +43,20 @@ export function taskStatusForCase(
 
 export function siteCheckCompleteForCase(caseId: string, tasks: TaskState): boolean {
   return taskStatusForCase(caseId, 'siteCheck', tasks.siteCheck) === 'Done';
+}
+
+/** A location review is complete when it has a decision, plus comments for a No. */
+export function locationReviewIsValid(review: PublicNoticeEvidenceLocationReview) {
+  return Boolean(review.decision.trim()) && (review.decision !== 'No' || Boolean(review.rejectionComments.trim()));
+}
+
+export type LocationStatus = 'To do' | 'Resubmitted' | 'Done';
+
+/** The Status column on a location record: Done once its current review is complete. */
+export function locationStatus(
+  review: PublicNoticeEvidenceLocationReview,
+  resubmitted: boolean,
+): LocationStatus {
+  if (locationReviewIsValid(review)) return 'Done';
+  return resubmitted ? 'Resubmitted' : 'To do';
 }
