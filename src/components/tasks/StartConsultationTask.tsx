@@ -13,6 +13,7 @@ const useStyles = makeStyles({
   heading: { fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold },
   saved: { fontSize: tokens.fontSizeBase300, fontWeight: tokens.fontWeightRegular, color: tokens.colorNeutralForeground3 },
   list: { margin: 0, paddingLeft: '20px', '& li': { marginBottom: '6px' } },
+  readOnlyCheckbox: { cursor: 'default', '& *': { cursor: 'default' } },
 });
 
 export default function StartConsultationTask({ caseId }: { caseId: string }) {
@@ -20,7 +21,7 @@ export default function StartConsultationTask({ caseId }: { caseId: string }) {
   const navigate = useNavigate();
   const context = useTasks();
   const status = startConsultationStatus(caseId, context);
-  const locked = status !== 'To do';
+  const locked = status === 'Cannot start yet';
   const completed = status === 'Done';
   const form = context.consultations[caseId];
   const backTo = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
@@ -34,9 +35,7 @@ export default function StartConsultationTask({ caseId }: { caseId: string }) {
     <div className={styles.page}>
       {locked && (
         <FormNotification level="read-only">
-          {completed
-            ? 'Consultation has started. This task is read-only.'
-            : 'You cannot start consultation until the required assessment tasks are complete.'}
+          You cannot start consultation until the required assessment tasks are complete.
         </FormNotification>
       )}
       <FormCommandBar saveLabel="Save and close" onSave={saveAndClose} backTo={backTo} />
@@ -58,9 +57,10 @@ export default function StartConsultationTask({ caseId }: { caseId: string }) {
         <Text className={styles.heading}>Confirm</Text>
         <TaskRow label={label} locked={locked}>
           <Checkbox
+            className={locked ? styles.readOnlyCheckbox : undefined}
             aria-label={label}
             aria-readonly={locked}
-            checked={completed || form?.confirmed === true}
+            checked={form?.confirmed ?? completed}
             onChange={(_, data) => {
               if (!locked) context.setConsultationConfirmed(caseId, Boolean(data.checked));
             }}
