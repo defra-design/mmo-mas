@@ -45,9 +45,20 @@ export function siteCheckCompleteForCase(caseId: string, tasks: TaskState): bool
   return taskStatusForCase(caseId, 'siteCheck', tasks.siteCheck) === 'Done';
 }
 
+/** The No option on "Do you accept the photographs for this location?". It says
+ *  what No leads to, and stands out from Yes in the location grid. */
+export const NOT_ACCEPTED = 'No - request new photos';
+
+/** Older saved data and labels for a decision, mapped to the current options. */
+export function currentDecision(decision: string | undefined) {
+  if (decision === 'Accept' || decision === 'Yes') return 'Yes';
+  if (decision === 'Reject' || decision === 'No' || decision === NOT_ACCEPTED) return NOT_ACCEPTED;
+  return '';
+}
+
 /** A location review is complete when it has a decision, plus comments for a No. */
 export function locationReviewIsValid(review: PublicNoticeEvidenceLocationReview) {
-  return Boolean(review.decision.trim()) && (review.decision !== 'No' || Boolean(review.rejectionComments.trim()));
+  return Boolean(review.decision.trim()) && (review.decision !== NOT_ACCEPTED || Boolean(review.rejectionComments.trim()));
 }
 
 export type LocationStatus = 'To do' | 'Resubmitted' | 'Done';
@@ -59,4 +70,19 @@ export function locationStatus(
 ): LocationStatus {
   if (locationReviewIsValid(review)) return 'Done';
   return resubmitted ? 'Resubmitted' : 'To do';
+}
+
+/**
+ * The evidence-review task's status, from its location reviews: Done or Awaiting
+ * applicant (any not accepted) once every review is complete, In progress once any is,
+ * otherwise the starting status.
+ */
+export function publicNoticeEvidenceStatus(
+  reviews: PublicNoticeEvidenceLocationReview[],
+  initial: TaskStatus,
+): TaskStatus {
+  if (reviews.every(locationReviewIsValid)) {
+    return reviews.some(review => review.decision === NOT_ACCEPTED) ? 'Awaiting applicant' : 'Done';
+  }
+  return reviews.some(locationReviewIsValid) ? 'In progress' : initial;
 }

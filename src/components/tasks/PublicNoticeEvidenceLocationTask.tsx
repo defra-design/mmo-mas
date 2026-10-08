@@ -9,7 +9,7 @@ import FormNotification from '../FormNotification';
 import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskContext';
 import { useTasks } from '../../context/TaskContext';
 import {
-  hasResubmittedPublicNoticeEvidence, hasSubmittedPublicNoticeEvidence,
+  hasResubmittedPublicNoticeEvidence, hasSubmittedPublicNoticeEvidence, NOT_ACCEPTED,
 } from '../../utils/publicNoticeEvidence';
 import { notificationMessage } from '../../utils/validationMessages';
 import PublicNoticeEvidenceLocation from './PublicNoticeEvidenceLocation';
@@ -36,7 +36,7 @@ const useStyles = makeStyles({
 type Field = keyof PublicNoticeEvidenceLocationReview;
 const missingFields = (review: PublicNoticeEvidenceLocationReview): Field[] => [
   ...(!review.decision ? ['decision' as const] : []),
-  ...(review.decision === 'No' && !review.rejectionComments.trim() ? ['rejectionComments' as const] : []),
+  ...(review.decision === NOT_ACCEPTED && !review.rejectionComments.trim() ? ['rejectionComments' as const] : []),
 ];
 
 type Props = { caseId: string };

@@ -1,3 +1,5 @@
+import { NOT_ACCEPTED } from '../../utils/publicNoticeEvidence';
+
 // The applicant's site notice locations, as submitted on CDP. Names follow the
 // applicant guidance: a place, then where exactly the notice was displayed.
 const submitted = [
@@ -23,17 +25,17 @@ export const publicNoticeEvidenceLocations = submitted.map(([name, date], index)
 export type PublicNoticeEvidenceLocation = (typeof publicNoticeEvidenceLocations)[number];
 
 // MLA/2026/10013: the earlier review, now read-only history. Locations 1 and 5
-// were answered No; the rest were accepted.
+// were not accepted; the rest were accepted.
 export const resubmittedPublicNoticeEvidenceReviews = publicNoticeEvidenceLocations.map(
   (_, index) =>
     ({
       0: {
-        decision: 'No',
+        decision: NOT_ACCEPTED,
         rejectionComments:
           'The close-up photograph does not clearly show the full notice and the surroundings photograph does not show where it was displayed. Provide clear replacement photographs showing the complete notice and its location.',
       },
       4: {
-        decision: 'No',
+        decision: NOT_ACCEPTED,
         rejectionComments:
           'The close-up photograph is blurred and the notice text cannot be read. Provide a clear replacement close-up photograph of the notice.',
       },

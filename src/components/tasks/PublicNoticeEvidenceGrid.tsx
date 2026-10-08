@@ -1,11 +1,11 @@
 // Read-only subgrid of the task's related Location records. Short view column
 // names stand in for the full form labels, as a D365 view shows each column's
-// display name. Only the Location column opens the record. The last column has
-// no width, so it takes the spare space and Location name truncates like
-// Application name on the case list.
+// display name. Location name is the record's primary column, so it is the
+// link that opens the record. The last column has no width, so it takes the
+// spare space and Location name truncates like Application name on the case list.
 import { useEffect, useState } from 'react';
 import {
-  Link, makeStyles, Table, TableBody, TableCell, TableHeader,
+  makeStyles, Table, TableBody, TableCell, TableHeader,
   TableHeaderCell, TableRow, Text, tokens,
 } from '@fluentui/react-components';
 import GridColumnMenu from '../GridColumnMenu';
@@ -28,7 +28,24 @@ const columns: Column[] = [
 ];
 // The view's default sort is Location, ascending; the caseworker can change it.
 const defaultView: View = { sort: { key: 'location', dir: 'asc' }, filters: {} };
-const sortValue = (row: LocationRow, key: Key) => key === 'date' ? String(Date.parse(row.date)) : row[key];
+// Dates arrive as e.g. "18 August 2026"; the grid shows them as 18/08/2026 and
+// sorts them as yyyymmdd.
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+  'August', 'September', 'October', 'November', 'December'];
+const dateParts = (date: string) => {
+  const [day, month, year] = date.split(' ');
+  return { day: day.padStart(2, '0'), month: String(months.indexOf(month) + 1).padStart(2, '0'), year };
+};
+const gridDate = (date: string) => {
+  const { day, month, year } = dateParts(date);
+  return `${day}/${month}/${year}`;
+};
+const sortValue = (row: LocationRow, key: Key) => {
+  if (key !== 'date') return row[key];
+  const { day, month, year } = dateParts(row.date);
+  return `${year}${month}${day}`;
+};
+const cellValue = (row: LocationRow, key: Key) => key === 'date' ? gridDate(row.date) : row[key];
 
 // D365 remembers a grid's sort and filters while the caseworker opens a record
 // and comes back, so keep them per case for the browser session.
@@ -46,6 +63,8 @@ const useStyles = makeStyles({
   grid: { overflowX: 'auto' },
   table: { tableLayout: 'fixed', minWidth: '880px', width: '100%' },
   row: { height: '42px', ':hover': { backgroundColor: '#edebe9' } },
+  // Subgrid links are underlined by default; .link-button removes it with !important.
+  link: { textDecorationLine: 'underline !important' },
   filtered: { outline: '1px solid #0078d4', outlineOffset: '-1px', borderRadius: tokens.borderRadiusMedium },
   footer: { paddingTop: tokens.spacingVerticalM, color: '#605e5c' },
 });
@@ -67,7 +86,8 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
     .filter(row => columns.every(({ key }) => {
       const filter = filters[key];
       if (!filter) return true;
-      return Array.isArray(filter) ? filter.includes(row[key]) : row[key].toLowerCase().includes(filter.toLowerCase());
+      const value = cellValue(row, key);
+      return Array.isArray(filter) ? filter.includes(value) : value.toLowerCase().includes(filter.toLowerCase());
     }))
     .sort((a, b) => {
       const compare = sortValue(a, sort.key).localeCompare(sortValue(b, sort.key), undefined, { numeric: true });
@@ -94,9 +114,9 @@ export default function PublicNoticeEvidenceGrid({ caseId, rows, onOpen }: Props
         )}</TableRow></TableHeader>
         <TableBody>{shown.map(row =>
           <TableRow className={styles.row} key={row.index}>
-            <TableCell><Link as="button" onClick={() => onOpen(row.index)}>{row.location}</Link></TableCell>
-            <TableCell><TruncatedCell value={row.name} /></TableCell>
-            <TableCell><TruncatedCell value={row.date} /></TableCell>
+            <TableCell><TruncatedCell value={row.location} /></TableCell>
+            <TableCell><TruncatedCell value={row.name} className={styles.link} onClick={() => onOpen(row.index)} /></TableCell>
+            <TableCell><TruncatedCell value={gridDate(row.date)} /></TableCell>
             <TableCell><TruncatedCell value={row.status} /></TableCell>
             <TableCell><TruncatedCell value={row.accepted} /></TableCell>
           </TableRow>,
