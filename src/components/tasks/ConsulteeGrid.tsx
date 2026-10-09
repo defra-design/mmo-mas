@@ -1,10 +1,11 @@
 // Read-only subgrid of the case's related Consultee records, with the subgrid's
 // own command bar: Add consultee opens a new record full page. Selecting rows
-// swaps it for Edit (one record opens its form; several open the OOB bulk edit
-// panel) and Remove (the OOB Delete command, relabelled in the command designer).
+// swaps it for Remove (the OOB Delete command, relabelled in the command
+// designer). Edit is hidden in the command designer: it would offer the OOB bulk
+// edit panel, and batch-editing consultees isn't appropriate for this task.
 // Notes are left out of the view because they can be long. As in D365, the
 // Organisation link opens the Organisation (Account) record, not the Consultee:
-// clicking a row selects it, and double-clicking it, Edit, or the row's Navigate
+// clicking a row selects it, and double-clicking it or the row's Navigate
 // icon in the last column opens the Consultee. Consultation type has no width,
 // so it takes the spare space.
 import { useEffect, useState } from 'react';
@@ -13,14 +14,13 @@ import {
   Button, makeStyles, mergeClasses, Table, TableBody, TableCell, TableHeader,
   TableHeaderCell, TableRow, Text, Tooltip, tokens,
 } from '@fluentui/react-components';
-import { AddRegular, DeleteRegular, EditRegular, OpenRegular } from '@fluentui/react-icons';
+import { AddRegular, DeleteRegular, OpenRegular, TableFilled } from '@fluentui/react-icons';
 import GridColumnMenu from '../GridColumnMenu';
 import type { ColumnFilter } from '../GridColumnMenu';
 import TruncatedCell from '../TruncatedCell';
 import GridCheckbox from '../GridCheckbox';
 import { useSubgridStyles } from '../subgridStyles';
 import CaseDialogShell from '../CaseDialogShell';
-import ConsulteeBulkEdit from './ConsulteeBulkEdit';
 import type { ConsulteeRow } from '../../context/TaskContext';
 
 type Key = 'organisation' | 'consultationType';
@@ -55,7 +55,28 @@ const useStyles = makeStyles({
     ':hover': { color: '#0078d4', outline: '2px solid #0078d4', outlineOffset: '-2px' },
   },
   filtered: { outline: '1px solid #0078d4', outlineOffset: '-1px', borderRadius: tokens.borderRadiusMedium },
-  empty: { color: '#605e5c' },
+  // D365's empty-grid state: a grey disc with a white grid icon, and the
+  // message under it, centred in the grid.
+  empty: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: tokens.spacingVerticalS,
+    paddingTop: tokens.spacingVerticalL,
+    paddingBottom: tokens.spacingVerticalL,
+    color: '#323130',
+  },
+  emptyIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '112px',
+    height: '112px',
+    borderRadius: '50%',
+    backgroundColor: '#c8c6c4',
+    color: '#ffffff',
+    fontSize: '80px',
+  },
   footer: { display: 'flex', gap: tokens.spacingHorizontalL, paddingTop: tokens.spacingVerticalM, color: '#605e5c' },
 });
 
@@ -67,16 +88,14 @@ type Props = {
   onOpen: (id: string) => void;
   onOpenOrganisation: (name: string) => void;
   onRemove: (ids: string[]) => void;
-  onUpdate: (rows: ConsulteeRow[]) => void;
 };
 
-export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onOpenOrganisation, onRemove, onUpdate }: Props) {
+export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onOpenOrganisation, onRemove }: Props) {
   const styles = useStyles();
   const grid = useSubgridStyles();
   const [view, setView] = useState(() => loadView(caseId));
   const [selected, setSelected] = useState<string[]>([]);
   const [confirming, setConfirming] = useState(false);
-  const [bulkEditing, setBulkEditing] = useState(false);
   useEffect(() => {
     try {
       sessionStorage.setItem(storageKey(caseId), JSON.stringify(view));
@@ -102,14 +121,12 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onO
   const chosen = rows.filter(row => selected.includes(row.id));
   // Clicks on the row's own controls (checkbox, link) are left to them.
   const onControl = (event: MouseEvent) => Boolean((event.target as HTMLElement).closest('button, input, a'));
-  const edit = () => (chosen.length === 1 ? onOpen(chosen[0].id) : setBulkEditing(true));
 
   return <>
     {!locked && <div className={styles.commands}>
-      {selected.length > 0 ? <>
-        <Button appearance="subtle" icon={<EditRegular />} onClick={edit}>Edit</Button>
-        <Button appearance="subtle" icon={<DeleteRegular />} onClick={() => setConfirming(true)}>Remove</Button>
-      </> : <Button appearance="subtle" icon={<AddRegular />} onClick={onAdd}>Add consultee</Button>}
+      {selected.length > 0
+        ? <Button appearance="subtle" icon={<DeleteRegular />} onClick={() => setConfirming(true)}>Remove</Button>
+        : <Button appearance="subtle" icon={<AddRegular />} onClick={onAdd}>Add consultee</Button>}
     </div>}
     <div className={styles.grid}>
       <Table className={styles.table} aria-label="Consultees">
@@ -143,7 +160,12 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onO
           </TableHeaderCell>
         </TableRow></TableHeader>
         <TableBody>
-          {shown.length === 0 && <TableRow><TableCell colSpan={4}><Text className={styles.empty}>No data available</Text></TableCell></TableRow>}
+          {shown.length === 0 && <TableRow><TableCell colSpan={4}>
+            <div className={styles.empty}>
+              <span className={styles.emptyIcon}><TableFilled aria-hidden /></span>
+              <Text>We didn't find anything to show here</Text>
+            </div>
+          </TableCell></TableRow>}
           {shown.map(row =>
             <TableRow
               key={row.id}
@@ -176,15 +198,6 @@ export default function ConsulteeGrid({ caseId, rows, locked, onAdd, onOpen, onO
       <Text>Rows: {shown.length}</Text>
       {selected.length > 0 && <Text>Selected: {selected.length}</Text>}
     </div>
-    {bulkEditing && <ConsulteeBulkEdit
-      count={chosen.length}
-      onCancel={() => setBulkEditing(false)}
-      onSave={changes => {
-        onUpdate(chosen.map(row => ({ ...row, ...changes })));
-        setSelected([]);
-        setBulkEditing(false);
-      }}
-    />}
     {confirming && <CaseDialogShell
       title={chosen.length === 1 ? 'Remove consultee' : 'Remove consultees'}
       confirmLabel="Remove"

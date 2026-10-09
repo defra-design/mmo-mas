@@ -20,7 +20,7 @@ Check this before introducing a component that isn't already used elsewhere in t
 | Lookup to another record (e.g. Organisation / Account) | Lookup column | Custom-styled Input + results flyout (`OrganisationLookup`) simulating the OOB Lookup — not Combobox, not a PCF |
 | Related records listed on a form (e.g. Consultees) | Read-only subgrid + the related table's main form, opened full page | Fluent Table with `useSubgridStyles`, `GridColumnMenu` and `GridCheckbox` (`ConsulteeGrid`); the record on its own route |
 | Grid row selection | Grid select column | `GridCheckbox` (Fluent Checkbox with the D365 hover tick) |
-| Editing several selected records at once | OOB "Edit multiple records" (bulk edit) panel | Fluent `OverlayDrawer` (`ConsulteeBulkEdit`) |
+| Editing several selected records at once | OOB "Edit multiple records" (bulk edit) panel | Fluent `OverlayDrawer` (not used on Consultees, where Edit is hidden) |
 | Opening an Organisation from a lookup or subgrid link | Account main form | Cards + read-only field rows + Timeline (`OrganisationForm`) |
 
 ## Things that don't have an OOB equivalent — treat with caution
