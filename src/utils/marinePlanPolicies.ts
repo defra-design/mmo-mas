@@ -68,6 +68,18 @@ export function mppTaskStatus(status: string, locked = false): MppAssessmentStat
   return status === 'Done' ? 'Done' : 'To do';
 }
 
+/** The MPP task status on the task-form case: In progress once at least one
+ *  policy assessment is saved, until every one is. */
+export function mppTaskFormStatus(
+  status: string,
+  answers: Record<string, { outcome?: string; reason?: string }>,
+  locked = false,
+): MppAssessmentStatus | 'In progress' {
+  const rolledUp = mppTaskStatus(status, locked);
+  if (rolledUp !== 'To do') return rolledUp;
+  return policies.some(policy => mppAssessmentStatus(answers[policy.code]) === 'Done') ? 'In progress' : 'To do';
+}
+
 /** Zero-based index of a policy in the flattened list, or -1 if not found. */
 export function policyIndex(code: string): number {
   return policies.findIndex(p => p.code === code);

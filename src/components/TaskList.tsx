@@ -28,7 +28,7 @@ import {
   siteCheckCompleteForCase,
   taskStatusForCase,
 } from '../utils/publicNoticeEvidence';
-import { MPP_TASK_FORM_CASE_ID, mppTaskStatus } from '../utils/marinePlanPolicies';
+import { MPP_TASK_FORM_CASE_ID, mppTaskFormStatus, mppTaskStatus } from '../utils/marinePlanPolicies';
 
 const useStyles = makeStyles({
   heading: {
@@ -73,6 +73,11 @@ interface TaskRow {
   onClick?: () => void;
   disabled?: boolean;
 }
+
+const MPP_TASK_FORM_ORDER = [
+  'siteCheck', 'wfd', 'mpp', 'publicRegister', 'siteNotice', 'publicNoticeEvidence',
+  'prepForConsultee', 'startConsultation',
+];
 
 interface TaskListProps {
   caseId: string;
@@ -134,7 +139,12 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
       disabled: mppLocked,
       // MLA/2026/10002 trials the task as a form holding a subgrid of policy
       // assessments, opened like any other task (read-only until Site check).
-      ...(caseId === MPP_TASK_FORM_CASE_ID && { disabled: false, onClick: open('marine-plan-policies') }),
+      // Its status shows In progress once at least one assessment is saved.
+      ...(caseId === MPP_TASK_FORM_CASE_ID && {
+        status: mppTaskFormStatus(tasks.marinePlanPolicies, taskContext.mppForm, mppLocked),
+        disabled: false,
+        onClick: open('marine-plan-policies'),
+      }),
     });
   }
 
@@ -164,6 +174,15 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
     onClick: open('start-consultation'),
   });
 
+  // MLA/2026/10002 trials its own task order, with Public register shown as
+  // Withholding information in this list only.
+  const shown = caseId === MPP_TASK_FORM_CASE_ID
+    ? MPP_TASK_FORM_ORDER
+      .map(key => rows.find(row => row.key === key))
+      .filter((row): row is TaskRow => Boolean(row))
+      .map(row => (row.key === 'publicRegister' ? { ...row, name: 'Withholding information' } : row))
+    : rows;
+
   return (
     <div>
       <Text as="h2" className={styles.heading}>Tasks</Text>
@@ -172,7 +191,7 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
         <Button appearance="subtle" icon={<ArrowSortRegular />} aria-label="Sort" />
       </div>
 
-      {rows.map(row => (
+      {shown.map(row => (
         <div
           key={row.key}
           className={`${styles.row} ${row.onClick ? styles.rowClickable : ''}`}
