@@ -237,7 +237,8 @@ these to new grids without being asked:
   preview tick on hover). Clicking a row, away from its link or checkbox, selects just that
   row. The header checkbox selects every shown row and shows a part tick when only some are
   ticked. Selected rows are light blue, and the footer reads `Rows: N  Selected: N`.
-  Subgrids configured without a select column (Tasks, Marine plan policies) keep none.
+  Subgrids configured without a select column (Tasks, and the Marine plan policies subgrid
+  on the case form) keep none. The Policy assessments subgrid on the MPP task form has one.
 - **Opening.** The primary column's link opens the row's record, and double-clicking the row
   opens the same record. Where a column links to a *different* table (the Organisation lookup
   on Consultees), that link opens the other record instead, and double-click, Edit or the

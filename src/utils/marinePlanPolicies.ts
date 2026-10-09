@@ -35,6 +35,10 @@ export const policies: MarinePlanPolicy[] = (mppData.categories as RawCategory[]
 
 export const policyCount = policies.length;
 
+/** The case whose Marine plan policies task opens a task form with a subgrid of
+ *  policy assessments. Other cases keep their existing MPP treatment. */
+export const MPP_TASK_FORM_CASE_ID = 'MLA/2026/10002';
+
 export type MppAssessmentStatus = 'Cannot start yet' | 'To do' | 'Done';
 
 /**
@@ -62,6 +66,18 @@ export function allMppAssessmentsComplete(
 export function mppTaskStatus(status: string, locked = false): MppAssessmentStatus {
   if (locked || status === 'Cannot start yet') return 'Cannot start yet';
   return status === 'Done' ? 'Done' : 'To do';
+}
+
+/** The MPP task status on the task-form case: In progress once at least one
+ *  policy assessment is saved, until every one is. */
+export function mppTaskFormStatus(
+  status: string,
+  answers: Record<string, { outcome?: string; reason?: string }>,
+  locked = false,
+): MppAssessmentStatus | 'In progress' {
+  const rolledUp = mppTaskStatus(status, locked);
+  if (rolledUp !== 'To do') return rolledUp;
+  return policies.some(policy => mppAssessmentStatus(answers[policy.code]) === 'Done') ? 'In progress' : 'To do';
 }
 
 /** Zero-based index of a policy in the flattened list, or -1 if not found. */
