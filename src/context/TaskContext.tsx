@@ -690,8 +690,11 @@ export function TaskProvider({ children }: PropsWithChildren) {
     review: PublicNoticeEvidenceLocationReview,
   ) =>
     setState(prev => {
-      const locations = prev.publicNoticeEvidenceMeta.locations.map((location, locationIndex) =>
-        locationIndex === index ? review : location,
+      // Map over the current locations so entries for removed ones are dropped.
+      const locations = publicNoticeEvidenceLocations.map((_, locationIndex) =>
+        locationIndex === index
+          ? review
+          : prev.publicNoticeEvidenceMeta.locations[locationIndex] ?? { decision: '', rejectionComments: '' },
       );
       return {
         ...prev,
