@@ -299,8 +299,11 @@ Do not add: `moment`, `lodash`, any CSS-in-JS library, any other component libra
 
 ---
 
-## Commit style
+## Commit and PR style
 
 This is a prototype — keep commit messages short and in plain English,
 describing what changed (e.g. "Add Public register tab" or "Fix Case age
 column alignment"). Don't use `feat:` / `fix:` / `chore:` prefixes.
+
+Pull request descriptions should be brief too: a short bulleted list of what changed,
+in plain English. No test plans, screenshots sections or long write-ups.
