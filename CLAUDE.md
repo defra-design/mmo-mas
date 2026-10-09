@@ -247,10 +247,13 @@ these to new grids without being asked:
   The row icon opens the row's record; the header icon does nothing.
 - **Subgrid command bar.** Right-aligned above the grid. With nothing selected it shows the
   create command; with rows selected, Edit and Remove. Edit on one row opens its form; on
-  several it opens the OOB "Edit multiple records" panel (`OverlayDrawer`, see
-  `ConsulteeBulkEdit.tsx`), which writes only the fields filled in. Remove asks for
+  several it opens the OOB "Edit multiple records" panel (an `OverlayDrawer`), which writes
+  only the fields filled in. Consultees hides Edit, because batch-editing consultees isn't
+  appropriate there; its rows open by double-click or the Navigate icon. Remove asks for
   confirmation in a dialog. Labels follow the GOV.UK style guide: sentence case, "Add …" and
   "Remove" rather than "New …" and "Delete".
+- **Empty grid.** With no rows, show D365's empty state centred in the grid: a grey disc
+  with a white grid icon and "We didn't find anything to show here" (see `ConsulteeGrid`).
 - **View state.** `GridColumnMenu` for column header menus (sort and filter), the sort and
   filters kept per case in `sessionStorage`, and a `Rows: N` footer.
 

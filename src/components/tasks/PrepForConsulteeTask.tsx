@@ -3,8 +3,9 @@
 // case's related Consultee records; each one is added and edited on its own
 // full-page form (PrepForConsulteeConsultee). A Two Options checkbox marks the
 // task complete: ticked → Done on save, unticked → In progress (OOB Task
-// activity statuses). Completing needs at least one consultee — in D365 an
-// OnSave form script that counts the related records and sets the notification.
+// activity statuses). Completing needs at least one consultee, and no
+// organisation can be added twice — in D365 an OnSave form script that checks
+// the related records and sets the notification.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -27,6 +28,8 @@ import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { organisationByName } from '../../utils/organisations';
 
 const NO_CONSULTEES_MESSAGE = 'Add at least one consultee before you mark the task as complete';
+
+const DUPLICATES_MESSAGE = 'You have added an organisation more than once. Remove the duplicate before you save the task';
 
 const useStyles = makeStyles({
   page: {
@@ -72,11 +75,10 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     saved,
     setPrepForConsulteeCompleted,
     removeConsultees,
-    saveConsultee,
     markUnsaved,
     savePrepForConsultee,
   } = useTasks();
-  const [showError, setShowError] = useState(false);
+  const [error, setError] = useState<string>();
   const rows = consultees[caseId] ?? [];
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   const taskUrl = `${caseUrl}/tasks/prep-for-consultee`;
@@ -88,8 +90,13 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     'Cannot start yet';
 
   const handleSave = () => {
+    const organisations = rows.map(row => row.organisation);
+    if (new Set(organisations).size < organisations.length) {
+      setError(DUPLICATES_MESSAGE);
+      return;
+    }
     if (prepForConsulteeMeta.completed && rows.length === 0) {
-      setShowError(true);
+      setError(NO_CONSULTEES_MESSAGE);
       return;
     }
     savePrepForConsultee();
@@ -100,7 +107,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     <div className={styles.page}>
       {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
 
-      {showError && <FormNotification level="error">{NO_CONSULTEES_MESSAGE}</FormNotification>}
+      {error && <FormNotification level="error">{error}</FormNotification>}
 
       <FormCommandBar
         saveLabel="Save and close"
@@ -122,11 +129,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         <div>
           <Text block className={styles.sectionHeading}>Consultees</Text>
           <Text block className={styles.desc}>
-            Add each organisation you need to tell about this application, then choose what to send them.
-          </Text>
-          <Text block className={styles.desc}>
-            A notification of application tells the organisation about the application. They do not need to respond.{' '}
-            A request for advice asks the organisation for specific advice. You will need to explain what you need advice on.
+            Add each organisation you need to consult about this application.
           </Text>
         </div>
         <div>
@@ -142,11 +145,8 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
             }}
             onRemove={ids => {
               removeConsultees(caseId, ids);
-              setShowError(false);
+              setError(undefined);
             }}
-            // Notes only belong to a request for advice, as on the consultee form.
-            onUpdate={updated => updated.forEach(row => saveConsultee(caseId,
-              row.consultationType === 'Request for advice' ? row : { ...row, notes: '' }))}
           />
         </div>
       </Card>
@@ -161,7 +161,7 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
             onChange={(_, data) => {
               setPrepForConsulteeCompleted(Boolean(data.checked));
               markUnsaved('prepForConsultee');
-              if (!data.checked) setShowError(false);
+              if (!data.checked && error === NO_CONSULTEES_MESSAGE) setError(undefined);
             }}
           />
         </TaskRow>

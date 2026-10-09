@@ -5,7 +5,7 @@
 // consultation type is a request for advice.
 import { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { makeStyles, mergeClasses, shorthands, tokens, Body1, Card, Field, Title3 } from '@fluentui/react-components';
+import { makeStyles, mergeClasses, shorthands, tokens, Body1, Card, Field, Text, Title3 } from '@fluentui/react-components';
 import { DismissCircleRegular } from '@fluentui/react-icons';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
@@ -32,6 +32,8 @@ const useStyles = makeStyles({
   },
   card: { ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL) },
   fields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
+  // Help text at the top of the section, as under the Consultees heading.
+  desc: { color: tokens.colorNeutralForeground2 },
   control: { flexGrow: 1, flexBasis: 0, minWidth: '140px' },
   // A read-only lookup or choice is just its value on the same grey background.
   value: {
@@ -108,13 +110,18 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
       <FormCommandBar backTo={taskUrl} saveLabel="Save and close" onSave={save} />
       <Card className={styles.card}>
         <Title3>
-          {isNew ? 'New consultee request' : 'Consultee request'}
-          <span className={styles.savedLabel}>- {isNew || dirty ? 'Unsaved' : 'Saved'}</span>
+          {isNew ? 'Add consultee' : 'Consultee request'}
+          <span className={styles.savedLabel}>- {dirty ? 'Unsaved' : 'Saved'}</span>
         </Title3>
         <div><Body1>Consultee</Body1></div>
       </Card>
       <Card className={styles.card}>
         <div className={styles.fields}>
+          <Text block className={styles.desc}>
+            An application notification tells the organisation about the application. They do not
+            need to respond. A request for advice asks the organisation for specific advice. You will
+            need to explain what you need advice on.
+          </Text>
           <TaskRow label="Organisation" required locked={locked}>
             {locked ? <Body1 className={mergeClasses(styles.control, styles.value)}>{draft.organisation}</Body1> : (
               <Field {...required('organisation')}>

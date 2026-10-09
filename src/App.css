@@ -158,7 +158,12 @@
   text-decoration: underline !important;
 }
 
+/* No outline when a link is clicked, as in D365; keyboard focus still shows one. */
 .link-button:focus {
+  outline: none !important;
+}
+
+.link-button:focus-visible {
   outline: 1px solid #005a9e !important;
   outline-offset: 1px !important;
 }

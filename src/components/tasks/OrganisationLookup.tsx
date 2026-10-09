@@ -246,7 +246,7 @@ export default function OrganisationLookup({ value, onSelect, recent, onOpen }: 
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            // All records sits straight after the label, as in D365.
             gap: 8,
             padding: '6px 12px',
           }}
@@ -254,44 +254,26 @@ export default function OrganisationLookup({ value, onSelect, recent, onOpen }: 
           <span style={{ fontSize: 12, fontWeight: 600, color: D365.textSecondary }}>
             {browsingAll ? 'Organisations' : 'Recent organisations'}
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-            <button
-              type="button"
-              disabled
-              title="New record — OOB Lookup action (not wired in this prototype)"
-              style={{
-                height: 24,
-                padding: '0 8px',
-                fontSize: 12,
-                fontFamily: 'inherit',
-                color: D365.textSecondary,
-                backgroundColor: D365.white,
-                border: `1px solid ${D365.border}`,
-                borderRadius: 2,
-                cursor: 'not-allowed',
-                opacity: 0.6,
-              }}
-            >
-              New record
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowAll(true)}
-              style={{
-                height: 24,
-                padding: '0 8px',
-                fontSize: 12,
-                fontFamily: 'inherit',
-                color: D365.text,
-                backgroundColor: D365.white,
-                border: `1px solid ${D365.border}`,
-                borderRadius: 2,
-                cursor: 'pointer',
-              }}
-            >
-              All records
-            </button>
-          </div>
+          {/* No "New" command: the lookup's quick create is turned off, because
+              organisations sign up themselves rather than being added by a
+              caseworker. */}
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            style={{
+              height: 24,
+              padding: '0 8px',
+              fontSize: 12,
+              fontFamily: 'inherit',
+              color: D365.text,
+              backgroundColor: D365.white,
+              border: `1px solid ${D365.border}`,
+              borderRadius: 2,
+              cursor: 'pointer',
+            }}
+          >
+            All records
+          </button>
         </div>
         {results.length === 0 ? (
           <div style={{ padding: '12px', color: D365.textSecondary }}>
