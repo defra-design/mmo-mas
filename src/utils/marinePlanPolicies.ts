@@ -35,6 +35,10 @@ export const policies: MarinePlanPolicy[] = (mppData.categories as RawCategory[]
 
 export const policyCount = policies.length;
 
+/** The case whose Marine plan policies task opens a task form with a subgrid of
+ *  policy assessments. Other cases keep their existing MPP treatment. */
+export const MPP_TASK_FORM_CASE_ID = 'MLA/2026/10002';
+
 export type MppAssessmentStatus = 'Cannot start yet' | 'To do' | 'Done';
 
 /**

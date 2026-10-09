@@ -28,7 +28,7 @@ import {
   siteCheckCompleteForCase,
   taskStatusForCase,
 } from '../utils/publicNoticeEvidence';
-import { mppTaskStatus } from '../utils/marinePlanPolicies';
+import { MPP_TASK_FORM_CASE_ID, mppTaskStatus } from '../utils/marinePlanPolicies';
 
 const useStyles = makeStyles({
   heading: {
@@ -132,6 +132,9 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
         mppLocked,
       ),
       disabled: mppLocked,
+      // MLA/2026/10002 trials the task as a form holding a subgrid of policy
+      // assessments, opened like any other task (read-only until Site check).
+      ...(caseId === MPP_TASK_FORM_CASE_ID && { disabled: false, onClick: open('marine-plan-policies') }),
     });
   }
 

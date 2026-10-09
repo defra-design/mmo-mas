@@ -31,7 +31,7 @@ import {
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { siteCheckCompleteForCase } from '../../utils/publicNoticeEvidence';
-import { policies, policyIndex } from '../../utils/marinePlanPolicies';
+import { MPP_TASK_FORM_CASE_ID, policies, policyIndex } from '../../utils/marinePlanPolicies';
 
 const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required'];
 
@@ -146,11 +146,14 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   const locked = !siteCheckCompleteForCase(caseId, tasks);
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
-  // Back and Save and close both return to the tab the policy was opened from,
+  // Back and Save and close both return to where the policy was opened from,
   // as D365 does — the subgrid lives on MLA/2026/10014's "Marine plan policies"
-  // tab, and going back restores the case form with that tab still active.
-  const returnToCase = () =>
-    navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
+  // tab, and going back restores the case form with that tab still active. On
+  // MLA/2026/10002 it lives on the Marine plan policies task form.
+  const returnToCase = () => {
+    if (caseId === MPP_TASK_FORM_CASE_ID) navigate(`${caseUrl}/tasks/marine-plan-policies`);
+    else navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
+  };
 
   const index = policyCode ? policyIndex(policyCode) : -1;
   const policy = index >= 0 ? policies[index] : undefined;
