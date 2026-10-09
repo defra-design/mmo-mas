@@ -1,5 +1,5 @@
 // src/components/MarineLicenceListView.tsx
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -348,6 +348,9 @@ export default function MarineLicenceListView({
     const [view, setView] = useState<'menu' | 'filter'>('menu');
     const [draft, setDraft] = useState('');
     const [equalsDraft, setEqualsDraft] = useState<string[]>([]);
+    // Field hands its control id to every child Checkbox, so each needs its own
+    // id or clicking any label toggles the first checkbox.
+    const checkboxIdBase = useId();
 
     // Distinct values present in this column, alphabetised — the checkbox options.
     const equalsOptions = useMemo(
@@ -464,9 +467,10 @@ export default function MarineLicenceListView({
                 {isEqualsCol ? (
                   <Field label="Equals">
                     <div className={styles.checkboxList}>
-                      {equalsOptions.map(option => (
+                      {equalsOptions.map((option, i) => (
                         <Checkbox
                           key={option}
+                          id={`${checkboxIdBase}-${i}`}
                           label={option}
                           checked={equalsDraft.includes(option)}
                           onChange={(_, data) => toggleEqualsValue(option, !!data.checked)}
