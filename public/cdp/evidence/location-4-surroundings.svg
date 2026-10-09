@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
-  <title>Prototype photograph showing the notice at Lyme Regis seafront, lamp post by the Cobb entrance</title>
+  <title>Prototype photograph showing the notice at Scarborough lifeboat station, noticeboard by the slipway</title>
   <g transform="translate(0 64)">
-    <rect width="1200" height="430" fill="#b9ddf3"/><rect y="430" width="1200" height="370" fill="#5d94b8"/>
-    <path d="M0 530L260 390l190 85 250-110 250 105 250-70v400H0z" fill="#777" opacity=".55"/>
-    <rect x="135" y="205" width="290" height="390" fill="#8a6848"/><rect x="175" y="245" width="210" height="270" fill="#fff" stroke="#444" stroke-width="7"/>
-    <text x="280" y="370" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">PUBLIC</text><text x="280" y="410" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">NOTICE</text>
+    <rect width="1200" height="430" fill="#c8dfec"/><rect y="430" width="1200" height="370" fill="#4c86a3"/>
+    <path d="M520 485h440l-55 120H590z" fill="#e7e3d6"/><path d="M690 485V270l130 215z" fill="#fff"/><path d="M200 800V250h310v550z" fill="#8c735d"/>
+    <rect x="245" y="315" width="220" height="285" fill="#fff" stroke="#444" stroke-width="7"/>
+    <text x="355" y="445" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">PUBLIC</text><text x="355" y="485" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700">NOTICE</text>
   </g>
   <rect width="1200" height="64" fill="#fff"/>
-  <text x="32" y="41" font-family="Arial" font-size="24">Location name: Lyme Regis seafront, lamp post by the Cobb entrance</text>
+  <text x="32" y="41" font-family="Arial" font-size="24">Location name: Scarborough lifeboat station, noticeboard by the slipway</text>
 </svg>
