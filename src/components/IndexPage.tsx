@@ -43,8 +43,7 @@ const useStyles = makeStyles({
     '& .fui-AccordionHeader__expandIcon': { marginTop: 0 },
     '& .fui-AccordionPanel > div': { fontSize: '16px', lineHeight: '1.6' },
   },
-  explorationsTitle: { margin: '8px 0 8px', fontSize: '16px', fontWeight: 600 },
-  explorationsList: { margin: 0, paddingLeft: 0, listStyleType: 'none', '& li + li': { marginTop: '8px' } },
+  explorations: { margin: '8px 0 0', fontWeight: 600 },
   resources: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px', paddingTop: '4px', fontSize: '15px' },
   resourceTitle: { margin: 0, fontSize: '16px', fontWeight: 600, color: '#323130' },
   pending: { color: '#605e5c' },
@@ -127,12 +126,7 @@ export default function IndexPage() {
                     </div>
                   )}
                   {iteration === 2 && (
-                    <section aria-labelledby="explorations-heading">
-                      <h4 id="explorations-heading" className={styles.explorationsTitle}>Design explorations</h4>
-                      <ul className={styles.explorationsList}>
-                        <li><a href={asset('mockups/index.html')}>Start consultation task mockups</a></li>
-                      </ul>
-                    </section>
+                    <p className={styles.explorations}><a href={asset('mockups/index.html')}>Design explorations</a></p>
                   )}
                 </div>
                 <div className={styles.resources}>
