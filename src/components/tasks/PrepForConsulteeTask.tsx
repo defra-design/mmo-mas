@@ -27,7 +27,7 @@ import { useTasks } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { organisationByName } from '../../utils/organisations';
 
-const NO_CONSULTEES_MESSAGE = 'Add at least one consultee before you mark the task as complete';
+const NO_CONSULTEES_MESSAGE = 'Add at least one consultee before you mark the task as complete.';
 
 const useStyles = makeStyles({
   page: {
