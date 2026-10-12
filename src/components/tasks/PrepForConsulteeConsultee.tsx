@@ -49,6 +49,10 @@ const useStyles = makeStyles({
   },
 });
 
+// Checked on save, as an OnSave form script in D365: one consultee record per
+// organisation on a case.
+const DUPLICATE_MESSAGE = 'This organisation is already a consultee on this application. Choose a different organisation';
+
 const missingFields = (draft: ConsulteeRow): Required[] =>
   (['organisation', 'consultationType'] as const).filter(field => !draft[field].trim());
 
@@ -66,6 +70,7 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
     existing ?? { id: crypto.randomUUID(), organisation: '', consultationType: '', notes: '' });
   const [dirty, setDirty] = useState(false);
   const [errors, setErrors] = useState<Required[]>([]);
+  const [duplicate, setDuplicate] = useState(false);
   const taskUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/prep-for-consultee`;
   const locked =
     taskStatusForCase(caseId, 'prepForConsultee', tasks.prepForConsultee) === 'Cannot start yet';
@@ -82,12 +87,17 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
     setDraft(next);
     setDirty(true);
     setErrors(previous => previous.filter(error => missingFields(next).includes(error)));
+    if (field === 'organisation') setDuplicate(false);
   };
   const save = () => {
     if (!locked) {
       const missing = missingFields(draft);
       setErrors(missing);
       if (missing.length) return;
+      const isDuplicate = (consultees[caseId] ?? [])
+        .some(row => row.id !== draft.id && row.organisation === draft.organisation);
+      setDuplicate(isDuplicate);
+      if (isDuplicate) return;
       // Notes only belong to a request for advice; drop any left from switching type.
       saveConsultee(caseId, draft.consultationType === 'Request for advice' ? draft : { ...draft, notes: '' });
     }
@@ -107,6 +117,7 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
       {errors.length > 0 && (
         <FormNotification level="error">{notificationMessage(errors.map(error => LABELS[error]))}</FormNotification>
       )}
+      {duplicate && <FormNotification level="error">{DUPLICATE_MESSAGE}</FormNotification>}
       <FormCommandBar backTo={taskUrl} saveLabel="Save and close" onSave={save} />
       <Card className={styles.card}>
         <Title3>
