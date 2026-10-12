@@ -187,7 +187,7 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
   status. **Every task opens, whatever its status.**
 - **Gating is read-only, not locked out.** A task still waiting on Site check reads "Cannot
   start yet", but it still opens — as a **read-only** form: a grey padlock notification
-  reading *"You cannot start this task until you complete the Site check task"*, a padlock
+  reading *"You cannot start this task until you complete the Site check task."*, a padlock
   against each field, read-only controls, and **no Save** on the command bar. This mirrors
   real D365, which cannot lock a caseworker out of a record it lets them see. Completing Site
   check flips the gated tasks to "To do" and the forms become editable.

@@ -51,7 +51,7 @@ const useStyles = makeStyles({
 
 // Checked on save, as an OnSave form script in D365: one consultee record per
 // organisation on a case.
-const DUPLICATE_MESSAGE = 'This organisation is already a consultee on this application. Choose a different organisation';
+const DUPLICATE_MESSAGE = 'You have already selected this organisation as a consultee. Select a different organisation.';
 
 const missingFields = (draft: ConsulteeRow): Required[] =>
   (['organisation', 'consultationType'] as const).filter(field => !draft[field].trim());

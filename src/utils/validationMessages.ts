@@ -13,4 +13,4 @@ export const notificationMessage = (names: string[]) => `${names.join(', ')} : $
 /** D365 read-only notification shown on a task that is gated behind Site check.
  *  The record is still openable — it is read-only, not hidden. */
 export const CANNOT_START_MESSAGE =
-  'You cannot start this task until you complete the Site check task';
+  'You cannot start this task until you complete the Site check task.';
