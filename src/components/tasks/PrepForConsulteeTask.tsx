@@ -29,8 +29,6 @@ import { organisationByName } from '../../utils/organisations';
 
 const NO_CONSULTEES_MESSAGE = 'Add at least one consultee before you mark the task as complete';
 
-const DUPLICATES_MESSAGE = 'You have added an organisation more than once. Remove the duplicate before you save the task';
-
 const useStyles = makeStyles({
   page: {
     backgroundColor: tokens.colorNeutralBackground2,
@@ -90,11 +88,6 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     'Cannot start yet';
 
   const handleSave = () => {
-    const organisations = rows.map(row => row.organisation);
-    if (new Set(organisations).size < organisations.length) {
-      setError(DUPLICATES_MESSAGE);
-      return;
-    }
     if (prepForConsulteeMeta.completed && rows.length === 0) {
       setError(NO_CONSULTEES_MESSAGE);
       return;
