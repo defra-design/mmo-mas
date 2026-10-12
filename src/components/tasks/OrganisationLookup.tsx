@@ -270,6 +270,7 @@ export default function OrganisationLookup({ value, onSelect, recent, onOpen }: 
               border: `1px solid ${D365.border}`,
               borderRadius: 2,
               cursor: 'pointer',
+              textDecoration: 'underline',
             }}
           >
             All records
