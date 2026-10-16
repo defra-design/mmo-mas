@@ -400,5 +400,91 @@
         }
       ]
     }
+  ],
+  "documents": [
+    {
+      "filename": "Ecological-impact-assessment.pdf",
+      "type": "Ecological Assessment",
+      "policies": [
+        {
+          "code": "SW-BIO-1",
+          "location": "Section 4.2"
+        },
+        {
+          "code": "SW-HAB-1",
+          "location": "Pages 12 to 15"
+        },
+        {
+          "code": "SW-DIST-1",
+          "location": "Section 5.3"
+        }
+      ]
+    },
+    {
+      "filename": "HRA-screening-report.pdf",
+      "type": "Habitats Regulations Assessment",
+      "policies": [
+        {
+          "code": "SW-MPA-1",
+          "location": "Sections 3 and 4"
+        },
+        {
+          "code": "SW-MPA-3",
+          "location": "Section 4.1"
+        },
+        {
+          "code": "SW-BIO-1",
+          "location": "Section 2"
+        }
+      ]
+    },
+    {
+      "filename": "Underwater-noise-assessment.pdf",
+      "type": "Technical / Engineering Report",
+      "policies": [
+        {
+          "code": "SW-UWN-2",
+          "location": "Sections 2.1 to 2.4"
+        },
+        {
+          "code": "SW-FISH-1",
+          "location": "Section 6"
+        }
+      ]
+    },
+    {
+      "filename": "Water-quality-and-sediment-report.pdf",
+      "type": "Water Quality Assessment",
+      "policies": [
+        {
+          "code": "SW-WQ-1",
+          "location": "Pages 3 to 9"
+        },
+        {
+          "code": "SW-DIST-1",
+          "location": "Section 7"
+        }
+      ]
+    },
+    {
+      "filename": "Navigational-risk-assessment.pdf",
+      "type": "Navigational Risk Assessment",
+      "policies": [
+        {
+          "code": "SW-PS-1",
+          "location": "Section 5"
+        }
+      ]
+    },
+    {
+      "filename": "Heritage-desk-based-assessment.pdf",
+      "type": "Heritage Assessment",
+      "policies": [
+        {
+          "code": "SW-HER-1",
+          "location": "Pages 4 to 6"
+        }
+      ]
+    }
   ]
 }

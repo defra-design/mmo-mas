@@ -361,3 +361,100 @@ body {
   font-size: 15px;
   font-weight: 600;
 }
+
+/* Supporting documents (sector view, MLA/2026/10015). Under a policy: one grey
+   box per document — a download link, then its type and where the evidence is
+   as label-beside-value rows that wrap value-under-label when narrow. */
+.mpp--sectors .mpp__doc + .mpp__doc {
+  margin-top: 12px;
+}
+
+.mpp--sectors .mpp__doc {
+  padding: 12px;
+}
+
+.mpp--sectors .mpp__doc .doc-link {
+  gap: 2px;
+  line-height: 1.4;
+}
+
+.mpp__doc-rows {
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mpp__doc-row {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--cdp-gap);
+  row-gap: 2px;
+  line-height: 1.4;
+}
+
+.mpp__doc-row dt {
+  flex: 0 0 200px;
+  color: var(--cdp-text-secondary);
+}
+
+.mpp__doc-row dd {
+  flex: 1 1 200px;
+  min-width: 0;
+  margin: 0;
+}
+
+/* "Supporting documents" nav page: every document and the policies it supports. */
+.mpp__doc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mpp__doc-table th,
+.mpp__doc-table td {
+  padding: 4px 16px 4px 0;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+.mpp__doc-table th {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+}
+
+/* Each document is its own tbody: a divider below it and extra space at its top
+   and bottom rows, with the policy rows inside it sitting close together. */
+.mpp__doc-table tbody {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.mpp__doc-table tbody tr:first-child td {
+  padding-top: 10px;
+}
+
+.mpp__doc-table tbody tr:last-child td,
+.mpp__doc-table tbody td[rowspan] {
+  padding-bottom: 10px;
+}
+
+.mpp__doc-table .doc-link {
+  gap: 2px;
+}
+
+/* A policy name in the documents table; opens that policy's sector page. */
+.mpp__inline-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  line-height: inherit;
+  color: #0078d4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mpp__inline-link:hover {
+  text-decoration: underline;
+}
