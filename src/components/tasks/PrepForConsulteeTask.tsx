@@ -5,7 +5,10 @@
 // task complete: ticked → Done on save, unticked → In progress (OOB Task
 // activity statuses). Completing needs at least one consultee, and no
 // organisation can be added twice — in D365 an OnSave form script that checks
-// the related records and sets the notification.
+// the related records and sets the notification. The consultation period is a
+// Choice column set once for every consultee on the case; a business rule makes
+// it required once the task is ticked complete. Both checks run on the same save,
+// so a caseworker sees every problem at once, stacked as separate notifications.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -22,7 +25,8 @@ import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import ConsulteeGrid from './ConsulteeGrid';
 import TaskRow from './TaskRow';
-import { CANNOT_START_MESSAGE } from '../../utils/validationMessages';
+import ConsultationPeriodSection, { CONSULTATION_PERIOD_LABEL } from './ConsultationPeriodSection';
+import { CANNOT_START_MESSAGE, notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { organisationByName } from '../../utils/organisations';
@@ -72,11 +76,13 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     prepForConsulteeMeta,
     saved,
     setPrepForConsulteeCompleted,
+    setConsultationPeriod,
     removeConsultees,
     markUnsaved,
     savePrepForConsultee,
   } = useTasks();
-  const [error, setError] = useState<string>();
+  const [periodError, setPeriodError] = useState(false);
+  const [consulteesError, setConsulteesError] = useState(false);
   const rows = consultees[caseId] ?? [];
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   const taskUrl = `${caseUrl}/tasks/prep-for-consultee`;
@@ -88,10 +94,12 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     'Cannot start yet';
 
   const handleSave = () => {
-    if (prepForConsulteeMeta.completed && rows.length === 0) {
-      setError(NO_CONSULTEES_MESSAGE);
-      return;
-    }
+    const { completed, consultationPeriod } = prepForConsulteeMeta;
+    const missingPeriod = completed && !consultationPeriod;
+    const missingConsultees = completed && rows.length === 0;
+    setPeriodError(missingPeriod);
+    setConsulteesError(missingConsultees);
+    if (missingPeriod || missingConsultees) return;
     savePrepForConsultee();
     navigate(caseUrl);
   };
@@ -100,7 +108,10 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
     <div className={styles.page}>
       {locked && <FormNotification level="read-only">{CANNOT_START_MESSAGE}</FormNotification>}
 
-      {error && <FormNotification level="error">{error}</FormNotification>}
+      {periodError && (
+        <FormNotification level="error">{notificationMessage([CONSULTATION_PERIOD_LABEL])}</FormNotification>
+      )}
+      {consulteesError && <FormNotification level="error">{NO_CONSULTEES_MESSAGE}</FormNotification>}
 
       <FormCommandBar
         saveLabel="Save and close"
@@ -117,6 +128,18 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
         </Title3>
         <div><Body1>Task</Body1></div>
       </Card>
+
+      <ConsultationPeriodSection
+        value={prepForConsulteeMeta.consultationPeriod}
+        locked={locked}
+        required={prepForConsulteeMeta.completed}
+        error={periodError ? requiredMessage(CONSULTATION_PERIOD_LABEL) : undefined}
+        onSelect={value => {
+          setConsultationPeriod(value);
+          markUnsaved('prepForConsultee');
+          if (value) setPeriodError(false);
+        }}
+      />
 
       <Card className={styles.sectionCard}>
         <div>
@@ -138,7 +161,6 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
             }}
             onRemove={ids => {
               removeConsultees(caseId, ids);
-              setError(undefined);
             }}
           />
         </div>
@@ -154,7 +176,10 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
             onChange={(_, data) => {
               setPrepForConsulteeCompleted(Boolean(data.checked));
               markUnsaved('prepForConsultee');
-              if (!data.checked && error === NO_CONSULTEES_MESSAGE) setError(undefined);
+              if (!data.checked) {
+                setPeriodError(false);
+                setConsulteesError(false);
+              }
             }}
           />
         </TaskRow>

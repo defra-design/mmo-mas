@@ -65,8 +65,11 @@ export type ConsulteesState = Record<string, ConsulteeRow[]>;
 
 // Two-options (Yes/No) field on the Prep for consultee task form. Ticked → status
 // Done on save; unticked → In progress. Maps to an OOB boolean / Two Options column.
+// `consultationPeriod` is an OOB Choice column (14, 21 or 28 days) set once for
+// all of the case's consultees; '' is an unset choice.
 export interface PrepForConsulteeMeta {
   completed: boolean;
+  consultationPeriod: string;
 }
 
 // Public register task form. `relatesTo`, the two `*Agree` decisions and
@@ -226,7 +229,7 @@ const initialState: PersistedState = {
   wfdForm: { review: '', initialConsiderations: '' },
   mppForm: {},
   consultees: {},
-  prepForConsulteeMeta: { completed: false },
+  prepForConsulteeMeta: { completed: false, consultationPeriod: '' },
   publicRegisterForm: {
     relatesTo: '',
     commercialAgree: '',
@@ -459,6 +462,7 @@ interface TaskContextValue {
   saveConsultee: (caseId: string, consultee: ConsulteeRow) => void;
   removeConsultees: (caseId: string, ids: string[]) => void;
   setPrepForConsulteeCompleted: (completed: boolean) => void;
+  setConsultationPeriod: (period: string) => void;
   setPublicRegisterField: <K extends keyof PublicRegisterForm>(
     field: K,
     value: PublicRegisterForm[K],
@@ -513,7 +517,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
       }])),
       consultees: { ...prev.consultees, [caseId]: [{ id: crypto.randomUUID(), organisation: 'Environment Agency (EA)',
         consultationType: 'Request for advice', notes: 'Please provide advice on the proposed works.' }] },
-      prepForConsulteeMeta: { completed: true },
+      prepForConsulteeMeta: { completed: true, consultationPeriod: '14 days' },
       publicRegisterForm: { ...initialState.publicRegisterForm, completed: true, personalInfo: 'No',
         relatesTo: 'Commercial or industrial confidentiality', commercialAgree: 'Agree - withhold all of it',
         commercialRationale: 'Commercially sensitive information checked and redacted for this example.' },
@@ -668,6 +672,12 @@ export function TaskProvider({ children }: PropsWithChildren) {
     setState(prev => ({
       ...prev,
       prepForConsulteeMeta: { ...prev.prepForConsulteeMeta, completed },
+    }));
+
+  const setConsultationPeriod = (consultationPeriod: string) =>
+    setState(prev => ({
+      ...prev,
+      prepForConsulteeMeta: { ...prev.prepForConsulteeMeta, consultationPeriod },
     }));
 
   const setPublicRegisterField = <K extends keyof PublicRegisterForm>(
@@ -854,6 +864,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         saveConsultee,
         removeConsultees,
         setPrepForConsulteeCompleted,
+        setConsultationPeriod,
         setPublicRegisterField,
         setSiteNoticeField,
         setPublicNoticeEvidenceLocation,
