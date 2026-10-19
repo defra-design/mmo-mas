@@ -418,10 +418,16 @@ body {
   line-height: 1.4;
 }
 
-.mpp__doc-table th {
+.mpp__doc-table thead th {
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
   font-weight: 600;
+}
+
+/* The document cell is a row-group header for screen readers, but looks like
+   the other cells. */
+.mpp__doc-table tbody th {
+  font-weight: normal;
 }
 
 /* Each document is its own tbody: a divider below it and extra space at its top
@@ -430,12 +436,12 @@ body {
   border-bottom: 1px solid #e0e0e0;
 }
 
-.mpp__doc-table tbody tr:first-child td {
+.mpp__doc-table tbody tr:first-child > * {
   padding-top: 10px;
 }
 
-.mpp__doc-table tbody tr:last-child td,
-.mpp__doc-table tbody td[rowspan] {
+.mpp__doc-table tbody tr:last-child > *,
+.mpp__doc-table tbody [rowspan] {
   padding-bottom: 10px;
 }
 
