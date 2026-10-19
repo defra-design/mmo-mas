@@ -154,10 +154,14 @@
     }
 
     function renderDocuments() {
-      detail.appendChild(heading('h2', 'mpp__detail-title', 'Supporting documents'));
+      var title = heading('h2', 'mpp__detail-title', 'Supporting documents');
+      title.id = 'supporting-documents-title';
+      detail.appendChild(title);
 
+      // Named by the heading above it, so screen readers announce the table.
       var table = document.createElement('table');
       table.className = 'mpp__doc-table';
+      table.setAttribute('aria-labelledby', title.id);
       var head = table.createTHead().insertRow();
       ['Document', 'Document type', 'Policy', 'Where to find the evidence'].forEach(function (text) {
         var th = document.createElement('th');
@@ -169,14 +173,18 @@
       // One row per document and policy, so each location lines up with its
       // policy. The document and type cells span that document's rows, and
       // each document gets its own tbody so the divider falls between documents.
+      // The document cell is a row-group header, so a screen reader announces
+      // the document on every policy row it spans.
       documents.forEach(function (doc) {
         var body = document.createElement('tbody');
         var links = doc.policies || [];
         links.forEach(function (link, i) {
           var tr = body.insertRow();
           if (i === 0) {
-            var docCell = tr.insertCell();
+            var docCell = document.createElement('th');
+            docCell.scope = 'rowgroup';
             docCell.rowSpan = links.length;
+            tr.appendChild(docCell);
             docCell.appendChild(docLink(doc.filename));
             var typeCell = tr.insertCell();
             typeCell.rowSpan = links.length;
