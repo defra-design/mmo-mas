@@ -88,3 +88,27 @@ export function policyIndex(code: string): number {
 export function findPolicy(code: string): MarinePlanPolicy | undefined {
   return policies.find(p => p.code === code);
 }
+
+/** A supporting document the applicant uploaded on CDP, linked to one or more
+ *  policies with where in the document the evidence is. */
+export interface SupportingDocument {
+  filename: string;
+  type: string;
+  location: string;
+}
+
+interface RawDocument {
+  filename: string;
+  type: string;
+  policies: { code: string; location: string }[];
+}
+
+/** The supporting documents linked to a policy, each with where its evidence is. */
+export function documentsForPolicy(code: string): SupportingDocument[] {
+  const documents = (mppData as { documents?: RawDocument[] }).documents ?? [];
+  return documents.flatMap(doc =>
+    doc.policies
+      .filter(link => link.code === code)
+      .map(link => ({ filename: doc.filename, type: doc.type, location: link.location })),
+  );
+}
