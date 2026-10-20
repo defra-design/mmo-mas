@@ -43,7 +43,7 @@
       docsGroup.className = 'mpp__group';
       var docsTitle = document.createElement('div');
       docsTitle.className = 'mpp__group-title';
-      docsTitle.textContent = 'Documents';
+      docsTitle.textContent = 'Evidence';
       docsGroup.appendChild(docsTitle);
       addItem(docsGroup, 'Supporting documents', renderDocuments);
       nav.appendChild(docsGroup);
@@ -163,7 +163,7 @@
       table.className = 'mpp__doc-table';
       table.setAttribute('aria-labelledby', title.id);
       var head = table.createTHead().insertRow();
-      ['Document', 'Document type', 'Policy', 'Where to find the evidence'].forEach(function (text) {
+      ['Document', 'Document type', 'Policy', 'Where the information is'].forEach(function (text) {
         var th = document.createElement('th');
         th.scope = 'col';
         th.textContent = text;
