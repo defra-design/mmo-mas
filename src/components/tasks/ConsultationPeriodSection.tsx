@@ -20,7 +20,7 @@ const CONSULTATION_PERIODS = ['14 days', '21 days', '28 days'];
 // The field's display name, so it also names the field in required-field errors.
 // It carries the explanation itself: help text under a field would need injected
 // HTML in D365, which isn't OOB.
-export const CONSULTATION_PERIOD_LABEL = 'How long all consultees have to respond';
+export const CONSULTATION_PERIOD_LABEL = 'Days to respond for all consultees';
 
 const useStyles = makeStyles({
   sectionCard: {
