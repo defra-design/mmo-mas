@@ -4,9 +4,8 @@
 // policy in that sector. Used only by MLA/2026/10015. Data lives in the shared
 // marine-plan-policies.json so both views stay in sync.
 //
-// Supporting documents: a policy the applicant uploaded evidence for lists those
-// documents under its consideration, and a "Supporting documents" item at the
-// top of the nav lists every document with the policies it supports.
+// Supporting documents: a "Supporting documents" item at the top of the nav
+// lists every document the applicant uploaded with the policies it supports.
 (function () {
   var nav = document.getElementById('mpp-nav');
   var detail = document.getElementById('mpp-detail');
@@ -26,17 +25,6 @@
     var items = [];
     // Each policy's label and the nav item for its sector, by policy code.
     var policies = {};
-
-    // Documents linked to each policy code: [{ doc, location }]
-    var docsByCode = {};
-    documents.forEach(function (doc) {
-      (doc.policies || []).forEach(function (link) {
-        (docsByCode[link.code] = docsByCode[link.code] || []).push({
-          doc: doc,
-          location: link.location
-        });
-      });
-    });
 
     if (documents.length) {
       var docsGroup = document.createElement('div');
@@ -129,25 +117,6 @@
             ? policy.consideration
             : ['No consideration provided.'];
         block.appendChild(box(consideration));
-
-        // Only policies the applicant uploaded evidence for show this.
-        var linked = docsByCode[policy.code];
-        if (linked) {
-          // One grey box per document: the download link, then its type and
-          // where the evidence is as label-beside-value rows.
-          block.appendChild(subhead('Supporting documents'));
-          linked.forEach(function (entry) {
-            var doc = document.createElement('div');
-            doc.className = 'mpp__box mpp__doc';
-            doc.appendChild(docLink(entry.doc.filename));
-            var rows = document.createElement('dl');
-            rows.className = 'mpp__doc-rows';
-            rows.appendChild(row('Document type', entry.doc.type));
-            rows.appendChild(row('Where to find the evidence', entry.location));
-            doc.appendChild(rows);
-            block.appendChild(doc);
-          });
-        }
 
         detail.appendChild(block);
       });
@@ -247,18 +216,6 @@
       p.textContent = text;
       wrap.appendChild(p);
     });
-    return wrap;
-  }
-
-  function row(label, value) {
-    var wrap = document.createElement('div');
-    wrap.className = 'mpp__doc-row';
-    var dt = document.createElement('dt');
-    dt.textContent = label + ':';
-    var dd = document.createElement('dd');
-    dd.textContent = value;
-    wrap.appendChild(dt);
-    wrap.appendChild(dd);
     return wrap;
   }
 

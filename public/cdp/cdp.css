@@ -362,48 +362,6 @@ body {
   font-weight: 600;
 }
 
-/* Supporting documents (sector view, MLA/2026/10015). Under a policy: one grey
-   box per document — a download link, then its type and where the evidence is
-   as label-beside-value rows that wrap value-under-label when narrow. */
-.mpp--sectors .mpp__doc + .mpp__doc {
-  margin-top: 12px;
-}
-
-.mpp--sectors .mpp__doc {
-  padding: 12px;
-}
-
-.mpp--sectors .mpp__doc .doc-link {
-  gap: 2px;
-  line-height: 1.4;
-}
-
-.mpp__doc-rows {
-  margin: 12px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mpp__doc-row {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: var(--cdp-gap);
-  row-gap: 2px;
-  line-height: 1.4;
-}
-
-.mpp__doc-row dt {
-  flex: 0 0 200px;
-  color: var(--cdp-text-secondary);
-}
-
-.mpp__doc-row dd {
-  flex: 1 1 200px;
-  min-width: 0;
-  margin: 0;
-}
-
 /* "Supporting documents" nav page: every document and the policies it supports. */
 .mpp__doc-table {
   width: 100%;
