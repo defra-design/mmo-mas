@@ -335,10 +335,12 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // A task form can request a specific landing tab via navigation state (e.g.
   // 10014's MPP assessment returns to the Marine plan policies tab on save so the
   // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
-  // Tasks tab; every other case opens on Case summary.
+  // Tasks tab; every other case opens on Case summary. A ?tab= in the URL does
+  // the same for plain links, e.g. a shared link to a case's MPP tab.
   const location = useLocation();
   const navState = location.state as { tab?: string; mppPage?: string } | null;
-  const requestedTab = navState?.tab;
+  const requestedTab =
+    navState?.tab ?? new URLSearchParams(location.search).get('tab') ?? undefined;
   // A policy assessment's "Find the supporting documents" link opens the case's
   // MPP tab on its Supporting documents page; the iframe reads the hash.
   const mppHash = navState?.mppPage === 'supporting-documents' ? '#supporting-documents' : '';
