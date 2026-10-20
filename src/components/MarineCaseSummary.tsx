@@ -337,7 +337,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
   // Tasks tab; every other case opens on Case summary.
   const location = useLocation();
-  const requestedTab = (location.state as { tab?: string } | null)?.tab;
+  const navState = location.state as { tab?: string; mppPage?: string } | null;
+  const requestedTab = navState?.tab;
+  // A policy assessment's "Find the supporting documents" link opens 10015's MPP
+  // tab on its Supporting documents page; the iframe reads the hash.
+  const mppHash = navState?.mppPage === 'supporting-documents' ? '#supporting-documents' : '';
   const [selectedTab, setSelectedTab] = useState(
     requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
   );
@@ -696,7 +700,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // case keeps the default page for the tab.
                   src={
                     tasksTab && selectedTab === 'mpp'
-                      ? asset('cdp/marine-plan-policies-sectors.html')
+                      ? asset('cdp/marine-plan-policies-sectors.html') + mppHash
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
                         : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'

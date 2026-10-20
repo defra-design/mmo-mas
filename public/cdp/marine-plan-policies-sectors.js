@@ -45,7 +45,7 @@
       docsTitle.className = 'mpp__group-title';
       docsTitle.textContent = 'Evidence';
       docsGroup.appendChild(docsTitle);
-      addItem(docsGroup, 'Supporting documents', renderDocuments);
+      var docsItem = addItem(docsGroup, 'Supporting documents', renderDocuments);
       nav.appendChild(docsGroup);
     }
 
@@ -211,8 +211,10 @@
       detail.appendChild(table);
     }
 
-    // Open the first sector by default (no focus/scroll on initial load).
-    if (firstSector) select(firstSector, false);
+    // Open the first sector by default (no focus/scroll on initial load), or the
+    // Supporting documents page when linked to from a policy assessment.
+    if (docsItem && window.location.hash === '#supporting-documents') select(docsItem, false);
+    else if (firstSector) select(firstSector, false);
   }
 
   // Focusable so a click moves focus here (announced to screen readers and
