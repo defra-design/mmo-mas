@@ -1,0 +1,282 @@
+// DESIGN EXPLORATION (not MVP) — a saved copy of the MLA/2026/10015 Marine plan
+// policies review tab (public/cdp/marine-plan-policies-sectors.js) from when each
+// policy listed its supporting documents under the applicant's consideration.
+// Opens on the Biodiversity sector, where South West Biodiversity 1 has two
+// documents. Reads the shared policy data from public/cdp.
+(function () {
+  var nav = document.getElementById('mpp-nav');
+  var detail = document.getElementById('mpp-detail');
+
+  fetch('../../cdp/marine-plan-policies.json')
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(init)
+    .catch(function () {
+      detail.textContent = 'Unable to load the marine plan policies.';
+    });
+
+  function init(data) {
+    var documents = data.documents || [];
+    var items = [];
+    // Each policy's label and the nav item for its sector, by policy code.
+    var policies = {};
+
+    // Documents linked to each policy code: [{ doc, location }]
+    var docsByCode = {};
+    documents.forEach(function (doc) {
+      (doc.policies || []).forEach(function (link) {
+        (docsByCode[link.code] = docsByCode[link.code] || []).push({
+          doc: doc,
+          location: link.location
+        });
+      });
+    });
+
+    if (documents.length) {
+      var docsGroup = document.createElement('div');
+      docsGroup.className = 'mpp__group';
+      var docsTitle = document.createElement('div');
+      docsTitle.className = 'mpp__group-title';
+      docsTitle.textContent = 'Evidence';
+      docsGroup.appendChild(docsTitle);
+      addItem(docsGroup, 'Supporting documents', renderDocuments);
+      nav.appendChild(docsGroup);
+    }
+
+    var firstSector;
+    (data.categories || []).forEach(function (cat) {
+      var group = document.createElement('div');
+      group.className = 'mpp__group';
+
+      var title = document.createElement('div');
+      title.className = 'mpp__group-title';
+      title.textContent = cat.name;
+      group.appendChild(title);
+
+      // Group this category's policies into sectors (topics), keeping the order
+      // in which each sector first appears.
+      var sectors = [];
+      var byTopic = {};
+      (cat.policies || []).forEach(function (policy) {
+        var key = policy.topic;
+        if (!byTopic[key]) {
+          byTopic[key] = { name: key, policies: [] };
+          sectors.push(byTopic[key]);
+        }
+        byTopic[key].policies.push(policy);
+      });
+
+      sectors.forEach(function (sector) {
+        var item = addItem(group, sector.name, function () {
+          renderSector(sector);
+        });
+        sector.policies.forEach(function (policy) {
+          policies[policy.code] = { label: policy.label, item: item };
+        });
+        if (!firstSector) firstSector = item;
+      });
+
+      nav.appendChild(group);
+    });
+
+    function addItem(group, text, renderFn) {
+      var link = document.createElement('button');
+      link.type = 'button';
+      link.className = 'mpp__link';
+      link.textContent = text;
+      var item = { el: link, render: renderFn };
+      link.addEventListener('click', function () {
+        select(item, true);
+      });
+      group.appendChild(link);
+      items.push(item);
+      return item;
+    }
+
+    function select(item, moveFocus) {
+      items.forEach(function (i) {
+        i.el.classList.toggle('mpp__link--active', i === item);
+      });
+      detail.innerHTML = '';
+      item.render();
+
+      if (moveFocus) focusOn(detail.querySelector('.mpp__detail-title'));
+    }
+
+    function renderSector(sector) {
+      detail.appendChild(heading('h2', 'mpp__detail-title', sector.name));
+
+      sector.policies.forEach(function (policy) {
+        var block = document.createElement('div');
+        block.className = 'mpp__policy';
+
+        var name = heading('h3', 'mpp__policy-title', policy.label);
+        name.id = 'policy-' + policy.code;
+        block.appendChild(name);
+
+        block.appendChild(subhead('Policy information'));
+        block.appendChild(box([policy.policyInfo]));
+
+        block.appendChild(subhead("Applicant's consideration"));
+        var consideration =
+          policy.consideration && policy.consideration.length
+            ? policy.consideration
+            : ['No consideration provided.'];
+        block.appendChild(box(consideration));
+
+        // Only policies the applicant uploaded evidence for show this.
+        var linked = docsByCode[policy.code];
+        if (linked) {
+          // One grey box per document: the download link, then its type and
+          // where the evidence is as label-beside-value rows.
+          block.appendChild(subhead('Supporting documents'));
+          linked.forEach(function (entry) {
+            var doc = document.createElement('div');
+            doc.className = 'mpp__box mpp__doc';
+            doc.appendChild(docLink(entry.doc.filename));
+            var rows = document.createElement('dl');
+            rows.className = 'mpp__doc-rows';
+            rows.appendChild(row('Document type', entry.doc.type));
+            rows.appendChild(row('Where to find the evidence', entry.location));
+            doc.appendChild(rows);
+            block.appendChild(doc);
+          });
+        }
+
+        detail.appendChild(block);
+      });
+    }
+
+    function renderDocuments() {
+      var title = heading('h2', 'mpp__detail-title', 'Supporting documents');
+      title.id = 'supporting-documents-title';
+      detail.appendChild(title);
+
+      // Named by the heading above it, so screen readers announce the table.
+      var table = document.createElement('table');
+      table.className = 'mpp__doc-table';
+      table.setAttribute('aria-labelledby', title.id);
+      var head = table.createTHead().insertRow();
+      ['Document', 'Document type', 'Policy', 'Where the information is'].forEach(function (text) {
+        var th = document.createElement('th');
+        th.scope = 'col';
+        th.textContent = text;
+        head.appendChild(th);
+      });
+
+      // One row per document and policy, so each location lines up with its
+      // policy. The document and type cells span that document's rows, and
+      // each document gets its own tbody so the divider falls between documents.
+      // The document cell is a row-group header, so a screen reader announces
+      // the document on every policy row it spans.
+      documents.forEach(function (doc) {
+        var body = document.createElement('tbody');
+        var links = doc.policies || [];
+        links.forEach(function (link, i) {
+          var tr = body.insertRow();
+          if (i === 0) {
+            var docCell = document.createElement('th');
+            docCell.scope = 'rowgroup';
+            docCell.rowSpan = links.length;
+            tr.appendChild(docCell);
+            docCell.appendChild(docLink(doc.filename));
+            var typeCell = tr.insertCell();
+            typeCell.rowSpan = links.length;
+            typeCell.textContent = doc.type;
+          }
+
+          // Opens the policy's sector page, scrolled to that policy.
+          var policy = policies[link.code];
+          var a = document.createElement('button');
+          a.type = 'button';
+          a.className = 'mpp__inline-link';
+          a.textContent = policy ? policy.label : link.code;
+          a.addEventListener('click', function () {
+            if (!policy) return;
+            select(policy.item, false);
+            focusOn(document.getElementById('policy-' + link.code));
+          });
+          tr.insertCell().appendChild(a);
+          tr.insertCell().textContent = link.location;
+        });
+        table.appendChild(body);
+      });
+
+      detail.appendChild(table);
+    }
+
+    // Open the Biodiversity sector, which has a policy with two documents.
+    var biodiversity = items.filter(function (i) {
+      return i.el.textContent === 'Biodiversity';
+    })[0];
+    if (biodiversity || firstSector) select(biodiversity || firstSector, false);
+  }
+
+  // Focusable so a click moves focus here (announced to screen readers and
+  // scrolled into view) rather than leaving the reader stranded mid-page.
+  function heading(tag, className, text) {
+    var el = document.createElement(tag);
+    el.className = className;
+    el.textContent = text;
+    el.tabIndex = -1;
+    return el;
+  }
+
+  function focusOn(el) {
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: 'start' });
+  }
+
+  function subhead(text) {
+    var p = document.createElement('p');
+    p.className = 'mpp__subhead';
+    p.textContent = text;
+    return p;
+  }
+
+  function box(paragraphs) {
+    var wrap = document.createElement('div');
+    wrap.className = 'mpp__box';
+    paragraphs.forEach(function (text) {
+      var p = document.createElement('p');
+      p.textContent = text;
+      wrap.appendChild(p);
+    });
+    return wrap;
+  }
+
+  function row(label, value) {
+    var wrap = document.createElement('div');
+    wrap.className = 'mpp__doc-row';
+    var dt = document.createElement('dt');
+    dt.textContent = label + ':';
+    var dd = document.createElement('dd');
+    dd.textContent = value;
+    wrap.appendChild(dt);
+    wrap.appendChild(dd);
+    return wrap;
+  }
+
+  // A download link with the same icon as the other CDP pages. It does nothing
+  // in the prototype; in the real system the file would come from CDP.
+  function docLink(filename) {
+    var a = document.createElement('a');
+    a.className = 'doc-link';
+    a.href = '#';
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+    });
+    a.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true" style="display: block;">' +
+      '<line x1="10" y1="2.6" x2="10" y2="12.4" stroke="currentColor" stroke-width="1.2" />' +
+      '<polyline points="6,8.6 10,12.6 14,8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />' +
+      '<line x1="3.6" y1="16.4" x2="16.4" y2="16.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />' +
+      '</svg>';
+    var span = document.createElement('span');
+    span.textContent = filename;
+    a.appendChild(span);
+    return a;
+  }
+})();

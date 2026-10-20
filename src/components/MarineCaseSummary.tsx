@@ -338,12 +338,15 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // Tasks tab; every other case opens on Case summary. A ?tab= in the URL does
   // the same for plain links, e.g. a shared link to a case's MPP tab.
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const navState = location.state as { tab?: string; mppPage?: string } | null;
-  const requestedTab =
-    navState?.tab ?? new URLSearchParams(location.search).get('tab') ?? undefined;
+  const requestedTab = navState?.tab ?? searchParams.get('tab') ?? undefined;
   // A policy assessment's "Find the supporting documents" link opens the case's
   // MPP tab on its Supporting documents page; the iframe reads the hash.
   const mppHash = navState?.mppPage === 'supporting-documents' ? '#supporting-documents' : '';
+  // Design exploration (not MVP): ?mpp=per-policy shows 10015's MPP tab with each
+  // policy listing its supporting documents, from a saved copy in public/mockups.
+  const mppPerPolicyMockup = searchParams.get('mpp') === 'per-policy';
   const [selectedTab, setSelectedTab] = useState(
     requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
   );
@@ -702,7 +705,9 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // case keeps the default page for the tab.
                   src={
                     tasksTab && selectedTab === 'mpp'
-                      ? asset('cdp/marine-plan-policies-sectors.html') + mppHash
+                      ? mppPerPolicyMockup
+                        ? asset('mockups/mpp-supporting-documents/review-tab.html')
+                        : asset('cdp/marine-plan-policies-sectors.html') + mppHash
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
                         : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'

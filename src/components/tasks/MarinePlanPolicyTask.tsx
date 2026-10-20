@@ -1,7 +1,7 @@
 // src/components/tasks/MarinePlanPolicyTask.tsx
 import { useState } from 'react';
 import type { MouseEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   makeStyles,
   shorthands,
@@ -26,6 +26,8 @@ import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
 import FieldDecorations from './FieldDecorations';
+import MppSupportingDocuments from './MppSupportingDocuments';
+import MppSupportingDocumentsHtml from './MppSupportingDocumentsHtml';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
@@ -152,6 +154,10 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   const styles = useStyles();
   const navigate = useNavigate();
   const { policyCode } = useParams<{ policyCode: string }>();
+  // Mockups of the applicant's supporting documents for the policy:
+  // ?docs=1 as D365 fields, ?docs=2 as injected HTML.
+  const [searchParams] = useSearchParams();
+  const docsMockup = searchParams.get('docs');
   const { tasks, mppForm, setMppField } = useTasks();
   // Empty required fields, populated on a failed save. Only ever set on an active
   // record — a locked one has no Save command to fail against.
@@ -310,6 +316,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
                   Find the supporting documents for this policy
                 </Link>
               </div>
+            )}
+            {docsMockup === '1' && (
+              <MppSupportingDocuments documents={documentsForPolicy(policy.code)} />
+            )}
+            {docsMockup === '2' && (
+              <MppSupportingDocumentsHtml documents={documentsForPolicy(policy.code)} />
             )}
         </div>
       </Card>
