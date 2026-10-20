@@ -1,7 +1,8 @@
 // Marine plan policies — plain JS for the CDP iframe.
 // Builds the grouped policy nav and renders the selected policy's information
-// and the applicant's consideration. Data lives in the sibling JSON file so it
-// can be regenerated/updated without touching this script.
+// and the applicant's consideration, plus a Supporting documents page listing
+// the applicant's documents. Data lives in the sibling JSON file so it can be
+// regenerated/updated without touching this script.
 (function () {
   var nav = document.getElementById('mpp-nav');
   var detail = document.getElementById('mpp-detail');
@@ -17,47 +18,79 @@
     });
 
   function init(data) {
+    var documents = data.documents || [];
     var items = [];
+    // Each policy's nav item and label, by policy code.
+    var byCode = {};
+    var labels = {};
 
-    (data.categories || []).forEach(function (cat) {
-      var group = document.createElement('div');
-      group.className = 'mpp__group';
-
-      var title = document.createElement('div');
-      title.className = 'mpp__group-title';
-      title.textContent = cat.name;
-      group.appendChild(title);
-
-      (cat.policies || []).forEach(function (policy) {
-        var link = document.createElement('button');
-        link.type = 'button';
-        link.className = 'mpp__link';
-        link.textContent = policy.label;
-        link.addEventListener('click', function () {
-          select(policy, link, true);
+    // "Evidence" > "Supporting documents" at the top of the nav: every document
+    // the applicant uploaded, using the shared supporting-documents.js.
+    var docsItem;
+    if (documents.length) {
+      var docsGroup = addGroup('Evidence');
+      docsItem = addItem(docsGroup, 'Supporting documents', function () {
+        return window.renderSupportingDocuments(detail, documents, labels, function (code) {
+          if (byCode[code]) select(byCode[code], true);
         });
-        group.appendChild(link);
-        items.push({ policy: policy, el: link });
       });
-
-      nav.appendChild(group);
-    });
-
-    function select(policy, el, moveFocus) {
-      items.forEach(function (item) {
-        item.el.classList.toggle('mpp__link--active', item.el === el);
-      });
-      render(policy, moveFocus);
     }
 
-    function render(policy, moveFocus) {
-      detail.innerHTML = '';
+    (data.categories || []).forEach(function (cat) {
+      var group = addGroup(cat.name);
+      (cat.policies || []).forEach(function (policy) {
+        byCode[policy.code] = addItem(group, policy.label, function () {
+          return render(policy);
+        });
+        labels[policy.code] = policy.label;
+      });
+    });
 
+    function addGroup(name) {
+      var group = document.createElement('div');
+      group.className = 'mpp__group';
+      var title = document.createElement('div');
+      title.className = 'mpp__group-title';
+      title.textContent = name;
+      group.appendChild(title);
+      nav.appendChild(group);
+      return group;
+    }
+
+    function addItem(group, text, renderFn) {
+      var link = document.createElement('button');
+      link.type = 'button';
+      link.className = 'mpp__link';
+      link.textContent = text;
+      var item = { el: link, render: renderFn };
+      link.addEventListener('click', function () {
+        select(item, true);
+      });
+      group.appendChild(link);
+      items.push(item);
+      return item;
+    }
+
+    // Each render returns its heading. Focusable so a click moves focus there
+    // (announced to screen readers and scrolled into view) rather than leaving
+    // the reader stranded mid-page.
+    function select(item, moveFocus) {
+      items.forEach(function (i) {
+        i.el.classList.toggle('mpp__link--active', i === item);
+      });
+      detail.innerHTML = '';
+      var heading = item.render();
+
+      if (moveFocus) {
+        heading.focus({ preventScroll: true });
+        heading.scrollIntoView({ block: 'start' });
+      }
+    }
+
+    function render(policy) {
       var heading = document.createElement('h2');
       heading.className = 'mpp__detail-title';
       heading.textContent = policy.label;
-      // Focusable so a click moves focus here (announced to screen readers and
-      // scrolled into view) rather than leaving the reader stranded mid-page.
       heading.tabIndex = -1;
       detail.appendChild(heading);
 
@@ -70,15 +103,16 @@
           ? policy.consideration
           : ['No consideration provided.'];
       detail.appendChild(box(consideration));
-
-      if (moveFocus) {
-        heading.focus({ preventScroll: true });
-        heading.scrollIntoView({ block: 'start' });
-      }
+      return heading;
     }
 
-    // Open the first policy by default (no focus/scroll on initial load).
-    if (items.length) select(items[0].policy, items[0].el, false);
+    // Open the first policy by default (no focus/scroll on initial load), or the
+    // Supporting documents page when linked to from a policy assessment.
+    var firstPolicy = items.filter(function (i) {
+      return i !== docsItem;
+    })[0];
+    if (docsItem && window.location.hash === '#supporting-documents') select(docsItem, false);
+    else if (firstPolicy) select(firstPolicy, false);
   }
 
   function subhead(text) {

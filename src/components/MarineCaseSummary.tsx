@@ -336,11 +336,14 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // 10014's MPP assessment returns to the Marine plan policies tab on save so the
   // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
   // Tasks tab; every other case opens on Case summary. A ?tab= in the URL does
-  // the same for plain links, e.g. from the design explorations pages.
+  // the same for plain links, e.g. a shared link to a case's MPP tab.
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const requestedTab =
-    (location.state as { tab?: string } | null)?.tab ?? searchParams.get('tab') ?? undefined;
+  const navState = location.state as { tab?: string; mppPage?: string } | null;
+  const requestedTab = navState?.tab ?? searchParams.get('tab') ?? undefined;
+  // A policy assessment's "Find the supporting documents" link opens the case's
+  // MPP tab on its Supporting documents page; the iframe reads the hash.
+  const mppHash = navState?.mppPage === 'supporting-documents' ? '#supporting-documents' : '';
   // Design exploration (not MVP): ?mpp=per-policy shows 10015's MPP tab with each
   // policy listing its supporting documents, from a saved copy in public/mockups.
   const mppPerPolicyMockup = searchParams.get('mpp') === 'per-policy';
@@ -702,16 +705,14 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // case keeps the default page for the tab.
                   src={
                     tasksTab && selectedTab === 'mpp'
-                      ? asset(
-                          mppPerPolicyMockup
-                            ? 'mockups/mpp-supporting-documents/review-tab.html'
-                            : 'cdp/marine-plan-policies-sectors.html',
-                        )
+                      ? mppPerPolicyMockup
+                        ? asset('mockups/mpp-supporting-documents/review-tab.html')
+                        : asset('cdp/marine-plan-policies-sectors.html') + mppHash
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
                         : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
                           ? asset('cdp/public-register-none.html')
-                          : cdpPages[selectedTab].src
+                          : cdpPages[selectedTab].src + (selectedTab === 'mpp' ? mppHash : '')
                   }
                   title={cdpPages[selectedTab].title}
                 />
