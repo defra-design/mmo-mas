@@ -335,9 +335,15 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // A task form can request a specific landing tab via navigation state (e.g.
   // 10014's MPP assessment returns to the Marine plan policies tab on save so the
   // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
-  // Tasks tab; every other case opens on Case summary.
+  // Tasks tab; every other case opens on Case summary. A ?tab= in the URL does
+  // the same for plain links, e.g. a shared link to a case's MPP tab.
   const location = useLocation();
-  const requestedTab = (location.state as { tab?: string } | null)?.tab;
+  const navState = location.state as { tab?: string; mppPage?: string } | null;
+  const requestedTab =
+    navState?.tab ?? new URLSearchParams(location.search).get('tab') ?? undefined;
+  // A policy assessment's "Find the supporting documents" link opens the case's
+  // MPP tab on its Supporting documents page; the iframe reads the hash.
+  const mppHash = navState?.mppPage === 'supporting-documents' ? '#supporting-documents' : '';
   const [selectedTab, setSelectedTab] = useState(
     requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
   );
@@ -696,12 +702,12 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // case keeps the default page for the tab.
                   src={
                     tasksTab && selectedTab === 'mpp'
-                      ? asset('cdp/marine-plan-policies-sectors.html')
+                      ? asset('cdp/marine-plan-policies-sectors.html') + mppHash
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
                         : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
                           ? asset('cdp/public-register-none.html')
-                          : cdpPages[selectedTab].src
+                          : cdpPages[selectedTab].src + (selectedTab === 'mpp' ? mppHash : '')
                   }
                   title={cdpPages[selectedTab].title}
                 />

@@ -1,5 +1,6 @@
 // src/components/tasks/MarinePlanPolicyTask.tsx
 import { useState } from 'react';
+import type { MouseEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   makeStyles,
@@ -12,6 +13,7 @@ import {
   Body1,
   Button,
   Field,
+  Link,
   Textarea,
 } from '@fluentui/react-components';
 import {
@@ -31,7 +33,19 @@ import {
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { siteCheckCompleteForCase } from '../../utils/publicNoticeEvidence';
-import { MPP_TASK_FORM_CASE_ID, policies, policyIndex } from '../../utils/marinePlanPolicies';
+import {
+  MPP_TASK_FORM_CASE_ID,
+  documentsForPolicy,
+  policies,
+  policyIndex,
+} from '../../utils/marinePlanPolicies';
+
+const CASES_WITH_SUPPORTING_DOCUMENTS = [
+  'MLA/2026/10002',
+  'MLA/2026/10012',
+  'MLA/2026/10013',
+  'MLA/2026/10015',
+];
 
 const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required'];
 
@@ -176,6 +190,17 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
     );
   }
 
+  // These cases' Marine plan policies tab (the CDP iframe) has the Supporting
+  // documents page, so a policy with documents linked to it points the
+  // caseworker there. 10014's tab is a native subgrid with no such page.
+  const hasDocuments =
+    CASES_WITH_SUPPORTING_DOCUMENTS.includes(caseId) &&
+    documentsForPolicy(policy.code).length > 0;
+  const openSupportingDocuments = (e: MouseEvent) => {
+    e.preventDefault();
+    navigate(caseUrl, { state: { tab: 'mpp', mppPage: 'supporting-documents' } });
+  };
+
   const answer = mppForm[policy.code];
   const valueOf = (field: MppField) => answer?.[field] ?? '';
 
@@ -277,6 +302,15 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
                 </div>
               </div>
             </div>
+            {/* Injected HTML in real D365 (a web resource), so it has no label or
+                padlock — just the link, under the applicant's consideration. */}
+            {hasDocuments && (
+              <div>
+                <Link inline href={caseUrl} onClick={openSupportingDocuments}>
+                  Find the supporting documents for this policy
+                </Link>
+              </div>
+            )}
         </div>
       </Card>
 

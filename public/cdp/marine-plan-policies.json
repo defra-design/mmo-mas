@@ -440,7 +440,7 @@
     },
     {
       "filename": "Underwater-noise-assessment.pdf",
-      "type": "Technical / Engineering Report",
+      "type": "Technical or Engineering Report",
       "policies": [
         {
           "code": "SW-UWN-2",
