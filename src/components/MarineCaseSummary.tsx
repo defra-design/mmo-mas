@@ -335,9 +335,15 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // A task form can request a specific landing tab via navigation state (e.g.
   // 10014's MPP assessment returns to the Marine plan policies tab on save so the
   // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
-  // Tasks tab; every other case opens on Case summary.
+  // Tasks tab; every other case opens on Case summary. A ?tab= in the URL does
+  // the same for plain links, e.g. from the design explorations pages.
   const location = useLocation();
-  const requestedTab = (location.state as { tab?: string } | null)?.tab;
+  const searchParams = new URLSearchParams(location.search);
+  const requestedTab =
+    (location.state as { tab?: string } | null)?.tab ?? searchParams.get('tab') ?? undefined;
+  // Design exploration (not MVP): ?mpp=per-policy shows 10015's MPP tab with each
+  // policy listing its supporting documents, from a saved copy in public/mockups.
+  const mppPerPolicyMockup = searchParams.get('mpp') === 'per-policy';
   const [selectedTab, setSelectedTab] = useState(
     requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
   );
@@ -696,7 +702,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // case keeps the default page for the tab.
                   src={
                     tasksTab && selectedTab === 'mpp'
-                      ? asset('cdp/marine-plan-policies-sectors.html')
+                      ? asset(
+                          mppPerPolicyMockup
+                            ? 'mockups/mpp-supporting-documents/review-tab.html'
+                            : 'cdp/marine-plan-policies-sectors.html',
+                        )
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
                         : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
