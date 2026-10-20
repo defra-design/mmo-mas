@@ -339,8 +339,8 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const location = useLocation();
   const navState = location.state as { tab?: string; mppPage?: string } | null;
   const requestedTab = navState?.tab;
-  // A policy assessment's "Find the supporting documents" link opens 10015's MPP
-  // tab on its Supporting documents page; the iframe reads the hash.
+  // A policy assessment's "Find the supporting documents" link opens the case's
+  // MPP tab on its Supporting documents page; the iframe reads the hash.
   const mppHash = navState?.mppPage === 'supporting-documents' ? '#supporting-documents' : '';
   const [selectedTab, setSelectedTab] = useState(
     requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
@@ -705,7 +705,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         ? asset('cdp/site-and-activity-multi.html')
                         : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
                           ? asset('cdp/public-register-none.html')
-                          : cdpPages[selectedTab].src
+                          : cdpPages[selectedTab].src + (selectedTab === 'mpp' ? mppHash : '')
                   }
                   title={cdpPages[selectedTab].title}
                 />

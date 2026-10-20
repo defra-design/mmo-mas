@@ -363,6 +363,15 @@ body {
 }
 
 /* "Supporting documents" nav page: every document and the policies it supports. */
+.mpp__doc-table-wrap {
+  overflow-x: auto;
+}
+
+.mpp__doc-table-wrap:focus-visible {
+  outline: 2px solid #0078d4;
+  outline-offset: 2px;
+}
+
 .mpp__doc-table {
   width: 100%;
   border-collapse: collapse;

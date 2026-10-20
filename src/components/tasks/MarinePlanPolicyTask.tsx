@@ -40,6 +40,13 @@ import {
   policyIndex,
 } from '../../utils/marinePlanPolicies';
 
+const CASES_WITH_SUPPORTING_DOCUMENTS = [
+  'MLA/2026/10002',
+  'MLA/2026/10012',
+  'MLA/2026/10013',
+  'MLA/2026/10015',
+];
+
 const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required'];
 
 // Both assessment fields are business-required on an active policy record. Names
@@ -183,10 +190,12 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
     );
   }
 
-  // 10015's Marine plan policies tab has the Supporting documents page, so a
-  // policy with documents linked to it points the caseworker there.
+  // These cases' Marine plan policies tab (the CDP iframe) has the Supporting
+  // documents page, so a policy with documents linked to it points the
+  // caseworker there. 10014's tab is a native subgrid with no such page.
   const hasDocuments =
-    caseId === 'MLA/2026/10015' && documentsForPolicy(policy.code).length > 0;
+    CASES_WITH_SUPPORTING_DOCUMENTS.includes(caseId) &&
+    documentsForPolicy(policy.code).length > 0;
   const openSupportingDocuments = (e: MouseEvent) => {
     e.preventDefault();
     navigate(caseUrl, { state: { tab: 'mpp', mppPage: 'supporting-documents' } });
