@@ -66,5 +66,23 @@ p { margin: 0; }
 .hint-body { display: flex; flex-direction: column; gap: 12px; min-width: 0; margin-top: 12px; }
 .hint-body ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
 
+/* Interactive task page. The scenario bar is a mockup control, not part of the design. */
+[hidden] { display: none !important; }
+.scenarios { position: sticky; top: 0; z-index: 1; background: #fff; border-top: 8px solid #009d45; border-bottom: 1px solid #e1dfdd; padding: 8px 24px 12px; }
+.scenarios fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.scenarios legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
+.scenarios label { cursor: pointer; }
+.scenarios input { position: absolute; opacity: 0; }
+.scenarios span { display: block; padding: 4px 12px; border: 1px solid #8a8886; border-radius: 4px; background: #fff; }
+.scenarios label:hover span { background: #edebe9; }
+.scenarios input:checked + span { background: #0078d4; border-color: #0078d4; color: #fff; }
+.scenarios input:focus-visible + span { outline: 2px solid #0078d4; outline-offset: 2px; }
+.notification { display: flex; align-items: center; gap: 8px; padding: 6px 12px; margin: 0 -24px; background: #fdf3f4; border-bottom: 1px solid #e0e0e0; }
+.notification-icon { display: grid; place-items: center; flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; background: #bc2f32; color: #fff; font-size: 10px; line-height: 1; }
+.command.live { cursor: pointer; }
+.fields:has(.field-error) { flex-wrap: wrap; }
+.field-error { flex-basis: 100%; margin-top: 4px; color: #bc2f32; font-size: 12px; }
+.field-text { flex: 1; padding-top: 4px; }
+
 @media (max-width: 850px) { aside { width: 205px; } main { padding: 0 16px 20px; } .card { padding: 20px; } .brand { font-size: 14px; } }
 @media (max-width: 620px) { aside { display: none; } header { padding: 0 16px; } .brand span { padding: 0 4px; } .brand { font-size: 12px; } }
