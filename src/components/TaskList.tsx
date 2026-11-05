@@ -108,7 +108,7 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
     },
     {
       key: 'publicRegister',
-      name: 'Public register',
+      name: 'Withholding information',
       status: taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister),
       onClick: open('public-register'),
     },
@@ -174,13 +174,11 @@ export default function TaskList({ caseId, mppInSeparateList = false }: TaskList
     onClick: open('start-consultation'),
   });
 
-  // MLA/2026/10002 trials its own task order, with Public register shown as
-  // Withholding information in this list only.
+  // MLA/2026/10002 trials its own task order.
   const shown = caseId === MPP_TASK_FORM_CASE_ID
     ? MPP_TASK_FORM_ORDER
       .map(key => rows.find(row => row.key === key))
       .filter((row): row is TaskRow => Boolean(row))
-      .map(row => (row.key === 'publicRegister' ? { ...row, name: 'Withholding information' } : row))
     : rows;
 
   return (

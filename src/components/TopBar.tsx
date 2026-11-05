@@ -52,8 +52,9 @@ export default function TopBar() {
           aria-label="Back to home"
           // Hard-navigate to the domain root rather than router navigate('/'),
           // which would keep a frozen iteration's basename (e.g. /iteration-1/)
-          // and trap the user in that snapshot instead of the live index.
-          onClick={() => { window.location.href = '/'; }}
+          // and trap the user in that snapshot instead of the live index. Uses the
+          // top window so a design exploration framing the app is left too.
+          onClick={() => { window.top!.location.href = '/'; }}
         >
           {Array.from({ length: 9 }).map((_, i) => (
             <span key={i} className={classes.waffleDot} />

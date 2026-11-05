@@ -1,8 +1,7 @@
 // src/components/tasks/WithholdDecision.tsx
-// One ground for withholding information from the public register — commercial
-// confidentiality or national security. A request can raise either or both, so
-// the same block is rendered once per ground raised, pointed at that ground's
-// own columns via `fields`.
+// One reason for withholding information from the public register, with the
+// applicant's request for it (`children`) above the caseworker's decision. The
+// block is pointed at that reason's own columns via `fields`.
 //
 // The decision is a Choice column. Its guidance is visible as soon as the ground
 // is selected, before the caseworker makes that decision. Which Multiline Text
@@ -48,6 +47,8 @@ interface WithholdDecisionProps {
   onChange: (field: FieldKey, value: string) => void;
   /** Full-width guidance under the decision field (custom HTML, as on WFD). */
   guidance?: ReactNode;
+  /** The applicant's read-only request, shown above the decision. */
+  children?: ReactNode;
 }
 
 export default function WithholdDecision({
@@ -58,6 +59,7 @@ export default function WithholdDecision({
   errorFor,
   onChange,
   guidance,
+  children,
 }: WithholdDecisionProps) {
   const styles = useStyles();
   const agree = values[fields.agree];
@@ -67,6 +69,8 @@ export default function WithholdDecision({
       <Text block className={styles.heading}>
         {heading}
       </Text>
+
+      {children}
 
       <TaskRow label="Do you agree with the applicant's request?" required locked={locked} top>
         <TaskChoice
