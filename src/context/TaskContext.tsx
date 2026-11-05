@@ -72,23 +72,18 @@ export interface PrepForConsulteeMeta {
   consultationPeriod: string;
 }
 
-// Public register task form. `relatesTo`, the two `*Agree` decisions and
-// `personalInfo` are OOB Choice columns; the rest are Multiline Text columns
-// revealed by business rules on those choices (see publicRegisterFields).
-// Commercial confidentiality and national security are assessed separately
-// because a request can raise either or both, and each ground gets its own
-// decision, applicant wording and internal rationale. `completed` is a Two
-// Options column that decides the status on save (as on Prep for consultee).
+// Withholding information task form (stored under its old Public register key).
+// `commercialAgree` and `personalInfo` are OOB Choice columns; the rest are
+// Multiline Text columns revealed by business rules on those choices (see
+// publicRegisterFields). The applicant chose the reason for withholding, so the
+// live cases only assess commercial or industrial confidentiality. `completed` is
+// a Two Options column that decides the status on save (as on Prep for consultee).
 // The redaction link itself is a URL column on the case, not a caseworker
 // answer, so it isn't stored here.
 export interface PublicRegisterForm {
-  relatesTo: string;
   commercialAgree: string;
   commercialApplicantText: string;
   commercialRationale: string;
-  securityAgree: string;
-  securityApplicantText: string;
-  securityRationale: string;
   personalInfo: string;
   personalInfoDetail: string;
   completed: boolean;
@@ -231,13 +226,9 @@ const initialState: PersistedState = {
   consultees: {},
   prepForConsulteeMeta: { completed: false, consultationPeriod: '' },
   publicRegisterForm: {
-    relatesTo: '',
     commercialAgree: '',
     commercialApplicantText: '',
     commercialRationale: '',
-    securityAgree: '',
-    securityApplicantText: '',
-    securityRationale: '',
     personalInfo: '',
     personalInfoDetail: '',
     completed: false,
@@ -519,7 +510,7 @@ export function TaskProvider({ children }: PropsWithChildren) {
         consultationType: 'Request for advice', notes: 'Please provide advice on the proposed works.' }] },
       prepForConsulteeMeta: { completed: true, consultationPeriod: '14 days' },
       publicRegisterForm: { ...initialState.publicRegisterForm, completed: true, personalInfo: 'No',
-        relatesTo: 'Commercial or industrial confidentiality', commercialAgree: 'Agree - withhold all of it',
+        commercialAgree: 'Agree - withhold all of it',
         commercialRationale: 'Commercially sensitive information checked and redacted for this example.' },
       siteNoticeForm: { needsNotice: NO_NOTICES, rationale: 'No public notice is required for this example.', summary: '', groups: '' },
       consultations, transfers, rejections,

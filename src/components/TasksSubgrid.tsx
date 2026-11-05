@@ -95,7 +95,7 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
     },
     {
       key: 'publicRegister',
-      name: 'Public register',
+      name: 'Withholding information',
       status: taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister),
       slug: 'public-register',
     },

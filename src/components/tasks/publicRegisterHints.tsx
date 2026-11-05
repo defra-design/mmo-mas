@@ -1,5 +1,5 @@
 // src/components/tasks/publicRegisterHints.tsx
-// Caseworker guidance shown full-width under Public register fields. Same custom
+// Caseworker guidance shown full-width under Withholding information fields. Same custom
 // HTML injection as the WFD excluded-activity list — not an OOB field description.
 //
 // `disclosure` collapses the guidance behind a "Help with ..." link instead of
@@ -69,31 +69,6 @@ export function CommercialRationaleHint({ disclosure }: HintProps) {
         operations. Be satisfied that the information is genuinely confidential, that
         confidentiality is protected by law and that disclosure would harm a legitimate
         commercial interest.
-      </p>
-    </TaskHint>
-  );
-}
-
-export function SecurityRationaleHint({ disclosure }: HintProps) {
-  return (
-    <TaskHint title={disclosure ? 'Help with national security' : undefined}>
-      <p>Withhold information if publishing it would put national security at risk. This includes a likely risk to:</p>
-      <ul>
-        <li>national security</li>
-        <li>defence</li>
-        <li>critical national infrastructure</li>
-        <li>national resilience</li>
-        <li>protection against hostile acts</li>
-      </ul>
-      <p>
-        Examples include defence and military information, critical national infrastructure,
-        security arrangements, sensitive location information, resilience and vulnerability
-        information.
-      </p>
-      <p>
-        Do not withhold information solely because it's controversial, likely to attract
-        public scrutiny or operationally sensitive without a corresponding national security
-        risk.
       </p>
     </TaskHint>
   );

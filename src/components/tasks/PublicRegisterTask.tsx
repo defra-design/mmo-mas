@@ -1,10 +1,13 @@
 // src/components/tasks/PublicRegisterTask.tsx
-// Task form for "Public register". Section 1 is the applicant's submitted answers
-// (read-only columns on the case). Section 2 is the caseworker's assessment: an
-// OOB Choice column for the grounds raised, which reveals a decision block per
-// ground. Section 3 is the personal-information check, and section 4 the URL column that
-// launches the redaction journey on CDP. Every show/hide here is an OOB business
-// rule on a choice field, so none of it needs code in the real build.
+// Task form for "Withholding information" (formerly Public register). Section 1 is
+// the applicant's answers: whether they asked for anything to be withheld and the
+// reason they chose (read-only columns on the case). The live cases use the
+// commercial or industrial confidentiality reason, so section 2 shows the
+// applicant's explanation with the caseworker's decision on it. The national
+// security variations are mockups only (public/mockups/withhold-information).
+// Then come the personal-information check and the URL column that launches the
+// redaction journey on CDP. Every show/hide here is an OOB business rule on a
+// choice field or on the applicant's own answer, so none of it needs code.
 // A Two Options checkbox marks the task complete: ticked -> Done on save,
 // unticked -> In progress (OOB Task activity statuses), as on Prep for consultee.
 import { useState } from 'react';
@@ -27,19 +30,10 @@ import TaskChoice from './TaskChoice';
 import TaskTextarea from './TaskTextarea';
 import WithholdDecision from './WithholdDecision';
 import UrlField from './UrlField';
-import {
-  CommercialRationaleHint,
-  PersonalInfoHint,
-  SecurityRationaleHint,
-} from './publicRegisterHints';
+import { CommercialRationaleHint, PersonalInfoHint } from './publicRegisterHints';
 import {
   FIELD_NAMES,
-  RELATES_COMMERCIAL,
-  RELATES_SECURITY,
-  relatesOptions,
   requiredFields,
-  showsCommercial,
-  showsSecurity,
   yesNoOptions,
   YES,
   type FieldKey,
@@ -80,17 +74,19 @@ const useStyles = makeStyles({
 });
 
 // The applicant's submitted answer, which arrives with the application from CDP.
+// Matches the Withholding information tab (public/cdp/public-register.html).
+const REASON = 'Commercial or industrial confidentiality';
 const APPLICANT_REQUEST =
-  'We would like two things withheld. First, the fees and financial figures in our proposed ' +
-  'works summary, because they are commercially sensitive. A second operator is expected to ' +
-  'bid for a concession in the same harbour next year, and if they can see what we are ' +
-  'paying and what we expect to take they can pitch against us. Second, we would like the ' +
-  'pontoon dimensions, the construction method and our working hours withheld. We spent two ' +
-  'years getting this set-up right and we do not want another hire business copying it.';
+  'We would like the fees and financial figures in our activity description withheld. A ' +
+  'second operator is expected to bid for a concession in the same harbour next year, and ' +
+  'if they can see what we are paying and what we expect to take they can pitch against us. ' +
+  'We would also like the pontoon dimensions and fixing method shown on our construction ' +
+  'drawing withheld. We spent two years getting this set-up right and we do not want ' +
+  'another hire business copying it.';
 
 // Displayed as the OOB URL column value. The real CDP journey isn't live, so
 // the click target is the GOV.UK prototype instead (prototype-only split).
-// Cases whose Public register guidance collapses behind "Help with ..."
+// Cases whose Withholding information guidance collapses behind "Help with ..."
 // disclosures rather than sitting open on the form. Both presentations are in the
 // prototype so the round of testing on 10014 (open) and 10015 (disclosure) can
 // compare them; the guidance copy itself is identical either way. 10013 has no
@@ -98,8 +94,8 @@ const APPLICANT_REQUEST =
 const GUIDANCE_AS_DISCLOSURE = ['MLA/2026/10013', 'MLA/2026/10015'];
 
 // Cases where the applicant answered "No" to the withholding question. There is
-// then nothing to assess: the reason field and the whole assessment section come
-// off the form and the sections below renumber. Modelled as a business rule on
+// then nothing to assess: the reason field and the decision section come off the
+// form. Modelled as a business rule on
 // the applicant's own answer, exactly like every other reveal on this form.
 const NO_WITHHOLD_REQUEST = ['MLA/2026/10013'];
 
@@ -122,7 +118,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
     taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister) === 'Cannot start yet';
   const hideGuidance = GUIDANCE_AS_DISCLOSURE.includes(caseId);
   // Did the applicant ask for anything to be withheld? If not there is no
-  // assessment to make, and sections 3 and 4 move up to 2 and 3.
+  // decision to make.
   const assessed = !NO_WITHHOLD_REQUEST.includes(caseId);
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
   const [errors, setErrors] = useState<FieldKey[]>([]);
@@ -162,7 +158,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
 
       <Card className={styles.headerCard}>
         <Title3>
-          Public register
+          Withholding information
           <span className={styles.savedLabel}>- {saved.publicRegister ? 'Saved' : 'Unsaved'}</span>
         </Title3>
         <div><Body1>Task</Body1></div>
@@ -174,63 +170,34 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           <TaskRow label="Did the applicant ask for information to be withheld?" locked>
             <TaskValue>{assessed ? 'Yes' : 'No'}</TaskValue>
           </TaskRow>
-          {/* Nothing was requested, so the applicant never gave a reason. */}
+          {/* Nothing was requested, so the applicant never chose a reason. */}
           {assessed && (
-            <TaskRow label="What they want withheld and why" locked top>
-              <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
+            <TaskRow label="Their reason" locked>
+              <TaskValue>{REASON}</TaskValue>
             </TaskRow>
           )}
         </div>
       </Card>
 
-      {/* No request to assess when the applicant answered "No". */}
+      {/* No request to decide on when the applicant answered "No". */}
       {assessed && (
-        <>
-          <Card className={styles.sectionCard}>
-            <Text block className={styles.sectionHeading}>Your assessment</Text>
-            <TaskRow label="What does the request relate to?" required locked={locked} top>
-              <TaskChoice
-                value={form.relatesTo}
-                options={relatesOptions}
-                onSelect={v => update('relatesTo', v)}
-                locked={locked}
-                error={errorFor('relatesTo')}
-              />
-            </TaskRow>
-          </Card>
-
-          {showsCommercial(form.relatesTo) && (
-            <WithholdDecision
-              heading={RELATES_COMMERCIAL}
-              locked={locked}
-              fields={{
-                agree: 'commercialAgree',
-                applicantText: 'commercialApplicantText',
-                rationale: 'commercialRationale',
-              }}
-              values={form}
-              errorFor={errorFor}
-              onChange={update}
-              guidance={<CommercialRationaleHint disclosure={hideGuidance} />}
-            />
-          )}
-
-          {showsSecurity(form.relatesTo) && (
-            <WithholdDecision
-              heading={RELATES_SECURITY}
-              locked={locked}
-              fields={{
-                agree: 'securityAgree',
-                applicantText: 'securityApplicantText',
-                rationale: 'securityRationale',
-              }}
-              values={form}
-              errorFor={errorFor}
-              onChange={update}
-              guidance={<SecurityRationaleHint disclosure={hideGuidance} />}
-            />
-          )}
-        </>
+        <WithholdDecision
+          heading={REASON}
+          locked={locked}
+          fields={{
+            agree: 'commercialAgree',
+            applicantText: 'commercialApplicantText',
+            rationale: 'commercialRationale',
+          }}
+          values={form}
+          errorFor={errorFor}
+          onChange={update}
+          guidance={<CommercialRationaleHint disclosure={hideGuidance} />}
+        >
+          <TaskRow label="What they want withheld and why" locked top>
+            <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
+          </TaskRow>
+        </WithholdDecision>
       )}
 
       <Card className={styles.sectionCard}>

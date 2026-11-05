@@ -252,7 +252,7 @@ const cdpPages: Record<string, { src: string; title: string }> = {
   mpp: { src: asset('cdp/marine-plan-policies.html'), title: 'Marine plan policies' },
   wfd: { src: asset('cdp/water-framework-directive.html'), title: 'Water Framework Directive' },
   other: { src: asset('cdp/other-permissions.html'), title: 'Other permissions' },
-  'public-register': { src: asset('cdp/public-register.html'), title: 'Public register' },
+  'public-register': { src: asset('cdp/public-register.html'), title: 'Withholding information' },
 };
 
 // The case tabs, in order. Driven by data so the overflow menu can list the
@@ -264,7 +264,7 @@ const tabs: { id: string; name: string }[] = [
   { id: 'mpp', name: 'Marine plan policies' },
   { id: 'wfd', name: 'Water Framework Directive' },
   { id: 'other', name: 'Other permissions' },
-  { id: 'public-register', name: 'Public register' },
+  { id: 'public-register', name: 'Withholding information' },
 ];
 
 // A single overflowed tab, shown as a menu item; visible tabs render nothing.
@@ -347,6 +347,9 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // Design exploration (not MVP): ?mpp=per-policy shows 10015's MPP tab with each
   // policy listing its supporting documents, from a saved copy in public/mockups.
   const mppPerPolicyMockup = searchParams.get('mpp') === 'per-policy';
+  // Design exploration: ?withhold=mockup shows the Withholding information tab
+  // with a switch for each answer the applicant could give.
+  const withholdMockup = searchParams.get('withhold') === 'mockup';
   const [selectedTab, setSelectedTab] = useState(
     requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
   );
@@ -701,7 +704,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // 10015 shows the sector-grouped MPP view (one page per sector);
                   // 10002 (Teignmouth) shows the multi-site, multi-activity Sites and
                   // activities view; 10013's applicant asked for nothing to be withheld,
-                  // so its Public register tab answers No with no follow-up — every other
+                  // so its Withholding information tab answers No with no follow-up — every other
                   // case keeps the default page for the tab.
                   src={
                     tasksTab && selectedTab === 'mpp'
@@ -710,9 +713,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         : asset('cdp/marine-plan-policies-sectors.html') + mppHash
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
-                        : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
-                          ? asset('cdp/public-register-none.html')
-                          : cdpPages[selectedTab].src + (selectedTab === 'mpp' ? mppHash : '')
+                        : withholdMockup && selectedTab === 'public-register'
+                          ? asset('mockups/withhold-information/review-tab.html')
+                          : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
+                            ? asset('cdp/public-register-none.html')
+                            : cdpPages[selectedTab].src + (selectedTab === 'mpp' ? mppHash : '')
                   }
                   title={cdpPages[selectedTab].title}
                 />
