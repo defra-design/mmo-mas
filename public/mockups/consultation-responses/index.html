@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consultation responses mockups</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; border-top: 8px solid #009d45; color: #323130; background: #fff; font: 16px/1.6 'Segoe UI', Arial, sans-serif; }
+    main { max-width: 840px; margin: 0 auto; padding: 40px 24px 64px; }
+    a { color: #0078d4; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { text-decoration: none; }
+    a:focus-visible { outline: 3px solid #0078d4; outline-offset: 4px; }
+    .back { position: relative; display: inline-flex; align-items: center; }
+    .back svg { position: absolute; right: calc(100% + 4px); top: 50%; display: block; width: 20px; height: 20px; transform: translateY(-50%) rotate(180deg); }
+    h1 { font-size: 32px; line-height: 1.25; margin: 32px 0 24px; }
+    h2 { font-size: 24px; line-height: 1.3; margin: 40px 0 16px; }
+    h1, h2 { font-weight: 600; }
+    p { margin: 0 0 16px; }
+    ul { padding-left: 24px; margin: 0 0 16px; }
+    li { margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../index.html"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7.65 4.15c.2-.2.5-.2.7 0l5.49 5.46c.21.22.21.57 0 .78l-5.49 5.46a.5.5 0 0 1-.7-.7L12.8 10 7.65 4.85a.5.5 0 0 1 0-.7Z" /></svg><span>Back to design explorations</span></a>
+    <h1>Consultation responses mockups</h1>
+    <p>While a case is in consultation, the caseworker needs to see who has responded, read the advice and the public's comments as they come in, and extend the deadline if a consultee asks for more time (ML-1712).</p>
+    <p>The responses come from the consultation service on CDP, so they are shown read-only in a new Consultation responses tab, like the application. Extending the deadline is something the caseworker does, so it is an optional task.</p>
+    <p>Both use MLA/2026/10006, Hayling Island groyne repairs, with the application from the GOV.UK prototype. Use the bar at the top of each mockup to switch the layout and scenario. The bar sits outside the case, so it can be left out of screenshots.</p>
+    <p><a href="tab.html">Consultation responses tab – MLA/2026/10006</a></p>
+    <p><a href="task.html">Extend consultation deadline task – MLA/2026/10006</a></p>
+
+    <h2>What the mockups show</h2>
+    <ul>
+      <li>The tab has two layouts: everything on one page, or a nav with a page for each consultee, as on Marine plan policies and Other permissions.</li>
+      <li>Only requests for advice can be outstanding or overdue. A response to an application notification is optional.</li>
+      <li>The task has two layouts: the extension fields on the task itself, or an Extensions subgrid where Add extension opens a quick create form.</li>
+      <li>The case is laid out like MLA/2026/10015: a full-width Tasks tab first, then Case summary, then Consultation responses, so the new tab is in view rather than in the overflow menu.</li>
+      <li>The task opens from the bottom of the Tasks subgrid, where it shows as Optional. The other tasks and the marine plan policies show as Done because the case is in consultation.</li>
+    </ul>
+
+    <h2>D365 notes</h2>
+    <ul>
+      <li>Saving an extension needs a Power Automate flow to change the case's consultation deadline. With the fields on the task, the flow would also create the extension record and clear the fields.</li>
+      <li>Showing the new deadline as soon as Extend by is picked needs a small form script. Without one, it would only appear after saving.</li>
+      <li>On the task, the extension fields are only required once one of them is filled in (a business rule), so the task can be opened and closed without extending.</li>
+    </ul>
+
+    <h2>Questions to answer</h2>
+    <ul>
+      <li>Does an extension also apply to public comments? In the mockups, public comments still close on the original date.</li>
+      <li>Is an extension added to the current deadline, or to today's date when the deadline has already passed? The mockups add it to the current deadline.</li>
+      <li>Will CDP send response statuses back to D365, so the case list can show outstanding or overdue advice?</li>
+    </ul>
+  </main>
+</body>
+</html>

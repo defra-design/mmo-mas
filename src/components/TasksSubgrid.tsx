@@ -5,7 +5,8 @@ import { startConsultationStatus } from '../utils/startConsultation';
 // in its own right-hand column, matching MarinePlanPoliciesSubgrid. The narrow
 // two-line reflow (name over status) lives in TaskList and is only correct in
 // the rail/card; a subgrid on a full-width form tab is a real table.
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { asset } from '../utils/asset';
 import {
   makeStyles,
   mergeClasses,
@@ -67,7 +68,7 @@ const useStyles = makeStyles({
 interface TaskRow {
   key: string;
   name: string;
-  status: TaskStatus;
+  status: TaskStatus | 'Optional';
   slug: string;
 }
 
@@ -134,6 +135,15 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
     slug: 'start-consultation',
   });
 
+  // Design exploration (?consultation=mockup): the case is in consultation, so the
+  // receive and assess tasks are all done and the optional Extend consultation
+  // deadline task sits at the bottom. It opens the static task mockup.
+  const consultationMockup = new URLSearchParams(useLocation().search).get('consultation') === 'mockup';
+  if (consultationMockup) {
+    rows.forEach(row => { row.status = 'Done'; });
+    rows.push({ key: 'extendConsultation', name: 'Extend consultation deadline', status: 'Optional', slug: '' });
+  }
+
   return (
     <div>
       <Text as="h2" className={styles.heading}>Tasks</Text>
@@ -151,8 +161,14 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
           </TableHeader>
           <tbody>
             {rows.map(row => {
-              const openTask = () =>
+              const openTask = () => {
+                if (row.key === 'extendConsultation') {
+                  // The case sits in an iframe on the mockup page, so leave it for the task mockup.
+                  window.top!.location.href = asset('mockups/consultation-responses/task.html') + window.top!.location.hash;
+                  return;
+                }
                 navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/${row.slug}`);
+              };
               return (
                 <TableRow
                   key={row.key}

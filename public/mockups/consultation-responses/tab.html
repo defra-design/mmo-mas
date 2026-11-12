@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consultation responses tab</title>
+  <link rel="stylesheet" href="scenarios.css">
+  <style>
+    body { margin: 0; height: 100vh; display: flex; flex-direction: column; }
+    iframe { flex: 1; width: 100%; border: 0; display: block; }
+  </style>
+</head>
+<body>
+  <!-- Not part of the design: switches the layout and scenario. The case underneath
+       is the real app, so the bar stays out of screenshots of it. -->
+  <form class="scenarios" id="scenarios" aria-label="Mockup controls">
+    <a class="scenarios-back" href="index.html">Back to consultation responses mockups</a>
+    <div class="scenarios-groups">
+      <fieldset>
+        <legend>Layout of the tab</legend>
+        <label><input type="radio" name="layout" value="page" checked><span>One page</span></label>
+        <label><input type="radio" name="layout" value="nav"><span>Nav by consultee</span></label>
+      </fieldset>
+      <fieldset>
+        <legend>Scenario</legend>
+        <label><input type="radio" name="scenario" value="due" checked><span>Before the deadline</span></label>
+        <label><input type="radio" name="scenario" value="passed"><span>Deadline passed</span></label>
+        <label><input type="radio" name="scenario" value="extended"><span>Deadline extended</span></label>
+      </fieldset>
+    </div>
+  </form>
+  <iframe id="case" title="Case MLA/2026/10006"></iframe>
+  <script>
+    // The tab content (review-tab.html) sits in the case's own iframe, inside the
+    // case frame here. It reads the bar when it loads, and a change here passes
+    // the new choice down through its hash as "layout/scenario".
+    // ?tab=tasks opens the case on its Tasks tab, for the task's Save and close.
+    (function () {
+      var bar = document.getElementById('scenarios');
+      function value(name) { return bar.querySelector('[name="' + name + '"]:checked').value; }
+      function key() { return value('layout') + '/' + value('scenario'); }
+
+      location.hash.slice(1).split('/').forEach(function (v) {
+        var input = bar.querySelector('input[value="' + v + '"]');
+        if (input) input.checked = true;
+      });
+
+      var tab = new URLSearchParams(location.search).get('tab') === 'tasks' ? 'tasks' : 'consultation';
+      document.getElementById('case').src =
+        '../../receive-assess/cases/MLA%2F2026%2F10006?tab=' + tab + '&consultation=mockup';
+
+      bar.addEventListener('change', function () {
+        history.replaceState(null, '', location.search + '#' + key());
+        try {
+          var inner = document.getElementById('case').contentDocument.querySelector('iframe');
+          if (inner) inner.contentWindow.location.hash = key();
+        } catch (e) { /* the case isn't loaded yet; the tab reads the bar when it is */ }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+/* DESIGN EXPLORATION — styles for the Consultation responses tab. Kept here, not
+   in cdp.css, until the tab is built for real. Everything is scoped to .consult. */
+
+.consult .fields { margin-bottom: 32px; }
+.consult .field__label { flex-basis: 200px; }
+
+/* Three levels, as the Marine plan policies sector view (MLA/2026/10015): the
+   tab title 20/600, a part of the page 20/400 (larger but lighter, so it doesn't
+   read as one more consultee), and each consultee or commenter 16/600. */
+.consult__heading {
+  margin: 40px 0 16px;
+  font-size: 20px;
+  font-weight: 400;
+}
+.consult__heading:first-child { margin-top: 0; }
+
+/* Between the parts of the one page layout: the divider between sites on the
+   Sites and activities tab (.site-divider), with the heading straight after it. */
+.consult .site-divider + .consult__heading { margin-top: 0; margin-bottom: 24px; }
+
+/* Nav layout: every pane title is a group heading, as the sector view. */
+.consult .mpp__detail-title,
+.consult__pane--consultee .consult__item-title {
+  margin-bottom: 24px;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+/* Overview table: looks like a D365 grid but is plain HTML from CDP. */
+.consult__table-wrap { overflow-x: auto; }
+.consult__table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+}
+.consult__table th,
+.consult__table td {
+  padding: 8px 16px 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.4;
+}
+.consult__table thead th { font-weight: 600; }
+.consult__table td:first-child { width: 40%; }
+
+.consult__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+  color: #0078d4;
+  cursor: pointer;
+  text-decoration: none;
+}
+.consult__link:hover { text-decoration: underline; }
+
+/* Status: the same tags as the status column in the Marine licence cases list
+   (.tag / .tag-mla-* in src/App.css), so the two read alike. Awaiting response
+   takes the Awaiting applicant yellow, as both wait on someone outside MMO. */
+.tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: nowrap;
+  background: #e5e6e7;
+  color: #282d30;
+}
+.tag--awaiting { background: #fdf2cc; color: #5c4400; }
+.tag--responded { background: #d1e7dd; color: #005a30; }
+.tag--overdue { background: #f4cdc6; color: #2a0b06; }
+
+/* One consultee's response, or one public comment. */
+.consult__item + .consult__item {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #e0e0e0;
+}
+.consult__item-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.consult__item .fields { gap: 12px; margin-bottom: 0; }
+
+/* Nav layout */
+.consult .mpp__nav { flex-basis: 280px; }
+.consult .mpp__group-title { font-size: 14px; }
+.consult__overdue { display: block; color: #b10e1c; }
+
+/* One page layout: contents list and Back to top links. */
+.consult__contents { margin: 0 0 32px; }
+.consult__contents-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.consult__contents ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.consult__top { margin: 16px 0 0; }
+.consult__top .consult__link { display: inline-flex; align-items: center; gap: 6px; }
+.consult__top svg { width: 14px; height: 14px; }
+.consult [tabindex="-1"]:focus { outline: none; }
+
+/* Overview fields: one column like the other CDP tabs, with the tighter 12px
+   gap the consultee sections use. Dates first, then the responses. */
+.consult .consult__summary { gap: 12px; margin-bottom: 32px; }

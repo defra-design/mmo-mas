@@ -177,9 +177,11 @@ const useStyles = makeStyles({
 
 interface MarinePlanPoliciesSubgridProps {
   caseId: string;
+  /** Every policy shows Done, e.g. on a case already in consultation (mockup only). */
+  allDone?: boolean;
 }
 
-export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPoliciesSubgridProps) {
+export default function MarinePlanPoliciesSubgrid({ caseId, allDone = false }: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();
   const grid = useSubgridStyles();
   const navigate = useNavigate();
@@ -193,7 +195,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPolicies
 
   const taskStatus = taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies);
   const locked = !siteCheckCompleteForCase(caseId, tasks);
-  const allPoliciesDone = !locked && taskStatus === 'Done';
+  const allPoliciesDone = allDone || (!locked && taskStatus === 'Done');
 
   // Build the display rows (with the computed lifecycle status) once, then filter
   // and sort them so both operate on what the caseworker actually sees.
