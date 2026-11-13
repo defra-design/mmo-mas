@@ -253,6 +253,11 @@ const cdpPages: Record<string, { src: string; title: string }> = {
   wfd: { src: asset('cdp/water-framework-directive.html'), title: 'Water Framework Directive' },
   other: { src: asset('cdp/other-permissions.html'), title: 'Other permissions' },
   'public-register': { src: asset('cdp/public-register.html'), title: 'Withholding information' },
+  // Design exploration only: the tab is added by ?consultation=mockup (see below).
+  consultation: {
+    src: asset('mockups/consultation-responses/review-tab.html'),
+    title: 'Consultation responses',
+  },
 };
 
 // The case tabs, in order. Driven by data so the overflow menu can list the
@@ -350,8 +355,12 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // Design exploration: ?withhold=mockup shows the Withholding information tab
   // with a switch for each answer the applicant could give.
   const withholdMockup = searchParams.get('withhold') === 'mockup';
+  // Design exploration: ?consultation=mockup lays the case out like 10015 (a
+  // full-width Tasks tab first) and adds the Consultation responses tab after
+  // Case summary, whose CDP page lives in public/mockups/consultation-responses.
+  const consultationMockup = searchParams.get('consultation') === 'mockup';
   const [selectedTab, setSelectedTab] = useState(
-    requestedTab ?? (caseId === 'MLA/2026/10015' ? 'tasks' : 'summary')
+    requestedTab ?? (caseId === 'MLA/2026/10015' || consultationMockup ? 'tasks' : 'summary')
   );
 
   // Which case-action dialog is open, if any. Each dialog owns its own fields and
@@ -377,7 +386,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const mppRailList = caseId === 'MLA/2026/10012';
   const mppFullWidth = caseId === 'MLA/2026/10013';
   const mppTabList = caseId === 'MLA/2026/10014';
-  const tasksTab = caseId === 'MLA/2026/10015';
+  const tasksTab = caseId === 'MLA/2026/10015' || consultationMockup;
   const mppAsList = mppRailList || mppFullWidth || mppTabList || tasksTab;
   // 10013 shows the Tasks list in the persistent rail (across every tab) even
   // though it also has the full-width MPP subgrid stacked under the Case summary.
@@ -385,7 +394,12 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const showRail = tasksOnAllTabs && !tasksTab;
 
   // 10015 prepends a dedicated "Tasks" tab ahead of Case summary.
-  const caseTabs = tasksTab ? [{ id: 'tasks', name: 'Tasks' }, ...tabs] : tabs;
+  const caseTabs = [
+    ...(tasksTab ? [{ id: 'tasks', name: 'Tasks' }] : []),
+    ...tabs.slice(0, 1),
+    ...(consultationMockup ? [{ id: 'consultation', name: 'Consultation responses' }] : []),
+    ...tabs.slice(1),
+  ];
 
   // 10014's Marine plan policies tab is a native subgrid, not the CDP iframe.
   const nativeMppTab = mppTabList && selectedTab === 'mpp';
@@ -410,7 +424,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const data = {
     reference: caseId,
     title: details?.title ?? row?.project ?? 'Marine licence case',
-    status: details?.status ?? 'Allocated',
+    status: details?.status ?? row?.status ?? 'Allocated',
     assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
     applicationType: details?.applicationType ?? 'Marine licence application',
@@ -559,7 +573,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   <TasksSubgrid caseId={caseId} />
                 </Card>
                 <Card className={mergeClasses(styles.mppFullWidthCard, styles.stackedCard)}>
-                  <MarinePlanPoliciesSubgrid caseId={caseId} />
+                  <MarinePlanPoliciesSubgrid caseId={caseId} allDone={consultationMockup} />
                 </Card>
               </div>
             )}

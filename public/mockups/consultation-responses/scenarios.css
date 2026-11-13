@@ -1,0 +1,16 @@
+/* The bar that switches the applicant's answers on the interactive mockups. It is a
+   mockup control, not part of the design. Copied from the withhold information mockups. */
+.scenarios { position: sticky; top: 0; z-index: 1; background: #fff; border-top: 8px solid #009d45; border-bottom: 1px solid #e1dfdd; padding: 8px 24px 12px; color: #323130; font: 14px/1.5 'Segoe UI', Arial, sans-serif; }
+.scenarios fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.scenarios legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
+.scenarios label { cursor: pointer; }
+.scenarios input { position: absolute; opacity: 0; }
+.scenarios span { display: block; padding: 4px 12px; border: 1px solid #8a8886; border-radius: 4px; background: #fff; }
+.scenarios label:hover span { background: #edebe9; }
+.scenarios input:checked + span { background: #0078d4; border-color: #0078d4; color: #fff; }
+.scenarios input:focus-visible + span { outline: 2px solid #0078d4; outline-offset: 2px; }
+.scenarios-back { display: inline-block; margin-bottom: 4px; color: #0078d4; text-decoration: underline; text-underline-offset: 3px; }
+.scenarios-back::before { content: '‹'; margin-right: 6px; text-decoration: none; display: inline-block; }
+.scenarios-back:hover { text-decoration: none; }
+.scenarios-back:focus-visible { outline: 2px solid #0078d4; outline-offset: 2px; }
+.scenarios-groups { display: flex; flex-wrap: wrap; column-gap: 32px; row-gap: 4px; }
