@@ -163,8 +163,11 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
             {rows.map(row => {
               const openTask = () => {
                 if (row.key === 'extendConsultation') {
-                  // The case sits in an iframe on the mockup page, so leave it for the task mockup.
-                  window.top!.location.href = asset('mockups/consultation-responses/task.html') + window.top!.location.hash;
+                  // The case sits in an iframe on the mockup page, so leave it for the task
+                  // mockup, in the version (?task=) it was last opened from.
+                  const layout = new URLSearchParams(window.top!.location.search).get('task') ?? 'page';
+                  window.top!.location.href = asset('mockups/consultation-responses/task.html') +
+                    `?layout=${encodeURIComponent(layout)}` + window.top!.location.hash;
                   return;
                 }
                 navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/${row.slug}`);
