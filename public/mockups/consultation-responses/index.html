@@ -30,29 +30,6 @@
     <p>Both use MLA/2026/10006, Hayling Island groyne repairs, with the application from the GOV.UK prototype. Use the bar at the top of each mockup to switch the layout and scenario. The bar sits outside the case, so it can be left out of screenshots.</p>
     <p><a href="tab.html">Consultation responses tab – MLA/2026/10006</a></p>
     <p><a href="task.html">Extend consultation deadline task – MLA/2026/10006</a></p>
-
-    <h2>What the mockups show</h2>
-    <ul>
-      <li>The tab has two layouts: everything on one page, or a nav with a page for each consultee, as on Marine plan policies and Other permissions.</li>
-      <li>Only requests for advice can be outstanding or overdue. A response to an application notification is optional.</li>
-      <li>The task has two layouts: the extension fields on the task itself, or an Extensions subgrid where Add extension opens a quick create form.</li>
-      <li>The case is laid out like MLA/2026/10015: a full-width Tasks tab first, then Case summary, then Consultation responses, so the new tab is in view rather than in the overflow menu.</li>
-      <li>The task opens from the bottom of the Tasks subgrid, where it shows as Optional. The other tasks and the marine plan policies show as Done because the case is in consultation.</li>
-    </ul>
-
-    <h2>D365 notes</h2>
-    <ul>
-      <li>Saving an extension needs a Power Automate flow to change the case's consultation deadline. With the fields on the task, the flow would also create the extension record and clear the fields.</li>
-      <li>Showing the new deadline as soon as Extend by is picked needs a small form script. Without one, it would only appear after saving.</li>
-      <li>On the task, the extension fields are only required once one of them is filled in (a business rule), so the task can be opened and closed without extending.</li>
-    </ul>
-
-    <h2>Questions to answer</h2>
-    <ul>
-      <li>Does an extension also apply to public comments? In the mockups, public comments still close on the original date.</li>
-      <li>Is an extension added to the current deadline, or to today's date when the deadline has already passed? The mockups add it to the current deadline.</li>
-      <li>Will CDP send response statuses back to D365, so the case list can show outstanding or overdue advice?</li>
-    </ul>
   </main>
 </body>
 </html>
