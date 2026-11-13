@@ -8,8 +8,7 @@
   <link rel="stylesheet" href="scenarios.css">
 </head>
 <body>
-  <!-- Not part of the design: switches the scenario. Which version of the task
-       this is comes from ?layout= (fields or quick-create), set by the link in. -->
+  <!-- Not part of the design: switches the scenario. -->
   <form class="scenarios" id="scenarios" aria-label="Mockup controls">
     <a class="scenarios-back" href="index.html">Back to consultation responses mockups</a>
     <div class="scenarios-groups">
@@ -44,7 +43,6 @@
       <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌖</span>Case Marine Plan Areas</div>
     </aside>
     <main id="task-view">
-      <div class="notification" id="error" role="alert" hidden><span class="notification-icon" aria-hidden="true">✕</span><span id="error-text"></span></div>
       <div class="notification info" id="passed-note" hidden><span class="notification-icon" aria-hidden="true">i</span><span>The consultation deadline passed on 10/11/2026. You can still extend it.</span></div>
       <div class="commands" role="toolbar" aria-label="Task commands">
         <a class="command back-to-case" href="tab.html?tab=tasks" aria-label="Back to the case"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5l-7 7 7 7M7 12h14"/></svg></a>
@@ -61,46 +59,41 @@
         <h2>Consultation</h2>
         <div class="stack">
           <div class="row"><div class="label">Consultation started</div><div class="deco"><svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="fields"><div class="value">27/10/2026</div></div></div>
-          <div class="row"><div class="label">Consultation period</div><div class="deco"><svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="fields"><div class="value">14 days</div></div></div>
-          <div class="row"><div class="label">Consultation deadline</div><div class="deco"><svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="fields"><div class="value" id="deadline"></div></div></div>
+          <div class="row"><div class="label" id="period-label">Consultation period</div><div class="deco"><svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="fields"><div class="value">14 days</div></div></div>
+          <div class="row"><div class="label" id="deadline-label">Consultation deadline</div><div class="deco"><svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="fields"><div class="value" id="deadline"></div></div></div>
+          <div class="row" id="total-row" hidden><div class="label">Total extension</div><div class="deco"><svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="fields"><div class="value" id="total"></div></div></div>
+          <div class="row" id="extended-row" hidden><div class="label">Extended consultation deadline</div><div class="deco"><svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="fields"><div class="value" id="extended-deadline"></div></div></div>
           <details class="hint"><summary><svg class="chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg><span>Help with extending the deadline</span></summary><div class="hint-body">
-            <p>Only extend the deadline if a consultee has asked for more time. You can extend it more than once, and after it has passed.</p>
-            <ul><li>The new deadline applies to every consultee on this case, not just the one who asked.</li><li>Consultees are not sent a notification. Let the consultee who asked know the new deadline yourself.</li><li>You can see who has responded on the <a class="hint-link" id="responses-link" href="tab.html">Consultation responses tab</a>.</li></ul>
+            <p>Extend the deadline if a consultee asks for more time, or if you need longer. You can extend it more than once, and after it has passed.</p>
+            <ul><li>The new deadline applies to every consultee on this case, not just the one who asked.</li><li>Consultees are not sent a notification. If a consultee asked for more time, let them know the new deadline yourself.</li><li>You can see who has responded on the <a class="hint-link" id="responses-link" href="tab.html">Consultation responses tab</a>.</li></ul>
           </div></details>
         </div>
       </section>
 
-      <!-- Layout 1: the extension fields sit on the task. Saving adds a row to the
-           Extensions subgrid and clears them. -->
-      <section class="card" id="extend-card">
-        <h2>Extend the deadline</h2>
-        <div class="stack" id="extend-fields"></div>
-      </section>
 
       <section class="card">
-        <!-- A D365 read-only subgrid, drawn in HTML: the same behaviour as the
-             Consultees subgrid on Prepare for consultation (see ConsulteeGrid.tsx). -->
+        <!-- A D365 read-only subgrid, drawn in HTML, with no select column (as the
+             Tasks subgrid): extensions can't be removed. -->
         <div class="subgrid-head">
           <h2>Extensions</h2>
           <div class="subgrid-commands">
-            <button class="command live" id="add" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add extension</button>
-            <button class="command live" id="remove" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12M10 11v5M14 11v5"/></svg>Remove</button>
+            <button class="command live" id="add" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add extension</button>
           </div>
         </div>
         <div class="subgrid-wrap">
           <table class="grid" aria-label="Extensions">
-            <colgroup><col style="width: 44px"><col style="width: 160px"><col style="width: 140px"><col style="width: 160px"><col><col style="width: 48px"></colgroup>
+            <colgroup><col style="width: 140px"><col style="width: 120px"><col style="width: 140px"><col></colgroup>
             <thead><tr id="grid-head"></tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
         <div class="empty" id="empty"><div class="empty-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 10h16M4 14.5h16M10 5v14"/></svg></div><span>We didn't find anything to show here</span></div>
-        <div class="grid-footer"><span id="count">Rows: 0</span><span id="selected-count" hidden></span></div>
+        <div class="grid-footer"><span id="count">Rows: 0</span></div>
         <div class="sort-menu" id="sort-menu" role="menu" hidden></div>
       </section>
     </main>
 
-    <!-- Full page version: Add extension opens a Consultation extension record's
+    <!-- Add extension opens a Consultation extension record's
          own main form, as Add consultee does on Prepare for consultation. -->
     <main id="record-view" hidden>
       <div class="notification" id="rec-error" role="alert" hidden><span class="notification-icon" aria-hidden="true">✕</span><span id="rec-error-text"></span></div>
@@ -120,21 +113,9 @@
     </main>
   </div>
 
-  <!-- Remove: the OOB Delete command, relabelled, asks for confirmation. -->
-  <div class="qc-scrim" id="dialog-scrim" hidden></div>
-  <section class="dialog" id="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
-    <h2 id="dialog-title">Remove extension</h2>
-    <p id="dialog-text"></p>
-    <div class="dialog-actions"><button class="btn primary" type="button" id="dialog-remove">Remove</button><button class="btn" type="button" id="dialog-cancel">Cancel</button></div>
-  </section>
+  <!-- Tooltip for a cut-off Reason. -->
+  <div class="tip" id="tip" role="tooltip" hidden></div>
 
-  <!-- Layout 2: Add extension opens the OOB quick create form for an extension. -->
-  <div class="qc-scrim" id="qc-scrim" hidden></div>
-  <section class="qc" id="qc" role="dialog" aria-modal="true" aria-labelledby="qc-title" hidden>
-    <header><h2 id="qc-title">Quick create: Consultation extension</h2></header>
-    <div class="qc-body"><div class="notification" id="qc-error" role="alert" hidden><span class="notification-icon" aria-hidden="true">✕</span><span id="qc-error-text"></span></div><div class="stack" id="qc-fields"></div></div>
-    <footer><button class="btn primary" type="button" id="qc-save">Save and close</button><button class="btn" type="button" id="qc-cancel">Cancel</button></footer>
-  </section>
   <script src="task.js"></script>
 </body>
 </html>

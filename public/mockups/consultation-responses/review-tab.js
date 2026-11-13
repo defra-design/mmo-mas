@@ -3,7 +3,7 @@
 // (consultation v2 / public register v1); the consultees, responses and comments
 // are made up for it.
 //
-// Two layouts (one page, or a nav by consultee) and three scenarios (before the
+// Two layouts (a nav by consultee, the default, or one page) and three scenarios (before the
 // deadline, deadline passed, deadline extended), chosen on the bar on tab.html.
 // The choice comes in on this page's hash as "layout/scenario", or is read from
 // the bar when the page loads.
@@ -338,7 +338,7 @@
 
   function render() {
     var parts = location.hash.slice(1).split('/');
-    var layout = LAYOUTS.indexOf(parts[0]) > -1 ? parts[0] : fromBar('layout') || 'page';
+    var layout = LAYOUTS.indexOf(parts[0]) > -1 ? parts[0] : fromBar('layout') || 'nav';
     var scenario = SCENARIOS.indexOf(parts[1]) > -1 ? parts[1] : fromBar('scenario') || 'due';
     page.innerHTML = layout === 'nav' ? withNav(scenario) : onePage(scenario);
     if (layout === 'nav') selectPane('pane-overview', false);

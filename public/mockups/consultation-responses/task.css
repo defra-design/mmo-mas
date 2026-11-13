@@ -91,7 +91,7 @@ p { margin: 0; }
 .subgrid-head h2 { margin: 0; }
 .subgrid-commands { display: flex; gap: 4px; }
 .subgrid-wrap { overflow-x: auto; }
-.grid { width: 100%; min-width: 600px; border-collapse: collapse; table-layout: fixed; }
+.grid { width: 100%; min-width: 560px; border-collapse: collapse; table-layout: fixed; }
 .grid th, .grid td { padding: 0 8px; height: 42px; text-align: left; border-bottom: 1px solid #edebe9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .grid th { font-weight: 600; height: 44px; }
 .grid th.col:hover { outline: 1px solid #0078d4; outline-offset: -1px; border-radius: 4px; }
@@ -106,48 +106,23 @@ p { margin: 0; }
 .hmenu svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.3; }
 .cell-link { font: inherit; color: #0f6cbd; background: none; border: 0; padding: 0; cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .cell-link:hover { text-decoration: underline; }
-.navigate { width: 28px; height: 28px; display: grid; place-items: center; background: none; border: 0; border-radius: 2px; color: #0078d4; cursor: pointer; }
-.navigate:hover { outline: 2px solid #0078d4; outline-offset: -2px; }
-.navigate svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; }
 /* Row checkbox: a grey square behind it and a grey preview tick on hover. */
-.gcheck { width: 28px; height: 28px; display: grid; place-items: center; background: none; border: 0; border-radius: 4px; padding: 0; cursor: pointer; }
-.gcheck:hover { background: #e0e0e0; }
-.gcheck .box { width: 16px; height: 16px; border: 1px solid #616161; border-radius: 2px; display: grid; place-items: center; background: #fff; }
-.gcheck svg { width: 12px; height: 12px; fill: none; stroke: transparent; stroke-width: 1.8; }
-.gcheck:hover svg { stroke: #616161; }
-.gcheck[aria-checked="true"] .box, .gcheck[aria-checked="mixed"] .box { background: #0f6cbd; border-color: #0f6cbd; }
-.gcheck[aria-checked="true"] svg { stroke: #fff; }
-.gcheck[aria-checked="mixed"] svg { stroke: #fff; }
-.gcheck:disabled { cursor: default; opacity: .5; } .gcheck:disabled:hover { background: none; } .gcheck:disabled:hover svg { stroke: transparent; }
 .grid-footer { display: flex; gap: 24px; padding: 8px; color: #605e5c; font-size: 12px; }
 /* Column header menu: sort only in the mockup (filter is on the real grids). */
 .sort-menu { position: absolute; z-index: 4; min-width: 200px; background: #fff; border-radius: 4px; box-shadow: 0 8px 16px #00000024, 0 0 2px #0000001f; padding: 4px; }
 .sort-menu button { display: block; width: 100%; text-align: left; font: inherit; background: none; border: 0; border-radius: 4px; padding: 6px 8px; cursor: pointer; }
 .sort-menu button:hover { background: #f5f5f5; }
-.dialog { position: fixed; z-index: 6; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(480px, calc(100% - 32px)); background: #fff; border-radius: 8px; box-shadow: 0 24px 48px #0000003d; padding: 24px; }
-.dialog h2 { font-size: 20px; line-height: 28px; margin: 0 0 8px; }
-.dialog p { margin: 0 0 24px; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .card { position: relative; }
 .empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px 0 24px; color: #424242; }
 .empty-disc { width: 64px; height: 64px; border-radius: 50%; background: #e0e0e0; display: grid; place-items: center; }
 .empty-disc svg { width: 32px; height: 32px; fill: none; stroke: #fff; stroke-width: 1.6; }
 
 /* Quick create: the OOB flyout that slides in from the right. */
-.qc-scrim { position: fixed; inset: 0; background: #00000033; z-index: 5; }
-.qc { position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100%); background: #fff; z-index: 6; display: flex; flex-direction: column; box-shadow: -4px 0 16px #00000024; }
-.qc header { background: #fff; color: #242424; height: auto; padding: 20px 24px 8px; display: block; }
-.qc h2 { font-size: 20px; line-height: 28px; margin: 0; }
-.qc .qc-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
-.qc .label { flex-basis: 120px; min-width: 120px; }
-.qc .fields { flex-basis: 200px; }
-.qc footer { display: flex; gap: 8px; padding: 16px 24px; border-top: 1px solid #edebe9; }
-.btn { font: inherit; min-height: 32px; padding: 0 12px; border-radius: 4px; border: 1px solid #d1d1d1; background: #fff; color: #242424; cursor: pointer; }
-.btn.primary { background: #0f6cbd; border-color: #0f6cbd; color: #fff; }
-.btn:hover { background: #f5f5f5; } .btn.primary:hover { background: #115ea3; }
-.btn:focus-visible { outline: 2px solid #0078d4; outline-offset: 2px; }
 
 /* A link in the help text, as the help links in the app. */
 .hint-link { color: #115ea3; text-decoration: underline; }
 .hint-link:hover { text-decoration: none; }
 .hint-link:focus-visible { outline: 2px solid #0078d4; outline-offset: 2px; }
+/* Tooltip for a cut-off grid cell: the Fluent v9 Tooltip, below, fading in. */
+.tip { position: absolute; z-index: 5; max-width: 360px; padding: 4px 11px 6px; background: #fff; color: #242424; border-radius: 4px; box-shadow: 0 8px 16px #00000024, 0 0 2px #0000001f; font-size: 12px; line-height: 16px; white-space: normal; animation: tip-in .15s ease-out; }
+@keyframes tip-in { from { opacity: 0; } to { opacity: 1; } }

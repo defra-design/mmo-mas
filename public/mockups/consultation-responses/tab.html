@@ -18,8 +18,8 @@
     <div class="scenarios-groups">
       <fieldset>
         <legend>Layout of the tab</legend>
-        <label><input type="radio" name="layout" value="page" checked><span>One page</span></label>
-        <label><input type="radio" name="layout" value="nav"><span>Nav by consultee</span></label>
+        <label><input type="radio" name="layout" value="nav" checked><span>Nav by consultee</span></label>
+        <label><input type="radio" name="layout" value="page"><span>One page</span></label>
       </fieldset>
       <fieldset>
         <legend>Scenario</legend>
@@ -49,8 +49,13 @@
       document.getElementById('case').src =
         '../../receive-assess/cases/MLA%2F2026%2F10006?tab=' + tab + '&consultation=mockup';
 
+      // A new scenario drops ?extended=1 (an extension added on the task), and
+      // tells the case's Tasks subgrid, so the task's status follows the bar.
       bar.addEventListener('change', function () {
-        history.replaceState(null, '', location.search + '#' + key());
+        var search = new URLSearchParams(location.search);
+        search.delete('extended');
+        history.replaceState(null, '', (search.toString() ? '?' + search : location.pathname) + '#' + key());
+        window.dispatchEvent(new Event('mockup-scenario'));
         try {
           var inner = document.getElementById('case').contentDocument.querySelector('iframe');
           if (inner) inner.contentWindow.location.hash = key();

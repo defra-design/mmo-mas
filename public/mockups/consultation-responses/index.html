@@ -29,9 +29,28 @@
     <p>The responses come from the consultation service on CDP, so they are shown read-only in a new Consultation responses tab, like the application. Extending the deadline is something the caseworker does, so it is an optional task.</p>
     <p>They all use MLA/2026/10006, Hayling Island groyne repairs, with the application from the GOV.UK prototype. Use the bar at the top of each mockup to switch the scenario, and on the tab, its layout. The bar sits outside the case, so it can be left out of screenshots.</p>
     <p><a href="tab.html">Consultation responses tab – MLA/2026/10006</a></p>
-    <p><a href="task.html?layout=page">Extend consultation deadline task, add on a new page – MLA/2026/10006</a></p>
-    <p><a href="task.html?layout=quick-create">Extend consultation deadline task, add in a side panel – MLA/2026/10006</a></p>
-    <p><a href="task.html?layout=fields">Extend consultation deadline task, fields on the task – MLA/2026/10006</a></p>
+    <p><a href="task.html">Extend consultation deadline task – MLA/2026/10006</a></p>
+
+    <h2>How extending the deadline works</h2>
+    <p>The task starts as Optional. Before any extension, the top of the task shows:</p>
+    <ul>
+      <li>Consultation started</li>
+      <li>Consultation period</li>
+      <li>Consultation deadline</li>
+    </ul>
+    <p>To extend, the caseworker selects Add extension on the Extensions subgrid. This opens a new page showing the current deadline. That is the original deadline for the first extension, or the latest deadline after that. The caseworker chooses how many days to extend by, in blocks of 7, and the new deadline is shown straight away. They must give a reason. They don't record who asked, as the caseworker may decide to extend without being asked.</p>
+    <p>Once there is an extension, the top of the task changes to show:</p>
+    <ul>
+      <li>Consultation started</li>
+      <li>Original consultation period</li>
+      <li>Original consultation deadline</li>
+      <li>Total extension – all extensions added together</li>
+      <li>Extended consultation deadline</li>
+    </ul>
+    <p>"Original" only appears once there is something to compare it with. In D365 a field's label can't change, so these are separate fields, shown and hidden by a business rule depending on whether there are any extensions.</p>
+    <p>Each extension is a row in the Extensions subgrid, showing when it was made, how many days it added, the new deadline and the reason. A long reason is cut off, and the full text shows when you hover over it or open the extension. Extensions can't be removed, because each one has already moved the deadline. The deadline can be extended more than once, and after it has passed.</p>
+    <p>A Power Automate flow updates the case's consultation deadline when an extension is saved. The new deadline applies to every consultee on the case. Consultees are not sent a notification, so the caseworker lets them know.</p>
+    <p>After the first extension, the task's status changes from Optional to Extended. It can still be opened to extend again.</p>
   </main>
 </body>
 </html>
