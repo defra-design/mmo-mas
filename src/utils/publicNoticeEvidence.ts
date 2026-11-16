@@ -3,6 +3,7 @@ import type {
   TaskState,
   TaskStatus,
 } from '../context/TaskContext';
+import { CONSULTATION_CASE_ID } from './consultationCase';
 
 export const PUBLIC_NOTICE_EVIDENCE_CASE_ID = 'MLA/2026/10014';
 export const PUBLIC_NOTICE_EVIDENCE_RESUBMISSION_CASE_ID = 'MLA/2026/10013';
@@ -34,6 +35,8 @@ export function taskStatusForCase(
   task: keyof TaskState,
   status: TaskStatus,
 ): TaskStatus {
+  // MLA/2026/10006 is in consultation, so every task before it is done.
+  if (caseId === CONSULTATION_CASE_ID) return 'Done';
   if (hasResubmittedPublicNoticeEvidence(caseId)) return 'Done';
   if (!hasSubmittedPublicNoticeEvidence(caseId)) return status;
   if (task === 'siteCheck' || task === 'siteNotice') return 'Done';

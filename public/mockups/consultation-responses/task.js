@@ -1,4 +1,4 @@
-// DESIGN EXPLORATION — the Extend consultation deadline task for MLA/2026/10006.
+// DESIGN EXPLORATION — the Extend consultee closing date task for MLA/2026/10006.
 // Three scenarios on the bar. The task holds the Extensions subgrid; Add
 // extension opens a Consultation extension record full page, as Add consultee
 // does on Prepare for consultation. A flow moves the case's consultation
@@ -7,12 +7,13 @@
 //
 // The Extensions subgrid is configured without a select column, like the Tasks
 // subgrid: extensions can't be removed, as each one has already moved the
-// deadline. Row and cell hover as every grid; the Extended on link or a
+// deadline. Row and cell hover as every grid; the Date extended link or a
 // double-click opens the extension read-only. Reason is cut off with an
 // ellipsis, and a tooltip shows it in full only when it is cut off.
 //
-// Once extended, the dates at the top show the original period and deadline,
-// the total extension and the extended deadline. In D365 those are separate
+// Once extended, the dates at the top show the original period and closing
+// date, the total extension and the consultee closing date (always the current
+// one). In D365 those are separate
 // fields shown and hidden by a business rule, as a label can't change.
 (function () {
   // "Today", the deadline before any extension, and the extensions so far.
@@ -29,9 +30,9 @@
     }
   };
   var COLUMNS = [
-    { key: 'on', label: 'Extended on', sort: ['Old to new', 'New to old'] },
+    { key: 'on', label: 'Date extended', sort: ['Old to new', 'New to old'] },
     { key: 'days', label: 'Extended by', sort: ['Smaller to larger', 'Larger to smaller'] },
-    { key: 'to', label: 'New deadline', sort: ['Old to new', 'New to old'] },
+    { key: 'to', label: 'New closing date', sort: ['Old to new', 'New to old'] },
     { key: 'reason', label: 'Reason', sort: ['A to Z', 'Z to A'] }
   ];
 
@@ -53,16 +54,16 @@
   var LOCK = '<svg class="lock" viewBox="0 0 20 20" aria-label="Read-only" role="img"><path d="M6.5 8V6a3.5 3.5 0 0 1 7 0v2M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>';
   var CHEVRON = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>';
 
-  // A new extension's fields. Current deadline is the case's deadline now: the
-  // original one for a first extension, or the latest. New deadline is worked
+  // A new extension's fields. Current closing date is the case's closing date now: the
+  // original one for a first extension, or the latest. New closing date is worked
   // out as soon as Extend by is picked: in D365 that is a small form script, or
   // it appears on save from a calculated column.
   function fieldsHtml() {
     var options = ['7 days', '14 days', '21 days', '28 days'].map(function (o) { return '<option>' + o + '</option>'; }).join('');
     return '' +
-      '<div class="row"><div class="label">Current deadline</div><div class="deco">' + LOCK + '</div><div class="fields"><div class="value">' + show(state.deadline) + '</div></div></div>' +
+      '<div class="row"><div class="label">Current closing date</div><div class="deco">' + LOCK + '</div><div class="fields"><div class="value">' + show(state.deadline) + '</div></div></div>' +
       '<div class="row"><div class="label">Extend by</div><div class="deco"><span class="req" aria-hidden="true">*</span></div><div class="fields"><select class="choice" name="days" aria-label="Extend by"><option value="">---</option>' + options + '</select></div></div>' +
-      '<div class="row"><div class="label">New deadline</div><div class="deco">' + LOCK + '</div><div class="fields"><div class="value" data-new-deadline></div></div></div>' +
+      '<div class="row"><div class="label">New closing date</div><div class="deco">' + LOCK + '</div><div class="fields"><div class="value" data-new-deadline></div></div></div>' +
       '<div class="row"><div class="label">Reason</div><div class="deco"><span class="req" aria-hidden="true">*</span></div><div class="fields"><textarea class="text" name="reason" aria-label="Reason"></textarea></div></div>';
   }
 
@@ -72,7 +73,7 @@
     function row(label, value, multiline) {
       return '<div class="row"><div class="label">' + label + '</div><div class="deco">' + LOCK + '</div><div class="fields"><div class="value' + (multiline ? ' multiline' : '') + '">' + value + '</div></div></div>';
     }
-    return row('Extended on', show(e.on)) + row('Extend by', e.days + ' days') + row('New deadline', show(e.to)) +
+    return row('Date extended', show(e.on)) + row('Extend by', e.days + ' days') + row('New closing date', show(e.to)) +
       row('Reason', esc(e.reason), true);
   }
 
@@ -141,13 +142,14 @@
     byId('count').textContent = 'Rows: ' + rows.length;
   }
 
-  // The dates at the top. Not extended: period and deadline. Extended: the
-  // original period and deadline, the total extension and the extended deadline.
+  // The dates at the top. Not extended: period and consultee closing date.
+  // Extended: the original period and closing date, the total extension and the
+  // consultee closing date, which always shows the current date.
   function drawDates() {
     var extended = state.extensions.length > 0;
     var total = state.extensions.reduce(function (n, e) { return n + e.days; }, 0);
     byId('period-label').textContent = extended ? 'Original consultation period' : 'Consultation period';
-    byId('deadline-label').textContent = extended ? 'Original consultation deadline' : 'Consultation deadline';
+    byId('deadline-label').textContent = extended ? 'Original closing date' : 'Consultee closing date';
     byId('deadline').textContent = show(state.base);
     byId('total-row').hidden = !extended;
     byId('extended-row').hidden = !extended;

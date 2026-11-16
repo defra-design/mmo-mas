@@ -8,6 +8,7 @@ import { startConsultationStatus } from '../utils/startConsultation';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { asset } from '../utils/asset';
+import { CONSULTATION_CASE_ID } from '../utils/consultationCase';
 import {
   makeStyles,
   mergeClasses,
@@ -148,8 +149,8 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   });
 
   // Design exploration (?consultation=mockup): the case is in consultation, so the
-  // receive and assess tasks are all done and the optional Extend consultation
-  // deadline task sits at the bottom. It opens the static task mockup.
+  // receive and assess tasks are all done and the optional Extend consultee
+  // closing date task sits at the bottom. It opens the static task mockup.
   // Its status is Optional until the deadline has been extended, then Extended:
   // in the Deadline extended scenario, or after adding one on the task mockup
   // (?extended=1). Both are on the mockup page around the case.
@@ -161,13 +162,19 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
     window.top?.addEventListener('mockup-scenario', update);
     return () => window.top?.removeEventListener('mockup-scenario', update);
   }, [consultationMockup]);
-  if (consultationMockup) {
+  // The live case in consultation (MLA/2026/10006) is the same, but its task is
+  // the React one, and its status follows the case's saved extensions.
+  const consultationCase = caseId === CONSULTATION_CASE_ID;
+  const extended = consultationMockup
+    ? mockupExtended
+    : (taskContext.consultationExtensions[caseId] ?? []).length > 0;
+  if (consultationMockup || consultationCase) {
     rows.forEach(row => { row.status = 'Done'; });
     rows.push({
       key: 'extendConsultation',
-      name: 'Extend consultation deadline',
-      status: mockupExtended ? 'Extended' : 'Optional',
-      slug: '',
+      name: 'Extend consultee closing date',
+      status: extended ? 'Extended' : 'Optional',
+      slug: 'extend-closing-date',
     });
   }
 
@@ -189,7 +196,7 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
           <tbody>
             {rows.map(row => {
               const openTask = () => {
-                if (row.key === 'extendConsultation') {
+                if (row.key === 'extendConsultation' && consultationMockup) {
                   // The case sits in an iframe on the mockup page, so leave it for the task
                   // mockup, in the same scenario.
                   window.top!.location.href = asset('mockups/consultation-responses/task.html') +

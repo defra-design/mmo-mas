@@ -3,6 +3,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import { allMppAssessmentsComplete, policies } from '../utils/marinePlanPolicies';
 import { startConsultationStatus } from '../utils/startConsultation';
+import { CONSULTATION_CASE_ID } from '../utils/consultationCase';
+import { HAYLING_CONSULTEES } from '../utils/consultationCaseAnswers';
 import type { ConsultationsState } from '../utils/startConsultation';
 import { loadPublicNoticeRequirement, NO_NOTICES, SITE_NOTICE } from '../utils/publicNoticeRequirement';
 import { currentDecision, publicNoticeEvidenceStatus } from '../utils/publicNoticeEvidence';
@@ -170,6 +172,19 @@ export interface RejectionState {
 // independence rule as `transfers` above.
 export type RejectionsState = Record<string, RejectionState>;
 
+// One extension to a case's consultee closing date: a Consultation extension
+// record, related to the case. `dateExtended` is an ISO date; the new closing
+// date follows from the extensions before it (see utils/consultationCase).
+export interface ConsultationExtension {
+  id: string;
+  dateExtended: string;
+  days: number;
+  reason: string;
+}
+
+// Every case's consultation extensions, keyed by case reference, oldest first.
+export type ConsultationExtensionsState = Record<string, ConsultationExtension[]>;
+
 // Today, in the out-of-the-box D365 format (DD/MM/YYYY).
 function today() {
   const d = new Date();
@@ -199,6 +214,7 @@ interface PersistedState {
   // Every case's rejection record, keyed by case reference.
   rejections: RejectionsState;
   consultations: ConsultationsState;
+  consultationExtensions: ConsultationExtensionsState;
   // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
   // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
   // on every case tab. See IndexPage.
@@ -223,7 +239,8 @@ const initialState: PersistedState = {
   siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
   wfdForm: { review: '', initialConsiderations: '' },
   mppForm: {},
-  consultees: {},
+  // MLA/2026/10006 is in consultation, so it starts with its consultees.
+  consultees: { [CONSULTATION_CASE_ID]: HAYLING_CONSULTEES },
   prepForConsulteeMeta: { completed: false, consultationPeriod: '' },
   publicRegisterForm: {
     commercialAgree: '',
@@ -254,6 +271,7 @@ const initialState: PersistedState = {
   transfers: {},
   rejections: {},
   consultations: {},
+  consultationExtensions: {},
   // Default to the "tasks on all tabs" experience — the tested Iteration 1
   // behaviour (formerly the "Version 1" index link). The untested "Version 2"
   // variant that turned this off has been dropped.
@@ -365,7 +383,7 @@ function loadState(): PersistedState {
         // Older saved state held one consultee list shared by every case. It
         // cannot be assigned to a case, so it is dropped.
         consultees: Object.fromEntries(
-          Object.entries(parsed.consultees ?? {}).flatMap(([caseId, rows]) =>
+          Object.entries({ ...initialState.consultees, ...parsed.consultees }).flatMap(([caseId, rows]) =>
             Array.isArray(rows) ? [[caseId, (rows as Partial<ConsulteeRow>[])
               .filter(row => typeof row.id === 'string' && typeof row.organisation === 'string')
               .map(row => ({
@@ -411,6 +429,12 @@ function loadState(): PersistedState {
             }]];
           }),
         ),
+        consultationExtensions: Object.fromEntries(
+          Object.entries(parsed.consultationExtensions ?? {}).flatMap(([caseId, rows]) =>
+            Array.isArray(rows) ? [[caseId, (rows as Partial<ConsultationExtension>[])
+              .filter(row => typeof row.id === 'string' && typeof row.dateExtended === 'string'
+                && typeof row.days === 'number' && typeof row.reason === 'string') as ConsultationExtension[]]] : []),
+        ),
         tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
       };
     }
@@ -436,7 +460,9 @@ interface TaskContextValue {
   transfers: TransfersState;
   rejections: RejectionsState;
   consultations: ConsultationsState;
+  consultationExtensions: ConsultationExtensionsState;
   tasksOnAllTabs: boolean;
+  addConsultationExtension: (caseId: string, extension: ConsultationExtension) => void;
   requestTransferToMcms: (caseId: string, reasons: string, requestedBy: string) => void;
   completeTransferToMcms: (caseId: string, mcmsReference: string, completedBy: string) => void;
   rejectApplication: (
@@ -547,6 +573,16 @@ export function TaskProvider({ children }: PropsWithChildren) {
         },
       } };
     });
+
+  // Saving an extension adds the record; the case's closing date follows from it.
+  const addConsultationExtension = (caseId: string, extension: ConsultationExtension) =>
+    setState(prev => ({
+      ...prev,
+      consultationExtensions: {
+        ...prev.consultationExtensions,
+        [caseId]: [...(prev.consultationExtensions[caseId] ?? []), extension],
+      },
+    }));
 
   const setTasksOnAllTabs = (value: boolean) =>
     setState(prev => ({ ...prev, tasksOnAllTabs: value }));
@@ -840,6 +876,8 @@ export function TaskProvider({ children }: PropsWithChildren) {
         transfers: state.transfers,
         rejections: state.rejections,
         consultations: state.consultations,
+        consultationExtensions: state.consultationExtensions,
+        addConsultationExtension,
         setConsultationConfirmed,
         saveStartConsultation,
         loadConsultationExample,

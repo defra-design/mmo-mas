@@ -1,0 +1,158 @@
+{
+  "planArea": "South Inshore Marine Plan",
+  "categories": [
+    {
+      "name": "Cross-cutting",
+      "policies": [
+        {
+          "code": "S-CC-3",
+          "topic": "Climate change",
+          "label": "South Climate change 3 (S-CC-3)",
+          "policyInfo": "Proposals in the south marine plan area and adjacent marine plan areas that are likely to have a significant adverse impact on coastal change should not be supported.",
+          "consideration": [
+            "The groynes have been in place since the 1950s and hold the beach that protects the seafront road and properties behind it. The works keep them at their current length and height, so the way shingle moves along the frontage will not change. The rock at the end of groyne 19 replaces beach that has been lost to scour and is not expected to affect the beaches further east."
+          ]
+        },
+        {
+          "code": "S-CO-1",
+          "topic": "Co-existence",
+          "label": "South Co-existence 1 (S-CO-1)",
+          "policyInfo": "Proposals will minimise their use of space and consider opportunities for co-existence with other activities",
+          "consideration": [
+            "The works use the same footprint as the existing groynes. Only one groyne will be worked on at a time, and the rest of the beach will stay open to the public. We have spoken to the seafront watersports clubs and the beach huts association about the dates."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Economic",
+      "policies": [
+        {
+          "code": "S-AGG-4",
+          "topic": "Aggregates",
+          "label": "South Aggregates 4 (S-AGG-4)",
+          "policyInfo": "Where proposals require marine aggregates as part of their construction, preference should be given to using marine aggregates sourced from the south marine plan areas. If this is not appropriate, proposals should state why.",
+          "consideration": [
+            "The rock armour is quarried granite from Cornwall, as marine aggregates are not suitable for armour stone of this size. No marine aggregates are needed for the works."
+          ]
+        },
+        {
+          "code": "S-INF-1",
+          "topic": "Infrastructure",
+          "label": "South Infrastructure 1 (S-INF-1)",
+          "policyInfo": "Appropriate land-based infrastructure which facilitates marine activity (and vice versa) should be supported.",
+          "consideration": [
+            "The groynes protect the seafront road, the promenade and about 200 properties from erosion and flooding. Keeping them in good condition supports the seafront businesses and the coastal path."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Environmental",
+      "policies": [
+        {
+          "code": "S-BIO-1",
+          "topic": "Biodiversity",
+          "label": "South Biodiversity 1 (S-BIO-1)",
+          "policyInfo": "Proposals that may have significant adverse impacts on natural habitat and species adaptation, migration and connectivity must demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate significant adverse impacts",
+          "consideration": [
+            "The groynes sit on a shingle and sand beach next to the Chichester and Langstone Harbours Special Protection Area. Works will be carried out from April to June, when the overwintering brent geese and waders have left. Plant will stay on the beach between the groynes being worked on and will not go onto the lower shore beyond the end of the groynes, apart from groyne 19. Our Habitats Regulations Assessment screening concludes there is no likely significant effect."
+          ]
+        },
+        {
+          "code": "S-BIO-3",
+          "topic": "Biodiversity",
+          "label": "South Biodiversity 3 (S-BIO-3)",
+          "policyInfo": "Proposals that enhance coastal habitats where important in their own right and/or for ecosystem functioning and provision of goods and services will be supported. Proposals must take account of the space required for coastal habitats where important in their own right and/or for ecosystem functioning and provision of goods and services and demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate for net loss of coastal habitat.",
+          "consideration": [
+            "There will be no loss of coastal habitat. The rock at groyne 19 covers about 40 square metres of beach that is already scoured and has no vegetation. The vegetated shingle at the top of the beach will be fenced off during the works."
+          ]
+        },
+        {
+          "code": "S-DIST-1",
+          "topic": "Disturbance",
+          "label": "South Disturbance 1 (S-DIST-1)",
+          "policyInfo": "Proposals, including in relation to tourism and recreational activities, within and adjacent to the south marine plan areas must demonstrate that they will, in order of preference a. avoid b. minimise c. mitigate significant cumulative adverse physical disturbance or displacement impacts on highly mobile species.",
+          "consideration": [
+            "Timing the works for April to June avoids the period when overwintering brent geese, curlew and dunlin use the frontage. Our winter bird survey found the main high tide roosts are more than 500 metres from the works. Ringed plover may nest on the upper beach, so an ecologist will check the working area each week and set up a 50 metre exclusion zone around any nest found."
+          ]
+        },
+        {
+          "code": "S-MPA-1",
+          "topic": "Marine protected areas",
+          "label": "South Marine protected areas 1 (S-MPA-1)",
+          "policyInfo": "Proposals that support the objectives of marine protected areas and the ecological coherence of the marine protected area network will be supported. Proposals that may have adverse impacts on the objectives of marine protected areas and the ecological coherence of the marine protected area network must demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate adverse impacts, with due regard given to statutory advice on ecologically coherent network.",
+          "consideration": [
+            "The site is next to the Chichester and Langstone Harbours SPA and Ramsar site and the Solent Maritime Special Area of Conservation. The works are small scale, like for like and timed to avoid the sensitive period for the protected bird species. See the Habitats Regulations Assessment screening."
+          ]
+        },
+        {
+          "code": "S-UWN-2",
+          "topic": "Underwater noise",
+          "label": "South Underwater noise 2 (S-UWN-2)",
+          "policyInfo": "Proposals that generate impulsive sound and/or ambient noise must demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate significant adverse impacts on highly mobile species d. if it is not possible to mitigate significant adverse impacts, proposals must state the case for proceeding.",
+          "consideration": [
+            "Posts will be driven with a vibrating head rather than impact piling, at low tide when the work area is dry. No underwater noise is expected."
+          ]
+        },
+        {
+          "code": "S-WQ-1",
+          "topic": "Water quality",
+          "label": "South Water quality 1 (S-WQ-1)",
+          "policyInfo": "Proposals that may have significant adverse impacts upon water environment, including upon habitats and species that can be of benefit to water quality must demonstrate that they will, in order or preference: a. avoid b. minimise c. mitigate significant adverse impacts.",
+          "consideration": [
+            "All plant will use biodegradable hydraulic oil and be refuelled off the beach. Spill kits will be kept on site. The greenheart timber is untreated, so nothing will leach into the water."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Social",
+      "policies": [
+        {
+          "code": "S-ACC-1",
+          "topic": "Access",
+          "label": "South Access 1 (S-ACC-1)",
+          "policyInfo": "Proposals, including in relation to tourism and recreation, should demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate significant adverse impacts on public access.",
+          "consideration": [
+            "The beach and promenade will stay open. Fencing will close off a working area of about 30 metres around each groyne while it is worked on, with signs and a banksman when plant is moving. The works are planned outside the school summer holidays."
+          ]
+        },
+        {
+          "code": "S-HER-1",
+          "topic": "Heritage assets",
+          "label": "South Heritage assets 1 (S-HER-1)",
+          "policyInfo": "Proposals that may compromise or harm elements contributing to the significance of heritage assets should demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate compromise or harm If it is not possible to mitigate, the public benefits for proceeding with the proposal must outweigh the compromise or harm to the heritage asset",
+          "consideration": [
+            "There are no recorded heritage assets on this part of the beach. If any finds are made while digging around the posts, work will stop and we will report them under the Crown Estate protocol for archaeological discoveries."
+          ]
+        },
+        {
+          "code": "S-TR-2",
+          "topic": "Tourism and recreation",
+          "label": "South Tourism and recreation 2 (S-TR-2)",
+          "policyInfo": "Proposals that enhance or promote tourism and recreation activities will be supported. Proposals for development must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate significant adverse impacts on tourism and recreation activities.",
+          "consideration": [
+            "Keeping the groynes in good condition holds the beach in place, which the seafront tourism businesses depend on. Working outside the summer holidays keeps disruption to visitors to a minimum."
+          ]
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "filename": "hayling-groynes-hra-screening.pdf",
+      "type": "Habitats Regulations Assessment",
+      "policies": [
+        {
+          "code": "S-BIO-1",
+          "location": "Section 4, pages 9 to 14"
+        },
+        {
+          "code": "S-MPA-1",
+          "location": "Section 5, pages 15 to 18"
+        }
+      ]
+    }
+  ]
+}

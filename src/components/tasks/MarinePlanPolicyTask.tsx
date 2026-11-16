@@ -38,12 +38,13 @@ import { siteCheckCompleteForCase } from '../../utils/publicNoticeEvidence';
 import {
   MPP_TASK_FORM_CASE_ID,
   documentsForPolicy,
-  policies,
-  policyIndex,
+  policiesForCase,
 } from '../../utils/marinePlanPolicies';
+import { HAYLING_MPP } from '../../utils/consultationCaseAnswers';
 
 const CASES_WITH_SUPPORTING_DOCUMENTS = [
   'MLA/2026/10002',
+  'MLA/2026/10006',
   'MLA/2026/10012',
   'MLA/2026/10013',
   'MLA/2026/10015',
@@ -175,8 +176,7 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
     else navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
   };
 
-  const index = policyCode ? policyIndex(policyCode) : -1;
-  const policy = index >= 0 ? policies[index] : undefined;
+  const policy = policiesForCase(caseId).find(p => p.code === policyCode);
 
   if (!policy) {
     return (
@@ -201,13 +201,14 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   // caseworker there. 10014's tab is a native subgrid with no such page.
   const hasDocuments =
     CASES_WITH_SUPPORTING_DOCUMENTS.includes(caseId) &&
-    documentsForPolicy(policy.code).length > 0;
+    documentsForPolicy(policy.code, caseId).length > 0;
   const openSupportingDocuments = (e: MouseEvent) => {
     e.preventDefault();
     navigate(caseUrl, { state: { tab: 'mpp', mppPage: 'supporting-documents' } });
   };
 
-  const answer = mppForm[policy.code];
+  // MLA/2026/10006 shows its own assessment while the shared one is empty.
+  const answer = mppForm[policy.code] ?? HAYLING_MPP[policy.code];
   const valueOf = (field: MppField) => answer?.[field] ?? '';
 
   const errorFor = (field: MppField) =>
@@ -318,10 +319,10 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
               </div>
             )}
             {docsMockup === '1' && (
-              <MppSupportingDocuments documents={documentsForPolicy(policy.code)} />
+              <MppSupportingDocuments documents={documentsForPolicy(policy.code, caseId)} />
             )}
             {docsMockup === '2' && (
-              <MppSupportingDocumentsHtml documents={documentsForPolicy(policy.code)} />
+              <MppSupportingDocumentsHtml documents={documentsForPolicy(policy.code, caseId)} />
             )}
         </div>
       </Card>

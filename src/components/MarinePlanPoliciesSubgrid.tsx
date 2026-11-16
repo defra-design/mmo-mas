@@ -45,7 +45,8 @@ import {
 import { useTasks } from '../context/TaskContext';
 import { siteCheckCompleteForCase, taskStatusForCase } from '../utils/publicNoticeEvidence';
 import TruncatedCell from './TruncatedCell';
-import { mppAssessmentStatus, mppTaskStatus, policies } from '../utils/marinePlanPolicies';
+import { mppAssessmentStatus, mppTaskStatus, policiesForCase } from '../utils/marinePlanPolicies';
+import { HAYLING_MPP } from '../utils/consultationCaseAnswers';
 
 // OOB subgrids page their records, and "records per page" is set per subgrid on
 // the form. 50 is a standard value and puts all 41 policies on one page.
@@ -80,7 +81,7 @@ type Filters = Partial<Record<ColKey, string | string[]>>;
 
 // Group and Status filter by an "equals one of" checkbox list.
 const EQUALS_OPTIONS: Partial<Record<ColKey, string[]>> = {
-  group: Array.from(new Set(policies.map(p => p.group))),
+  group: ['Cross-cutting', 'Economic', 'Environmental', 'Social'],
   status: ['Cannot start yet', 'To do', 'Done'],
 };
 
@@ -200,13 +201,13 @@ export default function MarinePlanPoliciesSubgrid({ caseId, allDone = false }: M
   // Build the display rows (with the computed lifecycle status) once, then filter
   // and sort them so both operate on what the caseworker actually sees.
   const rows = useMemo(() => {
-    const built = policies.map(policy => ({
+    const built = policiesForCase(caseId).map(policy => ({
       code: policy.code,
       label: policy.label,
       group: policy.group,
       status: allPoliciesDone
         ? mppTaskStatus('Done')
-        : mppAssessmentStatus(mppForm[policy.code], locked),
+        : mppAssessmentStatus(mppForm[policy.code] ?? HAYLING_MPP[policy.code], locked),
     }));
 
     const filtered = built.filter(r =>
@@ -222,7 +223,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId, allDone = false }: M
       return sort.dir === 'asc' ? cmp : -cmp;
     });
     return sorted;
-  }, [allPoliciesDone, locked, mppForm, filters, sort]);
+  }, [caseId, allPoliciesDone, locked, mppForm, filters, sort]);
 
   const total = rows.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));

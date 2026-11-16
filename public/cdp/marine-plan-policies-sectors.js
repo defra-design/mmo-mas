@@ -1,8 +1,9 @@
 // Marine plan policies (sector view) — plain JS for the CDP iframe.
 // Same data as marine-plan-policies.js, but the nav lists the sectors (topics)
 // within each of the four category groups, and each sector page shows every
-// policy in that sector. Used only by MLA/2026/10015. Data lives in the shared
-// marine-plan-policies.json so both views stay in sync.
+// policy in that sector. Used by MLA/2026/10015, whose data lives in the shared
+// marine-plan-policies.json so both views stay in sync, and by MLA/2026/10006
+// (Hayling Island groyne repairs) via ?case=hayling.
 //
 // Supporting documents: a "Supporting documents" item at the top of the nav
 // lists every document the applicant uploaded with the policies it supports,
@@ -11,7 +12,13 @@
   var nav = document.getElementById('mpp-nav');
   var detail = document.getElementById('mpp-detail');
 
-  fetch('marine-plan-policies.json')
+  // ?case=hayling loads that application's own data (marine-plan-policies-hayling.json).
+  // With no query it loads the shared marine-plan-policies.json, as before.
+  var dataFiles = { hayling: 'marine-plan-policies-hayling.json' };
+  var caseKey = new URLSearchParams(window.location.search).get('case');
+  var dataFile = dataFiles[caseKey] || 'marine-plan-policies.json';
+
+  fetch(dataFile)
     .then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
