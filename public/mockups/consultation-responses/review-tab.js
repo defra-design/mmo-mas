@@ -100,7 +100,7 @@
       id: 'havant',
       name: 'Havant Borough Council',
       type: 'Application notification',
-      status: 'No response'
+      status: 'No response needed'
     },
     {
       id: 'rya',
@@ -195,7 +195,7 @@
     // Dates first, then the responses.
     return '<dl class="fields consult__summary">' +
       field('Consultation started', esc(STARTED)) +
-      field('Consultee responses due', due) +
+      field('Consultee closing date', due) +
       field('Public comments close', esc(COMMENTS_CLOSE)) +
       field('Requests for advice', esc(count(advice)) + (overdue ? ', ' + overdue + ' overdue' : '')) +
       field('Application notifications', esc(count(notified))) +
@@ -210,7 +210,7 @@
         '<td>' + (statusOf(c, scenario) === 'Responded' ? esc(c.responded) : '') + '</td></tr>';
     }).join('');
     return '<div class="consult__table-wrap"><table class="consult__table">' +
-      '<thead><tr><th scope="col">Organisation</th><th scope="col">Consultation type</th><th scope="col">Consultation status</th><th scope="col">Responded</th></tr></thead>' +
+      '<thead><tr><th scope="col">Organisation</th><th scope="col">Consultation type</th><th scope="col">Response status</th><th scope="col">Date responded</th></tr></thead>' +
       '<tbody>' + rows + '</tbody></table></div>';
   }
 
@@ -224,9 +224,10 @@
     var fields = field('Consultation type', esc(c.type));
     if (c.asked) fields += field('Advice requested', esc(c.asked));
     // Plain text here: a tinted badge is hard to see on the grey value box.
-    fields += field('Consultation status', esc(status));
+    fields += field('Response status', esc(status));
     if (status === 'Responded') {
-      fields += field('Responded', esc(c.responded) + ' by ' + esc(c.by));
+      fields += field('Responded by', esc(c.by));
+      fields += field('Date responded', esc(c.responded));
       fields += field('Response', paragraphs(c.response));
     }
     return '<article class="consult__item" id="item-' + c.id + '">' +
@@ -238,7 +239,7 @@
     return commentsFor(scenario).map(function (c) {
       return '<article class="consult__item">' +
         '<' + headingTag + ' class="consult__item-title">' + esc(c.name) + '</' + headingTag + '>' +
-        '<dl class="fields">' + field('Received', esc(c.received)) + field('Email', esc(c.email)) +
+        '<dl class="fields">' + field('Date received', esc(c.received)) + field('Email address', esc(c.email)) +
         field('Comment', paragraphs([c.text])) + '</dl></article>';
     }).join('');
   }
