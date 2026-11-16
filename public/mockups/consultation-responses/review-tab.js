@@ -41,7 +41,9 @@
         'Thank you for consulting the Environment Agency. We have reviewed the application and the Water Framework Directive assessment (hayling-groynes-wfd-assessment.pdf) and have no objection to the proposal.',
         'The works are like for like repairs within the footprint of the existing groynes, and the rock armour at groyne 19 is small in scale. We agree with the conclusion of the WFD assessment that the works will not cause deterioration of the Solent coastal water body or stop it reaching good status. We recommend that: • plant is refuelled away from the beach and spill kits are kept on site, as set out in the application • any timber or debris removed is taken off the beach on the same tide.',
         'The groynes are part of the Hayling Island coastal defence scheme. Please make sure Coastal Partners know the final working dates.'
-      ]
+      ],
+      // A file the consultee uploaded with their response.
+      document: 'EA-WFD-review-hayling-groynes.pdf'
     },
     {
       id: 'mmo',
@@ -178,6 +180,17 @@
       '</dt><dd class="field__value">' + value + '</dd></div>';
   }
 
+  // A document, shown as on the other CDP tabs: a download icon and the file
+  // name. A dead link here, as on the WFD tab.
+  function docLink(name) {
+    return '<a class="doc-link" href="#" onclick="return false;" style="display: inline-flex; align-items: center; gap: 2px; line-height: 1;">' +
+      '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true" style="display: block; flex-shrink: 0;">' +
+      '<line x1="10" y1="2.6" x2="10" y2="12.4" stroke="currentColor" stroke-width="1.2" />' +
+      '<polyline points="6,8.6 10,12.6 14,8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />' +
+      '<line x1="3.6" y1="16.4" x2="16.4" y2="16.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />' +
+      '</svg><span>' + esc(name) + '</span></a>';
+  }
+
   function paragraphs(list) {
     return list.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
   }
@@ -229,6 +242,7 @@
       fields += field('Responded by', esc(c.by));
       fields += field('Date responded', esc(c.responded));
       fields += field('Response', paragraphs(c.response));
+      if (c.document) fields += field('Supporting document', docLink(c.document));
     }
     return '<article class="consult__item" id="item-' + c.id + '">' +
       '<' + headingTag + ' class="consult__item-title" tabindex="-1">' + esc(c.name) + '</' + headingTag + '>' +
