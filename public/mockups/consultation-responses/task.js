@@ -12,8 +12,7 @@
 // ellipsis, and a tooltip shows it in full only when it is cut off.
 //
 // Once extended, the dates at the top show the original period and closing
-// date, the total extension and the consultee closing date (always the current
-// one). In D365 those are separate
+// date, and the consultee closing date (always the current one). In D365 those are separate
 // fields shown and hidden by a business rule, as a label can't change.
 (function () {
   // "Today", the deadline before any extension, and the extensions so far.
@@ -143,17 +142,14 @@
   }
 
   // The dates at the top. Not extended: period and consultee closing date.
-  // Extended: the original period and closing date, the total extension and the
-  // consultee closing date, which always shows the current date.
+  // Extended: the original period and closing date, and the consultee closing
+  // date, which always shows the current date.
   function drawDates() {
     var extended = state.extensions.length > 0;
-    var total = state.extensions.reduce(function (n, e) { return n + e.days; }, 0);
     byId('period-label').textContent = extended ? 'Original consultation period' : 'Consultation period';
     byId('deadline-label').textContent = extended ? 'Original closing date' : 'Consultee closing date';
     byId('deadline').textContent = show(state.base);
-    byId('total-row').hidden = !extended;
     byId('extended-row').hidden = !extended;
-    byId('total').textContent = total + ' days';
     byId('extended-deadline').textContent = show(state.deadline);
   }
 

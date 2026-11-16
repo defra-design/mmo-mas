@@ -46,7 +46,3 @@ export function withNewClosingDates(extensions: ConsultationExtension[]) {
 export function currentClosingDate(extensions: ConsultationExtension[]) {
   return extensions.reduce((closing, extension) => addDays(closing, extension.days), ORIGINAL_CLOSING_DATE);
 }
-
-export function totalExtension(extensions: ConsultationExtension[]) {
-  return extensions.reduce((total, extension) => total + extension.days, 0);
-}
