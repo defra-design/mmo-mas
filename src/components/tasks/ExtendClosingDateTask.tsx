@@ -1,10 +1,9 @@
 // src/components/tasks/ExtendClosingDateTask.tsx
 // Task form for "Extend consultee closing date", an optional task on a case in
 // consultation (MLA/2026/10006). The consultation dates are read-only. Once
-// there is an extension, Consultation period and Consultee closing date are
-// joined by Original consultation period, Original closing date and Total
-// extension: separate columns shown and hidden by a business rule, as a label
-// can't change. Consultee closing date always shows the current date. Each
+// there is an extension, Consultation period becomes Original consultation
+// period, and Original closing date is added: separate columns shown and hidden
+// by a business rule, as a label can't change. Consultee closing date always shows the current date. Each
 // extension is a related Consultation extension record, added on its own page
 // from the Extensions subgrid. Its status is Optional, then Extended.
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +17,7 @@ import ExtensionsGrid from './ExtensionsGrid';
 import { useTasks } from '../../context/TaskContext';
 import {
   CONSULTATION_PERIOD_DAYS, CONSULTATION_STARTED, ORIGINAL_CLOSING_DATE, currentClosingDate,
-  isoDate, showDate, totalExtension, withNewClosingDates,
+  isoDate, showDate, withNewClosingDates,
 } from '../../utils/consultationCase';
 
 const useStyles = makeStyles({
@@ -71,7 +70,6 @@ export default function ExtendClosingDateTask({ caseId }: Props) {
         {date('Consultation started', showDate(CONSULTATION_STARTED))}
         {date(extended ? 'Original consultation period' : 'Consultation period', `${CONSULTATION_PERIOD_DAYS} days`)}
         {extended && date('Original closing date', showDate(ORIGINAL_CLOSING_DATE))}
-        {extended && date('Total extension', `${totalExtension(extensions)} days`)}
         {date('Consultee closing date', showDate(closingDate))}
         <TaskHint title="Help with extending the closing date">
           <Text block>
