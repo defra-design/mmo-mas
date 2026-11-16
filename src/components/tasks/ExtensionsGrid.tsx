@@ -23,9 +23,9 @@ type Key = 'dateExtended' | 'days' | 'newClosingDate' | 'reason';
 type View = { sort: { key: Key; dir: 'asc' | 'desc' }; filters: Partial<Record<Key, ColumnFilter>> };
 
 const columns: { key: Key; label: string; width?: number; sortLabels: [string, string] }[] = [
-  { key: 'dateExtended', label: 'Date extended', width: 150, sortLabels: ['Old to new', 'New to old'] },
-  { key: 'days', label: 'Extended by', width: 130, sortLabels: ['Smaller to larger', 'Larger to smaller'] },
-  { key: 'newClosingDate', label: 'New closing date', width: 160, sortLabels: ['Old to new', 'New to old'] },
+  { key: 'dateExtended', label: 'Date extended', width: 190, sortLabels: ['Old to new', 'New to old'] },
+  { key: 'days', label: 'Extended by', width: 170, sortLabels: ['Smaller to larger', 'Larger to smaller'] },
+  { key: 'newClosingDate', label: 'New closing date', width: 210, sortLabels: ['Old to new', 'New to old'] },
   { key: 'reason', label: 'Reason', sortLabels: ['A to Z', 'Z to A'] },
 ];
 const text = (row: ExtensionGridRow, key: Key) =>
@@ -46,7 +46,7 @@ function loadView(caseId: string): View {
 const useStyles = makeStyles({
   commands: { display: 'flex', justifyContent: 'flex-end' },
   grid: { overflowX: 'auto' },
-  table: { tableLayout: 'fixed', minWidth: '600px', width: '100%' },
+  table: { tableLayout: 'fixed', minWidth: '820px', width: '100%' },
   row: { height: '42px' },
   filtered: { outline: '1px solid #0078d4', outlineOffset: '-1px', borderRadius: tokens.borderRadiusMedium },
   empty: {
@@ -74,6 +74,9 @@ export default function ExtensionsGrid({ caseId, rows, onAdd, onOpen }: Props) {
     }
   }, [caseId, view]);
   const { sort, filters } = view;
+  // Rows arrive in the order the extensions were made. Extensions made on the
+  // same day tie on Date extended, so break ties by that order (newest last).
+  const order = new Map(rows.map((row, index) => [row.id, index]));
   const shown = rows
     .filter(row => columns.every(({ key }) => {
       const filter = filters[key];
@@ -81,7 +84,8 @@ export default function ExtensionsGrid({ caseId, rows, onAdd, onOpen }: Props) {
       return text(row, key).toLowerCase().includes(filter.toLowerCase());
     }))
     .sort((a, b) => {
-      const compare = sort.key === 'days' ? a.days - b.days : a[sort.key].localeCompare(b[sort.key]);
+      const compare = (sort.key === 'days' ? a.days - b.days : a[sort.key].localeCompare(b[sort.key]))
+        || order.get(a.id)! - order.get(b.id)!;
       return sort.dir === 'asc' ? compare : -compare;
     });
   const onControl = (event: MouseEvent) => Boolean((event.target as HTMLElement).closest('button, input, a'));

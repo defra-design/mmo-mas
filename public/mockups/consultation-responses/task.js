@@ -120,7 +120,7 @@
     var key = state.sort.key, dir = state.sort.dir;
     return state.extensions.slice().sort(function (a, b) {
       var x = a[key], y = b[key];
-      return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * dir || (b.seq - a.seq);
+      return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * dir || (a.seq - b.seq) * dir;
     });
   }
 
