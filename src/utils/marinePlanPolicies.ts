@@ -3,6 +3,10 @@
 // per-policy assessment form. The data mirrors public/cdp/marine-plan-policies.json
 // (the applicant-facing CDP iframe copy) — keep the two in sync if the seed changes.
 import mppData from '../mock-data/marine-plan-policies.json';
+// MLA/2026/10006 (Hayling Island, South plan area) has its own policies,
+// mirroring public/cdp/marine-plan-policies-hayling.json.
+import haylingMppData from '../mock-data/marine-plan-policies-hayling.json';
+import { CONSULTATION_CASE_ID } from './consultationCase';
 
 export interface MarinePlanPolicy {
   code: string;
@@ -34,6 +38,15 @@ export const policies: MarinePlanPolicy[] = (mppData.categories as RawCategory[]
 );
 
 export const policyCount = policies.length;
+
+const haylingPolicies: MarinePlanPolicy[] = (haylingMppData.categories as RawCategory[]).flatMap(cat =>
+  cat.policies.map(p => ({ ...p, group: cat.name }))
+);
+
+/** The policies the applicant answered on this case. */
+export function policiesForCase(caseId: string): MarinePlanPolicy[] {
+  return caseId === CONSULTATION_CASE_ID ? haylingPolicies : policies;
+}
 
 /** The case whose Marine plan policies task opens a task form with a subgrid of
  *  policy assessments. Other cases keep their existing MPP treatment. */
@@ -104,8 +117,9 @@ interface RawDocument {
 }
 
 /** The supporting documents linked to a policy, each with where its evidence is. */
-export function documentsForPolicy(code: string): SupportingDocument[] {
-  const documents = (mppData as { documents?: RawDocument[] }).documents ?? [];
+export function documentsForPolicy(code: string, caseId?: string): SupportingDocument[] {
+  const data = caseId === CONSULTATION_CASE_ID ? haylingMppData : mppData;
+  const documents = (data as { documents?: RawDocument[] }).documents ?? [];
   return documents.flatMap(doc =>
     doc.policies
       .filter(link => link.code === code)

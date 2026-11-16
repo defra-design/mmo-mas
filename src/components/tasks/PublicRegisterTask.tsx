@@ -45,6 +45,7 @@ import {
 } from '../../utils/validationMessages';
 import { useTasks } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
+import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
 
 const useStyles = makeStyles({
   page: {
@@ -91,13 +92,13 @@ const APPLICANT_REQUEST =
 // prototype so the round of testing on 10014 (open) and 10015 (disclosure) can
 // compare them; the guidance copy itself is identical either way. 10013 has no
 // assessment section, so this only affects its personal-information guidance.
-const GUIDANCE_AS_DISCLOSURE = ['MLA/2026/10013', 'MLA/2026/10015'];
+const GUIDANCE_AS_DISCLOSURE = ['MLA/2026/10006', 'MLA/2026/10013', 'MLA/2026/10015'];
 
 // Cases where the applicant answered "No" to the withholding question. There is
 // then nothing to assess: the reason field and the decision section come off the
 // form. Modelled as a business rule on
 // the applicant's own answer, exactly like every other reveal on this form.
-const NO_WITHHOLD_REQUEST = ['MLA/2026/10013'];
+const NO_WITHHOLD_REQUEST = ['MLA/2026/10006', 'MLA/2026/10013'];
 
 const REDACT_URL = 'https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a';
 const REDACT_HREF =
@@ -110,8 +111,12 @@ interface PublicRegisterTaskProps {
 export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks, publicRegisterForm: form, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
+  const { tasks, publicRegisterForm: sharedForm, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
     useTasks();
+  // MLA/2026/10006 shows its own answers while the shared ones are empty.
+  const form = caseId === CONSULTATION_CASE_ID
+    ? { ...sharedForm, personalInfo: sharedForm.personalInfo || 'No', completed: true }
+    : sharedForm;
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =

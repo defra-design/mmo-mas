@@ -33,6 +33,8 @@ import {
   taskStatusForCase,
 } from '../../utils/publicNoticeEvidence';
 import { SITE_NOTICE } from '../../utils/publicNoticeRequirement';
+import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
+import { HAYLING_PROPOSED_WORKS, HAYLING_SITE_NOTICE } from '../../utils/consultationCaseAnswers';
 
 const useStyles = makeStyles({
   page: {
@@ -87,7 +89,14 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
     saveSiteNotice,
   } = useTasks();
   const completedFixture = hasSubmittedPublicNoticeEvidence(caseId);
-  const form = completedFixture
+  const form = caseId === CONSULTATION_CASE_ID
+    ? {
+        needsNotice: siteNoticeForm.needsNotice || HAYLING_SITE_NOTICE.needsNotice,
+        rationale: siteNoticeForm.rationale,
+        summary: siteNoticeForm.summary || HAYLING_SITE_NOTICE.summary,
+        groups: siteNoticeForm.groups || HAYLING_SITE_NOTICE.groups,
+      }
+    : completedFixture
     ? {
         needsNotice: siteNoticeForm.needsNotice || SITE_NOTICE,
         rationale: siteNoticeForm.rationale,
@@ -148,7 +157,9 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
 
       <SiteNoticeAssessment
         form={form}
-        proposedWorks={completedFixture ? COMPLETED_PROPOSED_WORKS : PROPOSED_WORKS}
+        proposedWorks={caseId === CONSULTATION_CASE_ID
+          ? HAYLING_PROPOSED_WORKS
+          : completedFixture ? COMPLETED_PROPOSED_WORKS : PROPOSED_WORKS}
         locked={locked}
         errorFor={errorFor}
         onChange={update}

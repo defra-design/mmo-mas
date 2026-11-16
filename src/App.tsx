@@ -17,6 +17,8 @@ import PrepForConsulteeTask from './components/tasks/PrepForConsulteeTask';
 import PrepForConsulteeConsultee from './components/tasks/PrepForConsulteeConsultee';
 import OrganisationForm from './components/OrganisationForm';
 import PublicRegisterTask from './components/tasks/PublicRegisterTask';
+import ExtendClosingDateTask from './components/tasks/ExtendClosingDateTask';
+import ConsultationExtensionRecord from './components/tasks/ConsultationExtensionRecord';
 import SiteNoticeTask from './components/tasks/SiteNoticeTask';
 import ReviewPublicNoticeEvidenceTask from './components/tasks/ReviewPublicNoticeEvidenceTask';
 import PublicNoticeEvidenceLocationTask from './components/tasks/PublicNoticeEvidenceLocationTask';
@@ -134,6 +136,22 @@ function App() {
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <StartConsultationTask caseId={id} />} />
+                  </Shell>
+                }
+              />
+              <Route
+                path="/receive-assess/cases/:caseId/tasks/extend-closing-date"
+                element={
+                  <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
+                    <MarineCaseWrapper render={(id) => <ExtendClosingDateTask caseId={id} />} />
+                  </Shell>
+                }
+              />
+              <Route
+                path="/receive-assess/cases/:caseId/tasks/extend-closing-date/extensions/:extensionId"
+                element={
+                  <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
+                    <MarineCaseWrapper render={(id) => <ConsultationExtensionRecord caseId={id} />} />
                   </Shell>
                 }
               />

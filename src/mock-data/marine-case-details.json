@@ -63,5 +63,18 @@
     "applicant": "Jenny Smith",
     "organisation": "South Devon Coast SUP Ltd",
     "consentToPublish": "Yes"
+  },
+  "MLA/2026/10006": {
+    "reference": "MLA/2026/10006",
+    "title": "Hayling Island groyne repairs",
+    "status": "Consultation",
+    "assignedTo": "James Okafor",
+    "caseAge": "34 days",
+    "applicationType": "Marine licence application",
+    "submitted": "13/10/2026",
+    "feeBand": "2A",
+    "applicant": "Rachel Turner",
+    "organisation": "Solent Coastal Services Ltd",
+    "consentToPublish": "Yes"
   }
 }

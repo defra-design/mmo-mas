@@ -24,6 +24,8 @@ import { notificationMessage, requiredMessage } from '../../utils/validationMess
 import { useTasks } from '../../context/TaskContext';
 import type { SiteCheckForm } from '../../context/TaskContext';
 import { hasSubmittedPublicNoticeEvidence } from '../../utils/publicNoticeEvidence';
+import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
+import { HAYLING_SITE_CHECK } from '../../utils/consultationCaseAnswers';
 
 // Native D365 uses a narrow label column. Once a row cannot fit the label and
 // its control side by side, the control wraps underneath.
@@ -121,7 +123,13 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   const navigate = useNavigate();
   const { siteCheckForm, saved, setSiteCheckField, markUnsaved, completeSiteCheck } = useTasks();
   const completedFixture = hasSubmittedPublicNoticeEvidence(caseId);
-  const form: SiteCheckForm = completedFixture
+  const form: SiteCheckForm = caseId === CONSULTATION_CASE_ID
+    ? {
+        coordinatesOk: siteCheckForm.coordinatesOk || HAYLING_SITE_CHECK.coordinatesOk,
+        withinMile: siteCheckForm.withinMile || HAYLING_SITE_CHECK.withinMile,
+        notes: siteCheckForm.notes || HAYLING_SITE_CHECK.notes,
+      }
+    : completedFixture
     ? {
         coordinatesOk: siteCheckForm.coordinatesOk || 'Yes',
         withinMile: siteCheckForm.withinMile || 'Yes',

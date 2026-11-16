@@ -29,6 +29,8 @@ import { useTasks } from '../../context/TaskContext';
 import type { WfdForm } from '../../context/TaskContext';
 import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
 import { asset } from '../../utils/asset';
+import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
+import { HAYLING_WFD } from '../../utils/consultationCaseAnswers';
 
 const useStyles = makeStyles({
   page: {
@@ -127,13 +129,24 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
   const navigate = useNavigate();
   const {
     tasks,
-    wfdForm,
+    wfdForm: sharedWfdForm,
     saved,
     setWfdReview,
     setWfdInitialConsiderations,
     markUnsaved,
     completeWfd,
   } = useTasks();
+  // MLA/2026/10006 shows its own answers while the shared ones are empty.
+  const wfdForm = caseId === CONSULTATION_CASE_ID
+    ? {
+        review: sharedWfdForm.review || HAYLING_WFD.review,
+        initialConsiderations: sharedWfdForm.initialConsiderations || HAYLING_WFD.initialConsiderations,
+      }
+    : sharedWfdForm;
+  // Hayling's assessment, from the GOV.UK prototype (a dead link, as there).
+  const assessmentDocument = caseId === CONSULTATION_CASE_ID
+    ? { fileName: 'hayling-groynes-wfd-assessment.pdf', href: '#' }
+    : ASSESSMENT_DOCUMENT;
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =
@@ -222,7 +235,7 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
                 surfaces - if you minimise bank or bed disturbance
               </li>
             </ul>
-            {ASSESSMENT_DOCUMENT && <div className={styles.row}>
+            {assessmentDocument && <div className={styles.row}>
               <TaskFieldLabel className={styles.label}>
                 Assessment provided
               </TaskFieldLabel>
@@ -230,12 +243,12 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
               <div className={styles.fields}>
                 <div className={styles.value}>
                   <Link
-                    href={ASSESSMENT_DOCUMENT.href}
+                    href={assessmentDocument.href}
                     target="_blank"
                     rel="noopener"
                     className={styles.docxLink}
                   >
-                    <ArrowDownloadRegular /> {ASSESSMENT_DOCUMENT.fileName}
+                    <ArrowDownloadRegular /> {assessmentDocument.fileName}
                   </Link>
                 </div>
               </div>

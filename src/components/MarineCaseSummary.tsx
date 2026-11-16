@@ -40,6 +40,7 @@ import FieldDecorations from './tasks/FieldDecorations';
 import OrganisationLink from './OrganisationLink';
 import TasksSubgrid from './TasksSubgrid';
 import CdpFrame from './CdpFrame';
+import { CONSULTATION_CASE_ID, currentClosingDate } from '../utils/consultationCase';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
 
@@ -246,6 +247,17 @@ interface MarineCaseSummaryProps {
 
 // Tabs whose content is CDP application data rendered in an iframe. Paths are
 // resolved through asset() so a frozen iteration loads its own CDP pages.
+// MLA/2026/10006's own application (Hayling Island groyne repairs), from the
+// GOV.UK prototype. Withholding information answers No, as on 10013.
+const haylingPages: Record<string, string> = {
+  project: asset('cdp/project-details-hayling.html'),
+  site: asset('cdp/site-and-activity-hayling.html'),
+  mpp: asset('cdp/marine-plan-policies-sectors.html') + '?case=hayling',
+  wfd: asset('cdp/water-framework-directive-hayling.html'),
+  other: asset('cdp/other-permissions-hayling.html'),
+  'public-register': asset('cdp/public-register-none.html'),
+};
+
 const cdpPages: Record<string, { src: string; title: string }> = {
   project: { src: asset('cdp/project-details.html'), title: 'Application details' },
   site: { src: asset('cdp/site-and-activity.html'), title: 'Site and activity' },
@@ -336,6 +348,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     requestTransferToMcms,
     completeTransferToMcms,
     rejectApplication,
+    consultationExtensions,
   } = useTasks();
   // A task form can request a specific landing tab via navigation state (e.g.
   // 10014's MPP assessment returns to the Marine plan policies tab on save so the
@@ -359,8 +372,17 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // full-width Tasks tab first) and adds the Consultation responses tab after
   // Case summary, whose CDP page lives in public/mockups/consultation-responses.
   const consultationMockup = searchParams.get('consultation') === 'mockup';
+  // MLA/2026/10006 (Hayling Island groyne repairs) is the live case in
+  // consultation: laid out like 10015, with the Consultation responses tab and
+  // the Extend consultee closing date task. The mockups above reuse it.
+  const consultationCase = caseId === CONSULTATION_CASE_ID;
+  // The live Consultation responses tab is CDP's page. CDP is told the case's
+  // closing date (it moves when the caseworker extends it), passed in the hash.
+  const consultationResponsesSrc =
+    asset('cdp/consultation-responses.html') + '#' + currentClosingDate(consultationExtensions[caseId] ?? []);
   const [selectedTab, setSelectedTab] = useState(
-    requestedTab ?? (caseId === 'MLA/2026/10015' || consultationMockup ? 'tasks' : 'summary')
+    requestedTab ??
+      (caseId === 'MLA/2026/10015' || consultationCase || consultationMockup ? 'tasks' : 'summary')
   );
 
   // Which case-action dialog is open, if any. Each dialog owns its own fields and
@@ -386,7 +408,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const mppRailList = caseId === 'MLA/2026/10012';
   const mppFullWidth = caseId === 'MLA/2026/10013';
   const mppTabList = caseId === 'MLA/2026/10014';
-  const tasksTab = caseId === 'MLA/2026/10015' || consultationMockup;
+  const tasksTab = caseId === 'MLA/2026/10015' || consultationCase || consultationMockup;
   const mppAsList = mppRailList || mppFullWidth || mppTabList || tasksTab;
   // 10013 shows the Tasks list in the persistent rail (across every tab) even
   // though it also has the full-width MPP subgrid stacked under the Case summary.
@@ -397,7 +419,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const caseTabs = [
     ...(tasksTab ? [{ id: 'tasks', name: 'Tasks' }] : []),
     ...tabs.slice(0, 1),
-    ...(consultationMockup ? [{ id: 'consultation', name: 'Consultation responses' }] : []),
+    ...(consultationCase || consultationMockup ? [{ id: 'consultation', name: 'Consultation responses' }] : []),
     ...tabs.slice(1),
   ];
 
@@ -428,7 +450,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
     applicationType: details?.applicationType ?? 'Marine licence application',
-    submitted: details ? submittedDate : '—',
+    submitted: details?.submitted ?? (details ? submittedDate : '—'),
     feeBand: details?.feeBand ?? '—',
     applicant: details?.applicant ?? '—',
     organisation: details?.organisation ?? '—',
@@ -573,7 +595,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   <TasksSubgrid caseId={caseId} />
                 </Card>
                 <Card className={mergeClasses(styles.mppFullWidthCard, styles.stackedCard)}>
-                  <MarinePlanPoliciesSubgrid caseId={caseId} allDone={consultationMockup} />
+                  <MarinePlanPoliciesSubgrid caseId={caseId} allDone={consultationCase || consultationMockup} />
                 </Card>
               </div>
             )}
@@ -721,7 +743,11 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // so its Withholding information tab answers No with no follow-up — every other
                   // case keeps the default page for the tab.
                   src={
-                    tasksTab && selectedTab === 'mpp'
+                    consultationCase && haylingPages[selectedTab]
+                      ? haylingPages[selectedTab] + (selectedTab === 'mpp' ? mppHash : '')
+                      : consultationCase && selectedTab === 'consultation' && !consultationMockup
+                        ? consultationResponsesSrc
+                        : tasksTab && selectedTab === 'mpp'
                       ? mppPerPolicyMockup
                         ? asset('mockups/mpp-supporting-documents/review-tab.html')
                         : asset('cdp/marine-plan-policies-sectors.html') + mppHash

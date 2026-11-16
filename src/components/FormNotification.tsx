@@ -3,13 +3,13 @@
 // bar on a record. It stands in for the OOB notification surface a real form uses
 // (`formContext.ui.setFormNotification` for errors/warnings, and the built-in
 // read-only notification when a record is inactive). It is not a custom banner:
-// both levels are native D365, so nothing here needs a PCF control.
+// all three levels are native D365, so nothing here needs a PCF control.
 //
 // It spans the whole content area, so it pulls out past main's 20px side padding
 // rather than sitting inside the form.
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses, shorthands, tokens, Body1 } from '@fluentui/react-components';
-import { DismissCircleFilled, LockClosedFilled } from '@fluentui/react-icons';
+import { DismissCircleFilled, InfoFilled, LockClosedFilled } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   bar: {
@@ -29,11 +29,14 @@ const useStyles = makeStyles({
   error: { backgroundColor: tokens.colorStatusDangerBackground1 },
   icon: { fontSize: '16px', flexShrink: 0, color: tokens.colorNeutralForeground1 },
   errorIcon: { color: tokens.colorStatusDangerForeground3 },
+  // INFO level: a pale blue strip with a blue (i).
+  info: { backgroundColor: '#ebf3fc' },
+  infoIcon: { color: '#0f6cbd' },
 });
 
 interface FormNotificationProps {
-  /** 'error' = ERROR-level form notification. 'read-only' = the inactive-record lock strip. */
-  level: 'error' | 'read-only';
+  /** 'error' = ERROR-level form notification. 'info' = INFO-level. 'read-only' = the inactive-record lock strip. */
+  level: 'error' | 'info' | 'read-only';
   children: ReactNode;
 }
 
@@ -43,11 +46,13 @@ export default function FormNotification({ level, children }: FormNotificationPr
 
   return (
     <div
-      className={mergeClasses(styles.bar, isError ? styles.error : styles.readOnly)}
+      className={mergeClasses(styles.bar, isError ? styles.error : level === 'info' ? styles.info : styles.readOnly)}
       role={isError ? 'alert' : undefined}
     >
       {isError ? (
         <DismissCircleFilled className={mergeClasses(styles.icon, styles.errorIcon)} />
+      ) : level === 'info' ? (
+        <InfoFilled className={mergeClasses(styles.icon, styles.infoIcon)} />
       ) : (
         <LockClosedFilled className={styles.icon} />
       )}
