@@ -44,7 +44,7 @@
       <li>Consultation started</li>
       <li>Original consultation period</li>
       <li>Original closing date</li>
-      <li>Consultee closing date – always the current closing date</li>
+      <li>New closing date – always the current closing date</li>
     </ul>
     <p>"Original" only appears once there is something to compare it with. In D365 a field's label can't change, so these are separate fields, shown and hidden by a business rule depending on whether there are any extensions.</p>
     <p>Each extension is a row in the Extensions subgrid, showing when it was made, how many days it added, the new closing date and the reason. A long reason is cut off, and the full text shows when you hover over it or open the extension. Extensions can't be removed, because each one has already moved the closing date. The closing date can be extended more than once, and after it has passed.</p>
