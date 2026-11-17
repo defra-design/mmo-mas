@@ -29,7 +29,7 @@
     <main>
       <a class="back" href="../"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7.65 4.15c.2-.2.5-.2.7 0l5.49 5.46c.21.22.21.57 0 .78l-5.49 5.46a.5.5 0 0 1-.7-.7L12.8 10 7.65 4.85a.5.5 0 0 1 0-.7Z" /></svg><span>Back to prototype index</span></a>
       <h1>Iteration 2 – design overview</h1>
-      <p>Iteration 2 develops the receive and assess journey from reviewing an application into recording assessment decisions and preparing the case for consultation. It adds individual marine plan policy assessments, consultation preparation, public register decisions, public notice and evidence review, and a task to start consultation. It also explores how case officers reject an application or arrange a transfer to MCMS.</p>
+      <p>Iteration 2 develops the receive and assess journey from reviewing an application into recording assessment decisions and preparing the case for consultation. It adds individual marine plan policy assessments, consultation preparation, public register decisions, public notice and evidence review, and a task to start consultation. It also explores how case officers reject an application or arrange a transfer to MCMS, and begins the consultation stage, with following consultation responses and extending the consultee closing date.</p>
       <p>This overview describes the current prototype, including the latest additions to Iteration 2. It builds on the <a href="iteration-1-design-overview.html">Iteration 1 design overview</a>.</p>
 
       <h2>Different ways of displaying tasks and marine plan policy assessments</h2>
@@ -138,6 +138,22 @@
         </li>
       </ul>
 
+      <h2>Consultation</h2>
+      <p>Once consultation has started, the case officer needs to see who has responded and, if needed, give consultees more time. MLA/2026/10006, Hayling Island groyne repairs, is a case in consultation that shows both. It opens on a dedicated Tasks tab, with every receive and assess task <strong>Done</strong>.</p>
+      <ul>
+        <li>
+          <h3>Extend consultee closing date</h3>
+          <p>An optional task at the bottom of the task list, with the status <strong>Optional</strong> so it’s clear it doesn’t need to be completed. It shows the consultation dates read-only, with an Extensions subgrid below. <strong>Add extension</strong> opens a new extension record on its own page, where the case officer chooses how long to extend by, in blocks of 7 days up to 28, and gives a reason. The new closing date is shown as soon as the length is chosen. An earlier version recorded which consultee asked for more time. It was dropped after the UCD collab, as the case officer may extend without being asked.</p>
+          <p>Once there is an extension, the task shows the original consultation period and closing date alongside the new closing date, and its status becomes <strong>Extended</strong>. The task still opens, so the closing date can be extended again, including after it has passed. Extensions can’t be removed, because each one has already moved the closing date. The new date applies to every consultee, and no system notification is sent: a consultee who wants more time asks offline. Public comments still close on the original date (to be confirmed).</p>
+        </li>
+        <li>
+          <h3>Consultation responses tab (parked)</h3>
+          <p>A read-only tab after Case summary, shown only at the Consultation stage. Placing it there keeps it from being pushed into the overflow menu on smaller screens. Like the other application tabs, it is a CDP page shown inside the case in an iframe. It uses the same navigation and detail layout as the Marine plan policies tab: an overview with the consultation dates, counts of responses and a table of every consultee’s response status, then each consultee’s response and the public comments. A consultee who hasn’t responded is <strong>Awaiting response</strong> until the closing date, then <strong>Overdue</strong>, and goes back to <strong>Awaiting response</strong> when the closing date is extended.</p>
+          <p>Building it showed it is technically feasible to get each consultee’s response status from CDP. The tab covers the original brief to monitor progress and view responses, but it is parked. In the next stage, Make and issue a decision, the case officer will act on the responses as well as read them, and anything they record has to be a task, so the tab could change. A one-page layout and the before, passed and extended scenarios are kept in the Design explorations section of the prototype.</p>
+        </li>
+      </ul>
+      <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1712">ML-1712 – Consultation journey in MAS</a>.</p>
+
       <h2>Case actions</h2>
       <ul>
         <li>
@@ -159,6 +175,7 @@
       <h2>Prototype scope</h2>
       <p>The examples illustrate different stages of the journey using prepared application and evidence data. The redaction summary describes the separate journey documented in ML-1383.</p>
       <p>The current Start consultation gate checks the required tasks and two policy assessments (SW-CC-1 and SW-CC-3) as a prototype shortcut. The ready-to-start example fills all policy assessments. This shortcut does not define the final service rule.</p>
+      <p>MLA/2026/10006 uses today’s date, so its original consultee closing date has already passed. Extensions added to it are saved until the prototype data is cleared from the index page.</p>
       <p class="back-to-top"><a href="#top">Back to top</a></p>
     </main>
   </body>
