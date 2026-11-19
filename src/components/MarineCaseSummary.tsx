@@ -357,11 +357,8 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // the same for plain links, e.g. a shared link to a case's MPP tab.
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const navState = location.state as { tab?: string; mppPage?: string } | null;
+  const navState = location.state as { tab?: string } | null;
   const requestedTab = navState?.tab ?? searchParams.get('tab') ?? undefined;
-  // A policy assessment's "Find the supporting documents" link opens the case's
-  // MPP tab on its Supporting documents page; the iframe reads the hash.
-  const mppHash = navState?.mppPage === 'supporting-documents' ? '#supporting-documents' : '';
   // Design exploration (not MVP): ?mpp=per-policy shows 10015's MPP tab with each
   // policy listing its supporting documents, from a saved copy in public/mockups.
   const mppPerPolicyMockup = searchParams.get('mpp') === 'per-policy';
@@ -744,20 +741,20 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                   // case keeps the default page for the tab.
                   src={
                     consultationCase && haylingPages[selectedTab]
-                      ? haylingPages[selectedTab] + (selectedTab === 'mpp' ? mppHash : '')
+                      ? haylingPages[selectedTab]
                       : consultationCase && selectedTab === 'consultation' && !consultationMockup
                         ? consultationResponsesSrc
                         : tasksTab && selectedTab === 'mpp'
                       ? mppPerPolicyMockup
                         ? asset('mockups/mpp-supporting-documents/review-tab.html')
-                        : asset('cdp/marine-plan-policies-sectors.html') + mppHash
+                        : asset('cdp/marine-plan-policies-sectors.html')
                       : caseId === 'MLA/2026/10002' && selectedTab === 'site'
                         ? asset('cdp/site-and-activity-multi.html')
                         : withholdMockup && selectedTab === 'public-register'
                           ? asset('mockups/withhold-information/review-tab.html')
                           : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
                             ? asset('cdp/public-register-none.html')
-                            : cdpPages[selectedTab].src + (selectedTab === 'mpp' ? mppHash : '')
+                            : cdpPages[selectedTab].src
                   }
                   title={cdpPages[selectedTab].title}
                 />

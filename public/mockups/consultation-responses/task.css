@@ -120,9 +120,6 @@ p { margin: 0; }
 /* Quick create: the OOB flyout that slides in from the right. */
 
 /* A link in the help text, as the help links in the app. */
-.hint-link { color: #115ea3; text-decoration: underline; }
-.hint-link:hover { text-decoration: none; }
-.hint-link:focus-visible { outline: 2px solid #0078d4; outline-offset: 2px; }
 /* Tooltip for a cut-off grid cell: the Fluent v9 Tooltip, below, fading in. */
 .tip { position: absolute; z-index: 5; max-width: 360px; padding: 4px 11px 6px; background: #fff; color: #242424; border-radius: 4px; box-shadow: 0 8px 16px #00000024, 0 0 2px #0000001f; font-size: 12px; line-height: 16px; white-space: normal; animation: tip-in .15s ease-out; }
 @keyframes tip-in { from { opacity: 0; } to { opacity: 1; } }
