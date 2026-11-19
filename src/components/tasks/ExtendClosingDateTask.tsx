@@ -7,7 +7,7 @@
 // hidden by a business rule, as a label can't change. Each extension is a related Consultation extension record, added on its own page
 // from the Extensions subgrid. Its status is Optional, then Extended.
 import { useNavigate } from 'react-router-dom';
-import { makeStyles, shorthands, tokens, Body1, Card, Link, Text, Title3 } from '@fluentui/react-components';
+import { makeStyles, shorthands, tokens, Body1, Card, Text, Title3 } from '@fluentui/react-components';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import TaskRow from './TaskRow';
@@ -80,11 +80,7 @@ export default function ExtendClosingDateTask({ caseId }: Props) {
             <li>The new closing date applies to every consultee on this case, not just the one who asked.</li>
             <li>We do not email consultees when you extend the closing date. If a consultee asked for more time, tell them the new date.</li>
             <li>
-              To see who has responded, go to the{' '}
-              <Link as="a" href={`${caseUrl}?tab=consultation`}
-                onClick={event => { event.preventDefault(); navigate(caseUrl, { state: { tab: 'consultation' } }); }}>
-                Consultation responses tab
-              </Link>.
+              To see who has responded, go to the Consultation responses tab.
             </li>
           </ul>
         </TaskHint>

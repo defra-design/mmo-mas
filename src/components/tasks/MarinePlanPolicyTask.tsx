@@ -1,6 +1,5 @@
 // src/components/tasks/MarinePlanPolicyTask.tsx
 import { useState } from 'react';
-import type { MouseEvent } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   makeStyles,
@@ -13,7 +12,6 @@ import {
   Body1,
   Button,
   Field,
-  Link,
   Textarea,
 } from '@fluentui/react-components';
 import {
@@ -197,15 +195,13 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   }
 
   // These cases' Marine plan policies tab (the CDP iframe) has the Supporting
-  // documents page, so a policy with documents linked to it points the
-  // caseworker there. 10014's tab is a native subgrid with no such page.
+  // documents page, so a policy with documents linked to it tells the
+  // caseworker to look there. 10014's tab is a native subgrid with no such page.
+  // It isn't a link: opening a tab from a form needs custom JavaScript, which
+  // the D365 developer ruled out as it would need retesting with each update.
   const hasDocuments =
     CASES_WITH_SUPPORTING_DOCUMENTS.includes(caseId) &&
     documentsForPolicy(policy.code, caseId).length > 0;
-  const openSupportingDocuments = (e: MouseEvent) => {
-    e.preventDefault();
-    navigate(caseUrl, { state: { tab: 'mpp', mppPage: 'supporting-documents' } });
-  };
 
   // MLA/2026/10006 shows its own assessment while the shared one is empty.
   const answer = mppForm[policy.code] ?? HAYLING_MPP[policy.code];
@@ -310,13 +306,11 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
               </div>
             </div>
             {/* Injected HTML in real D365 (a web resource), so it has no label or
-                padlock — just the link, under the applicant's consideration. */}
+                padlock — just the text, under the applicant's consideration. */}
             {hasDocuments && (
-              <div>
-                <Link inline href={caseUrl} onClick={openSupportingDocuments}>
-                  Find the supporting documents for this policy
-                </Link>
-              </div>
+              <Body1 block>
+                You can find the supporting document for this policy in the Marine plan policies tab.
+              </Body1>
             )}
             {docsMockup === '1' && (
               <MppSupportingDocuments documents={documentsForPolicy(policy.code, caseId)} />

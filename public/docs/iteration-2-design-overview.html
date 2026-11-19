@@ -72,7 +72,9 @@
         <li>
           <h3>Marine plan policy supporting documents</h3>
           <p>Applicants can upload supporting documents and link each one to the marine plan policies it supports, saying where in the document the relevant information is. On the Marine plan policies tab, a new “Evidence” section at the top of the navigation links to a “Supporting documents” page. This lists every document in a table, with its document type, each policy it supports and where the information is. Each policy links to that policy’s page.</p>
-          <p>When a policy has documents linked to it, its assessment shows a “Find the supporting documents for this policy” link under the applicant’s consideration, which opens the Supporting documents page. This is on MLA/2026/10002, 10012, 10013 and 10015. Showing documents against each policy, and within the assessment itself, were also explored but are not MVP. They are kept in the Design explorations section of the prototype.</p>
+          <p>When a policy has documents linked to it, its assessment says “You can find the supporting document for this policy in the Marine plan policies tab.” under the applicant’s consideration. This is on MLA/2026/10002, 10006, 10012, 10013 and 10015.</p>
+          <p>We wanted this to be a link that opens the Supporting documents page on the Marine plan policies tab. The D365 developer advised against it: opening a tab from a form needs custom JavaScript, and Microsoft’s guidance is that custom code like this has to be retested whenever the platform is updated. So there are no links from tasks to tabs, and the case officer is told where to look instead.</p>
+          <p>Showing documents against each policy, and within the assessment itself, were also explored but are not MVP. They are kept in the Design explorations section of the prototype.</p>
           <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1642">ML-1642 – CO can view supporting documents</a>.</p>
         </li>
       </ul>
@@ -145,6 +147,7 @@
           <h3>Extend consultee closing date</h3>
           <p>An optional task at the bottom of the task list, with the status <strong>Optional</strong> so it’s clear it doesn’t need to be completed. It shows the consultation dates read-only, with an Extensions subgrid below. <strong>Add extension</strong> opens a new extension record on its own page, where the case officer chooses how long to extend by, in blocks of 7 days up to 28, and gives a reason. The new closing date is shown as soon as the length is chosen. An earlier version recorded which consultee asked for more time. It was dropped after the UCD collab, as the case officer may extend without being asked.</p>
           <p>Once there is an extension, the task shows the original consultation period and closing date alongside the new closing date, and its status becomes <strong>Extended</strong>. The task still opens, so the closing date can be extended again, including after it has passed. Extensions can’t be removed, because each one has already moved the closing date. The new date applies to every consultee, and no system notification is sent: a consultee who wants more time asks offline. Public comments still close on the original date (to be confirmed).</p>
+          <p>The task’s help text tells the case officer to go to the Consultation responses tab to see who has responded. It was a link to the tab, but, as with the marine plan policy supporting documents, links from tasks to tabs were ruled out because they need custom JavaScript that would have to be retested with each platform update.</p>
         </li>
         <li>
           <h3>Consultation responses tab (parked)</h3>

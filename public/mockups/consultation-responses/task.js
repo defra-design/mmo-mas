@@ -107,8 +107,6 @@
     Array.prototype.forEach.call(document.querySelectorAll('.back-to-case'), function (a) {
       a.href = 'tab.html?tab=tasks#' + scenario;
     });
-    // Help text link to the case's Consultation responses tab, in the same scenario.
-    byId('responses-link').href = 'tab.html#' + scenario;
     byId('passed-note').hidden = scenario !== 'passed';
     showTask();
     setSaved(true);
