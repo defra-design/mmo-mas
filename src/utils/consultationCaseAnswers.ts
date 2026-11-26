@@ -1,6 +1,6 @@
 // src/utils/consultationCaseAnswers.ts
 // The caseworker's answers on MLA/2026/10006's tasks, all done before its
-// consultation started on 27 October 2026. Made up to fit the Hayling Island
+// consultation started (11 days ago, see consultationCase.ts). Made up to fit the Hayling Island
 // groyne repairs application and the consultation responses that came back.
 // As on the other completed cases (10013, 10014), assessment answers are
 // shared in this prototype: these show while the shared answer is empty.

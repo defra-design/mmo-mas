@@ -116,6 +116,9 @@
       ]
     }
   ];
+  // A to Z, as the consultee grid on the Prepare for consultation task sorts
+  // them. The overview table follows this order, and the nav within each group.
+  CONSULTEES.sort(function (a, b) { return a.name.localeCompare(b.name); });
 
   // from: the first scenario the comment has arrived in.
   var COMMENTS = [

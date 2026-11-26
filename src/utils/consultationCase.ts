@@ -1,15 +1,21 @@
 // src/utils/consultationCase.ts
 // MLA/2026/10006, Hayling Island groyne repairs: the live case in consultation.
-// Its consultation started on 27 October 2026 with the 14-day consultee period,
-// so consultees were asked to respond by 10 November. The Extend consultee
-// closing date task adds extensions that move that date on; in D365 a Power
-// Automate flow updates the case's closing date when an extension is saved.
+// Its dates are worked out from today, so it is always mid-consultation when
+// demoed: the consultation started 11 days ago with the 14-day consultee
+// period, so the closing date is 3 days away. The application was submitted
+// 34 days ago, matching its 34-day case age. (The design exploration in
+// public/mockups/consultation-responses keeps fixed dates for its before,
+// passed and extended scenarios.) The Extend consultee closing date task adds
+// extensions that move the closing date on; in D365 a Power Automate flow
+// updates the case's closing date when an extension is saved.
 import type { ConsultationExtension } from '../context/TaskContext';
 
 export const CONSULTATION_CASE_ID = 'MLA/2026/10006';
-export const CONSULTATION_STARTED = '2026-10-27';
 export const CONSULTATION_PERIOD_DAYS = 14;
-export const ORIGINAL_CLOSING_DATE = '2026-11-10';
+const TODAY = isoDate(new Date());
+export const CASE_SUBMITTED = addDays(TODAY, -34);
+export const CONSULTATION_STARTED = addDays(TODAY, -11);
+export const ORIGINAL_CLOSING_DATE = addDays(CONSULTATION_STARTED, CONSULTATION_PERIOD_DAYS);
 // Extensions are in 7-day blocks (CIP14).
 export const EXTEND_BY_OPTIONS = ['7 days', '14 days', '21 days', '28 days'];
 

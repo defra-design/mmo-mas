@@ -3,9 +3,13 @@
 // from CDP, read-only. The application is from the GOV.UK prototype; the
 // consultees, responses and comments are made up for it.
 //
-// The case passes in its consultee closing date on the hash (an ISO date), as it
-// moves when the caseworker extends it. A consultee who hasn't responded is
-// Overdue once that date has passed, and Awaiting response until then.
+// The case passes in when the consultation started and its consultee closing
+// date on the hash (#started=YYYY-MM-DD&closing=YYYY-MM-DD), as the closing date
+// moves when the caseworker extends it. The case works its dates out from
+// today, so it is always mid-consultation: started 11 days ago, closing in 3.
+// Responses and comments are dated in days after the start, and only show once
+// that day has come. A consultee who hasn't responded is Overdue once the
+// closing date has passed, and Awaiting response until then.
 // The design exploration this came from, with its other layout and scenarios,
 // is public/mockups/consultation-responses.
 (function () {
@@ -13,31 +17,26 @@
   // stays up for 21 days (LCML v4 site notice page), and public comments close
   // 21 days after it goes up, as on public register v1. The notice is taken as
   // going up the day the consultation starts.
-  // Scenario "today": before the deadline 6 November, deadline passed
-  // 12 November, deadline extended (by 7 days, on 12 November) 14 November.
-  var STARTED = '27 October 2026';
-  var ORIGINAL_CLOSING = '2026-11-10';
-  var COMMENTS_CLOSE = '17 November 2026';
+  var PERIOD_DAYS = 14;
+  var COMMENTS_DAYS = 21;
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
     'August', 'September', 'October', 'November', 'December'];
 
-  // status: what CDP says about the request, per design exploration scenario
-  // (only extended is used here, see statusOf). A string is the same in all.
+  // day: the response came in this many days after the consultation started.
+  // No day: not responded yet. status: a fixed status (No response needed).
   var CONSULTEES = [
     {
       id: 'ne',
       name: 'Natural England',
       type: 'Request for advice',
       asked: 'We would like your advice on whether the repairs are likely to have a significant effect on the Chichester and Langstone Harbours Special Protection Area. Tell us about any timing restrictions you would recommend to protect overwintering brent geese.',
-      status: { due: 'Awaiting response', passed: 'Overdue', extended: 'Awaiting response' }
     },
     {
       id: 'ea',
       name: 'Environment Agency',
       type: 'Request for advice',
       asked: 'We would like your advice on whether the works comply with the Water Framework Directive, based on the applicant’s WFD assessment.',
-      status: 'Responded',
-      responded: '4 November 2026',
+      day: 8,
       by: 'Priya Shah',
       response: [
         'Thank you for consulting the Environment Agency. We have reviewed the application and the Water Framework Directive assessment (hayling-groynes-wfd-assessment.pdf) and have no objection to the proposal.',
@@ -52,8 +51,7 @@
       name: 'Portsmouth Marine Management Organisation Coastal Office',
       type: 'Request for advice',
       asked: 'Please tell us about fishing and other uses of the sea in the area, any seasonal restrictions you would recommend, and which MMO office should be the local office for the licence.',
-      status: 'Responded',
-      responded: '3 November 2026',
+      day: 7,
       by: 'Chris Dunn',
       response: [
         'The beach between groynes 14 and 19 is used for bait digging for lugworm and ragworm at low water, mainly in winter, and for recreational angling from the beach. There is no commercial fishing from this part of the beach, but small potting boats from Langstone Harbour work the inshore grounds offshore of the groynes. We do not expect the April to June working window to cause problems for local fisheries.',
@@ -66,8 +64,7 @@
       name: 'Maritime and Coastguard Agency',
       type: 'Request for advice',
       asked: 'Tell us whether the rock armour at groyne 19 is likely to be a risk to navigation, and any measures you would recommend.',
-      status: 'Responded',
-      responded: '30 October 2026',
+      day: 3,
       by: 'Alex Byrne',
       response: [
         'The MCA has no objection. The works are on the beach and carried out at low water, so we do not expect them to affect navigation.',
@@ -79,8 +76,7 @@
       name: 'Southern Inshore Fisheries and Conservation Authority',
       type: 'Request for advice',
       asked: 'We would like your advice on any effect on fishing and bait digging in the area, and any byelaws that apply.',
-      status: { due: 'Awaiting response', passed: 'Overdue', extended: 'Responded' },
-      responded: '13 November 2026',
+      day: 17,
       by: 'Sarah Mills',
       response: [
         'Apologies for the late response. The works area is within the Southern IFCA district. The Solent bait digging code of conduct applies to the intertidal area off groynes 14 to 19, which is popular with bait diggers in winter and spring.',
@@ -92,8 +88,7 @@
       name: 'Historic England',
       type: 'Request for advice',
       asked: 'Tell us whether there are any heritage assets in the works area, and any measures you would recommend.',
-      status: 'Responded',
-      responded: '5 November 2026',
+      day: 12,
       by: 'Helen Price',
       response: [
         'There are no designated heritage assets in the works area, and the National Record of the Historic Environment shows no recorded wrecks or finds on this part of the beach. The timber groynes date from the 1950s and are not of heritage interest.',
@@ -110,45 +105,46 @@
       id: 'rya',
       name: 'Royal Yachting Association',
       type: 'Application notification',
-      status: 'Responded',
-      responded: '6 November 2026',
+      day: 10,
       by: 'Mark Ellison',
       response: [
         'The RYA is responding for the two watersports clubs that launch from the seafront between groynes 16 and 18. Please could the works on groynes 16 to 18 avoid weekends in May and June, when the clubs run their junior training. We also ask that the rock at the end of groyne 19 is marked so that windsurfers and kitesurfers can see it at high water.'
       ]
     }
   ];
+  // A to Z, as the consultee grid on the Prepare for consultation task sorts
+  // them. The overview table follows this order, and the nav within each group.
+  CONSULTEES.sort(function (a, b) { return a.name.localeCompare(b.name); });
 
   var COMMENTS = [
     {
       name: 'Margaret Ellis',
       email: 'margaret.ellis@example.com',
-      received: '29 October 2026',
+      day: 2,
       text: 'I own beach hut 212, which is just behind groyne 17. Will we still be able to get to our huts while the work is going on? Some of us are elderly and can’t walk the long way round from the next access point. I’d also like to know if the machines will start at 7:30 in the morning, as the noise carries a long way along the huts.'
     },
     {
       name: 'Dan Okoro',
       email: 'dan.okoro@example.com',
-      received: '2 November 2026',
+      day: 6,
       text: 'I windsurf off this beach most weekends. The new rock at the end of groyne 19 will be under water at high tide and could be a real hazard for windsurfers and swimmers. Please make sure it is clearly marked with a post or a buoy.'
     },
     {
       name: 'Susan Hart',
       email: 'susan.hart@example.com',
-      received: '4 November 2026',
+      day: 8,
       text: 'I fully support this. The beach in front of groynes 17 to 19 has dropped a lot in the last few winters and the groynes are falling apart. Please get on with it before the next big storm.'
     },
     {
       name: 'Rob Turner',
       email: 'rob.turner@example.com',
-      received: '5 November 2026',
+      day: 9,
       text: 'Greenheart is a tropical hardwood. Even if it is FSC certified, I don’t think we should be shipping it from South America to repair groynes. Have recycled plastic or reused timber been considered? I’d like the applicant to explain why they chose greenheart.'
     },
     {
       name: 'Peter Lawson',
       email: 'secretary@example.com',
-      received: '11 November 2026',
-      from: 'passed',
+      day: 15,
       text: 'I’m writing as secretary of the Hayling Island Seafront Beach Huts Association. We met the applicant in the summer and are happy with the timing of the works. Our members ask that the fencing around each groyne leaves a clear path along the top of the beach so huts either side can still be reached, and that the contractor gives us two weeks’ notice of the dates for each groyne.'
     }
   ];
@@ -161,20 +157,42 @@
     });
   }
 
-  // Responses so far are as in the design exploration's extended scenario.
-  // Anyone still waiting is Overdue once the closing date has passed.
+  // Responded once the response's day has come. Anyone still waiting is
+  // Overdue once the closing date has passed.
   function statusOf(c) {
-    var status = typeof c.status === 'string' ? c.status : c.status.extended;
-    return status === 'Awaiting response' && today() > closing() ? 'Overdue' : status;
+    if (c.status) return c.status;
+    if (arrived(c)) return 'Responded';
+    return today() > closing() ? 'Overdue' : 'Awaiting response';
+  }
+  function arrived(item) {
+    return item.day != null && addDays(started(), item.day) <= today();
+  }
+  function dayDate(item) {
+    return longDate(addDays(started(), item.day));
   }
 
-  function closing() {
-    var hash = location.hash.slice(1);
-    return /^\d{4}-\d{2}-\d{2}$/.test(hash) ? hash : ORIGINAL_CLOSING;
+  function iso(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function addDays(isoDate, days) {
+    var p = isoDate.split('-');
+    return iso(new Date(+p[0], p[1] - 1, +p[2] + days));
   }
   function today() {
-    var d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    return iso(new Date());
+  }
+  function hashDate(name) {
+    var match = new RegExp('[#&]' + name + '=(\\d{4}-\\d{2}-\\d{2})').exec(location.hash);
+    return match && match[1];
+  }
+  function started() {
+    return hashDate('started') || addDays(today(), -11);
+  }
+  function originalClosing() {
+    return addDays(started(), PERIOD_DAYS);
+  }
+  function closing() {
+    return hashDate('closing') || originalClosing();
   }
   function longDate(iso) {
     var p = iso.split('-');
@@ -187,7 +205,7 @@
   }
 
   function commentsFor() {
-    return COMMENTS;
+    return COMMENTS.filter(arrived);
   }
 
   function field(label, value) {
@@ -217,15 +235,15 @@
       return list.filter(function (c) { return statusOf(c) === 'Responded'; }).length + ' of ' + list.length + ' responded';
     }
     var overdue = advice.filter(function (c) { return statusOf(c) === 'Overdue'; }).length;
-    var due = closing() !== ORIGINAL_CLOSING
-      ? esc(longDate(closing())) + ' (extended from ' + esc(longDate(ORIGINAL_CLOSING)) + ')'
-      : esc(longDate(ORIGINAL_CLOSING));
+    var due = closing() !== originalClosing()
+      ? esc(longDate(closing())) + ' (extended from ' + esc(longDate(originalClosing())) + ')'
+      : esc(longDate(originalClosing()));
     if (today() > closing()) due += ' (passed)';
     // Dates first, then the responses.
     return '<dl class="fields consult__summary">' +
-      field('Consultation started', esc(STARTED)) +
+      field('Consultation started', esc(longDate(started()))) +
       field('Consultee closing date', due) +
-      field('Public comments close', esc(COMMENTS_CLOSE)) +
+      field('Public comments close', esc(longDate(addDays(started(), COMMENTS_DAYS)))) +
       field('Requests for advice', esc(count(advice)) + (overdue ? ', ' + overdue + ' overdue' : '')) +
       field('Application notifications', esc(count(notified))) +
       field('Public comments', commentsFor().length + ' received') +
@@ -236,7 +254,7 @@
     var rows = CONSULTEES.map(function (c) {
       return '<tr><td><button type="button" class="consult__link" data-go="' + c.id + '">' + esc(c.name) + '</button></td>' +
         '<td>' + esc(c.type) + '</td><td>' + tag(statusOf(c)) + '</td>' +
-        '<td>' + (statusOf(c) === 'Responded' ? esc(c.responded) : '') + '</td></tr>';
+        '<td>' + (statusOf(c) === 'Responded' ? esc(dayDate(c)) : '') + '</td></tr>';
     }).join('');
     return '<div class="consult__table-wrap"><table class="consult__table">' +
       '<thead><tr><th scope="col">Organisation</th><th scope="col">Consultation type</th><th scope="col">Response status</th><th scope="col">Date responded</th></tr></thead>' +
@@ -251,7 +269,7 @@
     fields += field('Response status', esc(status));
     if (status === 'Responded') {
       fields += field('Responded by', esc(c.by));
-      fields += field('Date responded', esc(c.responded));
+      fields += field('Date responded', esc(dayDate(c)));
       fields += field('Response', paragraphs(c.response));
       if (c.document) fields += field('Supporting document', docLink(c.document));
     }
@@ -264,7 +282,7 @@
     return commentsFor().map(function (c) {
       return '<article class="consult__item">' +
         '<' + headingTag + ' class="consult__item-title">' + esc(c.name) + '</' + headingTag + '>' +
-        '<dl class="fields">' + field('Date received', esc(c.received)) + field('Email address', esc(c.email)) +
+        '<dl class="fields">' + field('Date received', esc(dayDate(c))) + field('Email address', esc(c.email)) +
         field('Comment', paragraphs([c.text])) + '</dl></article>';
     }).join('');
   }

@@ -40,7 +40,9 @@ import FieldDecorations from './tasks/FieldDecorations';
 import OrganisationLink from './OrganisationLink';
 import TasksSubgrid from './TasksSubgrid';
 import CdpFrame from './CdpFrame';
-import { CONSULTATION_CASE_ID, currentClosingDate } from '../utils/consultationCase';
+import {
+  CASE_SUBMITTED, CONSULTATION_CASE_ID, CONSULTATION_STARTED, currentClosingDate, showDate,
+} from '../utils/consultationCase';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
 
@@ -373,10 +375,12 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   // consultation: laid out like 10015, with the Consultation responses tab and
   // the Extend consultee closing date task. The mockups above reuse it.
   const consultationCase = caseId === CONSULTATION_CASE_ID;
-  // The live Consultation responses tab is CDP's page. CDP is told the case's
-  // closing date (it moves when the caseworker extends it), passed in the hash.
+  // The live Consultation responses tab is CDP's page. CDP is told when the
+  // consultation started and the case's closing date (it moves when the
+  // caseworker extends it), passed in the hash.
   const consultationResponsesSrc =
-    asset('cdp/consultation-responses.html') + '#' + currentClosingDate(consultationExtensions[caseId] ?? []);
+    asset('cdp/consultation-responses.html') + `#started=${CONSULTATION_STARTED}&closing=` +
+    currentClosingDate(consultationExtensions[caseId] ?? []);
   const [selectedTab, setSelectedTab] = useState(
     requestedTab ??
       (caseId === 'MLA/2026/10015' || consultationCase || consultationMockup ? 'tasks' : 'summary')
@@ -447,7 +451,9 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
     applicationType: details?.applicationType ?? 'Marine licence application',
-    submitted: details?.submitted ?? (details ? submittedDate : '—'),
+    // The live MLA/2026/10006's dates are worked out from today (see
+    // consultationCase.ts); the mockups keep the case's fixed dates.
+    submitted: consultationCase && !consultationMockup ? showDate(CASE_SUBMITTED) : details?.submitted ?? (details ? submittedDate : '—'),
     feeBand: details?.feeBand ?? '—',
     applicant: details?.applicant ?? '—',
     organisation: details?.organisation ?? '—',
