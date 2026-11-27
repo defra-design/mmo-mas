@@ -1,67 +1,14 @@
 {
-  "MLA/2026/10002": {
-    "reference": "MLA/2026/10002",
-    "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
-    "status": "Assessment in progress",
-    "assignedTo": "Sam Evans",
+  "MLA/2026/10001": {
+    "reference": "MLA/2026/10001",
+    "title": "Dart estuary navigation buoy replacement",
+    "status": "Awaiting allocation",
+    "assignedTo": "",
     "caseAge": "1 day",
     "applicationType": "Marine licence application",
-    "submitted": "2 June 2026",
     "feeBand": "2A",
-    "applicant": "Jenny Smith",
-    "organisation": "South Devon Coast SUP Ltd",
-    "consentToPublish": "Yes"
-  },
-  "MLA/2026/10012": {
-    "reference": "MLA/2026/10012",
-    "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
-    "status": "Assessment in progress",
-    "assignedTo": "Sam Evans",
-    "caseAge": "1 day",
-    "applicationType": "Marine licence application",
-    "submitted": "2 June 2026",
-    "feeBand": "2A",
-    "applicant": "Jenny Smith",
-    "organisation": "South Devon Coast SUP Ltd",
-    "consentToPublish": "Yes"
-  },
-  "MLA/2026/10013": {
-    "reference": "MLA/2026/10013",
-    "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
-    "status": "Consultation",
-    "assignedTo": "Sam Evans",
-    "caseAge": "1 day",
-    "applicationType": "Marine licence application",
-    "submitted": "2 June 2026",
-    "feeBand": "2A",
-    "applicant": "Jenny Smith",
-    "organisation": "South Devon Coast SUP Ltd",
-    "consentToPublish": "Yes"
-  },
-  "MLA/2026/10014": {
-    "reference": "MLA/2026/10014",
-    "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
-    "status": "Consultation",
-    "assignedTo": "Sam Evans",
-    "caseAge": "1 day",
-    "applicationType": "Marine licence application",
-    "submitted": "2 June 2026",
-    "feeBand": "2A",
-    "applicant": "Jenny Smith",
-    "organisation": "South Devon Coast SUP Ltd",
-    "consentToPublish": "Yes"
-  },
-  "MLA/2026/10015": {
-    "reference": "MLA/2026/10015",
-    "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
-    "status": "Assessment in progress",
-    "assignedTo": "Sam Evans",
-    "caseAge": "1 day",
-    "applicationType": "Marine licence application",
-    "submitted": "2 June 2026",
-    "feeBand": "2A",
-    "applicant": "Jenny Smith",
-    "organisation": "South Devon Coast SUP Ltd",
+    "applicant": "Sam Pearce",
+    "organisation": "Dart Estuary Moorings Ltd",
     "consentToPublish": "Yes"
   },
   "MLA/2026/10006": {
@@ -75,6 +22,45 @@
     "feeBand": "2A",
     "applicant": "Rachel Turner",
     "organisation": "Solent Coastal Services Ltd",
+    "consentToPublish": "Yes"
+  },
+  "MLA/2026/10013": {
+    "reference": "MLA/2026/10013",
+    "title": "Installation of safety ladders at Brixham Fish Quay",
+    "status": "Assessment in progress",
+    "assignedTo": "Sam Evans",
+    "caseAge": "29 days",
+    "applicationType": "Marine licence application",
+    "submitted": "29/10/2026",
+    "feeBand": "2A",
+    "applicant": "Owen Pascoe",
+    "organisation": "Torbay Council",
+    "consentToPublish": "Yes"
+  },
+  "MLA/2026/10014": {
+    "reference": "MLA/2026/10014",
+    "title": "Exmouth Marina pontoon replacement",
+    "status": "Assessment in progress",
+    "assignedTo": "Rachel Patel",
+    "caseAge": "22 days",
+    "applicationType": "Marine licence application",
+    "submitted": "05/11/2026",
+    "feeBand": "2B",
+    "applicant": "Laura Bennett",
+    "organisation": "Exe Estuary Marinas Ltd",
+    "consentToPublish": "Yes"
+  },
+  "MLA/2026/10015": {
+    "reference": "MLA/2026/10015",
+    "title": "Installation of floating pontoon, Teignmouth Harbour, Devon",
+    "status": "Assessment in progress",
+    "assignedTo": "Sam Evans",
+    "caseAge": "1 day",
+    "applicationType": "Marine licence application",
+    "submitted": "2 June 2026",
+    "feeBand": "2A",
+    "applicant": "Jenny Smith",
+    "organisation": "South Devon Coast SUP Ltd",
     "consentToPublish": "Yes"
   }
 }

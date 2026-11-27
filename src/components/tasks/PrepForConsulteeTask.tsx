@@ -27,11 +27,8 @@ import ConsulteeGrid from './ConsulteeGrid';
 import TaskRow from './TaskRow';
 import ConsultationPeriodSection, { CONSULTATION_PERIOD_LABEL } from './ConsultationPeriodSection';
 import { CANNOT_START_MESSAGE, notificationMessage, requiredMessage } from '../../utils/validationMessages';
-import { useTasks } from '../../context/TaskContext';
-import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
+import { useCaseTasks } from '../../context/TaskContext';
 import { organisationByName } from '../../utils/organisations';
-import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
-import { HAYLING_CONSULTATION_PERIOD } from '../../utils/consultationCaseAnswers';
 
 const NO_CONSULTEES_MESSAGE = 'Add at least one consultee before you mark the task as complete.';
 
@@ -75,31 +72,24 @@ export default function PrepForConsulteeTask({ caseId }: PrepForConsulteeTaskPro
   const {
     tasks,
     consultees,
-    prepForConsulteeMeta: sharedMeta,
+    prepForConsulteeMeta,
     saved,
     setPrepForConsulteeCompleted,
     setConsultationPeriod,
     removeConsultees,
     markUnsaved,
     savePrepForConsultee,
-  } = useTasks();
+  } = useCaseTasks(caseId);
   const [periodError, setPeriodError] = useState(false);
   const [consulteesError, setConsulteesError] = useState(false);
   const rows = consultees[caseId] ?? [];
-  // MLA/2026/10006 shows its own answers while the shared ones are empty.
-  const prepForConsulteeMeta = caseId === CONSULTATION_CASE_ID
-    ? {
-        completed: true,
-        consultationPeriod: sharedMeta.consultationPeriod || HAYLING_CONSULTATION_PERIOD,
-      }
-    : sharedMeta;
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
   const taskUrl = `${caseUrl}/tasks/prep-for-consultee`;
 
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =
-    taskStatusForCase(caseId, 'prepForConsultee', tasks.prepForConsultee) ===
+    tasks.prepForConsultee ===
     'Cannot start yet';
 
   const handleSave = () => {

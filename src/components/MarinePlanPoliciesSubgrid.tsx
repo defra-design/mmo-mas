@@ -42,11 +42,9 @@ import {
   ArrowAutofitWidthRegular,
   DismissRegular,
 } from '@fluentui/react-icons';
-import { useTasks } from '../context/TaskContext';
-import { siteCheckCompleteForCase, taskStatusForCase } from '../utils/publicNoticeEvidence';
+import { useCaseTasks } from '../context/TaskContext';
 import TruncatedCell from './TruncatedCell';
 import { mppAssessmentStatus, mppTaskStatus, policiesForCase } from '../utils/marinePlanPolicies';
-import { HAYLING_MPP } from '../utils/consultationCaseAnswers';
 
 // OOB subgrids page their records, and "records per page" is set per subgrid on
 // the form. 50 is a standard value and puts all 41 policies on one page.
@@ -56,8 +54,8 @@ const PAGE_SIZE = 50;
 // proportion to these, so Policy grows most. The leading row-select column is
 // hidden (per the D365 subgrid config the dev confirmed), so Policy leads.
 // Policy is deliberately narrower than its longest label: it holds the sum
-// (MIN_WIDTH) down so the horizontal scrollbar appears later on the narrow
-// 10014 tab, and over-long labels truncate to an ellipsis with a hover title.
+// (MIN_WIDTH) down so the horizontal scrollbar appears later on narrow
+// screens, and over-long labels truncate to an ellipsis with a hover title.
 const COLS = { policy: 290, group: 180, status: 180 };
 const MIN_WIDTH = COLS.policy + COLS.group + COLS.status;
 
@@ -178,15 +176,13 @@ const useStyles = makeStyles({
 
 interface MarinePlanPoliciesSubgridProps {
   caseId: string;
-  /** Every policy shows Done, e.g. on a case already in consultation (mockup only). */
-  allDone?: boolean;
 }
 
-export default function MarinePlanPoliciesSubgrid({ caseId, allDone = false }: MarinePlanPoliciesSubgridProps) {
+export default function MarinePlanPoliciesSubgrid({ caseId }: MarinePlanPoliciesSubgridProps) {
   const styles = useStyles();
   const grid = useSubgridStyles();
   const navigate = useNavigate();
-  const { tasks, mppForm } = useTasks();
+  const { tasks, mppForm } = useCaseTasks(caseId);
   const [page, setPage] = useState(1);
   // The grid always has a sort; it opens sorted A→Z on Group, which puts
   // Cross-cutting first (then Economic, Environmental, Social). Ties keep the
@@ -194,9 +190,9 @@ export default function MarinePlanPoliciesSubgrid({ caseId, allDone = false }: M
   const [sort, setSort] = useState<SortState>({ key: 'group', dir: 'asc' });
   const [filters, setFilters] = useState<Filters>({});
 
-  const taskStatus = taskStatusForCase(caseId, 'marinePlanPolicies', tasks.marinePlanPolicies);
-  const locked = !siteCheckCompleteForCase(caseId, tasks);
-  const allPoliciesDone = allDone || (!locked && taskStatus === 'Done');
+  const taskStatus = tasks.marinePlanPolicies;
+  const locked = tasks.siteCheck !== 'Done';
+  const allPoliciesDone = !locked && taskStatus === 'Done';
 
   // Build the display rows (with the computed lifecycle status) once, then filter
   // and sort them so both operate on what the caseworker actually sees.
@@ -207,7 +203,7 @@ export default function MarinePlanPoliciesSubgrid({ caseId, allDone = false }: M
       group: policy.group,
       status: allPoliciesDone
         ? mppTaskStatus('Done')
-        : mppAssessmentStatus(mppForm[policy.code] ?? HAYLING_MPP[policy.code], locked),
+        : mppAssessmentStatus(mppForm[policy.code], locked),
     }));
 
     const filtered = built.filter(r =>

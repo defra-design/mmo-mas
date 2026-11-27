@@ -28,20 +28,20 @@ import {
 import { MoreHorizontalRegular, SendRegular, ArrowExportRegular } from '@fluentui/react-icons';
 import { getAssigneeAvatarColor } from '../utils/avatarColors';
 import { asset } from '../utils/asset';
-import { useTasks } from '../context/TaskContext';
+import { useCaseTasks } from '../context/TaskContext';
+import { applicationFor, CONSULTATION_CASE_ID } from '../utils/cases';
+import type { Application } from '../utils/cases';
 import { caseStatus } from '../utils/caseStatus';
 import { RequestTransferDialog, CompleteTransferDialog } from './TransferMcmsDialogs';
 import RejectApplicationDialog from './RejectApplicationDialog';
 import FormCommandBar from './FormCommandBar';
-import TaskList from './TaskList';
-import MarinePlanPoliciesList from './MarinePlanPoliciesList';
 import MarinePlanPoliciesSubgrid from './MarinePlanPoliciesSubgrid';
 import FieldDecorations from './tasks/FieldDecorations';
 import OrganisationLink from './OrganisationLink';
 import TasksSubgrid from './TasksSubgrid';
 import CdpFrame from './CdpFrame';
 import {
-  CASE_SUBMITTED, CONSULTATION_CASE_ID, CONSULTATION_STARTED, currentClosingDate, showDate,
+  CASE_SUBMITTED, consultationFor, showDate,
 } from '../utils/consultationCase';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
@@ -228,51 +228,43 @@ const useStyles = makeStyles({
   transferFields: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL },
 });
 
-// Older MLA/2026/10015 rejection records may contain markup from the trial editor.
-// Show them as plain text without changing the saved record.
-function rejectionNotesAsPlainText(notes: string, caseId: string) {
-  if (caseId !== 'MLA/2026/10015' ||
-      !/<\/?(?:p|div|br|b|strong|i|em|u|s|ul|ol|li|h[12]|span|font|a|sup|sub|blockquote)\b/i.test(notes)) {
-    return notes;
-  }
-  const body = new DOMParser().parseFromString(notes, 'text/html').body;
-  body.querySelectorAll('script, style, svg, math, iframe, object').forEach(node => node.remove());
-  body.querySelectorAll('br').forEach(node => node.replaceWith('\n'));
-  body.querySelectorAll('p, div, li, h1, h2, blockquote').forEach(node => node.append('\n'));
-  return body.textContent?.replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n').trim() ?? notes;
-}
-
 interface MarineCaseSummaryProps {
   caseId: string;
 }
 
-// Tabs whose content is CDP application data rendered in an iframe. Paths are
-// resolved through asset() so a frozen iteration loads its own CDP pages.
-// MLA/2026/10006's own application (Hayling Island groyne repairs), from the
-// GOV.UK prototype. Withholding information answers No, as on 10013.
-const haylingPages: Record<string, string> = {
-  project: asset('cdp/project-details-hayling.html'),
-  site: asset('cdp/site-and-activity-hayling.html'),
-  mpp: asset('cdp/marine-plan-policies-sectors.html') + '?case=hayling',
-  wfd: asset('cdp/water-framework-directive-hayling.html'),
-  other: asset('cdp/other-permissions-hayling.html'),
-  'public-register': asset('cdp/public-register-none.html'),
+// Tabs whose content is the applicant's CDP application data, rendered in an
+// iframe. Each application has its own pages. Paths are resolved through
+// asset() so a frozen iteration loads its own CDP pages.
+const cdpTitles: Record<string, string> = {
+  project: 'Application details',
+  site: 'Site and activity',
+  mpp: 'Marine plan policies',
+  wfd: 'Water Framework Directive',
+  other: 'Other permissions',
+  'public-register': 'Withholding information',
+  consultation: 'Consultation responses',
 };
 
-const cdpPages: Record<string, { src: string; title: string }> = {
-  project: { src: asset('cdp/project-details.html'), title: 'Application details' },
-  site: { src: asset('cdp/site-and-activity.html'), title: 'Site and activity' },
-  mpp: { src: asset('cdp/marine-plan-policies.html'), title: 'Marine plan policies' },
-  wfd: { src: asset('cdp/water-framework-directive.html'), title: 'Water Framework Directive' },
-  other: { src: asset('cdp/other-permissions.html'), title: 'Other permissions' },
-  'public-register': { src: asset('cdp/public-register.html'), title: 'Withholding information' },
-  // Design exploration only: the tab is added by ?consultation=mockup (see below).
-  consultation: {
-    src: asset('mockups/consultation-responses/review-tab.html'),
-    title: 'Consultation responses',
-  },
-};
+function cdpPage(application: Application, tab: string): string | undefined {
+  const own = (page: string) =>
+    asset(application === 'teignmouth' ? `cdp/${page}.html` : `cdp/${page}-${application}.html`);
+  switch (tab) {
+    case 'project': return own('project-details');
+    case 'site': return own('site-and-activity');
+    case 'wfd': return own('water-framework-directive');
+    case 'other': return own('other-permissions');
+    // The sector-grouped view: one page per sector.
+    case 'mpp':
+      return asset('cdp/marine-plan-policies-sectors.html') +
+        (application === 'teignmouth' ? '' : `?case=${application}`);
+    // Hayling's and Brixham's applicants asked for nothing to be withheld.
+    case 'public-register':
+      return application === 'hayling' || application === 'brixham'
+        ? asset('cdp/public-register-none.html')
+        : own('public-register');
+    default: return undefined;
+  }
+}
 
 // The case tabs, in order. Driven by data so the overflow menu can list the
 // tabs that don't fit on screen.
@@ -342,49 +334,41 @@ function OverflowTabsMenu({
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
+  const caseTasks = useCaseTasks(caseId);
   const {
-    tasksOnAllTabs,
     transfers,
     rejections,
     consultations,
+    consultees,
     requestTransferToMcms,
     completeTransferToMcms,
     rejectApplication,
-    consultationExtensions,
-  } = useTasks();
-  // A task form can request a specific landing tab via navigation state (e.g.
-  // 10014's MPP assessment returns to the Marine plan policies tab on save so the
-  // caseworker can pick the next policy). Otherwise 10015 leads with its dedicated
-  // Tasks tab; every other case opens on Case summary. A ?tab= in the URL does
-  // the same for plain links, e.g. a shared link to a case's MPP tab.
+  } = caseTasks;
+  // A task form can request a specific landing tab via navigation state;
+  // otherwise every case opens on its Tasks tab. A ?tab= in the URL does the
+  // same for plain links, e.g. a shared link to a case's MPP tab.
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
   const navState = location.state as { tab?: string } | null;
-  const requestedTab = navState?.tab ?? searchParams.get('tab') ?? undefined;
-  // Design exploration (not MVP): ?mpp=per-policy shows 10015's MPP tab with each
-  // policy listing its supporting documents, from a saved copy in public/mockups.
-  const mppPerPolicyMockup = searchParams.get('mpp') === 'per-policy';
-  // Design exploration: ?withhold=mockup shows the Withholding information tab
-  // with a switch for each answer the applicant could give.
-  const withholdMockup = searchParams.get('withhold') === 'mockup';
-  // Design exploration: ?consultation=mockup lays the case out like 10015 (a
-  // full-width Tasks tab first) and adds the Consultation responses tab after
-  // Case summary, whose CDP page lives in public/mockups/consultation-responses.
-  const consultationMockup = searchParams.get('consultation') === 'mockup';
-  // MLA/2026/10006 (Hayling Island groyne repairs) is the live case in
-  // consultation: laid out like 10015, with the Consultation responses tab and
-  // the Extend consultee closing date task. The mockups above reuse it.
+  const requestedTab = navState?.tab ?? new URLSearchParams(location.search).get('tab') ?? undefined;
+  // A case in consultation also has the Consultation responses tab. CDP is told
+  // when the consultation started, the period and the closing date (it moves
+  // when the caseworker extends it), passed in the hash. Hayling's responses
+  // are part of its CDP page; any other case passes its consultees, none of
+  // whom has responded yet.
   const consultationCase = caseId === CONSULTATION_CASE_ID;
-  // The live Consultation responses tab is CDP's page. CDP is told when the
-  // consultation started and the case's closing date (it moves when the
-  // caseworker extends it), passed in the hash.
-  const consultationResponsesSrc =
-    asset('cdp/consultation-responses.html') + `#started=${CONSULTATION_STARTED}&closing=` +
-    currentClosingDate(consultationExtensions[caseId] ?? []);
-  const [selectedTab, setSelectedTab] = useState(
-    requestedTab ??
-      (caseId === 'MLA/2026/10015' || consultationCase || consultationMockup ? 'tasks' : 'summary')
+  const consultation = consultationFor(caseId, caseTasks);
+  const consultationResponsesSrc = consultation && (
+    asset('cdp/consultation-responses.html') +
+    `#started=${consultation.started}&period=${consultation.periodDays}&closing=${consultation.closing}` +
+    (consultationCase ? '' : '&consultees=' + encodeURIComponent(JSON.stringify(
+      (consultees[caseId] ?? []).map(row => ({
+        name: row.organisation.replace(/\s*\([^)]*\)$/, ''),
+        type: row.consultationType,
+        asked: row.notes,
+      })),
+    )))
   );
+  const [selectedTab, setSelectedTab] = useState(requestedTab ?? 'tasks');
 
   // Which case-action dialog is open, if any. Each dialog owns its own fields and
   // validation state and is mounted only while open.
@@ -397,41 +381,23 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const isTransferred = Boolean(caseTransfer?.mcmsReference);
   const isRejected = Boolean(caseRejection);
 
-  // MPP design explorations live only on the duplicate cases; the original
-  // MLA/2026/10002 keeps its plain single "Marine plan policies" task row.
-  //  · 10012 → paginated policy list in the right-hand rail
-  //  · 10013 → full-width policy subgrid stacked under the Case summary + Tasks
-  //  · 10014 → policy subgrid replaces the CDP view on the Marine plan policies tab
-  //  · 10015 → dedicated "Tasks" tab (before Case summary) holding the full-width
-  //           Task grid + full-width MPP subgrid.
-  // Gating is uniform across every case: a task or policy that is "Cannot start
-  // yet" still opens, read-only, until Site check is done.
-  const mppRailList = caseId === 'MLA/2026/10012';
-  const mppFullWidth = caseId === 'MLA/2026/10013';
-  const mppTabList = caseId === 'MLA/2026/10014';
-  const tasksTab = caseId === 'MLA/2026/10015' || consultationCase || consultationMockup;
-  const mppAsList = mppRailList || mppFullWidth || mppTabList || tasksTab;
-  // 10013 shows the Tasks list in the persistent rail (across every tab) even
-  // though it also has the full-width MPP subgrid stacked under the Case summary.
-  // 10015 instead gives the tasks their own tab, so it opts out of the rail.
-  const showRail = tasksOnAllTabs && !tasksTab;
-
-  // 10015 prepends a dedicated "Tasks" tab ahead of Case summary.
+  // Every case leads with its Tasks tab: the Task grid with the Marine plan
+  // policies subgrid underneath.
   const caseTabs = [
-    ...(tasksTab ? [{ id: 'tasks', name: 'Tasks' }] : []),
+    { id: 'tasks', name: 'Tasks' },
     ...tabs.slice(0, 1),
-    ...(consultationCase || consultationMockup ? [{ id: 'consultation', name: 'Consultation responses' }] : []),
+    ...(consultation ? [{ id: 'consultation', name: 'Consultation responses' }] : []),
     ...tabs.slice(1),
   ];
-
-  // 10014's Marine plan policies tab is a native subgrid, not the CDP iframe.
-  const nativeMppTab = mppTabList && selectedTab === 'mpp';
+  const application = applicationFor(caseId);
+  const cdpSrc = selectedTab === 'consultation'
+    ? consultationResponsesSrc
+    : cdpPage(application, selectedTab);
   // Tabs whose content is React rather than an iframe. These scroll as one body
   // (see contentRowScroll); iframe tabs keep their own inner scroll.
-  const nativeTab =
-    selectedTab === 'summary' || (tasksTab && selectedTab === 'tasks') || nativeMppTab;
+  const nativeTab = selectedTab === 'summary' || selectedTab === 'tasks';
 
-  // Teignmouth (MLA/2026/1002) is fully built; other references fall back to their list row.
+  // Each case's header data; references without details fall back to their list row.
   const details = (marineCaseDetails as Record<string, any>)[caseId];
   const row = marineCases.find(c => c.reference === caseId);
 
@@ -448,12 +414,12 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     reference: caseId,
     title: details?.title ?? row?.project ?? 'Marine licence case',
     status: details?.status ?? row?.status ?? 'Allocated',
-    assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
+    // A case awaiting allocation has nobody assigned yet.
+    assignedTo: details?.assignedTo || row?.caseOfficer || 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
     applicationType: details?.applicationType ?? 'Marine licence application',
-    // The live MLA/2026/10006's dates are worked out from today (see
-    // consultationCase.ts); the mockups keep the case's fixed dates.
-    submitted: consultationCase && !consultationMockup ? showDate(CASE_SUBMITTED) : details?.submitted ?? (details ? submittedDate : '—'),
+    // MLA/2026/10006's dates are worked out from today (see consultationCase.ts).
+    submitted: consultationCase ? showDate(CASE_SUBMITTED) : details?.submitted ?? (details ? submittedDate : '—'),
     feeBand: details?.feeBand ?? '—',
     applicant: details?.applicant ?? '—',
     organisation: details?.organisation ?? '—',
@@ -545,7 +511,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           </div>
           <div className={styles.metaGroup}>
             {meta.map(m =>
-              m.label === 'Assigned to' ? (
+              m.label === 'Assigned to' && m.value !== 'Unallocated' ? (
                 <div key={m.label} className={styles.assignedItem}>
                   <Avatar
                     name={m.value}
@@ -590,15 +556,13 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
       <div className={styles.content}>
         <div className={mergeClasses(styles.contentRow, nativeTab && styles.contentRowScroll)}>
           <div className={styles.mainRegion}>
-            {/* 10015: dedicated Tasks tab — full-width Task grid, then the
-                full-width Marine plan policies subgrid stacked underneath. */}
-            {tasksTab && selectedTab === 'tasks' && (
+            {selectedTab === 'tasks' && (
               <div className={styles.nativeTabBody}>
                 <Card className={styles.tasksTabCard}>
                   <TasksSubgrid caseId={caseId} />
                 </Card>
                 <Card className={mergeClasses(styles.mppFullWidthCard, styles.stackedCard)}>
-                  <MarinePlanPoliciesSubgrid caseId={caseId} allDone={consultationCase || consultationMockup} />
+                  <MarinePlanPoliciesSubgrid caseId={caseId} />
                 </Card>
               </div>
             )}
@@ -623,15 +587,6 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                     </div>
                   </Card>
 
-                  {/* Tasks panel sits inline on the Case summary tab when it isn't
-                      in the persistent rail (Version 2, or the full-width MPP variant).
-                      10015 keeps its tasks on the dedicated Tasks tab, not here. */}
-                  {!showRail && !tasksTab && (
-                    <Card className={styles.tasksCard}>
-                      <TaskList caseId={caseId} mppInSeparateList={mppAsList} />
-                      {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
-                    </Card>
-                  )}
                 </div>
 
                 {/* Read-only Transfer to MCMS record. The request fields appear as soon
@@ -709,78 +664,29 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
                         </Text>
                         <FieldDecorations locked />
                         <div className={mergeClasses(styles.fieldValue, styles.transferDetailsValue)}>
-                          <Body1>{rejectionNotesAsPlainText(caseRejection.notes, caseId)}</Body1>
+                          <Body1>{caseRejection.notes}</Body1>
                         </div>
                       </div>
                     </div>
                   </Card>
                 )}
 
-                {/* Full-width MPP subgrid, stacked below the summary, tasks and the
-                    transfer record (10013) — the transfer details belong with the
-                    case's own fields, above the policy assessments. */}
-                {mppFullWidth && (
-                  <Card className={mergeClasses(styles.mppFullWidthCard, styles.stackedCard)}>
-                    <MarinePlanPoliciesSubgrid caseId={caseId} />
-                  </Card>
-                )}
               </div>
             )}
 
-            {/* 10014: the Marine plan policies tab is the caseworker subgrid
-                (all policies "To do", click to assess), not the CDP applicant view. */}
-            {nativeMppTab && (
-              <div className={styles.nativeTabBody}>
-                <Card className={styles.mppFullWidthCard}>
-                  <MarinePlanPoliciesSubgrid caseId={caseId} />
-                </Card>
-              </div>
-            )}
-
-            {cdpPages[selectedTab] && !nativeMppTab && (
+            {cdpSrc && (
               <div className={styles.frameCard}>
-                <CdpFrame
-                  // 10015 shows the sector-grouped MPP view (one page per sector);
-                  // 10002 (Teignmouth) shows the multi-site, multi-activity Sites and
-                  // activities view; 10013's applicant asked for nothing to be withheld,
-                  // so its Withholding information tab answers No with no follow-up — every other
-                  // case keeps the default page for the tab.
-                  src={
-                    consultationCase && haylingPages[selectedTab]
-                      ? haylingPages[selectedTab]
-                      : consultationCase && selectedTab === 'consultation' && !consultationMockup
-                        ? consultationResponsesSrc
-                        : tasksTab && selectedTab === 'mpp'
-                      ? mppPerPolicyMockup
-                        ? asset('mockups/mpp-supporting-documents/review-tab.html')
-                        : asset('cdp/marine-plan-policies-sectors.html')
-                      : caseId === 'MLA/2026/10002' && selectedTab === 'site'
-                        ? asset('cdp/site-and-activity-multi.html')
-                        : withholdMockup && selectedTab === 'public-register'
-                          ? asset('mockups/withhold-information/review-tab.html')
-                          : caseId === 'MLA/2026/10013' && selectedTab === 'public-register'
-                            ? asset('cdp/public-register-none.html')
-                            : cdpPages[selectedTab].src
-                  }
-                  title={cdpPages[selectedTab].title}
-                />
+                <CdpFrame src={cdpSrc} title={cdpTitles[selectedTab]} />
               </div>
             )}
 
-            {selectedTab !== 'summary' && !cdpPages[selectedTab] && !(tasksTab && selectedTab === 'tasks') && (
+            {!nativeTab && !cdpSrc && (
               <div className={styles.frameCard}>
                 <div className={styles.placeholder}>This section is not yet available in the prototype.</div>
               </div>
             )}
           </div>
 
-          {/* Version 1: one Tasks panel that persists across every tab. */}
-          {showRail && (
-            <Card className={styles.tasksRail}>
-              <TaskList caseId={caseId} mppInSeparateList={mppAsList} />
-              {mppRailList && <MarinePlanPoliciesList caseId={caseId} />}
-            </Card>
-          )}
         </div>
       </div>
 

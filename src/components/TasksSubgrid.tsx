@@ -1,14 +1,10 @@
-import { startConsultationStatus } from '../utils/startConsultation';
 // src/components/TasksSubgrid.tsx
-// Full-width D365 subgrid (read-only grid) of the case's caseworker tasks — the
-// columnar rendering a related-records list gets at full width, with the status
-// in its own right-hand column, matching MarinePlanPoliciesSubgrid. The narrow
-// two-line reflow (name over status) lives in TaskList and is only correct in
-// the rail/card; a subgrid on a full-width form tab is a real table.
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { asset } from '../utils/asset';
-import { CONSULTATION_CASE_ID } from '../utils/consultationCase';
+// Full-width D365 subgrid (read-only grid) of the case's caseworker tasks, with
+// the status in its own right-hand column, matching MarinePlanPoliciesSubgrid.
+// Every case shows its tasks here, on the Tasks tab.
+import { useNavigate } from 'react-router-dom';
+import { consultationFor } from '../utils/consultationCase';
+import { startConsultationStatus } from '../utils/startConsultation';
 import {
   makeStyles,
   mergeClasses,
@@ -26,12 +22,11 @@ import {
   ChevronRightRegular,
   PreviousRegular,
 } from '@fluentui/react-icons';
-import { useTasks } from '../context/TaskContext';
+import { useCaseTasks } from '../context/TaskContext';
 import type { TaskStatus } from '../context/TaskContext';
 import {
   hasSubmittedPublicNoticeEvidence,
   publicNoticeEvidenceStatusForCase,
-  taskStatusForCase,
 } from '../utils/publicNoticeEvidence';
 
 // Column widths. table-layout:fixed + width:100% shares any extra space in
@@ -78,59 +73,24 @@ interface TasksSubgridProps {
   caseId: string;
 }
 
-// The consultation mockup page (tab.html) around the case: has the deadline
-// been extended in its scenario?
-function isMockupExtended() {
-  try {
-    const top = window.top!.location;
-    return top.hash.slice(1).split('/').includes('extended') || new URLSearchParams(top.search).get('extended') === '1';
-  } catch {
-    return false;
-  }
-}
-
 export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
   const styles = useStyles();
   const grid = useSubgridStyles();
   const navigate = useNavigate();
-  const taskContext = useTasks();
+  const taskContext = useCaseTasks(caseId);
   const { tasks } = taskContext;
   const evidenceSubmitted = hasSubmittedPublicNoticeEvidence(caseId);
 
   // Every task opens, whatever its status. A task still gated behind Site check
   // ("Cannot start yet") opens read-only rather than being unclickable — D365
-  // cannot lock a caseworker out of a record.
+  // cannot lock a caseworker out of a record. Rows appear once they apply: the
+  // evidence review when the applicant's photos arrive, and the extension once
+  // the case is in consultation.
   const rows: TaskRow[] = [
-    {
-      key: 'siteCheck',
-      name: 'Site check',
-      status: taskStatusForCase(caseId, 'siteCheck', tasks.siteCheck),
-      slug: 'site-check',
-    },
-    {
-      key: 'publicRegister',
-      name: 'Withholding information',
-      status: taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister),
-      slug: 'public-register',
-    },
-    {
-      key: 'wfd',
-      name: 'Water Framework Directive',
-      status: taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment),
-      slug: 'wfd',
-    },
-    {
-      key: 'prepForConsultee',
-      name: 'Prepare for consultation',
-      status: taskStatusForCase(caseId, 'prepForConsultee', tasks.prepForConsultee),
-      slug: 'prep-for-consultee',
-    },
-    {
-      key: 'siteNotice',
-      name: 'Public notice',
-      status: taskStatusForCase(caseId, 'siteNotice', tasks.siteNotice),
-      slug: 'site-notice',
-    },
+    { key: 'siteCheck', name: 'Site check', status: tasks.siteCheck, slug: 'site-check' },
+    { key: 'wfd', name: 'Water Framework Directive', status: tasks.wfdAssessment, slug: 'wfd' },
+    { key: 'publicRegister', name: 'Withholding information', status: tasks.publicRegister, slug: 'public-register' },
+    { key: 'siteNotice', name: 'Public notice', status: tasks.siteNotice, slug: 'site-notice' },
     ...(evidenceSubmitted
       ? [{
           key: 'publicNoticeEvidence',
@@ -139,44 +99,22 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
           slug: 'review-public-notice-evidence',
         }]
       : []),
+    { key: 'prepForConsultee', name: 'Prepare for consultation', status: tasks.prepForConsultee, slug: 'prep-for-consultee' },
+    {
+      key: 'startConsultation',
+      name: 'Start consultation',
+      status: startConsultationStatus(caseId, taskContext),
+      slug: 'start-consultation',
+    },
+    ...(consultationFor(caseId, taskContext)
+      ? [{
+          key: 'extendConsultation',
+          name: 'Extend consultee closing date',
+          status: (taskContext.consultationExtensions[caseId] ?? []).length > 0 ? 'Extended' as const : 'Optional' as const,
+          slug: 'extend-closing-date',
+        }]
+      : []),
   ];
-
-  rows.push({
-    key: 'startConsultation',
-    name: 'Start consultation',
-    status: startConsultationStatus(caseId, taskContext),
-    slug: 'start-consultation',
-  });
-
-  // Design exploration (?consultation=mockup): the case is in consultation, so the
-  // receive and assess tasks are all done and the optional Extend consultee
-  // closing date task sits at the bottom. It opens the static task mockup.
-  // Its status is Optional until the deadline has been extended, then Extended:
-  // in the Deadline extended scenario, or after adding one on the task mockup
-  // (?extended=1). Both are on the mockup page around the case.
-  const consultationMockup = new URLSearchParams(useLocation().search).get('consultation') === 'mockup';
-  const [mockupExtended, setMockupExtended] = useState(isMockupExtended);
-  useEffect(() => {
-    if (!consultationMockup) return;
-    const update = () => setMockupExtended(isMockupExtended());
-    window.top?.addEventListener('mockup-scenario', update);
-    return () => window.top?.removeEventListener('mockup-scenario', update);
-  }, [consultationMockup]);
-  // The live case in consultation (MLA/2026/10006) is the same, but its task is
-  // the React one, and its status follows the case's saved extensions.
-  const consultationCase = caseId === CONSULTATION_CASE_ID;
-  const extended = consultationMockup
-    ? mockupExtended
-    : (taskContext.consultationExtensions[caseId] ?? []).length > 0;
-  if (consultationMockup || consultationCase) {
-    rows.forEach(row => { row.status = 'Done'; });
-    rows.push({
-      key: 'extendConsultation',
-      name: 'Extend consultee closing date',
-      status: extended ? 'Extended' : 'Optional',
-      slug: 'extend-closing-date',
-    });
-  }
 
   return (
     <div>
@@ -196,13 +134,6 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
           <tbody>
             {rows.map(row => {
               const openTask = () => {
-                if (row.key === 'extendConsultation' && consultationMockup) {
-                  // The case sits in an iframe on the mockup page, so leave it for the task
-                  // mockup, in the same scenario.
-                  window.top!.location.href = asset('mockups/consultation-responses/task.html') +
-                    window.top!.location.hash;
-                  return;
-                }
                 navigate(`/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/${row.slug}`);
               };
               return (

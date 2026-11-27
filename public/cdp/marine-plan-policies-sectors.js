@@ -12,9 +12,15 @@
   var nav = document.getElementById('mpp-nav');
   var detail = document.getElementById('mpp-detail');
 
-  // ?case=hayling loads that application's own data (marine-plan-policies-hayling.json).
+  // ?case=hayling, ?case=brixham, ?case=exmouth or ?case=dart loads that
+  // application's own data (marine-plan-policies-<case>.json).
   // With no query it loads the shared marine-plan-policies.json, as before.
-  var dataFiles = { hayling: 'marine-plan-policies-hayling.json' };
+  var dataFiles = {
+    hayling: 'marine-plan-policies-hayling.json',
+    brixham: 'marine-plan-policies-brixham.json',
+    exmouth: 'marine-plan-policies-exmouth.json',
+    dart: 'marine-plan-policies-dart.json',
+  };
   var caseKey = new URLSearchParams(window.location.search).get('case');
   var dataFile = dataFiles[caseKey] || 'marine-plan-policies.json';
 

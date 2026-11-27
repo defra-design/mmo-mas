@@ -465,6 +465,8 @@ body {
 
 /* Overview table: looks like a D365 grid but is plain HTML from CDP. */
 .consult__table-wrap { overflow-x: auto; }
+/* Nothing to show yet, e.g. no public comments on a consultation just started. */
+.consult__empty { margin: 0; color: #605e5c; }
 .consult__table {
   width: 100%;
   min-width: 560px;

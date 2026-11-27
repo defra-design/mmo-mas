@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Site and activity</title>
+    <link rel="stylesheet" href="cdp.css" />
+  </head>
+  <body>
+    <main class="section">
+      <h1 class="section__title">Sites and activities</h1>
+
+      <section class="subsection">
+        <dl class="fields">
+          <div class="field">
+            <dt class="field__label">Method of providing site location</dt>
+            <dd class="field__value">Draw on a map</dd>
+          </div>
+        </dl>
+      </section>
+
+      <div class="site-grid">
+        <section class="subsection">
+          <h2 class="subsection__title">Site 1</h2>
+          <dl class="fields">
+            <div class="field">
+              <dt class="field__label">Site name</dt>
+              <dd class="field__value">Brixham Fish Quay, north and east quay walls</dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Map view</dt>
+              <dd class="field__value field__value--map">
+                <svg
+                  class="site-map"
+                  viewBox="0 0 480 300"
+                  role="img"
+                  aria-label="Map showing the site location at Brixham Fish Quay"
+                >
+                  <rect width="480" height="300" fill="#cfe3ea" />
+                  <!-- Land around the inner harbour -->
+                  <path d="M0,0 L480,0 L480,70 Q380,96 300,84 L260,120 L150,120 L120,90 Q60,70 0,80 Z" fill="#e8efe0" />
+                  <path d="M0,220 Q80,206 140,232 L190,300 L0,300 Z" fill="#dfe7d6" />
+                  <!-- Fish quay -->
+                  <path d="M150,120 L260,120 L268,190 L156,196 Z" fill="#d9d4c7" stroke="#8a8478" stroke-width="1" />
+                  <!-- Breakwater -->
+                  <path d="M480,150 L330,236 L326,228 L476,142 Z" fill="#d9d4c7" stroke="#8a8478" stroke-width="1" />
+                  <!-- Coastline accent -->
+                  <path d="M0,80 Q60,70 120,90 L150,120" fill="none" stroke="#b06a86" stroke-width="2" />
+                  <path d="M260,120 L300,84 Q380,96 480,70" fill="none" stroke="#b06a86" stroke-width="2" />
+                  <!-- Site polygon: strip along the north and east quay walls -->
+                  <polygon
+                    points="150,114 266,114 276,194 262,196 252,128 150,128"
+                    fill="#bcd6e6"
+                    fill-opacity="0.55"
+                    stroke="#1a1a1a"
+                    stroke-width="2.5"
+                    stroke-linejoin="round"
+                  />
+                  <!-- Zoom control (decorative) -->
+                  <g>
+                    <rect x="430" y="204" width="34" height="62" rx="4" fill="#ffffff" stroke="#cccccc" />
+                    <line x1="430" y1="235" x2="464" y2="235" stroke="#cccccc" />
+                    <line x1="441" y1="219" x2="453" y2="219" stroke="#333333" stroke-width="2" />
+                    <line x1="447" y1="213" x2="447" y2="225" stroke="#333333" stroke-width="2" />
+                    <line x1="441" y1="251" x2="453" y2="251" stroke="#333333" stroke-width="2" />
+                  </g>
+                  <!-- Scale bar -->
+                  <g>
+                    <line x1="356" y1="286" x2="416" y2="286" stroke="#333333" stroke-width="2" />
+                    <text x="356" y="280" font-size="11" fill="#333333">50 m</text>
+                  </g>
+                </svg>
+              </dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Construction drawing 1</dt>
+              <dd class="field__value">
+                <a
+                  class="doc-link"
+                  href="#"
+                  onclick="return false;"
+                  style="display: inline-flex; align-items: center; gap: 2px; line-height: 1;"
+                ><svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true" style="display: block; flex-shrink: 0;">
+                    <line x1="10" y1="2.6" x2="10" y2="12.4" stroke="currentColor" stroke-width="1.2" />
+                    <polyline points="6,8.6 10,12.6 14,8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                    <line x1="3.6" y1="16.4" x2="16.4" y2="16.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                  </svg><span>brixham-fish-quay-ladder-positions.pdf</span></a>
+              </dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Construction drawing 2</dt>
+              <dd class="field__value">
+                <a
+                  class="doc-link"
+                  href="#"
+                  onclick="return false;"
+                  style="display: inline-flex; align-items: center; gap: 2px; line-height: 1;"
+                ><svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true" style="display: block; flex-shrink: 0;">
+                    <line x1="10" y1="2.6" x2="10" y2="12.4" stroke="currentColor" stroke-width="1.2" />
+                    <polyline points="6,8.6 10,12.6 14,8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                    <line x1="3.6" y1="16.4" x2="16.4" y2="16.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                  </svg><span>quay-ladder-fixing-detail.pdf</span></a>
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="subsection">
+          <h2 class="subsection__title">Site 1 – Activity 1</h2>
+          <dl class="fields">
+            <div class="field">
+              <dt class="field__label">Type of activity</dt>
+              <dd class="field__value">Construction of new works</dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Sub-activities</dt>
+              <dd class="field__value">
+                <ul class="field__value-list">
+                  <li>Other: safety ladders fixed to an existing quay wall</li>
+                </ul>
+              </dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Activity description</dt>
+              <dd class="field__value">
+                Removal of 4 corroded galvanised steel ladders and installation of 6 new
+                marine grade 316 stainless steel safety ladders on the north and east walls
+                of the fish quay. Each ladder is about 6 metres long, 450 millimetres wide,
+                and reaches from the top of the quay to below the lowest astronomical tide.
+                The ladders will be fixed to the wall with stainless steel brackets held by
+                resin anchors drilled into the stonework, with grab handles on the quay top.
+                Drilling will be done at low tide, above the water line, using hand held
+                electric drills with dust collection. Work will be done from the quay edge
+                and from the harbour workboat. Old ladders will be cut off and taken away for
+                recycling. No piling, dredging or work on the seabed is needed.
+              </dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Maximum duration of activity</dt>
+              <dd class="field__value">3 weeks</dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Completion date</dt>
+              <dd class="field__value">Not needed to be completed by a certain date</dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Activity limited to specific months</dt>
+              <dd class="field__value">No</dd>
+            </div>
+            <div class="field">
+              <dt class="field__label">Proposed working hours</dt>
+              <dd class="field__value">
+                Monday to Friday, 09:00 to 16:00, around low water. No work on the quay
+                edge while the fish market is landing catch in the early morning.
+              </dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

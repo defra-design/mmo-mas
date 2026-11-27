@@ -21,11 +21,8 @@ import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
 import FieldDecorations from './FieldDecorations';
 import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
-import { useTasks } from '../../context/TaskContext';
+import { useCaseTasks } from '../../context/TaskContext';
 import type { SiteCheckForm } from '../../context/TaskContext';
-import { hasSubmittedPublicNoticeEvidence } from '../../utils/publicNoticeEvidence';
-import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
-import { HAYLING_SITE_CHECK } from '../../utils/consultationCaseAnswers';
 
 // Native D365 uses a narrow label column. Once a row cannot fit the label and
 // its control side by side, the control wraps underneath.
@@ -121,21 +118,7 @@ const REQUIRED_FIELDS: { field: keyof SiteCheckForm; name: string }[] = [
 export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { siteCheckForm, saved, setSiteCheckField, markUnsaved, completeSiteCheck } = useTasks();
-  const completedFixture = hasSubmittedPublicNoticeEvidence(caseId);
-  const form: SiteCheckForm = caseId === CONSULTATION_CASE_ID
-    ? {
-        coordinatesOk: siteCheckForm.coordinatesOk || HAYLING_SITE_CHECK.coordinatesOk,
-        withinMile: siteCheckForm.withinMile || HAYLING_SITE_CHECK.withinMile,
-        notes: siteCheckForm.notes || HAYLING_SITE_CHECK.notes,
-      }
-    : completedFixture
-    ? {
-        coordinatesOk: siteCheckForm.coordinatesOk || 'Yes',
-        withinMile: siteCheckForm.withinMile || 'Yes',
-        notes: siteCheckForm.notes,
-      }
-    : siteCheckForm;
+  const { siteCheckForm: form, saved, setSiteCheckField, markUnsaved, completeSiteCheck } = useCaseTasks(caseId);
   // Empty required fields, populated on a failed save. D365 validates on save, not
   // as you type, then clears a field's error as soon as it is given a value.
   const [errors, setErrors] = useState<(keyof SiteCheckForm)[]>([]);
@@ -178,7 +161,7 @@ export default function SiteCheckTask({ caseId }: SiteCheckTaskProps) {
         <Title3>
           Site check
           <span className={styles.savedLabel}>
-            - {completedFixture || saved.siteCheck ? 'Saved' : 'Unsaved'}
+            - {saved.siteCheck ? 'Saved' : 'Unsaved'}
           </span>
         </Title3>
         <div><Body1>Task</Body1></div>

@@ -1,6 +1,6 @@
 // src/components/tasks/MarinePlanPolicyTask.tsx
 import { useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   makeStyles,
   shorthands,
@@ -24,29 +24,16 @@ import FormNotification from '../FormNotification';
 import OutcomeDropdown from './OutcomeDropdown';
 import TaskFieldLabel from './TaskFieldLabel';
 import FieldDecorations from './FieldDecorations';
-import MppSupportingDocuments from './MppSupportingDocuments';
-import MppSupportingDocumentsHtml from './MppSupportingDocumentsHtml';
 import {
   CANNOT_START_MESSAGE,
   notificationMessage,
   requiredMessage,
 } from '../../utils/validationMessages';
-import { useTasks } from '../../context/TaskContext';
-import { siteCheckCompleteForCase } from '../../utils/publicNoticeEvidence';
+import { useCaseTasks } from '../../context/TaskContext';
 import {
-  MPP_TASK_FORM_CASE_ID,
   documentsForPolicy,
   policiesForCase,
 } from '../../utils/marinePlanPolicies';
-import { HAYLING_MPP } from '../../utils/consultationCaseAnswers';
-
-const CASES_WITH_SUPPORTING_DOCUMENTS = [
-  'MLA/2026/10002',
-  'MLA/2026/10006',
-  'MLA/2026/10012',
-  'MLA/2026/10013',
-  'MLA/2026/10015',
-];
 
 const outcomeOptions = ['Compliant', 'Non-compliant', 'Consultation required'];
 
@@ -153,26 +140,17 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
   const styles = useStyles();
   const navigate = useNavigate();
   const { policyCode } = useParams<{ policyCode: string }>();
-  // Mockups of the applicant's supporting documents for the policy:
-  // ?docs=1 as D365 fields, ?docs=2 as injected HTML.
-  const [searchParams] = useSearchParams();
-  const docsMockup = searchParams.get('docs');
-  const { tasks, mppForm, setMppField } = useTasks();
+  const { tasks, mppForm, setMppField } = useCaseTasks(caseId);
   // Empty required fields, populated on a failed save. Only ever set on an active
   // record — a locked one has no Save command to fail against.
   const [errors, setErrors] = useState<MppField[]>([]);
 
-  const locked = !siteCheckCompleteForCase(caseId, tasks);
+  const locked = tasks.siteCheck !== 'Done';
 
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
-  // Back and Save and close both return to where the policy was opened from,
-  // as D365 does — the subgrid lives on MLA/2026/10014's "Marine plan policies"
-  // tab, and going back restores the case form with that tab still active. On
-  // MLA/2026/10002 it lives on the Marine plan policies task form.
-  const returnToCase = () => {
-    if (caseId === MPP_TASK_FORM_CASE_ID) navigate(`${caseUrl}/tasks/marine-plan-policies`);
-    else navigate(caseUrl, caseId === 'MLA/2026/10014' ? { state: { tab: 'mpp' } } : undefined);
-  };
+  // Back and Save and close both return to the case's Tasks tab, where the
+  // policy subgrid sits under the Task grid.
+  const returnToCase = () => navigate(caseUrl);
 
   const policy = policiesForCase(caseId).find(p => p.code === policyCode);
 
@@ -194,17 +172,13 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
     );
   }
 
-  // These cases' Marine plan policies tab (the CDP iframe) has the Supporting
-  // documents page, so a policy with documents linked to it tells the
-  // caseworker to look there. 10014's tab is a native subgrid with no such page.
-  // It isn't a link: opening a tab from a form needs custom JavaScript, which
+  // The Marine plan policies tab (the CDP iframe) has the Supporting documents
+  // page, so a policy with documents linked to it tells the caseworker to look
+  // there. It isn't a link: opening a tab from a form needs custom JavaScript, which
   // the D365 developer ruled out as it would need retesting with each update.
-  const hasDocuments =
-    CASES_WITH_SUPPORTING_DOCUMENTS.includes(caseId) &&
-    documentsForPolicy(policy.code, caseId).length > 0;
+  const hasDocuments = documentsForPolicy(policy.code, caseId).length > 0;
 
-  // MLA/2026/10006 shows its own assessment while the shared one is empty.
-  const answer = mppForm[policy.code] ?? HAYLING_MPP[policy.code];
+  const answer = mppForm[policy.code];
   const valueOf = (field: MppField) => answer?.[field] ?? '';
 
   const errorFor = (field: MppField) =>
@@ -311,12 +285,6 @@ export default function MarinePlanPolicyTask({ caseId }: MarinePlanPolicyTaskPro
               <Body1 block>
                 You can find the supporting document for this policy in the Marine plan policies tab.
               </Body1>
-            )}
-            {docsMockup === '1' && (
-              <MppSupportingDocuments documents={documentsForPolicy(policy.code, caseId)} />
-            )}
-            {docsMockup === '2' && (
-              <MppSupportingDocumentsHtml documents={documentsForPolicy(policy.code, caseId)} />
             )}
         </div>
       </Card>

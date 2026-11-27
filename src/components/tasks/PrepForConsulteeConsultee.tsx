@@ -14,8 +14,7 @@ import OutcomeDropdown from './OutcomeDropdown';
 import TaskRow from './TaskRow';
 import TaskTextarea from './TaskTextarea';
 import type { ConsulteeRow } from '../../context/TaskContext';
-import { useTasks } from '../../context/TaskContext';
-import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
+import { useCaseTasks } from '../../context/TaskContext';
 import { organisationByName } from '../../utils/organisations';
 import { CANNOT_START_MESSAGE, notificationMessage, requiredMessage } from '../../utils/validationMessages';
 
@@ -62,7 +61,7 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { tasks, consultees, recentOrganisations, addRecentOrganisation, saveConsultee } = useTasks();
+  const { tasks, consultees, recentOrganisations, addRecentOrganisation, saveConsultee } = useCaseTasks(caseId);
   const { consulteeId } = useParams<{ consulteeId: string }>();
   const existing = (consultees[caseId] ?? []).find(row => row.id === consulteeId);
   const isNew = consulteeId === 'new';
@@ -73,7 +72,7 @@ export default function PrepForConsulteeConsultee({ caseId }: Props) {
   const [duplicate, setDuplicate] = useState(false);
   const taskUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/prep-for-consultee`;
   const locked =
-    taskStatusForCase(caseId, 'prepForConsultee', tasks.prepForConsultee) === 'Cannot start yet';
+    tasks.prepForConsultee === 'Cannot start yet';
 
   if (!isNew && !existing) {
     return <div className={styles.page}>

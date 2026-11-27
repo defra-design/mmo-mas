@@ -7,14 +7,14 @@ import { makeStyles, shorthands, tokens, Body1, Card, Title3 } from '@fluentui/r
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import type { PublicNoticeEvidenceLocationReview } from '../../context/TaskContext';
-import { useTasks } from '../../context/TaskContext';
+import { useCaseTasks } from '../../context/TaskContext';
 import {
   hasResubmittedPublicNoticeEvidence, hasSubmittedPublicNoticeEvidence, NOT_ACCEPTED,
 } from '../../utils/publicNoticeEvidence';
 import { notificationMessage } from '../../utils/validationMessages';
 import PublicNoticeEvidenceLocation from './PublicNoticeEvidenceLocation';
 import {
-  publicNoticeEvidenceLocations, replacementPublicNoticeEvidence, resubmittedPublicNoticeEvidenceReviews,
+  evidenceLocationsFor, replacementPublicNoticeEvidence, resubmittedPublicNoticeEvidenceReviews,
 } from './publicNoticeEvidenceLocations';
 
 const useStyles = makeStyles({
@@ -44,10 +44,10 @@ type Props = { caseId: string };
 export default function PublicNoticeEvidenceLocationTask({ caseId }: Props) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const context = useTasks();
+  const context = useCaseTasks(caseId);
   const { locationNumber } = useParams<{ locationNumber: string }>();
   const index = Number(locationNumber) - 1;
-  const location = publicNoticeEvidenceLocations[index];
+  const location = evidenceLocationsFor(caseId)[index];
   const isResubmission = hasResubmittedPublicNoticeEvidence(caseId);
   const replacement = isResubmission ? replacementPublicNoticeEvidence[index] : undefined;
   // On 10013 the locations without replacement photographs are read-only history.

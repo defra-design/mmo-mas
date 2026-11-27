@@ -1,12 +1,15 @@
 // src/utils/marinePlanPolicies.ts
 // Flattened view of the marine plan policies for the caseworker MPP task list and
-// per-policy assessment form. The data mirrors public/cdp/marine-plan-policies.json
-// (the applicant-facing CDP iframe copy) — keep the two in sync if the seed changes.
-import mppData from '../mock-data/marine-plan-policies.json';
-// MLA/2026/10006 (Hayling Island, South plan area) has its own policies,
-// mirroring public/cdp/marine-plan-policies-hayling.json.
-import haylingMppData from '../mock-data/marine-plan-policies-hayling.json';
-import { CONSULTATION_CASE_ID } from './consultationCase';
+// per-policy assessment form. Each application has its own policies, mirroring
+// its public/cdp/marine-plan-policies*.json (the applicant-facing CDP iframe
+// copy) — keep the two in sync if the seed changes.
+import teignmouthData from '../mock-data/marine-plan-policies.json';
+import haylingData from '../mock-data/marine-plan-policies-hayling.json';
+import brixhamData from '../mock-data/marine-plan-policies-brixham.json';
+import exmouthData from '../mock-data/marine-plan-policies-exmouth.json';
+import dartData from '../mock-data/marine-plan-policies-dart.json';
+import { applicationFor } from './cases';
+import type { Application } from './cases';
 
 export interface MarinePlanPolicy {
   code: string;
@@ -26,31 +29,43 @@ interface RawPolicy {
   consideration: string[];
 }
 
+interface RawDocument {
+  filename: string;
+  type: string;
+  policies: { code: string; location: string }[];
+}
+
 interface RawCategory {
   name: string;
   policies: RawPolicy[];
 }
 
-// One ordered array (category order, then policy order within each) so a policy's
-// position gives the "X of N" index and next-policy navigation.
-export const policies: MarinePlanPolicy[] = (mppData.categories as RawCategory[]).flatMap(cat =>
-  cat.policies.map(p => ({ ...p, group: cat.name }))
-);
+interface RawData {
+  categories: RawCategory[];
+  documents?: RawDocument[];
+}
 
-export const policyCount = policies.length;
+const data: Record<Application, RawData> = {
+  teignmouth: teignmouthData as RawData,
+  hayling: haylingData as RawData,
+  brixham: brixhamData as RawData,
+  exmouth: exmouthData as RawData,
+  dart: dartData as RawData,
+};
 
-const haylingPolicies: MarinePlanPolicy[] = (haylingMppData.categories as RawCategory[]).flatMap(cat =>
-  cat.policies.map(p => ({ ...p, group: cat.name }))
-);
+// One ordered array per application (category order, then policy order within
+// each) so a policy's position gives the "X of N" index.
+const flatten = (raw: RawData): MarinePlanPolicy[] =>
+  raw.categories.flatMap(cat => cat.policies.map(p => ({ ...p, group: cat.name })));
+
+const policiesByApplication = Object.fromEntries(
+  Object.entries(data).map(([application, raw]) => [application, flatten(raw)]),
+) as Record<Application, MarinePlanPolicy[]>;
 
 /** The policies the applicant answered on this case. */
 export function policiesForCase(caseId: string): MarinePlanPolicy[] {
-  return caseId === CONSULTATION_CASE_ID ? haylingPolicies : policies;
+  return policiesByApplication[applicationFor(caseId)];
 }
-
-/** The case whose Marine plan policies task opens a task form with a subgrid of
- *  policy assessments. Other cases keep their existing MPP treatment. */
-export const MPP_TASK_FORM_CASE_ID = 'MLA/2026/10002';
 
 export type MppAssessmentStatus = 'Cannot start yet' | 'To do' | 'Done';
 
@@ -67,10 +82,12 @@ export function mppAssessmentStatus(
 }
 
 export function allMppAssessmentsComplete(
+  caseId: string,
   answers: Record<string, { outcome?: string; reason?: string }>,
 ): boolean {
+  const policies = policiesForCase(caseId);
   return (
-    policyCount > 0 &&
+    policies.length > 0 &&
     policies.every(policy => mppAssessmentStatus(answers[policy.code]) === 'Done')
   );
 }
@@ -81,27 +98,6 @@ export function mppTaskStatus(status: string, locked = false): MppAssessmentStat
   return status === 'Done' ? 'Done' : 'To do';
 }
 
-/** The MPP task status on the task-form case: In progress once at least one
- *  policy assessment is saved, until every one is. */
-export function mppTaskFormStatus(
-  status: string,
-  answers: Record<string, { outcome?: string; reason?: string }>,
-  locked = false,
-): MppAssessmentStatus | 'In progress' {
-  const rolledUp = mppTaskStatus(status, locked);
-  if (rolledUp !== 'To do') return rolledUp;
-  return policies.some(policy => mppAssessmentStatus(answers[policy.code]) === 'Done') ? 'In progress' : 'To do';
-}
-
-/** Zero-based index of a policy in the flattened list, or -1 if not found. */
-export function policyIndex(code: string): number {
-  return policies.findIndex(p => p.code === code);
-}
-
-export function findPolicy(code: string): MarinePlanPolicy | undefined {
-  return policies.find(p => p.code === code);
-}
-
 /** A supporting document the applicant uploaded on CDP, linked to one or more
  *  policies with where in the document the evidence is. */
 export interface SupportingDocument {
@@ -110,16 +106,9 @@ export interface SupportingDocument {
   location: string;
 }
 
-interface RawDocument {
-  filename: string;
-  type: string;
-  policies: { code: string; location: string }[];
-}
-
 /** The supporting documents linked to a policy, each with where its evidence is. */
 export function documentsForPolicy(code: string, caseId?: string): SupportingDocument[] {
-  const data = caseId === CONSULTATION_CASE_ID ? haylingMppData : mppData;
-  const documents = (data as { documents?: RawDocument[] }).documents ?? [];
+  const documents = data[caseId ? applicationFor(caseId) : 'teignmouth'].documents ?? [];
   return documents.flatMap(doc =>
     doc.policies
       .filter(link => link.code === code)

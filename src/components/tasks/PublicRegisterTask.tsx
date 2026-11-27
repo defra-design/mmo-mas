@@ -43,9 +43,8 @@ import {
   notificationMessage,
   requiredMessage,
 } from '../../utils/validationMessages';
-import { useTasks } from '../../context/TaskContext';
-import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
-import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
+import { useCaseTasks } from '../../context/TaskContext';
+import { applicantAnswersFor } from '../../utils/applicantAnswers';
 
 const useStyles = makeStyles({
   page: {
@@ -74,32 +73,11 @@ const useStyles = makeStyles({
   },
 });
 
-// The applicant's submitted answer, which arrives with the application from CDP.
-// Matches the Withholding information tab (public/cdp/public-register.html).
+// The applicant's chosen reason, which arrives with the application from CDP.
 const REASON = 'Commercial or industrial confidentiality';
-const APPLICANT_REQUEST =
-  'We would like the fees and financial figures in our activity description withheld. A ' +
-  'second operator is expected to bid for a concession in the same harbour next year, and ' +
-  'if they can see what we are paying and what we expect to take they can pitch against us. ' +
-  'We would also like the pontoon dimensions and fixing method shown on our construction ' +
-  'drawing withheld. We spent two years getting this set-up right and we do not want ' +
-  'another hire business copying it.';
 
 // Displayed as the OOB URL column value. The real CDP journey isn't live, so
 // the click target is the GOV.UK prototype instead (prototype-only split).
-// Cases whose Withholding information guidance collapses behind "Help with ..."
-// disclosures rather than sitting open on the form. Both presentations are in the
-// prototype so the round of testing on 10014 (open) and 10015 (disclosure) can
-// compare them; the guidance copy itself is identical either way. 10013 has no
-// assessment section, so this only affects its personal-information guidance.
-const GUIDANCE_AS_DISCLOSURE = ['MLA/2026/10006', 'MLA/2026/10013', 'MLA/2026/10015'];
-
-// Cases where the applicant answered "No" to the withholding question. There is
-// then nothing to assess: the reason field and the decision section come off the
-// form. Modelled as a business rule on
-// the applicant's own answer, exactly like every other reveal on this form.
-const NO_WITHHOLD_REQUEST = ['MLA/2026/10006', 'MLA/2026/10013'];
-
 const REDACT_URL = 'https://marine-licensing-url/redact/6a39375b0e7bc1f2d84a';
 const REDACT_HREF =
   'https://marine-licensing-prototype-5b7b33ca29e1.herokuapp.com/versions/multiple-sites-v2/low-complexity-v4/redact/redact-details?redact-site-type=circular';
@@ -111,20 +89,16 @@ interface PublicRegisterTaskProps {
 export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { tasks, publicRegisterForm: sharedForm, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
-    useTasks();
-  // MLA/2026/10006 shows its own answers while the shared ones are empty.
-  const form = caseId === CONSULTATION_CASE_ID
-    ? { ...sharedForm, personalInfo: sharedForm.personalInfo || 'No', completed: true }
-    : sharedForm;
+  const { tasks, publicRegisterForm: form, saved, setPublicRegisterField, markUnsaved, savePublicRegister } =
+    useCaseTasks(caseId);
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =
-    taskStatusForCase(caseId, 'publicRegister', tasks.publicRegister) === 'Cannot start yet';
-  const hideGuidance = GUIDANCE_AS_DISCLOSURE.includes(caseId);
+    tasks.publicRegister === 'Cannot start yet';
   // Did the applicant ask for anything to be withheld? If not there is no
   // decision to make.
-  const assessed = !NO_WITHHOLD_REQUEST.includes(caseId);
+  const applicantRequest = applicantAnswersFor(caseId).withholdRequest;
+  const assessed = Boolean(applicantRequest);
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
   const [errors, setErrors] = useState<FieldKey[]>([]);
 
@@ -197,10 +171,10 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
           values={form}
           errorFor={errorFor}
           onChange={update}
-          guidance={<CommercialRationaleHint disclosure={hideGuidance} />}
+          guidance={<CommercialRationaleHint disclosure />}
         >
           <TaskRow label="What they want withheld and why" locked top>
-            <TaskValue multiline>{APPLICANT_REQUEST}</TaskValue>
+            <TaskValue multiline>{applicantRequest}</TaskValue>
           </TaskRow>
         </WithholdDecision>
       )}
@@ -224,7 +198,7 @@ export default function PublicRegisterTask({ caseId }: PublicRegisterTaskProps) 
               error={errorFor('personalInfo')}
             />
           </TaskRow>
-          <PersonalInfoHint disclosure={hideGuidance} />
+          <PersonalInfoHint disclosure />
 
           {/* Internal only — the applicant isn't told, the information just goes. */}
           {form.personalInfo === YES && (
