@@ -80,6 +80,10 @@ deliberately **outside** `public/` so they're never nested inside later builds).
 
 - serves `dist/` (the live app) and `snapshots/` (mounted at `/`, so `snapshots/iteration-N/…`
   is served at `/iteration-N/…`) as static files;
+- redirects a snapshot's own front page (`/iteration-N/`) to the live landing page `/`. That
+  page is the landing page as it was then, which hides later iterations, and the "Back to
+  prototype index" links in a snapshot's design explorations and design overviews point
+  there. `vite.config.ts` does the same in dev;
 - has an SPA fallback that sends `/iteration-N/` deep links to that snapshot's own
   `index.html` (regex `^/(iteration-\d+)(/|$)`), and everything else to the live `index.html`.
 

@@ -17,6 +17,12 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 
+// A frozen iteration's own front page (/iteration-N/) is the landing page as
+// it was then, which hides the later iterations. Its "Back to prototype index"
+// links (design explorations and design overviews) point there, so send it to
+// the live landing page instead. Must run before the static snapshot files.
+app.get(/^\/iteration-\d+\/?$/, (req, res) => res.redirect('/'));
+
 // Serve the current app and the frozen snapshots as static files.
 app.use(express.static(distDir));
 app.use(express.static(snapshotsDir));
