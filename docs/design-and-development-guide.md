@@ -115,6 +115,7 @@ All routes are declared in `src/App.tsx`. The `:caseId` is a case reference like
 | `/proof-of-concept` | `ListView.tsx` ("Active cases") | Proof of concept |
 | `/cases/:caseId` | `CaseView.tsx` | Proof of concept |
 | `/iteration-1/…` | *(frozen snapshot — separate build, served by `server.js`)* | Iteration 1 |
+| `/iteration-2/…` | *(frozen snapshot — separate build, served by `server.js`)* | Iteration 2 |
 | `/receive-assess` | `MarineLicenceListView.tsx` ("Marine licence cases") | Receive and assess |
 | `/receive-assess/cases/:caseId` | `MarineCaseSummary.tsx` | Receive and assess |
 | `/receive-assess/cases/:caseId/tasks/site-check` | `tasks/SiteCheckTask.tsx` | Receive and assess |
@@ -128,12 +129,13 @@ All routes are declared in `src/App.tsx`. The `:caseId` is a case reference like
 
 ### Landing page
 
-- **What you see:** MMO logo, "Marine Applications System prototype", a link into the current
-  iteration ("Iteration 2 (in progress)"), a link to the frozen "Iteration 1" snapshot, a
+- **What you see:** MMO logo, "Marine Applications System prototype", the iterations grouped
+  by stage — the current one ("Iteration 3", in progress, Make and issue a decision stage) and
+  links to the frozen Iteration 2 and Iteration 1 snapshots (Receive and assess stage) — a
   "Clear saved data" button, and a "Proof of concept" link.
 - **Defined in:** `src/components/IndexPage.tsx`
-- **Data:** none. The current-iteration link is an in-app `<Link>`; the frozen-iteration link
-  is a plain `<a href="/iteration-1/…">` (a separate build — see
+- **Data:** none. The current-iteration link is an in-app `<Link>`; each frozen-iteration link
+  is a plain `<a href="/iteration-N/…">` (a separate build — see
   [Iterations & versioning](#iterations--versioning)). "Clear saved data" calls `resetAll()`
   to wipe runtime state.
 
@@ -376,9 +378,10 @@ stays permanently viewable.
 **How it works, in plain terms:**
 
 - The **current, in-progress iteration** is the live app at the root URL (e.g. `/receive-assess`).
-  This is where all new design work happens. Right now that's **Iteration 2**.
+  This is where all new design work happens. Right now that's **Iteration 3**
+  (the Make and issue a decision stage).
 - Each **completed iteration** is captured as a frozen copy served under its own URL prefix —
-  Iteration 1 lives at `/iteration-1/`. It's the exact build that was tested and it never
+  Iteration 1 lives at `/iteration-1/` and Iteration 2 at `/iteration-2/`. It's the exact build that was tested and it never
   changes, even as the live app moves on. It has its own copy of everything (including the CDP
   application-data pages), so later edits can't alter it.
 - The **landing page** links to the current iteration and to each frozen one, so anyone can

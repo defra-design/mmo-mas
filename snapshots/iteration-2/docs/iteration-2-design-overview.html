@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iteration 2 – design overview | Marine Applications System prototype</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; border-top: 8px solid #009d45; color: #323130; background: #fff; font: 16px/1.6 "Segoe UI", Arial, sans-serif; }
+      main { max-width: 840px; margin: 0 auto; padding: 40px 24px 64px; }
+      a { color: #0078d4; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+      a:hover { text-decoration: none; }
+      .back { position: relative; display: inline-flex; align-items: center; }
+      .back svg { position: absolute; right: calc(100% + 4px); top: 50%; display: block; width: 20px; height: 20px; transform: translateY(-50%) rotate(180deg); }
+      .back-to-top { margin: 40px 0 0; }
+      a:focus-visible { outline: 3px solid #0078d4; outline-offset: 4px; }
+      h1 { font-size: 32px; line-height: 1.25; margin: 32px 0 24px; }
+      h2 { font-size: 24px; line-height: 1.3; margin: 40px 0 16px; }
+      h3 { font-size: 18px; line-height: 1.4; margin: 0 0 12px; }
+      h4 { font-size: 16px; line-height: 1.4; margin: 24px 0 12px; }
+      h1, h2, h3, h4 { font-weight: 600; }
+      p { margin: 0 0 16px; }
+      ul { padding-left: 24px; }
+      li { padding-left: 4px; margin-bottom: 28px; }
+      @media print { main { max-width: none; padding: 0; } body { border-top: 0; } .back, .back-to-top { display: none; } h2, h3, h4 { break-after: avoid; } }
+    </style>
+  </head>
+  <body id="top">
+    <main>
+      <a class="back" href="../"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7.65 4.15c.2-.2.5-.2.7 0l5.49 5.46c.21.22.21.57 0 .78l-5.49 5.46a.5.5 0 0 1-.7-.7L12.8 10 7.65 4.85a.5.5 0 0 1 0-.7Z" /></svg><span>Back to prototype index</span></a>
+      <h1>Iteration 2 – design overview</h1>
+      <p>Iteration 2 develops the receive and assess journey from reviewing an application into recording assessment decisions and preparing the case for consultation. It adds individual marine plan policy assessments, consultation preparation, public register decisions, public notice and evidence review, and a task to start consultation. It also explores how case officers reject an application or arrange a transfer to MCMS, and begins the consultation stage, with following consultation responses and extending the consultee closing date.</p>
+      <p>This overview describes the current prototype, including the latest additions to Iteration 2. It builds on the <a href="iteration-1-design-overview.html">Iteration 1 design overview</a>.</p>
+
+      <h2>Different ways of displaying tasks and marine plan policy assessments</h2>
+      <p>Iteration 2 explores four ways of organising the case officer’s work. Each uses the same individual policy assessment form; the difference is where the tasks and policy assessments sit, and how the case officer moves between reviewing the application and assessing it.</p>
+      <ul>
+        <li>
+          <h3>MLA/2026/10015 – dedicated Tasks tab</h3>
+          <p>The Tasks tab is the first thing the case officer sees when entering the case. It shows the full-width Tasks grid, with the marine plan policy assessment grid underneath. All assessment work is brought together in one place, with no Tasks side panel.</p>
+          <p>The separate Marine plan policies tab remains available for reviewing the applicant’s policy answers, grouped by sector. The case officer can review related answers there and open individual assessment records from the Tasks tab.</p>
+        </li>
+        <li>
+          <h3>MLA/2026/10014 – persistent Tasks panel and assessments on the MPP tab</h3>
+          <p>The Tasks panel stays visible on the right while the case officer moves between tabs. The Marine plan policies tab contains the full-width assessment grid, replacing the separate applicant-answer view. Opening a policy brings its applicant information and the case officer’s assessment together on one form. Save and close returns to the MPP tab to choose the next policy.</p>
+        </li>
+        <li>
+          <h3>MLA/2026/10013 – assessments below Case summary and a persistent Tasks panel</h3>
+          <p>The Tasks panel stays visible on the right. The full-width marine plan policy assessment grid sits below the Case summary, allowing the case officer to open each policy to review the applicant’s answer and record a decision. The separate Marine plan policies tab retains the read-only applicant answers.</p>
+        </li>
+        <li>
+          <h3>MLA/2026/10012 – tasks and policy assessments in the side panel</h3>
+          <p>The persistent right-hand panel contains the Tasks list followed by a second list of individual marine plan policy assessments. Policies appear in a compact, paginated list rather than a full-width grid. The Marine plan policies tab retains the read-only applicant answers.</p>
+        </li>
+      </ul>
+      <p>Detailed exploration: <a href="https://eaflood.atlassian.net/browse/ML-1329">ML-1329 – marine plan policy assessments and layout variants</a>.</p>
+
+      <h2>Changes to applicant information</h2>
+      <ul>
+        <li>
+          <h3>Application details</h3>
+          <p>The applicant service changed its “Projects” page to “Submissions”. To keep the language consistent, Application details, Other permissions and WFD now refer to the application and proposed works in place of projects. Application details uses “Application name” and “Proposed works summary”, and displays preferred licence dates at month and year level.</p>
+        </li>
+        <li>
+          <h3>Sites and activities</h3>
+          <p>MLA/2026/10002 adds an example with multiple sites and activities, keeping each activity associated with its site. Sub-activities are listed explicitly. Case officers can also view the construction drawings applicants must submit for new construction, alterations or improvement works, with links alongside the relevant site information.</p>
+        </li>
+        <li>
+          <h3>WFD, Other permissions and Public register</h3>
+          <p>Refines the applicant question wording, Yes/No answers and document links. Public register examples show both an applicant request to withhold information and a case where nothing has been requested for withholding.</p>
+        </li>
+        <li>
+          <h3>Marine plan policy supporting documents</h3>
+          <p>Applicants can upload supporting documents and link each one to the marine plan policies it supports, saying where in the document the relevant information is. On the Marine plan policies tab, a new “Evidence” section at the top of the navigation links to a “Supporting documents” page. This lists every document in a table, with its document type, each policy it supports and where the information is. Each policy links to that policy’s page.</p>
+          <p>When a policy has documents linked to it, its assessment says “You can find the supporting document for this policy in the Marine plan policies tab.” under the applicant’s consideration. This is on MLA/2026/10002, 10006, 10012, 10013 and 10015.</p>
+          <p>We wanted this to be a link that opens the Supporting documents page on the Marine plan policies tab. The D365 developer advised against it: opening a tab from a form needs custom JavaScript, and Microsoft’s guidance is that custom code like this has to be retested whenever the platform is updated. So there are no links from tasks to tabs, and the case officer is told where to look instead.</p>
+          <p>Showing documents against each policy, and within the assessment itself, were also explored but are not MVP. They are kept in the Design explorations section of the prototype.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1642">ML-1642 – CO can view supporting documents</a>.</p>
+        </li>
+      </ul>
+
+      <h2>Assessment tasks</h2>
+      <ul>
+        <li>
+          <h3>Site check</h3>
+          <p>Refines the existing task with separate sections for coordinates and shape, the WFD assessment area, and optional notes. Required answers are checked on <strong>Save and close</strong>, which now unlocks the additional assessment tasks introduced in this iteration.</p>
+        </li>
+        <li>
+          <h3>Water Framework Directive</h3>
+          <p>Adds a required “Record your considerations” field when the case officer answers Yes to “Is the WFD section complete and acceptable?”. The field is hidden and not required for a No answer. The applicant question wording and assessment-document link have also been refined.</p>
+        </li>
+        <li>
+          <h3>Marine plan policy assessments</h3>
+          <p>There are 41 policy assessments across four groups: Cross-cutting, Economic, Environmental and Social. Each policy has its own record, showing the policy group, policy information and applicant’s consideration. The case officer records an outcome of <strong>Compliant</strong>, <strong>Non-compliant</strong> or <strong>Consultation required</strong>, with a required reason.</p>
+          <p>The policy grid shows Policy, Group and Status, with sorting and filtering. Task status is separate from the assessment outcome: a completed assessment is <strong>Done</strong>, whichever outcome was recorded. Assessments open read-only until Site check is complete, then become <strong>To do</strong>.</p>
+        </li>
+        <li>
+          <h3>Prepare for consultation</h3>
+          <p>After Site check is complete, the case officer selects organisations from a searchable lookup and chooses what each should receive. <strong>Application notification</strong> tells an organisation about the application without asking for a response. <strong>Request for advice</strong> reveals notes explaining what the organisation should consider.</p>
+          <p>Selecting an organisation reveals the next blank row. At least one organisation and a consultation type for every selected organisation are required before saving. The case officer can save valid work as <strong>In progress</strong>, or tick the completion checkbox and save it as <strong>Done</strong>. In the intended service, organisations receiving requests for advice can read the notes and respond.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1573">ML-1573 – Prepare for consultation</a>.</p>
+          <p><strong>Update:</strong> this task has since been redesigned, based on the developers’ advice. Consultees are now listed in a subgrid on the task page, and each one is added and edited as its own record on a separate page. A duplicate organisation is caught when the consultee is saved. The design described above is kept here as a record of the original approach.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1630">ML-1630 – Prepare for consultation subgrid rework</a>.</p>
+          <p><strong>Update:</strong> the case officer now sets a consultation period on this task, in a new “Consultation period” section above the consultees subgrid. A dropdown labelled “Days to respond for all consultees” offers <strong>14 days</strong>, <strong>21 days</strong> and <strong>28 days</strong>. The period is set once for the whole consultation, not for each consultee. Low complexity marine licences will use 14 days. The longer periods are included so the task already supports higher complexity licences when they come in. The field becomes required when the completion checkbox is ticked. If the period and the consultees are both missing on save, both errors are shown together.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1640">ML-1640 – CO can define consultation period</a>.</p>
+        </li>
+        <li>
+          <h3>Public register</h3>
+          <p>Sits directly below Site check, bringing withholding decisions early enough for the applicant to receive a response and decide whether to continue. The case officer reviews the applicant’s request and assesses commercial or industrial confidentiality, national security, or both. They can agree in full, agree in part or disagree, recording a rationale and, for partial agreement or refusal, a message for the applicant.</p>
+          <p>A personal-information check always appears, including when no withholding request was made. The case officer then follows a link to the separate redaction journey in a new tab. Required fields must be completed before saving: ticking the completion checkbox makes the task <strong>Done</strong>; leaving it unticked saves it as <strong>In progress</strong>.</p>
+          <p>The examples also compare guidance: <strong>MLA/2026/10014</strong> displays it openly with information icons, while <strong>MLA/2026/10015</strong> uses collapsed “Help with…” accordions. <strong>MLA/2026/10013</strong> shows no withholding request, so the assessment section is omitted and personal-information guidance is in an accordion.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1520">ML-1520 – Public register task and guidance variants</a>.</p>
+          <h4>Redact the application</h4>
+          <p>The link opens a page on CDP, Defra’s Core Development Platform, where the application data is stored. It uses the GOV.UK Design System, presenting the application in a similar way to the applicant service.</p>
+          <p>The page shows the submitted application and the applicant’s withholding request. The case officer edits a copy of an answer for publication while preserving the original, using a consistent redaction marker. They can withhold a site’s coordinates and map together, withhold documents, or upload redacted replacement documents. Redactions can also be changed or removed.</p>
+          <p>A preview opens in a new tab to show the public version, with withheld information omitted. Save redactions records the work and checks that no answers remain open for editing. This prepares the application for publication; publishing happens back in MAS.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1383">ML-1383 – redacting answers, locations and documents</a>.</p>
+        </li>
+        <li>
+          <h3>Public notice</h3>
+          <p>The case officer decides whether a public notice is required. The task currently supports site notices, with its broader name allowing for other notice types in future. Selecting <strong>None</strong> requires an explanation; selecting <strong>Site notice</strong> reveals fields for a shorter, public-facing summary and the audience: marine users, community users or both.</p>
+          <p>The applicant’s proposed works summary is shown as a read-only reference. Expandable guidance helps the case officer write the notice summary, including a worked example. The audience choice determines the suggested notice locations the applicant sees, such as harbour noticeboards or coastal access points.</p>
+          <p><strong>Save and close</strong> checks the required fields without a separate completion checkbox. None marks the task <strong>Done</strong>; Site notice changes it to <strong>Awaiting applicant</strong> while the applicant displays the notice and provides evidence. Before Site check is complete, the task can be opened read-only and closed without progressing it.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1381">ML-1381 – Public notice task</a>.</p>
+        </li>
+        <li>
+          <h3>Review public notice evidence and resubmissions</h3>
+          <p>When the applicant submits evidence, the Public notice task becomes <strong>Done</strong> and a separate <strong>Review public notice evidence</strong> task appears as <strong>To do</strong>. For each location, the case officer sees the display date and links to a close-up photograph and a photograph of the surroundings. They accept or reject each location separately, with required comments explaining any rejection.</p>
+          <p><strong>Save and close</strong> checks the decisions and comments. All accepted means <strong>Done</strong>; any rejection means <strong>Awaiting applicant</strong>. The intended applicant journey asks for replacement photographs only for rejected locations. Resubmission reuses the existing review task, showing <strong>Resubmitted - to review</strong>, with earlier evidence and decisions retained as read-only history. The accept/reject cycle repeats until the evidence is satisfactory.</p>
+          <p><strong>MLA/2026/10015</strong> shows the stage before evidence arrives; <strong>MLA/2026/10014</strong> shows the initial review; <strong>MLA/2026/10013</strong> shows replacement photographs for Location 1, with Locations 2 and 3 already accepted.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1544">ML-1544 – receiving and reviewing public notice evidence</a>.</p>
+          <p><strong>Update:</strong> this task has since been redesigned, based on the developers’ advice. Locations are now listed in a subgrid on the task page, and each one is reviewed as its own record on a separate page. There is no longer a separate save step for the task: it becomes <strong>Done</strong> or <strong>Awaiting applicant</strong> once every location has been reviewed. A rejected location is now recorded as <strong>No - request new photos</strong>, so it stands out in the subgrid. The design described above is kept here as a record of the original approach.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1629">ML-1629 – Review public notice evidence subgrid rework</a>.</p>
+        </li>
+        <li>
+          <h3>Start consultation</h3>
+          <p>Appears in the task list from the outset as <strong>Cannot start yet</strong>, opening read-only until the required assessment work is complete. Once ready, the case officer confirms that consultation can start and selects <strong>Save and close</strong>. The case status changes to <strong>Consultation</strong> and the task becomes <strong>Done</strong> and read-only.</p>
+          <p>The task explains the intended publication of the application and sending of the notifications and advice requests prepared earlier. Outstanding site-notice evidence does not prevent consultation starting once the notice has been prepared. The index includes a shortcut that loads a ready-to-start example.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1593">ML-1593 – Start consultation</a>.</p>
+        </li>
+      </ul>
+
+      <h2>Consultation</h2>
+      <p>Once consultation has started, the case officer needs to see who has responded and, if needed, give consultees more time. MLA/2026/10006, Hayling Island groyne repairs, is a case in consultation that shows both. It opens on a dedicated Tasks tab, with every receive and assess task <strong>Done</strong>.</p>
+      <ul>
+        <li>
+          <h3>Extend consultee closing date</h3>
+          <p>An optional task at the bottom of the task list, with the status <strong>Optional</strong> so it’s clear it doesn’t need to be completed. It shows the consultation dates read-only, with an Extensions subgrid below. <strong>Add extension</strong> opens a new extension record on its own page, where the case officer chooses how long to extend by, in blocks of 7 days up to 28, and gives a reason. The new closing date is shown as soon as the length is chosen. An earlier version recorded which consultee asked for more time. It was dropped after the UCD collab, as the case officer may extend without being asked.</p>
+          <p>Once there is an extension, the task shows the original consultation period and closing date alongside the new closing date, and its status becomes <strong>Extended</strong>. The task still opens, so the closing date can be extended again, including after it has passed. Extensions can’t be removed, because each one has already moved the closing date. The new date applies to every consultee, and no system notification is sent: a consultee who wants more time asks offline. Public comments still close on the original date (to be confirmed).</p>
+          <p>The task’s help text tells the case officer to go to the Consultation responses tab to see who has responded. It was a link to the tab, but, as with the marine plan policy supporting documents, links from tasks to tabs were ruled out because they need custom JavaScript that would have to be retested with each platform update.</p>
+        </li>
+        <li>
+          <h3>Consultation responses tab (parked)</h3>
+          <p>A read-only tab after Case summary, shown only at the Consultation stage. Placing it there keeps it from being pushed into the overflow menu on smaller screens. Like the other application tabs, it is a CDP page shown inside the case in an iframe. It uses the same navigation and detail layout as the Marine plan policies tab: an overview with the consultation dates, counts of responses and a table of every consultee’s response status, then each consultee’s response and the public comments. A consultee who hasn’t responded is <strong>Awaiting response</strong> until the closing date, then <strong>Overdue</strong>, and goes back to <strong>Awaiting response</strong> when the closing date is extended.</p>
+          <p>Building it showed it is technically feasible to get each consultee’s response status from CDP. The tab covers the original brief to monitor progress and view responses, but it is parked. In the next stage, Make and issue a decision, the case officer will act on the responses as well as read them, and anything they record has to be a task, so the tab could change. A one-page layout and the before, passed and extended scenarios are kept in the Design explorations section of the prototype.</p>
+        </li>
+      </ul>
+      <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1712">ML-1712 – Consultation journey in MAS</a>.</p>
+
+      <h2>Case actions</h2>
+      <ul>
+        <li>
+          <h3>Reject application</h3>
+          <p>A command-bar action opens a dialog for selecting the application sections with issues and writing the details the applicant needs. Both are required. Confirming changes the case status to <strong>Rejected</strong> and records the reasons, explanation, person and date in a read-only section on the Case summary.</p>
+        </li>
+        <li>
+          <h3>Transfer to MCMS</h3>
+          <p>A two-step flow shares the work between the case officer and the Business Support Team. The case officer selects <strong>Request transfer to MCMS</strong> in the command bar and enters the required reasons. Confirming changes the case status to <strong>Transfer pending</strong> and adds a Transfer to MCMS section to Case summary, showing who requested the transfer, when and why. The command changes to <strong>Complete transfer to MCMS</strong>.</p>
+          <p>After manually copying the case into MCMS, the Business Support Team uses that command to enter the required MCMS reference. Confirming changes the status to <strong>Transferred</strong>, adds who completed the transfer, the date and reference to the same details section, and removes the command. Both statuses also appear in the Case list, helping Business Support identify cases waiting for transfer.</p>
+          <p>More detail: <a href="https://eaflood.atlassian.net/browse/ML-1379">ML-1379 – Transfer to MCMS</a>.</p>
+        </li>
+      </ul>
+
+      <h2>Task form and status changes</h2>
+      <p>Task forms use clearer sections, consistent required markers and padlocks, and <strong>Save and close</strong> commands. Required-field checks show a form-level message and feedback beside the affected fields. Tasks that cannot start yet can now be inspected read-only, with a notification explaining the prerequisite.</p>
+      <p>Rejection, transfer and consultation actions update the status in both the Case list and case header.</p>
+
+      <h2>Prototype scope</h2>
+      <p>The examples illustrate different stages of the journey using prepared application and evidence data. The redaction summary describes the separate journey documented in ML-1383.</p>
+      <p>The current Start consultation gate checks the required tasks and two policy assessments (SW-CC-1 and SW-CC-3) as a prototype shortcut. The ready-to-start example fills all policy assessments. This shortcut does not define the final service rule.</p>
+      <p>MLA/2026/10006 uses today’s date, so its original consultee closing date has already passed. Extensions added to it are saved until the prototype data is cleared from the index page.</p>
+      <p class="back-to-top"><a href="#top">Back to top</a></p>
+    </main>
+  </body>
+</html>

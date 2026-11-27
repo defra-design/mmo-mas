@@ -1,4 +1,5 @@
 import { NOT_ACCEPTED } from '../../utils/publicNoticeEvidence';
+import { asset } from '../../utils/asset';
 
 // The applicant's site notice locations, as submitted on CDP. Names follow the
 // applicant guidance: a place, then where exactly the notice was displayed.
@@ -13,8 +14,8 @@ const submitted = [
 export const publicNoticeEvidenceLocations = submitted.map(([name, date], index) => ({
   name,
   date,
-  closeUpHref: `/cdp/evidence/location-${index + 1}-close-up.svg`,
-  surroundingsHref: `/cdp/evidence/location-${index + 1}-surroundings.svg`,
+  closeUpHref: asset(`cdp/evidence/location-${index + 1}-close-up.svg`),
+  surroundingsHref: asset(`cdp/evidence/location-${index + 1}-surroundings.svg`),
 }));
 
 export type PublicNoticeEvidenceLocation = (typeof publicNoticeEvidenceLocations)[number];
@@ -41,8 +42,8 @@ export const resubmittedPublicNoticeEvidenceReviews = publicNoticeEvidenceLocati
 // by location index.
 const replacement = (number: number) => ({
   submittedDate: '27 August 2026',
-  closeUpHref: `/cdp/evidence/location-${number}-replacement-close-up.svg`,
-  surroundingsHref: `/cdp/evidence/location-${number}-replacement-surroundings.svg`,
+  closeUpHref: asset(`cdp/evidence/location-${number}-replacement-close-up.svg`),
+  surroundingsHref: asset(`cdp/evidence/location-${number}-replacement-surroundings.svg`),
 });
 export const replacementPublicNoticeEvidence: Record<number, ReturnType<typeof replacement>> = {
   0: replacement(1),

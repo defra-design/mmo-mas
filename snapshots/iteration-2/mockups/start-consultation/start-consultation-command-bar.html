@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Start consultation – MLA/2026/10015</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #323130; background: #faf9f8; font: 14px/1.5 'Segoe UI', Arial, sans-serif; }
+    header { height: 48px; background: #243a5e; color: white; display: flex; align-items: center; gap: 18px; padding: 0 24px; }
+    .waffle { display: grid; grid-template-columns: repeat(3, 3px); gap: 4px; }
+    .waffle i { width: 3px; height: 3px; background: white; }
+    .brand { font-size: 16px; font-weight: 600; }
+    .brand span { font-weight: 400; opacity: .55; padding: 0 10px; }
+    .avatar { margin-left: auto; border-radius: 50%; background: #dce9f5; color: #243a5e; width: 32px; height: 32px; display: grid; place-items: center; font-size: 12px; }
+    .shell { display: flex; min-height: calc(100vh - 48px); }
+    aside { width: 248px; flex-shrink: 0; background: #f3f2f1; border-right: 1px solid #e1dfdd; box-shadow: inset -5px 0 8px #00000009; padding-top: 12px; }
+    .nav-item { padding: 9px 16px; min-height: 40px; display: flex; align-items: center; gap: 12px; }
+    .nav-icon { width: 18px; text-align: center; color: #605e5c; }
+    .nav-group { font-weight: 600; padding: 22px 16px 5px; }
+    .selected { background: white; border-left: 3px solid #0078d4; padding-left: 13px; }
+    main { min-width: 0; flex: 1; padding: 0 24px 24px; }
+    .commands { display: flex; gap: 4px; align-items: center; background: white; border-radius: 4px; padding: 4px 12px; margin: 12px 0 20px; box-shadow: 0 1px 3px #00000015; }
+    button { font: inherit; }
+    .command { background: transparent; border: 0; padding: 6px 10px; min-height: 32px; color: #323130; display: inline-flex; gap: 8px; align-items: center; cursor: default; }
+    .command:hover { background: #f3f2f1; border-radius: 4px; }
+    .command:focus-visible { outline: 2px solid #0078d4; outline-offset: 1px; }
+    .command svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+    .divider { height: 20px; width: 1px; background: #edebe9; margin: 0 4px; }
+    .card { background: white; border: 1px solid #edebe9; border-radius: 4px; box-shadow: 0 2px 4px #00000008; padding: 24px 32px; margin-bottom: 12px; }
+    .record { padding-top: 16px; padding-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 600; line-height: 32px; margin: 0; }
+    h1 span { color: #605e5c; font-size: 14px; font-weight: 400; }
+    h2 { font-size: 16px; line-height: 24px; font-weight: 600; margin: 0 0 12px; }
+    p { margin: 0 0 12px; }
+    p:last-child { margin-bottom: 0; }
+    .completion-row { display: flex; align-items: flex-start; gap: 0; }
+    .completion-row label { width: 160px; flex-shrink: 0; margin-right: 16px; padding-top: 4px; }
+    .field-decoration { width: 26px; flex-shrink: 0; }
+    .completion-row input { width: 16px; height: 16px; margin: 8px; accent-color: #0078d4; }
+    .intro { color: #605e5c; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 6px 0; }
+    @media (max-width: 850px) { aside { width: 205px; } main { padding: 0 16px 20px; } .card { padding: 20px; } .brand { font-size: 14px; } }
+    @media (max-width: 620px) { aside { display: none; } header { padding: 0 16px; } .brand span { padding: 0 4px; } .brand { font-size: 12px; } h1 { font-size: 22px; } }
+
+    body { height:100vh; overflow:hidden; }
+    .shell { height:calc(100vh - 48px); min-height:0; }
+    main { display:flex; flex-direction:column; }
+    .commands { flex-shrink:0; margin-bottom:12px; }
+    .command { text-decoration:none; }
+    .case-header { flex-shrink:0; padding:16px 20px 0; }
+    .header-top { display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; margin-bottom:28px; }
+    .case-title { display:flex; align-items:center; gap:12px; flex:1 1 280px; }
+    .case-avatar { width:48px; height:48px; border-radius:50%; background:#d4afe1; display:grid; place-items:center; flex-shrink:0; }
+    .metadata { display:flex; flex-wrap:wrap; gap:24px; }
+    .metadata small { display:block; color:#605e5c; font-size:12px; }
+    .tabs { display:flex; gap:24px; white-space:nowrap; overflow:hidden; min-height:48px; }
+    .tabs span { padding:10px 0 14px; }
+    .tabs .active { border-bottom:3px solid #0078d4; font-weight:600; }
+    .case-content { overflow:auto; min-height:0; padding-right:12px; }
+    .grid-card { padding:20px; }
+    .grid-scroll { overflow-x:auto; }
+    table { width:100%; min-width:600px; border-collapse:collapse; table-layout:fixed; }
+    th, td { text-align:left; border-bottom:1px solid #e1dfdd; height:44px; padding:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    th { font-weight:600; }
+    td { color:#605e5c; }
+    .record-link { color:#0078d4; }
+    .badge { background:#f3f2f1; padding:3px 8px; border-radius:4px; }
+    .grid-footer { display:flex; justify-content:space-between; margin-top:16px; color:#605e5c; }
+    dialog { width:520px; max-width:calc(100vw - 40px); border:0; border-radius:8px; padding:28px 32px; color:#323130; box-shadow:0 12px 36px #0005; font:14px/1.5 'Segoe UI',Arial,sans-serif; }
+    dialog::backdrop { background:rgba(0,0,0,.4); }
+    dialog h2 { font-size:20px; margin-bottom:16px; }
+    .dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:24px; }
+    .dialog-button { border:1px solid #d1d1d1; border-radius:4px; min-width:96px; padding:6px 16px; background:white; color:#323130; text-decoration:none; text-align:center; font:inherit; }
+    .dialog-button.primary { background:#0078d4; color:white; border-color:#0078d4; }
+    .dialog-button:focus-visible { outline:2px solid #323130; outline-offset:3px; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="waffle" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <div class="brand">Dynamics 365 <span>|</span> Marine Applications System</div>
+    <div class="avatar" aria-label="Sam Evans">SE</div>
+  </header>
+  <div class="shell">
+    <aside aria-label="Application navigation, illustration only">
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">☰</span></div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌂</span>Home</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">◷</span>Recent <span style="margin-left:auto">∨</span></div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">♧</span>Pinned <span style="margin-left:auto">∨</span></div>
+      <div class="nav-group">My work</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">▦</span>Applications dashboard</div>
+      <div class="nav-group">Customers</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">▤</span>Organisations</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">♙</span>Applicants</div>
+      <div class="nav-group">Service</div>
+      <div class="nav-item selected"><span class="nav-icon" aria-hidden="true">▣</span>Marine licence cases</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">▤</span>Exemption cases</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌖</span>Case Coastal Operations Areas</div>
+      <div class="nav-item"><span class="nav-icon" aria-hidden="true">⌖</span>Case Marine Plan Areas</div>
+    </aside>
+    <main>
+      <div class="commands" role="toolbar" aria-label="Case commands">
+        <button class="command" type="button" aria-label="Back">←</button>
+        <button class="command" type="button" aria-label="Open in new window">↗</button>
+        <button class="command" type="button">▷ &nbsp; Request transfer to MCMS</button>
+        <button class="command" type="button">⊠ &nbsp; Reject application</button>
+        <span class="divider"></span>
+        <a class="command" href="start-consultation-confirmation.html">→ &nbsp; Start consultation</a>
+      </div>
+      <section class="card case-header" aria-label="Case details">
+        <div class="header-top">
+          <div class="case-title"><span class="case-avatar" aria-hidden="true">I</span><div><h1>Installation of floating pontoon, Teignmouth Harbour, Devon</h1><div>Case</div></div></div>
+          <div class="metadata">
+            <div>MLA/2026/10015<small>Reference</small></div>
+            <div>Assessment in progress<small>Status</small></div>
+            <div>1 day<small>Case age</small></div>
+            <div>Sam Evans<small>Assigned to</small></div>
+          </div>
+        </div>
+        <div class="tabs" aria-label="Case tabs"><span class="active">Tasks</span><span>Case summary</span><span>Application details</span><span>Sites and activities</span><span>Marine plan policies</span><span>···</span></div>
+      </section>
+      <div class="case-content">
+        <section class="card grid-card" aria-labelledby="tasks-heading">
+          <h2 id="tasks-heading">Tasks</h2>
+          <div class="grid-scroll"><table aria-label="Tasks"><colgroup><col style="width:70%"><col style="width:30%"></colgroup><thead><tr><th>Task</th><th>Status</th></tr></thead><tbody><tr><td class="record-link">Site check</td><td>Done</td></tr>
+<tr><td class="record-link">Public register</td><td>Done</td></tr>
+<tr><td class="record-link">Water Framework Directive</td><td>Done</td></tr>
+<tr><td class="record-link">Prepare for consultation</td><td>Done</td></tr>
+<tr><td class="record-link">Public notice</td><td>Done</td></tr></tbody></table></div>
+          <div class="grid-footer"><span>1 - 5 of 5</span><span>Ⅰ‹ &nbsp; ‹ &nbsp; Page 1 &nbsp; ›</span></div>
+        </section>
+        <section class="card grid-card" aria-labelledby="policies-heading">
+          <h2 id="policies-heading">Marine plan policy assessments</h2>
+          <div class="grid-scroll"><table aria-label="Marine plan policy assessments"><colgroup><col style="width:60%"><col style="width:25%"><col style="width:15%"></colgroup><thead><tr><th>Policy ⌄</th><th>Group ⌄</th><th>Status ⌄</th></tr></thead><tbody><tr><td class="record-link">South West Climate change 1 (SW-CC-1)</td><td>Cross-cutting</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Climate change 3 (SW-CC-3)</td><td>Cross-cutting</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Co-existence 1 (SW-CO-1)</td><td>Cross-cutting</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Cross-border co-operation 1 (SW-CBC-1)</td><td>Cross-cutting</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Cumulative effects 1 (SW-CE-1)</td><td>Cross-cutting</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Aquaculture 2 (SW-AQ-2)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Cables 1 (SW-CAB-1)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Cables 3 (SW-CAB-3)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Dredging and disposal 1 (SW-DD-1)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Dredging and disposal 2 (SW-DD-2)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Dredging and disposal 3 (SW-DD-3)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Infrastructure 1 (SW-INF-1)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Infrastructure 2 (SW-INF-2)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Ports, harbours and shipping 1 (SW-PS-1)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Ports, harbours and shipping 4 (SW-PS-4)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Renewables 1 (SW-REN-1)</td><td>Economic</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Air quality 1 (SW-AIR-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Biodiversity 1 (SW-BIO-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Biodiversity 2 (SW-BIO-2)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Biodiversity 3 (SW-BIO-3)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Habitats 1 (SW-HAB-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Disturbance 1 (SW-DIST-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Invasive non-native species 1 (SW-INNS-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Invasive non-native species 2 (SW-INNS-2)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Marine litter 1 (SW-ML-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Marine litter 2 (SW-ML-2)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Marine protected areas 1 (SW-MPA-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Marine protected areas 2 (SW-MPA-2)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Marine protected areas 3 (SW-MPA-3)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Underwater noise 1 (SW-UWN-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Underwater noise 2 (SW-UWN-2)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Water quality 1 (SW-WQ-1)</td><td>Environmental</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Access 1 (SW-ACC-1)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Employment 1 (SW-EMP-1)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Fisheries 1 (SW-FISH-1)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Fisheries 2 (SW-FISH-2)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Fisheries 3 (SW-FISH-3)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Heritage assets 1 (SW-HER-1)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Knowledge, understanding, appreciation and enjoyment 1 (SW-SOC-1)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Seascape and landscape 1 (SW-SCP-1)</td><td>Social</td><td><span class="badge">Done</span></td></tr><tr><td class="record-link">South West Tourism and recreation 1 (SW-TR-1)</td><td>Social</td><td><span class="badge">Done</span></td></tr></tbody></table></div>
+          <div class="grid-footer"><span>1 - 41 of 41</span><span>Ⅰ‹ &nbsp; ‹ &nbsp; Page 1 &nbsp; ›</span></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

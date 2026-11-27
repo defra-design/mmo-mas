@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Withholding information tab</title>
+  <link rel="stylesheet" href="scenarios.css">
+  <style>
+    body { margin: 0; height: 100vh; display: flex; flex-direction: column; }
+    iframe { flex: 1; width: 100%; border: 0; display: block; }
+  </style>
+</head>
+<body>
+  <!-- Not part of the design: switches which answers the applicant gave. The case
+       underneath is the real app, so the bar stays out of screenshots of it. -->
+  <form class="scenarios" id="scenarios" aria-label="Applicant's answers">
+    <a class="scenarios-back" href="index.html">Back to withhold information variations</a>
+    <fieldset>
+      <legend>Mockup controls: what the applicant answered</legend>
+      <label><input type="radio" name="scenario" value="none"><span>No request</span></label>
+      <label><input type="radio" name="scenario" value="commercial" checked><span>Commercial</span></label>
+      <label><input type="radio" name="scenario" value="security"><span>National security, approved</span></label>
+      <label><input type="radio" name="scenario" value="security-none"><span>National security, not approved</span></label>
+    </fieldset>
+  </form>
+  <iframe id="case" title="Case MLA/2026/10015" src="../../receive-assess/cases/MLA%2F2026%2F10015?tab=public-register&amp;withhold=mockup"></iframe>
+  <script>
+    // The tab content (review-tab.html) sits in the case's own iframe, inside the
+    // case frame here. It reads the chosen answer from this bar when it loads, and
+    // a change here passes the new answer down through its hash.
+    (function () {
+      var bar = document.getElementById('scenarios');
+      function current() { return bar.querySelector('[name="scenario"]:checked').value; }
+
+      var fromUrl = bar.querySelector('[name="scenario"][value="' + location.hash.slice(1) + '"]');
+      if (fromUrl) fromUrl.checked = true;
+
+      bar.addEventListener('change', function () {
+        var key = current();
+        history.replaceState(null, '', '#' + key);
+        try {
+          var tab = document.getElementById('case').contentDocument.querySelector('iframe');
+          if (tab) tab.contentWindow.location.hash = key;
+        } catch (e) { /* the case isn't loaded yet; the tab reads the bar when it is */ }
+      });
+    })();
+  </script>
+</body>
+</html>
