@@ -3,10 +3,11 @@ import type {
   TaskState,
   TaskStatus,
 } from '../context/TaskContext';
-import { CONSULTATION_CASE_ID } from './consultationCase';
+import { EVIDENCE_CASE_ID, RESUBMISSION_CASE_ID } from './cases';
 
-export const PUBLIC_NOTICE_EVIDENCE_CASE_ID = 'MLA/2026/10014';
-export const PUBLIC_NOTICE_EVIDENCE_RESUBMISSION_CASE_ID = 'MLA/2026/10013';
+// The applicant's public notice photos have arrived on these cases.
+const PUBLIC_NOTICE_EVIDENCE_CASE_ID = EVIDENCE_CASE_ID;
+const PUBLIC_NOTICE_EVIDENCE_RESUBMISSION_CASE_ID = RESUBMISSION_CASE_ID;
 
 export function hasSubmittedPublicNoticeEvidence(caseId: string) {
   return (
@@ -23,29 +24,6 @@ export function publicNoticeEvidenceStatusForCase(caseId: string, tasks: TaskSta
   return hasResubmittedPublicNoticeEvidence(caseId)
     ? tasks.publicNoticeEvidenceResubmission
     : tasks.publicNoticeEvidence;
-}
-
-/**
- * MLA/2026/10014 is the initial-review fixture. MLA/2026/10013 is further into
- * Consultation: all Review and assess work is complete apart from the evidence
- * task reopened by replacement photographs. Other cases use shared state.
- */
-export function taskStatusForCase(
-  caseId: string,
-  task: keyof TaskState,
-  status: TaskStatus,
-): TaskStatus {
-  // MLA/2026/10006 is in consultation, so every task before it is done.
-  if (caseId === CONSULTATION_CASE_ID) return 'Done';
-  if (hasResubmittedPublicNoticeEvidence(caseId)) return 'Done';
-  if (!hasSubmittedPublicNoticeEvidence(caseId)) return status;
-  if (task === 'siteCheck' || task === 'siteNotice') return 'Done';
-  if (task === 'publicNoticeEvidence') return status;
-  return status === 'Cannot start yet' ? 'To do' : status;
-}
-
-export function siteCheckCompleteForCase(caseId: string, tasks: TaskState): boolean {
-  return taskStatusForCase(caseId, 'siteCheck', tasks.siteCheck) === 'Done';
 }
 
 /** The No option on "Do you accept the photographs for this location?". It says

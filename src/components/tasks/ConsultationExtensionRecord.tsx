@@ -15,7 +15,7 @@ import OutcomeDropdown from './OutcomeDropdown';
 import TaskRow from './TaskRow';
 import TaskTextarea from './TaskTextarea';
 import TaskValue from './TaskValue';
-import { useTasks } from '../../context/TaskContext';
+import { useCaseTasks } from '../../context/TaskContext';
 import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import {
   EXTEND_BY_OPTIONS, addDays, currentClosingDate, isoDate, showDate, withNewClosingDates,
@@ -41,7 +41,7 @@ export default function ConsultationExtensionRecord({ caseId }: Props) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { extensionId } = useParams<{ extensionId: string }>();
-  const { consultationExtensions, addConsultationExtension } = useTasks();
+  const { consultationExtensions, addConsultationExtension } = useCaseTasks(caseId);
   const extensions = consultationExtensions[caseId] ?? [];
   const saved = withNewClosingDates(extensions).find(row => row.id === extensionId);
   const [draft, setDraft] = useState({ days: '', reason: '' });

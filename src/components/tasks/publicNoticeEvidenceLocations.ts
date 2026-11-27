@@ -1,28 +1,46 @@
 import { NOT_ACCEPTED } from '../../utils/publicNoticeEvidence';
 import { asset } from '../../utils/asset';
+import { applicationFor } from '../../utils/cases';
+import type { Application } from '../../utils/cases';
 
 // The applicant's site notice locations, as submitted on CDP. Names follow the
 // applicant guidance: a place, then where exactly the notice was displayed.
-// The places are illustrative English coastal locations.
-const submitted = [
-  ['Whitby harbour, noticeboard by the swing bridge', '18 August 2026'],
-  ['Brixham Fish Quay, public noticeboard by the market entrance', '18 August 2026'],
-  ['Padstow harbour, sign post by the north quay steps', '19 August 2026'],
-  ['Scarborough lifeboat station, noticeboard by the slipway', '19 August 2026'],
-];
+// Each application has its own, with photos in public/cdp/evidence/<application>/.
+const submitted: Partial<Record<Application, string[][]>> = {
+  exmouth: [
+    ['Exmouth Marina, noticeboard by the marina office', '16 November 2026'],
+    ['Exmouth seafront, public noticeboard by the lifeboat station', '16 November 2026'],
+    ['Exmouth Dock, sign post at the dock entrance', '17 November 2026'],
+    ['Exmouth station car park, noticeboard by the Exe Estuary Trail', '17 November 2026'],
+  ],
+  brixham: [
+    ['Brixham Fish Quay, public noticeboard by the market entrance', '9 November 2026'],
+    ['Brixham harbour, noticeboard by the harbour office', '9 November 2026'],
+    ['Brixham breakwater, sign post by the breakwater steps', '10 November 2026'],
+    ['Brixham Marina, noticeboard by the walkway gate', '10 November 2026'],
+  ],
+};
 
-export const publicNoticeEvidenceLocations = submitted.map(([name, date], index) => ({
-  name,
-  date,
-  closeUpHref: asset(`cdp/evidence/location-${index + 1}-close-up.svg`),
-  surroundingsHref: asset(`cdp/evidence/location-${index + 1}-surroundings.svg`),
-}));
+/** Every application with public notice evidence has this many locations. */
+export const EVIDENCE_LOCATION_COUNT = 4;
 
-export type PublicNoticeEvidenceLocation = (typeof publicNoticeEvidenceLocations)[number];
+/** The public notice locations the applicant on this case sent photos for. */
+export function evidenceLocationsFor(caseId: string) {
+  const application = applicationFor(caseId);
+  return (submitted[application] ?? []).map(([name, date], index) => ({
+    name,
+    date,
+    closeUpHref: asset(`cdp/evidence/${application}/location-${index + 1}-close-up.svg`),
+    surroundingsHref: asset(`cdp/evidence/${application}/location-${index + 1}-surroundings.svg`),
+  }));
+}
+
+export type PublicNoticeEvidenceLocation = ReturnType<typeof evidenceLocationsFor>[number];
 
 // MLA/2026/10013: the earlier review, now read-only history. Locations 1 and 4
 // were not accepted; the rest were accepted.
-export const resubmittedPublicNoticeEvidenceReviews = publicNoticeEvidenceLocations.map(
+export const resubmittedPublicNoticeEvidenceReviews = Array.from(
+  { length: EVIDENCE_LOCATION_COUNT },
   (_, index) =>
     ({
       0: {
@@ -41,9 +59,9 @@ export const resubmittedPublicNoticeEvidenceReviews = publicNoticeEvidenceLocati
 // MLA/2026/10013: replacement photographs for the two rejected locations, keyed
 // by location index.
 const replacement = (number: number) => ({
-  submittedDate: '27 August 2026',
-  closeUpHref: asset(`cdp/evidence/location-${number}-replacement-close-up.svg`),
-  surroundingsHref: asset(`cdp/evidence/location-${number}-replacement-surroundings.svg`),
+  submittedDate: '24 November 2026',
+  closeUpHref: asset(`cdp/evidence/brixham/location-${number}-replacement-close-up.svg`),
+  surroundingsHref: asset(`cdp/evidence/brixham/location-${number}-replacement-surroundings.svg`),
 });
 export const replacementPublicNoticeEvidence: Record<number, ReturnType<typeof replacement>> = {
   0: replacement(1),

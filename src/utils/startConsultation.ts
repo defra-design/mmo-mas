@@ -1,7 +1,6 @@
 import type { MppForm, RejectionsState, SavedState, TaskState, TransfersState } from '../context/TaskContext';
 import caseDetails from '../mock-data/marine-case-details.json';
 import { mppAssessmentStatus } from './marinePlanPolicies';
-import { taskStatusForCase } from './publicNoticeEvidence';
 
 export interface StartConsultationForm {
   confirmed: boolean;
@@ -33,8 +32,8 @@ export function startConsultationStatus(caseId: string, state: ConsultationReadi
   if (consultationAlreadyStarted(caseId, state.consultations)) return 'Done';
   if (state.transfers[caseId] || state.rejections[caseId]) return 'Cannot start yet';
   const tasksDone = REQUIRED_TASKS.every(task =>
-    taskStatusForCase(caseId, task, state.tasks[task]) === 'Done' && state.saved[task]);
-  const notice = taskStatusForCase(caseId, 'siteNotice', state.tasks.siteNotice);
+    state.tasks[task] === 'Done' && state.saved[task]);
+  const notice = state.tasks.siteNotice;
   // Awaiting applicant means the officer has prepared the notice; evidence is
   // deliberately not a prerequisite for beginning consultation.
   const noticeReady = (notice === 'Done' || notice === 'Awaiting applicant') && state.saved.siteNotice;

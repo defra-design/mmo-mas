@@ -10,7 +10,7 @@
 // updates the case's closing date when an extension is saved.
 import type { ConsultationExtension } from '../context/TaskContext';
 
-export const CONSULTATION_CASE_ID = 'MLA/2026/10006';
+export { CONSULTATION_CASE_ID } from './cases';
 export const CONSULTATION_PERIOD_DAYS = 14;
 const TODAY = isoDate(new Date());
 export const CASE_SUBMITTED = addDays(TODAY, -34);

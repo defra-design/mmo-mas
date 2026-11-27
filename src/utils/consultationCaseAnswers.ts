@@ -2,8 +2,7 @@
 // The caseworker's answers on MLA/2026/10006's tasks, all done before its
 // consultation started (11 days ago, see consultationCase.ts). Made up to fit the Hayling Island
 // groyne repairs application and the consultation responses that came back.
-// As on the other completed cases (10013, 10014), assessment answers are
-// shared in this prototype: these show while the shared answer is empty.
+// They seed the case's saved answers (see context/caseSeeds.ts).
 import type { ConsulteeRow, MppAnswer, SiteCheckForm, SiteNoticeForm, WfdForm } from '../context/TaskContext';
 import { SITE_NOTICE } from './publicNoticeRequirement';
 

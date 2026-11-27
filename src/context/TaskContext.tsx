@@ -1,17 +1,22 @@
 // src/context/TaskContext.tsx
+// Holds every case's task statuses and answers, mirrored to localStorage so a
+// caseworker can leave a case and come back to it. Each case is independent:
+// answering a task on one case never changes another.
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { PropsWithChildren } from 'react';
-import { allMppAssessmentsComplete, policies } from '../utils/marinePlanPolicies';
+import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
+import { allMppAssessmentsComplete } from '../utils/marinePlanPolicies';
 import { startConsultationStatus } from '../utils/startConsultation';
-import { CONSULTATION_CASE_ID } from '../utils/consultationCase';
 import { HAYLING_CONSULTEES } from '../utils/consultationCaseAnswers';
+import { BRIXHAM_CONSULTEES } from '../utils/brixhamCaseAnswers';
+import { CONSULTATION_CASE_ID, RESUBMISSION_CASE_ID } from '../utils/cases';
 import type { ConsultationsState } from '../utils/startConsultation';
-import { loadPublicNoticeRequirement, NO_NOTICES, SITE_NOTICE } from '../utils/publicNoticeRequirement';
+import { loadPublicNoticeRequirement, SITE_NOTICE } from '../utils/publicNoticeRequirement';
 import { currentDecision, publicNoticeEvidenceStatus } from '../utils/publicNoticeEvidence';
 import {
-  publicNoticeEvidenceLocations,
+  EVIDENCE_LOCATION_COUNT,
   resubmittedLocationIndexes,
 } from '../components/tasks/publicNoticeEvidenceLocations';
+import { seedCase } from './caseSeeds';
 
 export type TaskStatus =
   | 'Done'
@@ -118,7 +123,7 @@ export interface PublicNoticeEvidenceMeta {
   locations: PublicNoticeEvidenceLocationReview[];
 }
 
-// MLA/2026/10013 is the later resubmission-stage fixture. Its original review
+// MLA/2026/10013 is at the resubmission stage. Its original review
 // is historical/read-only; each location with replacement photographs gets its
 // own new decision, held at that location's index (other entries stay empty).
 export interface PublicNoticeEvidenceResubmissionMeta {
@@ -193,109 +198,120 @@ function today() {
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
-interface PersistedState {
+// One case's tasks: their statuses, the answers saved on each, and whether each
+// has unsaved edits.
+export interface CaseState {
   tasks: TaskState;
   siteCheckForm: SiteCheckForm;
   wfdForm: WfdForm;
   mppForm: MppForm;
-  consultees: ConsulteesState;
   prepForConsulteeMeta: PrepForConsulteeMeta;
   publicRegisterForm: PublicRegisterForm;
   siteNoticeForm: SiteNoticeForm;
   publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta;
   publicNoticeEvidenceResubmissionMeta: PublicNoticeEvidenceResubmissionMeta;
-  // Organisations the caseworker has recently picked in the lookup, most-recent
-  // first. Shared across every consultee record/case (a per-user "Recent records"
-  // list, like the real D365 lookup); empty until they select one.
-  recentOrganisations: string[];
   saved: SavedState;
+}
+
+interface PersistedState {
+  // Each case's tasks, keyed by case reference. A case appears here once it is
+  // first changed; until then it shows its seed (see caseSeeds).
+  cases: Record<string, CaseState>;
+  consultees: ConsulteesState;
+  // Organisations the caseworker has recently picked in the lookup, most-recent
+  // first. Shared across every case (a per-user "Recent records" list, like the
+  // real D365 lookup); empty until they select one.
+  recentOrganisations: string[];
   // Every case's Transfer to MCMS record, keyed by case reference.
   transfers: TransfersState;
   // Every case's rejection record, keyed by case reference.
   rejections: RejectionsState;
   consultations: ConsultationsState;
   consultationExtensions: ConsultationExtensionsState;
-  // Prototype demo flag (set from the index page): Version 2 (false) = Tasks
-  // panel on the Case summary tab only; Version 1 (true) = Tasks panel persists
-  // on every case tab. See IndexPage.
-  tasksOnAllTabs: boolean;
 }
 
 const initialState: PersistedState = {
-  tasks: {
-    siteCheck: 'To do',
-    wfdAssessment: 'Cannot start yet',
-    marinePlanPolicies: 'Cannot start yet',
-    prepForConsultee: 'Cannot start yet',
-    publicRegister: 'Cannot start yet',
-    siteNotice: 'Cannot start yet',
-    // MLA/2026/10014 represents the point after applicant evidence arrives.
-    // The row is only rendered for that case and is ready for officer review.
-    publicNoticeEvidence: 'To do',
-    // MLA/2026/10013 has received replacement photographs and needs the
-    // existing evidence-review task brought back to the officer's queue.
-    publicNoticeEvidenceResubmission: 'Resubmitted - to review',
-  },
-  siteCheckForm: { coordinatesOk: '', withinMile: '', notes: '' },
-  wfdForm: { review: '', initialConsiderations: '' },
-  mppForm: {},
-  // MLA/2026/10006 is in consultation, so it starts with its consultees.
-  consultees: { [CONSULTATION_CASE_ID]: HAYLING_CONSULTEES },
-  prepForConsulteeMeta: { completed: false, consultationPeriod: '' },
-  publicRegisterForm: {
-    commercialAgree: '',
-    commercialApplicantText: '',
-    commercialRationale: '',
-    personalInfo: '',
-    personalInfoDetail: '',
-    completed: false,
-  },
-  siteNoticeForm: { needsNotice: '', rationale: '', summary: '', groups: '' },
-  publicNoticeEvidenceMeta: {
-    locations: publicNoticeEvidenceLocations.map(() => ({ decision: '', rejectionComments: '' })),
-  },
-  publicNoticeEvidenceResubmissionMeta: {
-    reviews: publicNoticeEvidenceLocations.map(() => ({ decision: '', rejectionComments: '' })),
+  cases: {},
+  // The cases past Prepare for consultation start with their consultees.
+  consultees: {
+    [CONSULTATION_CASE_ID]: HAYLING_CONSULTEES,
+    [RESUBMISSION_CASE_ID]: BRIXHAM_CONSULTEES,
   },
   recentOrganisations: [],
-  saved: {
-    siteCheck: true,
-    wfdAssessment: true,
-    marinePlanPolicies: true,
-    prepForConsultee: true,
-    publicRegister: true,
-    siteNotice: true,
-    publicNoticeEvidence: true,
-    publicNoticeEvidenceResubmission: true,
-  },
   transfers: {},
   rejections: {},
   consultations: {},
   consultationExtensions: {},
-  // Default to the "tasks on all tabs" experience — the tested Iteration 1
-  // behaviour (formerly the "Version 1" index link). The untested "Version 2"
-  // variant that turned this off has been dropped.
-  tasksOnAllTabs: true,
 };
 
 // Scope the persisted state to the build's base URL so a frozen iteration
 // (served under /iteration-N/) keeps its own saved answers rather than sharing
-// the live app's. At the domain root the base is '/', preserving the original key.
-// Every app's key shares this prefix; "Clear saved data" removes them all (see
-// resetAll) so one click wipes live and every frozen iteration on this origin.
+// the live app's. Every app's key shares this prefix; "Clear saved data" removes
+// them all (see resetAll) so one click wipes live and every frozen iteration.
+// The live key carries a version: Iteration 2 kept one set of answers for every
+// case, which can't be shared out between cases, so that data is left behind.
 const STORAGE_KEY_PREFIX = 'mas-review-assess-state';
 const base = import.meta.env.BASE_URL;
 const STORAGE_KEY =
   base === '/'
-    ? STORAGE_KEY_PREFIX
+    ? `${STORAGE_KEY_PREFIX}:v3`
     : `${STORAGE_KEY_PREFIX}:${base.replace(/\//g, '')}`;
 
-// Lift a pre-`transfers` saved record (one `transfer` object holding its own
-// caseId) into the keyed map. Anything without `requestedBy` predates the
-// two-step split and is discarded.
-function migrateSingleTransfer(old: unknown): TransfersState {
-  const t = old as (TransferState & { caseId?: string }) | null | undefined;
-  return t?.caseId && t.requestedBy ? { [t.caseId]: t } : {};
+// Re-derive the statuses that follow from saved answers, so stale or partial
+// saved data can't show a status its answers don't support.
+function normaliseCase(caseId: string, saved: Partial<CaseState> | undefined): CaseState {
+  const seed = seedCase(caseId);
+  const tasks: TaskState = { ...seed.tasks, ...saved?.tasks };
+  const mppForm: MppForm = { ...seed.mppForm, ...saved?.mppForm };
+  const siteNoticeForm: SiteNoticeForm = {
+    ...seed.siteNoticeForm,
+    ...saved?.siteNoticeForm,
+  };
+  siteNoticeForm.needsNotice = loadPublicNoticeRequirement(siteNoticeForm.needsNotice);
+  tasks.marinePlanPolicies = mppRollUp(caseId, tasks.siteCheck, mppForm);
+  const reviews = (list: unknown, fallback: PublicNoticeEvidenceLocationReview[]) =>
+    fallback.map((review, index) => {
+      const savedReview = Array.isArray(list) ? list[index] : undefined;
+      return { ...review, ...savedReview, decision: currentDecision(savedReview?.decision) || review.decision };
+    });
+  const publicNoticeEvidenceMeta = {
+    locations: reviews(saved?.publicNoticeEvidenceMeta?.locations, seed.publicNoticeEvidenceMeta.locations),
+  };
+  const publicNoticeEvidenceResubmissionMeta = {
+    reviews: reviews(saved?.publicNoticeEvidenceResubmissionMeta?.reviews, seed.publicNoticeEvidenceResubmissionMeta.reviews),
+  };
+  tasks.publicNoticeEvidence = publicNoticeEvidenceStatus(publicNoticeEvidenceMeta.locations, seed.tasks.publicNoticeEvidence);
+  tasks.publicNoticeEvidenceResubmission = publicNoticeEvidenceStatus(
+    resubmittedLocationIndexes.map(index => publicNoticeEvidenceResubmissionMeta.reviews[index]),
+    'Resubmitted - to review',
+  );
+  return {
+    tasks,
+    siteCheckForm: { ...seed.siteCheckForm, ...saved?.siteCheckForm },
+    wfdForm: { ...seed.wfdForm, ...saved?.wfdForm },
+    mppForm,
+    prepForConsulteeMeta: { ...seed.prepForConsulteeMeta, ...saved?.prepForConsulteeMeta },
+    publicRegisterForm: { ...seed.publicRegisterForm, ...saved?.publicRegisterForm },
+    siteNoticeForm,
+    publicNoticeEvidenceMeta,
+    publicNoticeEvidenceResubmissionMeta,
+    saved: { ...seed.saved, ...saved?.saved },
+  };
+}
+
+// Site check is the MPP prerequisite. Once it is done, the MPP task is Done when
+// every policy on the case has been assessed.
+function mppRollUp(caseId: string, siteCheck: TaskStatus, mppForm: MppForm): TaskStatus {
+  if (siteCheck !== 'Done') return 'Cannot start yet';
+  return allMppAssessmentsComplete(caseId, mppForm) ? 'Done' : 'To do';
+}
+
+// Keep only well-formed per-case records from saved data.
+function keyedArrays<T>(saved: unknown, valid: (row: Partial<T>) => boolean): Record<string, T[]> {
+  return Object.fromEntries(
+    Object.entries((saved ?? {}) as Record<string, unknown>).flatMap(([caseId, rows]) =>
+      Array.isArray(rows) ? [[caseId, (rows as Partial<T>[]).filter(valid) as T[]]] : []),
+  );
 }
 
 // Hydrate from localStorage so answers survive a full page refresh.
@@ -304,138 +320,23 @@ function loadState(): PersistedState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      const siteNoticeForm: SiteNoticeForm = {
-        ...initialState.siteNoticeForm,
-        ...parsed.siteNoticeForm,
-        needsNotice: loadPublicNoticeRequirement(parsed.siteNoticeForm?.needsNotice),
-      };
-      const mppForm: MppForm = { ...initialState.mppForm, ...parsed.mppForm };
-      const tasks: TaskState = { ...initialState.tasks, ...parsed.tasks };
-      // Site check is the MPP prerequisite. Re-derive the roll-up on hydration
-      // so stale or legacy task-status values cannot expose assessments early.
-      tasks.marinePlanPolicies =
-        tasks.siteCheck !== 'Done'
-          ? 'Cannot start yet'
-          : allMppAssessmentsComplete(mppForm)
-            ? 'Done'
-            : 'To do';
-      // Earlier saved prototype data used the generic To do label when
-      // replacement evidence returned to the officer. Adopt the more specific
-      // resubmission status without changing reviews already in progress or done.
-      if (tasks.publicNoticeEvidenceResubmission === 'To do') {
-        tasks.publicNoticeEvidenceResubmission = 'Resubmitted - to review';
-      }
-      const savedEvidenceLocations = Array.isArray(parsed.publicNoticeEvidenceMeta?.locations)
-        ? parsed.publicNoticeEvidenceMeta.locations
-        : [];
-      const publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta = {
-        ...initialState.publicNoticeEvidenceMeta,
-        ...parsed.publicNoticeEvidenceMeta,
-        locations: initialState.publicNoticeEvidenceMeta.locations.map((location, index) => {
-          const savedLocation = savedEvidenceLocations[index];
-          const savedDecision = savedLocation?.decision;
-          return {
-            ...location,
-            ...savedLocation,
-            decision: currentDecision(savedDecision) || location.decision,
-          };
-        }),
-      };
-      // The task status follows the saved location reviews.
-      tasks.publicNoticeEvidence = publicNoticeEvidenceStatus(
-        publicNoticeEvidenceMeta.locations,
-        'To do',
-      );
-
-      // Saved records from before the applicant-evidence hand-off marked a
-      // required Site notice Done. Lift those records into the new waiting
-      // state; MLA/2026/10014 is presented as Done by its case fixture because
-      // its evidence has already arrived.
-      if (tasks.siteNotice === 'Done' && siteNoticeForm.needsNotice === SITE_NOTICE) {
-        tasks.siteNotice = 'Awaiting applicant';
-      }
-
-      // Older saved data held a single `review` for Location 1's replacement.
-      const parsedResubmission = parsed.publicNoticeEvidenceResubmissionMeta;
-      const savedResubmissionReviews = Array.isArray(parsedResubmission?.reviews)
-        ? parsedResubmission.reviews
-        : parsedResubmission?.review
-          ? [parsedResubmission.review]
-          : [];
-      const publicNoticeEvidenceResubmissionMeta: PublicNoticeEvidenceResubmissionMeta = {
-        reviews: initialState.publicNoticeEvidenceResubmissionMeta.reviews.map(
-          (review, index) => {
-            const saved = savedResubmissionReviews[index];
-            return { ...review, ...saved, decision: currentDecision(saved?.decision) };
-          },
-        ),
-      };
-      tasks.publicNoticeEvidenceResubmission = publicNoticeEvidenceStatus(
-        resubmittedLocationIndexes.map(index => publicNoticeEvidenceResubmissionMeta.reviews[index]),
-        'Resubmitted - to review',
-      );
-
       return {
-        tasks,
-        siteCheckForm: { ...initialState.siteCheckForm, ...parsed.siteCheckForm },
-        wfdForm: { ...initialState.wfdForm, ...parsed.wfdForm },
-        mppForm,
-        // Older saved state held one consultee list shared by every case. It
-        // cannot be assigned to a case, so it is dropped.
-        consultees: Object.fromEntries(
-          Object.entries({ ...initialState.consultees, ...parsed.consultees }).flatMap(([caseId, rows]) =>
-            Array.isArray(rows) ? [[caseId, (rows as Partial<ConsulteeRow>[])
-              .filter(row => typeof row.id === 'string' && typeof row.organisation === 'string')
-              .map(row => ({
-                id: row.id as string,
-                organisation: row.organisation as string,
-                consultationType: typeof row.consultationType === 'string' ? row.consultationType : '',
-                notes: typeof row.notes === 'string' ? row.notes : '',
-              }))]] : []),
+        cases: Object.fromEntries(
+          Object.entries((parsed.cases ?? {}) as Record<string, Partial<CaseState>>)
+            .map(([caseId, saved]) => [caseId, normaliseCase(caseId, saved)]),
         ),
-        prepForConsulteeMeta: {
-          ...initialState.prepForConsulteeMeta,
-          ...parsed.prepForConsulteeMeta,
+        consultees: {
+          ...initialState.consultees,
+          ...keyedArrays<ConsulteeRow>(parsed.consultees, row =>
+            typeof row.id === 'string' && typeof row.organisation === 'string'),
         },
-        publicRegisterForm: {
-          ...initialState.publicRegisterForm,
-          ...parsed.publicRegisterForm,
-        },
-        siteNoticeForm,
-        publicNoticeEvidenceMeta,
-        publicNoticeEvidenceResubmissionMeta,
-        recentOrganisations: Array.isArray(parsed.recentOrganisations)
-          ? parsed.recentOrganisations
-          : initialState.recentOrganisations,
-        saved: {
-          ...initialState.saved,
-          ...parsed.saved,
-        },
-        // State saved before transfers were keyed by case held a single `transfer`
-        // object carrying its own caseId; lift it into the map. Anything older than
-        // the two-step split has no `requestedBy` and would render an empty card,
-        // so it is dropped rather than migrated.
-        transfers: parsed.transfers ?? migrateSingleTransfer(parsed.transfer),
-        rejections: parsed.rejections ?? initialState.rejections,
-        consultations: Object.fromEntries(
-          Object.entries(parsed.consultations ?? {}).flatMap(([caseId, value]) => {
-            if (!value || typeof value !== 'object') return [];
-            const record = value as Record<string, unknown>;
-            return [[caseId, {
-              confirmed: record.confirmed === true,
-              saved: record.saved !== false,
-              ...(typeof record.startedAt === 'string' && record.startedAt
-                ? { startedAt: record.startedAt } : {}),
-            }]];
-          }),
-        ),
-        consultationExtensions: Object.fromEntries(
-          Object.entries(parsed.consultationExtensions ?? {}).flatMap(([caseId, rows]) =>
-            Array.isArray(rows) ? [[caseId, (rows as Partial<ConsultationExtension>[])
-              .filter(row => typeof row.id === 'string' && typeof row.dateExtended === 'string'
-                && typeof row.days === 'number' && typeof row.reason === 'string') as ConsultationExtension[]]] : []),
-        ),
-        tasksOnAllTabs: parsed.tasksOnAllTabs ?? initialState.tasksOnAllTabs,
+        recentOrganisations: Array.isArray(parsed.recentOrganisations) ? parsed.recentOrganisations : [],
+        transfers: parsed.transfers ?? {},
+        rejections: parsed.rejections ?? {},
+        consultations: parsed.consultations ?? {},
+        consultationExtensions: keyedArrays<ConsultationExtension>(parsed.consultationExtensions, row =>
+          typeof row.id === 'string' && typeof row.dateExtended === 'string'
+            && typeof row.days === 'number' && typeof row.reason === 'string'),
       };
     }
   } catch {
@@ -444,65 +345,45 @@ function loadState(): PersistedState {
   return initialState;
 }
 
-interface TaskContextValue {
-  tasks: TaskState;
-  siteCheckForm: SiteCheckForm;
-  wfdForm: WfdForm;
-  mppForm: MppForm;
+// Everything a case's screens need: that case's tasks and answers, the records
+// kept per case, and the actions. Task actions apply to this case only.
+export interface CaseTasks extends CaseState {
   consultees: ConsulteesState;
-  prepForConsulteeMeta: PrepForConsulteeMeta;
-  publicRegisterForm: PublicRegisterForm;
-  siteNoticeForm: SiteNoticeForm;
-  publicNoticeEvidenceMeta: PublicNoticeEvidenceMeta;
-  publicNoticeEvidenceResubmissionMeta: PublicNoticeEvidenceResubmissionMeta;
   recentOrganisations: string[];
-  saved: SavedState;
   transfers: TransfersState;
   rejections: RejectionsState;
   consultations: ConsultationsState;
   consultationExtensions: ConsultationExtensionsState;
-  tasksOnAllTabs: boolean;
   addConsultationExtension: (caseId: string, extension: ConsultationExtension) => void;
   requestTransferToMcms: (caseId: string, reasons: string, requestedBy: string) => void;
   completeTransferToMcms: (caseId: string, mcmsReference: string, completedBy: string) => void;
-  rejectApplication: (
-    caseId: string,
-    reasons: string[],
-    notes: string,
-    rejectedBy: string,
-  ) => void;
-  setTasksOnAllTabs: (value: boolean) => void;
+  rejectApplication: (caseId: string, reasons: string[], notes: string, rejectedBy: string) => void;
+  saveConsultee: (caseId: string, consultee: ConsulteeRow) => void;
+  removeConsultees: (caseId: string, ids: string[]) => void;
+  addRecentOrganisation: (name: string) => void;
+  setConsultationConfirmed: (caseId: string, confirmed: boolean) => void;
+  saveStartConsultation: (caseId: string) => void;
   setSiteCheckField: (field: keyof SiteCheckForm, value: string) => void;
   setWfdReview: (value: string) => void;
   setWfdInitialConsiderations: (value: string) => void;
   setMppField: (code: string, field: keyof MppAnswer, value: string) => void;
-  saveConsultee: (caseId: string, consultee: ConsulteeRow) => void;
-  removeConsultees: (caseId: string, ids: string[]) => void;
   setPrepForConsulteeCompleted: (completed: boolean) => void;
   setConsultationPeriod: (period: string) => void;
-  setPublicRegisterField: <K extends keyof PublicRegisterForm>(
-    field: K,
-    value: PublicRegisterForm[K],
-  ) => void;
+  setPublicRegisterField: <K extends keyof PublicRegisterForm>(field: K, value: PublicRegisterForm[K]) => void;
   setSiteNoticeField: (field: keyof SiteNoticeForm, value: string) => void;
-  setPublicNoticeEvidenceLocation: (
-    index: number,
-    review: PublicNoticeEvidenceLocationReview,
-  ) => void;
-  setPublicNoticeEvidenceResubmissionReview: (
-    index: number,
-    review: PublicNoticeEvidenceLocationReview,
-  ) => void;
-  addRecentOrganisation: (name: string) => void;
+  setPublicNoticeEvidenceLocation: (index: number, review: PublicNoticeEvidenceLocationReview) => void;
+  setPublicNoticeEvidenceResubmissionReview: (index: number, review: PublicNoticeEvidenceLocationReview) => void;
   markUnsaved: (task: keyof SavedState) => void;
   completeSiteCheck: () => void;
   completeWfd: () => void;
   savePrepForConsultee: () => void;
   savePublicRegister: () => void;
   saveSiteNotice: () => void;
-  setConsultationConfirmed: (caseId: string, confirmed: boolean) => void;
-  saveStartConsultation: (caseId: string) => void;
-  loadConsultationExample: () => void;
+}
+
+interface TaskContextValue {
+  state: PersistedState;
+  setState: Dispatch<SetStateAction<PersistedState>>;
   resetAll: () => void;
 }
 
@@ -510,38 +391,6 @@ const TaskContext = createContext<TaskContextValue | undefined>(undefined);
 
 export function TaskProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState<PersistedState>(loadState);
-
-  // Index-page shortcut. Assessment answers are shared in this prototype;
-  // only MLA 15's case-level decisions are cleared when replaying the example.
-  const loadConsultationExample = () => setState(prev => {
-    const caseId = 'MLA/2026/10015';
-    const consultations = { ...prev.consultations };
-    const transfers = { ...prev.transfers };
-    const rejections = { ...prev.rejections };
-    delete consultations[caseId];
-    delete transfers[caseId];
-    delete rejections[caseId];
-    return {
-      ...prev,
-      tasks: { ...prev.tasks, siteCheck: 'Done', wfdAssessment: 'Done',
-        marinePlanPolicies: 'Done', prepForConsultee: 'Done', publicRegister: 'Done', siteNotice: 'Done' },
-      saved: { ...prev.saved, siteCheck: true, wfdAssessment: true,
-        marinePlanPolicies: true, prepForConsultee: true, publicRegister: true, siteNotice: true },
-      siteCheckForm: { coordinatesOk: 'Yes', withinMile: 'Yes', notes: 'Site and coordinates checked for this example.' },
-      wfdForm: { review: 'Yes', initialConsiderations: 'WFD information reviewed. No further assessment required for this example.' },
-      mppForm: Object.fromEntries(policies.map(policy => [policy.code, {
-        outcome: 'Compliant', reason: `The proposal is consistent with ${policy.code} for this example.`,
-      }])),
-      consultees: { ...prev.consultees, [caseId]: [{ id: crypto.randomUUID(), organisation: 'Environment Agency (EA)',
-        consultationType: 'Request for advice', notes: 'Please provide advice on the proposed works.' }] },
-      prepForConsulteeMeta: { completed: true, consultationPeriod: '14 days' },
-      publicRegisterForm: { ...initialState.publicRegisterForm, completed: true, personalInfo: 'No',
-        commercialAgree: 'Agree - withhold all of it',
-        commercialRationale: 'Commercially sensitive information checked and redacted for this example.' },
-      siteNoticeForm: { needsNotice: NO_NOTICES, rationale: 'No public notice is required for this example.', summary: '', groups: '' },
-      consultations, transfers, rejections,
-    };
-  });
 
   useEffect(() => {
     try {
@@ -551,301 +400,9 @@ export function TaskProvider({ children }: PropsWithChildren) {
     }
   }, [state]);
 
-  const setConsultationConfirmed = (caseId: string, confirmed: boolean) =>
-    setState(prev => {
-      if (startConsultationStatus(caseId, prev) === 'Cannot start yet') return prev;
-      return { ...prev, consultations: { ...prev.consultations,
-        [caseId]: { ...prev.consultations[caseId], confirmed, saved: false },
-      } };
-    });
-
-  const saveStartConsultation = (caseId: string) =>
-    setState(prev => {
-      // Keep the form editable after consultation starts without reversing or
-      // repeating the case transition when the confirmation is edited.
-      const status = startConsultationStatus(caseId, prev);
-      if (status === 'Cannot start yet') return prev;
-      const form = prev.consultations[caseId];
-      const confirmed = form?.confirmed ?? status === 'Done';
-      return { ...prev, consultations: { ...prev.consultations,
-        [caseId]: { ...form, confirmed, saved: true,
-          ...(confirmed && status === 'To do' ? { startedAt: new Date().toISOString() } : {}),
-        },
-      } };
-    });
-
-  // Saving an extension adds the record; the case's closing date follows from it.
-  const addConsultationExtension = (caseId: string, extension: ConsultationExtension) =>
-    setState(prev => ({
-      ...prev,
-      consultationExtensions: {
-        ...prev.consultationExtensions,
-        [caseId]: [...(prev.consultationExtensions[caseId] ?? []), extension],
-      },
-    }));
-
-  const setTasksOnAllTabs = (value: boolean) =>
-    setState(prev => ({ ...prev, tasksOnAllTabs: value }));
-
-  // Step 1 (Case Officer): request the transfer, recording the reasons. Other
-  // cases' records are untouched.
-  const requestTransferToMcms = (caseId: string, reasons: string, requestedBy: string) =>
-    setState(prev => ({
-      ...prev,
-      transfers: {
-        ...prev.transfers,
-        [caseId]: { requestedBy, dateRequested: today(), reasons },
-      },
-    }));
-
-  // Step 2 (Business Support Team): record the reference MCMS gave the case, which
-  // completes the transfer. No-op unless this case has a pending request.
-  const completeTransferToMcms = (caseId: string, mcmsReference: string, completedBy: string) =>
-    setState(prev =>
-      prev.transfers[caseId]
-        ? {
-            ...prev,
-            transfers: {
-              ...prev.transfers,
-              [caseId]: {
-                ...prev.transfers[caseId],
-                completedBy,
-                dateTransferred: today(),
-                mcmsReference,
-              },
-            },
-          }
-        : prev,
-    );
-
-  // The Case Officer rejects the application, recording the reasons they picked
-  // and their notes. Other cases' records are untouched.
-  const rejectApplication = (
-    caseId: string,
-    reasons: string[],
-    notes: string,
-    rejectedBy: string,
-  ) =>
-    setState(prev => ({
-      ...prev,
-      rejections: {
-        ...prev.rejections,
-        [caseId]: { rejectedBy, dateRejected: today(), reasons, notes },
-      },
-    }));
-
-  const setSiteCheckField = (field: keyof SiteCheckForm, value: string) =>
-    setState(prev => ({ ...prev, siteCheckForm: { ...prev.siteCheckForm, [field]: value } }));
-
-  const setWfdReview = (value: string) =>
-    setState(prev => ({ ...prev, wfdForm: { ...prev.wfdForm, review: value } }));
-
-  const setWfdInitialConsiderations = (value: string) =>
-    setState(prev => ({
-      ...prev,
-      wfdForm: { ...prev.wfdForm, initialConsiderations: value },
-    }));
-
-  // Writes one field of one policy's assessment (live, like setSiteCheckField). A
-  // policy only counts as assessed once it has both an outcome and a reason — the
-  // two business-required fields on its form. Once every policy is assessed the
-  // whole MPP task rolls up to Done; otherwise it stays "To do" while it's being
-  // worked through.
-  const setMppField = (code: string, field: keyof MppAnswer, value: string) =>
-    setState(prev => {
-      const existing = prev.mppForm[code] ?? { outcome: '', reason: '' };
-      const mppForm = {
-        ...prev.mppForm,
-        [code]: { ...existing, [field]: value },
-      };
-      const allAssessed = allMppAssessmentsComplete(mppForm);
-      // Site check remains authoritative even if stale form data exists. Once it
-      // is complete, the MPP roll-up is derived from the 41 assessments.
-      const marinePlanPolicies =
-        prev.tasks.siteCheck !== 'Done'
-          ? 'Cannot start yet'
-          : allAssessed
-            ? 'Done'
-            : 'To do';
-      return {
-        ...prev,
-        mppForm,
-        tasks: { ...prev.tasks, marinePlanPolicies },
-      };
-    });
-
-  // Save and close on a Consultee record: adds it to the case's subgrid, or
-  // replaces the existing record with the same id.
-  const saveConsultee = (caseId: string, consultee: ConsulteeRow) =>
-    setState(prev => {
-      const rows = prev.consultees[caseId] ?? [];
-      const next = rows.some(row => row.id === consultee.id)
-        ? rows.map(row => (row.id === consultee.id ? consultee : row))
-        : [...rows, consultee];
-      return { ...prev, consultees: { ...prev.consultees, [caseId]: next } };
-    });
-
-  // The subgrid's Remove command, for the selected records.
-  const removeConsultees = (caseId: string, ids: string[]) =>
-    setState(prev => ({
-      ...prev,
-      consultees: {
-        ...prev.consultees,
-        [caseId]: (prev.consultees[caseId] ?? []).filter(row => !ids.includes(row.id)),
-      },
-    }));
-
-  const setPrepForConsulteeCompleted = (completed: boolean) =>
-    setState(prev => ({
-      ...prev,
-      prepForConsulteeMeta: { ...prev.prepForConsulteeMeta, completed },
-    }));
-
-  const setConsultationPeriod = (consultationPeriod: string) =>
-    setState(prev => ({
-      ...prev,
-      prepForConsulteeMeta: { ...prev.prepForConsulteeMeta, consultationPeriod },
-    }));
-
-  const setPublicRegisterField = <K extends keyof PublicRegisterForm>(
-    field: K,
-    value: PublicRegisterForm[K],
-  ) =>
-    setState(prev => ({
-      ...prev,
-      publicRegisterForm: { ...prev.publicRegisterForm, [field]: value },
-    }));
-
-  const setSiteNoticeField = (field: keyof SiteNoticeForm, value: string) =>
-    setState(prev => ({ ...prev, siteNoticeForm: { ...prev.siteNoticeForm, [field]: value } }));
-
-  // Saving a location's form writes that related record's review. The task
-  // status follows: once every location has a complete review it is Done, or
-  // Awaiting applicant if any is not accepted. In D365 this is a flow on the location save.
-  const setPublicNoticeEvidenceLocation = (
-    index: number,
-    review: PublicNoticeEvidenceLocationReview,
-  ) =>
-    setState(prev => {
-      // Map over the current locations so entries for removed ones are dropped.
-      const locations = publicNoticeEvidenceLocations.map((_, locationIndex) =>
-        locationIndex === index
-          ? review
-          : prev.publicNoticeEvidenceMeta.locations[locationIndex] ?? { decision: '', rejectionComments: '' },
-      );
-      return {
-        ...prev,
-        tasks: { ...prev.tasks, publicNoticeEvidence: publicNoticeEvidenceStatus(locations, 'To do') },
-        publicNoticeEvidenceMeta: { ...prev.publicNoticeEvidenceMeta, locations },
-      };
-    });
-
-  // The same rule for 10013, judged on the new reviews of the resubmitted locations.
-  const setPublicNoticeEvidenceResubmissionReview = (
-    index: number,
-    review: PublicNoticeEvidenceLocationReview,
-  ) =>
-    setState(prev => {
-      const reviews = prev.publicNoticeEvidenceResubmissionMeta.reviews.map((current, reviewIndex) =>
-        reviewIndex === index ? review : current,
-      );
-      return {
-        ...prev,
-        tasks: {
-          ...prev.tasks,
-          publicNoticeEvidenceResubmission: publicNoticeEvidenceStatus(
-            resubmittedLocationIndexes.map(resubmitted => reviews[resubmitted]),
-            'Resubmitted - to review',
-          ),
-        },
-        publicNoticeEvidenceResubmissionMeta: { ...prev.publicNoticeEvidenceResubmissionMeta, reviews },
-      };
-    });
-
-  // Records a lookup pick as the most-recent organisation: moves it to the front,
-  // de-duplicates, and keeps at most the last 5 (matches D365's "Recent records").
-  const RECENT_ORG_LIMIT = 5;
-  const addRecentOrganisation = (name: string) =>
-    setState(prev => {
-      const trimmed = name.trim();
-      if (!trimmed) return prev;
-      const next = [trimmed, ...prev.recentOrganisations.filter(o => o !== trimmed)].slice(
-        0,
-        RECENT_ORG_LIMIT,
-      );
-      return { ...prev, recentOrganisations: next };
-    });
-
-  // An edit marks the task as having unsaved changes (shown in the task header).
-  const markUnsaved = (task: keyof SavedState) =>
-    setState(prev => ({ ...prev, saved: { ...prev.saved, [task]: false } }));
-
-  // Saving the Site check completes it, marks it saved, and unlocks downstream tasks.
-  const completeSiteCheck = () =>
-    setState(prev => ({
-      ...prev,
-      tasks: {
-        ...prev.tasks,
-        siteCheck: 'Done',
-        wfdAssessment: 'To do',
-        marinePlanPolicies: allMppAssessmentsComplete(prev.mppForm) ? 'Done' : 'To do',
-        prepForConsultee: 'To do',
-        publicRegister: 'To do',
-        siteNotice: 'To do',
-      },
-      saved: { ...prev.saved, siteCheck: true },
-    }));
-
-  // Saving the WFD assessment completes it and marks it saved; nothing depends on it.
-  const completeWfd = () =>
-    setState(prev => ({
-      ...prev,
-      tasks: { ...prev.tasks, wfdAssessment: 'Done' },
-      saved: { ...prev.saved, wfdAssessment: true },
-    }));
-
-  // Save Prep for consultee: ticked "completed" → Done; otherwise → In progress.
-  // Status "In progress" is OOB on Task activities; the checkbox is a Two Options field.
-  const savePrepForConsultee = () =>
-    setState(prev => ({
-      ...prev,
-      tasks: {
-        ...prev.tasks,
-        prepForConsultee: prev.prepForConsulteeMeta.completed ? 'Done' : 'In progress',
-      },
-      saved: { ...prev.saved, prepForConsultee: true },
-    }));
-
-  // Save Public register: same two-options rule as Prep for consultee — ticked
-  // "completed" → Done, otherwise → In progress. Nothing depends on this task.
-  const savePublicRegister = () =>
-    setState(prev => ({
-      ...prev,
-      tasks: {
-        ...prev.tasks,
-        publicRegister: prev.publicRegisterForm.completed ? 'Done' : 'In progress',
-      },
-      saved: { ...prev.saved, publicRegister: true },
-    }));
-
-  // A required Site notice hands work to the applicant, so the officer's save
-  // leaves the task open as Awaiting applicant. If no notice is required there
-  // is no applicant evidence to wait for and the task is Done immediately.
-  const saveSiteNotice = () =>
-    setState(prev => ({
-      ...prev,
-      tasks: {
-        ...prev.tasks,
-        siteNotice:
-          prev.siteNoticeForm.needsNotice === SITE_NOTICE ? 'Awaiting applicant' : 'Done',
-      },
-      saved: { ...prev.saved, siteNotice: true },
-    }));
-
   // Clears every prototype key on this origin (live + all frozen iterations),
-  // not just this app's own key, so the index page's "Clear saved data" wipes
-  // everything as it did before iterations got their own scoped keys. The
-  // useEffect below then re-seeds only the current app's key with initialState.
+  // so the index page's "Clear saved data" wipes everything. The useEffect
+  // above then re-seeds only the current app's key.
   const resetAll = () => {
     try {
       for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -859,62 +416,249 @@ export function TaskProvider({ children }: PropsWithChildren) {
   };
 
   return (
-    <TaskContext.Provider
-      value={{
-        tasks: state.tasks,
-        siteCheckForm: state.siteCheckForm,
-        wfdForm: state.wfdForm,
-        mppForm: state.mppForm,
-        consultees: state.consultees,
-        prepForConsulteeMeta: state.prepForConsulteeMeta,
-        publicRegisterForm: state.publicRegisterForm,
-        siteNoticeForm: state.siteNoticeForm,
-        publicNoticeEvidenceMeta: state.publicNoticeEvidenceMeta,
-        publicNoticeEvidenceResubmissionMeta: state.publicNoticeEvidenceResubmissionMeta,
-        recentOrganisations: state.recentOrganisations,
-        saved: state.saved,
-        transfers: state.transfers,
-        rejections: state.rejections,
-        consultations: state.consultations,
-        consultationExtensions: state.consultationExtensions,
-        addConsultationExtension,
-        setConsultationConfirmed,
-        saveStartConsultation,
-        loadConsultationExample,
-        tasksOnAllTabs: state.tasksOnAllTabs,
-        requestTransferToMcms,
-        completeTransferToMcms,
-        rejectApplication,
-        setTasksOnAllTabs,
-        setSiteCheckField,
-        setWfdReview,
-        setWfdInitialConsiderations,
-        setMppField,
-        saveConsultee,
-        removeConsultees,
-        setPrepForConsulteeCompleted,
-        setConsultationPeriod,
-        setPublicRegisterField,
-        setSiteNoticeField,
-        setPublicNoticeEvidenceLocation,
-        setPublicNoticeEvidenceResubmissionReview,
-        addRecentOrganisation,
-        markUnsaved,
-        completeSiteCheck,
-        completeWfd,
-        savePrepForConsultee,
-        savePublicRegister,
-        saveSiteNotice,
-        resetAll,
-      }}
-    >
+    <TaskContext.Provider value={{ state, setState, resetAll }}>
       {children}
     </TaskContext.Provider>
   );
 }
 
-export function useTasks() {
+function useTaskContext() {
   const ctx = useContext(TaskContext);
   if (!ctx) throw new Error('useTasks must be used within a TaskProvider');
   return ctx;
+}
+
+/** The records kept per case across every case: for the case list and index page. */
+export function useTasks() {
+  const { state, resetAll } = useTaskContext();
+  return {
+    transfers: state.transfers,
+    rejections: state.rejections,
+    consultations: state.consultations,
+    resetAll,
+  };
+}
+
+/** One case's tasks and answers, and the actions that change them. */
+export function useCaseTasks(caseId: string): CaseTasks {
+  const { state, setState } = useTaskContext();
+  const current = state.cases[caseId] ?? seedCase(caseId);
+
+  // Apply a change to this case only.
+  const update = (change: (c: CaseState) => Partial<CaseState>) =>
+    setState(prev => {
+      const c = prev.cases[caseId] ?? seedCase(caseId);
+      return { ...prev, cases: { ...prev.cases, [caseId]: { ...c, ...change(c) } } };
+    });
+
+  return {
+    ...current,
+    consultees: state.consultees,
+    recentOrganisations: state.recentOrganisations,
+    transfers: state.transfers,
+    rejections: state.rejections,
+    consultations: state.consultations,
+    consultationExtensions: state.consultationExtensions,
+
+    // Saving an extension adds the record; the case's closing date follows from it.
+    addConsultationExtension: (id, extension) =>
+      setState(prev => ({
+        ...prev,
+        consultationExtensions: {
+          ...prev.consultationExtensions,
+          [id]: [...(prev.consultationExtensions[id] ?? []), extension],
+        },
+      })),
+
+    // Step 1 (Case Officer): request the transfer, recording the reasons.
+    requestTransferToMcms: (id, reasons, requestedBy) =>
+      setState(prev => ({
+        ...prev,
+        transfers: { ...prev.transfers, [id]: { requestedBy, dateRequested: today(), reasons } },
+      })),
+
+    // Step 2 (Business Support Team): record the reference MCMS gave the case.
+    // No-op unless this case has a pending request.
+    completeTransferToMcms: (id, mcmsReference, completedBy) =>
+      setState(prev =>
+        prev.transfers[id]
+          ? {
+              ...prev,
+              transfers: {
+                ...prev.transfers,
+                [id]: { ...prev.transfers[id], completedBy, dateTransferred: today(), mcmsReference },
+              },
+            }
+          : prev,
+      ),
+
+    rejectApplication: (id, reasons, notes, rejectedBy) =>
+      setState(prev => ({
+        ...prev,
+        rejections: { ...prev.rejections, [id]: { rejectedBy, dateRejected: today(), reasons, notes } },
+      })),
+
+    // Save and close on a Consultee record: adds it to the case's subgrid, or
+    // replaces the existing record with the same id.
+    saveConsultee: (id, consultee) =>
+      setState(prev => {
+        const rows = prev.consultees[id] ?? [];
+        const next = rows.some(row => row.id === consultee.id)
+          ? rows.map(row => (row.id === consultee.id ? consultee : row))
+          : [...rows, consultee];
+        return { ...prev, consultees: { ...prev.consultees, [id]: next } };
+      }),
+
+    removeConsultees: (id, ids) =>
+      setState(prev => ({
+        ...prev,
+        consultees: { ...prev.consultees, [id]: (prev.consultees[id] ?? []).filter(row => !ids.includes(row.id)) },
+      })),
+
+    // Records a lookup pick as the most-recent organisation: moves it to the
+    // front, de-duplicates, and keeps the last 5 (D365's "Recent records").
+    addRecentOrganisation: name =>
+      setState(prev => {
+        const trimmed = name.trim();
+        if (!trimmed) return prev;
+        const next = [trimmed, ...prev.recentOrganisations.filter(o => o !== trimmed)].slice(0, 5);
+        return { ...prev, recentOrganisations: next };
+      }),
+
+    setConsultationConfirmed: (id, confirmed) =>
+      setState(prev => {
+        const readiness = { ...prev, ...(prev.cases[id] ?? seedCase(id)) };
+        if (startConsultationStatus(id, readiness) === 'Cannot start yet') return prev;
+        return { ...prev, consultations: { ...prev.consultations,
+          [id]: { ...prev.consultations[id], confirmed, saved: false },
+        } };
+      }),
+
+    // Keep the form editable after consultation starts without reversing or
+    // repeating the case transition when the confirmation is edited.
+    saveStartConsultation: id =>
+      setState(prev => {
+        const readiness = { ...prev, ...(prev.cases[id] ?? seedCase(id)) };
+        const status = startConsultationStatus(id, readiness);
+        if (status === 'Cannot start yet') return prev;
+        const form = prev.consultations[id];
+        const confirmed = form?.confirmed ?? status === 'Done';
+        return { ...prev, consultations: { ...prev.consultations,
+          [id]: { ...form, confirmed, saved: true,
+            ...(confirmed && status === 'To do' ? { startedAt: new Date().toISOString() } : {}),
+          },
+        } };
+      }),
+
+    setSiteCheckField: (field, value) =>
+      update(c => ({ siteCheckForm: { ...c.siteCheckForm, [field]: value } })),
+
+    setWfdReview: value => update(c => ({ wfdForm: { ...c.wfdForm, review: value } })),
+
+    setWfdInitialConsiderations: value =>
+      update(c => ({ wfdForm: { ...c.wfdForm, initialConsiderations: value } })),
+
+    // Writes one field of one policy's assessment. Once every policy on the
+    // case is assessed the MPP task rolls up to Done.
+    setMppField: (code, field, value) =>
+      update(c => {
+        const existing = c.mppForm[code] ?? { outcome: '', reason: '' };
+        const mppForm = { ...c.mppForm, [code]: { ...existing, [field]: value } };
+        return {
+          mppForm,
+          tasks: { ...c.tasks, marinePlanPolicies: mppRollUp(caseId, c.tasks.siteCheck, mppForm) },
+        };
+      }),
+
+    setPrepForConsulteeCompleted: completed =>
+      update(c => ({ prepForConsulteeMeta: { ...c.prepForConsulteeMeta, completed } })),
+
+    setConsultationPeriod: consultationPeriod =>
+      update(c => ({ prepForConsulteeMeta: { ...c.prepForConsulteeMeta, consultationPeriod } })),
+
+    setPublicRegisterField: (field, value) =>
+      update(c => ({ publicRegisterForm: { ...c.publicRegisterForm, [field]: value } })),
+
+    setSiteNoticeField: (field, value) =>
+      update(c => ({ siteNoticeForm: { ...c.siteNoticeForm, [field]: value } })),
+
+    // Saving a location's form writes that related record's review. The task
+    // status follows: Done once every location has a complete review, or
+    // Awaiting applicant if any is not accepted. In D365 a flow on the save.
+    setPublicNoticeEvidenceLocation: (index, review) =>
+      update(c => {
+        const locations = Array.from({ length: EVIDENCE_LOCATION_COUNT }, (_, i) =>
+          i === index ? review : c.publicNoticeEvidenceMeta.locations[i] ?? { decision: '', rejectionComments: '' });
+        return {
+          tasks: { ...c.tasks, publicNoticeEvidence: publicNoticeEvidenceStatus(locations, 'To do') },
+          publicNoticeEvidenceMeta: { locations },
+        };
+      }),
+
+    // The same rule for 10013, judged on the new reviews of the resubmitted locations.
+    setPublicNoticeEvidenceResubmissionReview: (index, review) =>
+      update(c => {
+        const reviews = c.publicNoticeEvidenceResubmissionMeta.reviews.map((current, i) =>
+          i === index ? review : current);
+        return {
+          tasks: {
+            ...c.tasks,
+            publicNoticeEvidenceResubmission: publicNoticeEvidenceStatus(
+              resubmittedLocationIndexes.map(i => reviews[i]),
+              'Resubmitted - to review',
+            ),
+          },
+          publicNoticeEvidenceResubmissionMeta: { reviews },
+        };
+      }),
+
+    // An edit marks the task as having unsaved changes (shown in the task header).
+    markUnsaved: task => update(c => ({ saved: { ...c.saved, [task]: false } })),
+
+    // Saving the Site check completes it and unlocks the tasks that wait for it.
+    completeSiteCheck: () =>
+      update(c => ({
+        tasks: {
+          ...c.tasks,
+          siteCheck: 'Done',
+          wfdAssessment: c.tasks.wfdAssessment === 'Cannot start yet' ? 'To do' : c.tasks.wfdAssessment,
+          marinePlanPolicies: mppRollUp(caseId, 'Done', c.mppForm),
+          prepForConsultee: c.tasks.prepForConsultee === 'Cannot start yet' ? 'To do' : c.tasks.prepForConsultee,
+          publicRegister: c.tasks.publicRegister === 'Cannot start yet' ? 'To do' : c.tasks.publicRegister,
+          siteNotice: c.tasks.siteNotice === 'Cannot start yet' ? 'To do' : c.tasks.siteNotice,
+        },
+        saved: { ...c.saved, siteCheck: true },
+      })),
+
+    completeWfd: () =>
+      update(c => ({
+        tasks: { ...c.tasks, wfdAssessment: 'Done' },
+        saved: { ...c.saved, wfdAssessment: true },
+      })),
+
+    // Ticked "completed" → Done; otherwise → In progress.
+    savePrepForConsultee: () =>
+      update(c => ({
+        tasks: { ...c.tasks, prepForConsultee: c.prepForConsulteeMeta.completed ? 'Done' : 'In progress' },
+        saved: { ...c.saved, prepForConsultee: true },
+      })),
+
+    // Same two-options rule as Prepare for consultation.
+    savePublicRegister: () =>
+      update(c => ({
+        tasks: { ...c.tasks, publicRegister: c.publicRegisterForm.completed ? 'Done' : 'In progress' },
+        saved: { ...c.saved, publicRegister: true },
+      })),
+
+    // A required Site notice hands work to the applicant, so the task stays open
+    // as Awaiting applicant. With no notice it is Done straight away.
+    saveSiteNotice: () =>
+      update(c => ({
+        tasks: {
+          ...c.tasks,
+          siteNotice: c.siteNoticeForm.needsNotice === SITE_NOTICE ? 'Awaiting applicant' : 'Done',
+        },
+        saved: { ...c.saved, siteNotice: true },
+      })),
+  };
 }

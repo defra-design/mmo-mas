@@ -9,14 +9,14 @@ import {
 } from '@fluentui/react-components';
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
-import { useTasks } from '../../context/TaskContext';
+import { useCaseTasks } from '../../context/TaskContext';
 import {
   hasResubmittedPublicNoticeEvidence, hasSubmittedPublicNoticeEvidence, locationStatus,
 } from '../../utils/publicNoticeEvidence';
 import PublicNoticeEvidenceGrid from './PublicNoticeEvidenceGrid';
 import type { LocationRow } from './PublicNoticeEvidenceGrid';
 import {
-  publicNoticeEvidenceLocations, resubmittedLocationIndexes, resubmittedPublicNoticeEvidenceReviews,
+  evidenceLocationsFor, resubmittedLocationIndexes, resubmittedPublicNoticeEvidenceReviews,
 } from './publicNoticeEvidenceLocations';
 
 const useStyles = makeStyles({
@@ -52,7 +52,7 @@ type Props = { caseId: string };
 export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const context = useTasks();
+  const context = useCaseTasks(caseId);
   const available = hasSubmittedPublicNoticeEvidence(caseId);
   const isResubmission = hasResubmittedPublicNoticeEvidence(caseId);
   const caseUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}`;
@@ -65,7 +65,7 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
       ? context.publicNoticeEvidenceResubmissionMeta.reviews[index]
       : resubmittedPublicNoticeEvidenceReviews[index];
   };
-  const rows: LocationRow[] = publicNoticeEvidenceLocations.map((location, index) => {
+  const rows: LocationRow[] = evidenceLocationsFor(caseId).map((location, index) => {
     const review = reviewFor(index);
     return {
       index,
@@ -99,8 +99,8 @@ export default function ReviewPublicNoticeEvidenceTask({ caseId }: Props) {
         <Card className={styles.sectionCard}>
           <Text block className={styles.sectionHeading}>Site notice evidence</Text>
           <div className={styles.intro}>
-            <Body1 block>The applicant submitted evidence on 20 August 2026.</Body1>
-            {isResubmission && <Body1 block>The applicant resubmitted evidence on 27 August 2026.</Body1>}
+            <Body1 block>The applicant submitted evidence on {isResubmission ? '11 November 2026' : '18 November 2026'}.</Body1>
+            {isResubmission && <Body1 block>The applicant resubmitted evidence on 24 November 2026.</Body1>}
           </div>
           <PublicNoticeEvidenceGrid
             caseId={caseId}

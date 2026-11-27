@@ -27,14 +27,8 @@ import {
   notificationMessage,
   requiredMessage,
 } from '../../utils/validationMessages';
-import { useTasks } from '../../context/TaskContext';
-import {
-  hasSubmittedPublicNoticeEvidence,
-  taskStatusForCase,
-} from '../../utils/publicNoticeEvidence';
-import { SITE_NOTICE } from '../../utils/publicNoticeRequirement';
-import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
-import { HAYLING_PROPOSED_WORKS, HAYLING_SITE_NOTICE } from '../../utils/consultationCaseAnswers';
+import { useCaseTasks } from '../../context/TaskContext';
+import { applicantAnswersFor } from '../../utils/applicantAnswers';
 
 const useStyles = makeStyles({
   page: {
@@ -52,27 +46,6 @@ const useStyles = makeStyles({
   },
 });
 
-// The applicant's submitted answer, which arrives with the application from CDP.
-const PROPOSED_WORKS =
-  'We propose to extend the existing sea defence at Dawlish by 120 metres eastwards along ' +
-  'the foreshore. The works consist of installing pre-cast concrete armour units and rock ' +
-  'revetment along the toe of the existing structure, with associated scour protection at ' +
-  'the eastern end. Materials will be delivered by road and placed using a tracked excavator ' +
-  'working from the beach during low tide. The works are expected to take 14 weeks.';
-
-const COMPLETED_PROPOSED_WORKS =
-  'South Devon Coast SUP Ltd is a small paddleboarding hire and instruction business ' +
-  'operating in Teignmouth. We are applying for a marine licence to install a small ' +
-  'floating pontoon within Teignmouth Harbour to provide a safe and accessible launching ' +
-  'and landing platform for paddleboards and kayaks hired to our customers. The pontoon ' +
-  'would be attached to the existing harbour wall using H-frame wall guides and a short ' +
-  'hinged gangway, and the works will take place entirely within the outer harbour area.';
-
-const COMPLETED_SITE_NOTICE_SUMMARY =
-  'South Devon Coast SUP Ltd has applied to install a small floating pontoon within ' +
-  'Teignmouth Harbour to provide a safe and accessible launching and landing platform ' +
-  'for paddleboards and kayaks.';
-
 interface SiteNoticeTaskProps {
   caseId: string;
 }
@@ -82,31 +55,15 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
   const navigate = useNavigate();
   const {
     tasks,
-    siteNoticeForm,
+    siteNoticeForm: form,
     saved,
     setSiteNoticeField,
     markUnsaved,
     saveSiteNotice,
-  } = useTasks();
-  const completedFixture = hasSubmittedPublicNoticeEvidence(caseId);
-  const form = caseId === CONSULTATION_CASE_ID
-    ? {
-        needsNotice: siteNoticeForm.needsNotice || HAYLING_SITE_NOTICE.needsNotice,
-        rationale: siteNoticeForm.rationale,
-        summary: siteNoticeForm.summary || HAYLING_SITE_NOTICE.summary,
-        groups: siteNoticeForm.groups || HAYLING_SITE_NOTICE.groups,
-      }
-    : completedFixture
-    ? {
-        needsNotice: siteNoticeForm.needsNotice || SITE_NOTICE,
-        rationale: siteNoticeForm.rationale,
-        summary: siteNoticeForm.summary || COMPLETED_SITE_NOTICE_SUMMARY,
-        groups: siteNoticeForm.groups || 'Both',
-      }
-    : siteNoticeForm;
+  } = useCaseTasks(caseId);
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
-  const locked = taskStatusForCase(caseId, 'siteNotice', tasks.siteNotice) === 'Cannot start yet';
+  const locked = tasks.siteNotice === 'Cannot start yet';
   // Fields left empty on a failed save. Each clears as soon as it's given a value.
   const [errors, setErrors] = useState<SiteNoticeField[]>([]);
 
@@ -149,7 +106,7 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
         <Title3>
           Public notice
           <span className={styles.savedLabel}>
-            - {completedFixture || saved.siteNotice ? 'Saved' : 'Unsaved'}
+            - {saved.siteNotice ? 'Saved' : 'Unsaved'}
           </span>
         </Title3>
         <div><Body1>Task</Body1></div>
@@ -157,9 +114,7 @@ export default function SiteNoticeTask({ caseId }: SiteNoticeTaskProps) {
 
       <SiteNoticeAssessment
         form={form}
-        proposedWorks={caseId === CONSULTATION_CASE_ID
-          ? HAYLING_PROPOSED_WORKS
-          : completedFixture ? COMPLETED_PROPOSED_WORKS : PROPOSED_WORKS}
+        proposedWorks={applicantAnswersFor(caseId).proposedWorks}
         locked={locked}
         errorFor={errorFor}
         onChange={update}

@@ -3,7 +3,7 @@ import { Body1, Card, Checkbox, Text, Title3, makeStyles, tokens } from '@fluent
 import FormCommandBar from '../FormCommandBar';
 import FormNotification from '../FormNotification';
 import TaskRow from './TaskRow';
-import { useTasks } from '../../context/TaskContext';
+import { useCaseTasks } from '../../context/TaskContext';
 import { startConsultationStatus } from '../../utils/startConsultation';
 
 const useStyles = makeStyles({
@@ -19,7 +19,7 @@ const useStyles = makeStyles({
 export default function StartConsultationTask({ caseId }: { caseId: string }) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const context = useTasks();
+  const context = useCaseTasks(caseId);
   const status = startConsultationStatus(caseId, context);
   const locked = status === 'Cannot start yet';
   const completed = status === 'Done';

@@ -184,19 +184,22 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
 
 ### Tasks panel & task forms
 
-- **What you see:** a "Tasks" panel listing caseworker tasks (Site check, Water Framework
-  Directive, Marine plan policies, Prepare for consultation, Public register) each with a
-  status. **Every task opens, whatever its status.**
+- **What you see:** every case opens on its **Tasks** tab: a grid of caseworker tasks, each
+  with a status, and the Marine plan policies grid underneath. The tasks are, in order: Site
+  check, Water Framework Directive, Withholding information, Public notice, Review public
+  notice evidence (once the applicant's photos arrive), Prepare for consultation, Start
+  consultation, and Extend consultee closing date (once in consultation). **Every task opens,
+  whatever its status.**
 - **Gating is read-only, not locked out.** A task still waiting on Site check reads "Cannot
   start yet", but it still opens — as a **read-only** form: a grey padlock notification
   reading *"You cannot start this task until you complete the Site check task."*, a padlock
   against each field, read-only controls, and **no Save** on the command bar. This mirrors
   real D365, which cannot lock a caseworker out of a record it lets them see. Completing Site
   check flips the gated tasks to "To do" and the forms become editable.
-- **Task list panel:** `src/components/TaskList.tsx` (and `src/components/TasksSubgrid.tsx`,
-  the grid-style variant). In **Version 2** it sits inline on the Case summary tab; in
-  **Version 1** (`tasksOnAllTabs = true`) it persists in a rail on every tab. The version is
-  chosen by the Version 1 / 2 links on the landing page.
+- **Task grid:** `src/components/TasksSubgrid.tsx`, with
+  `src/components/MarinePlanPoliciesSubgrid.tsx` under it. Iteration 2 tried other layouts
+  (a task panel on every tab, policy lists in other places); those are in the frozen
+  Iteration 2 only.
 - **Task forms:**
   - `src/components/tasks/SiteCheckTask.tsx`
   - `src/components/tasks/WfdTask.tsx`
@@ -209,7 +212,7 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
     read-only padlock D365 draws against a field.
 - **Task data & status:** **not** in any JSON file. Task statuses and the caseworker's saved
   answers live in runtime state — see below. The applicant answers shown read-only inside a
-  task form are currently hard-coded in the form component.
+  task form come from `src/utils/applicantAnswers.ts`, per application.
 
 ### Prepare for consultation task (the consultees list)
 
@@ -323,17 +326,20 @@ the `else` branch in `TaskHint` and the `disclosure` props; keep the open versio
 This is the one place caseworker input and task progress are stored. There is **no** backend
 and these are **not** written back to the JSON files.
 
-- A single `TaskProvider` (wrapped around the app in `App.tsx`) holds: each task's **status**,
-  each task's saved **form answers**, dirty/"Unsaved" flags, and the `tasksOnAllTabs` UI flag.
-- Components read and write it only through the **`useTasks()`** hook — never touch
-  `localStorage` directly from a component.
-- The whole state object is mirrored to `localStorage` under the key
-  **`mas-review-assess-state`** on every change, and re-hydrated on load — so a caseworker can
-  refresh or leave and come back and still see their work.
-- **Saving a task** (e.g. `completeSiteCheck()`) sets that task's status to `Done` and unlocks
-  downstream tasks (Site check unlocks WFD and Marine plan policies).
-- **Reset:** "Clear saved data" on the landing page calls `resetAll()`, which restores
-  `initialState` and clears the persisted copy.
+- A single `TaskProvider` (wrapped around the app in `App.tsx`) holds **each case's own**
+  task statuses, saved **form answers** and dirty/"Unsaved" flags. Cases are independent:
+  work on one never changes another.
+- Where each case starts (its stage and the answers already saved) is set in
+  `src/context/caseSeeds.ts`. Which application each case holds is in `src/utils/cases.ts`.
+- Case screens read and write it through **`useCaseTasks(caseId)`**; the case list and
+  landing page use **`useTasks()`**. Never touch `localStorage` directly from a component.
+- The state is mirrored to `localStorage` under **`mas-review-assess-state:v3`** on every
+  change, and re-hydrated on load — so a caseworker can refresh or leave and come back and
+  still see their work.
+- **Saving a task** (e.g. `completeSiteCheck()`) sets that task's status on that case and
+  unlocks the tasks that wait for it.
+- **Reset:** "Clear saved data" on the landing page calls `resetAll()`, which puts every case
+  back to its seed.
 
 > Separately, the list view persists only its **last-used sort** under `localStorage` keys
 > like `mas-list-sort:Marine licence cases` (in `MarineLicenceListView.tsx`).
@@ -419,7 +425,7 @@ src/
     MarineCaseSummary.tsx       ← case header + tabs; wires CDP iframe tabs
     CdpFrame.tsx                ← the <iframe> wrapper for CDP pages
     FormCommandBar.tsx          ← Back / Open / Save / Reject command bar
-    TaskList.tsx                ← the Tasks panel
+    TasksSubgrid.tsx            ← the Tasks grid on each case's Tasks tab
     tasks/
       SiteCheckTask.tsx         ← Site check task form
       WfdTask.tsx               ← Water Framework Directive task form

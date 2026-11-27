@@ -4,7 +4,6 @@ import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import Shell, { reviewAssessNavGroups } from './components/Shell';
 import IndexPage from './components/IndexPage';
-import ConsultationExample from './components/ConsultationExample';
 import ListView from './components/ListView';
 import CaseView from './components/CaseView';
 import MarineLicenceListView from './components/MarineLicenceListView';
@@ -12,7 +11,6 @@ import MarineCaseSummary from './components/MarineCaseSummary';
 import SiteCheckTask from './components/tasks/SiteCheckTask';
 import WfdTask from './components/tasks/WfdTask';
 import MarinePlanPolicyTask from './components/tasks/MarinePlanPolicyTask';
-import MarinePlanPoliciesTask from './components/tasks/MarinePlanPoliciesTask';
 import PrepForConsulteeTask from './components/tasks/PrepForConsulteeTask';
 import PrepForConsulteeConsultee from './components/tasks/PrepForConsulteeConsultee';
 import OrganisationForm from './components/OrganisationForm';
@@ -37,7 +35,6 @@ function App() {
             <Routes>
               {/* Clean index page without Shell */}
               <Route path="/" element={<IndexPage />} />
-              <Route path="/examples/start-consultation" element={<ConsultationExample />} />
 
               {/* Proof of concept journey */}
               <Route
@@ -176,14 +173,6 @@ function App() {
                 element={
                   <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
                     <MarineCaseWrapper render={(id) => <PublicNoticeEvidenceLocationTask key={id} caseId={id} />} />
-                  </Shell>
-                }
-              />
-              <Route
-                path="/receive-assess/cases/:caseId/tasks/marine-plan-policies"
-                element={
-                  <Shell navGroups={reviewAssessNavGroups} selectedKey="marine-licence-cases">
-                    <MarineCaseWrapper render={(id) => <MarinePlanPoliciesTask caseId={id} />} />
                   </Shell>
                 }
               />

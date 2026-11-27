@@ -103,28 +103,35 @@ Wrap fields in Fluent v9 `Field` for consistent label + validation layout.
 ## State persistence and reset
 
 Caseworker answers and task statuses persist across page refreshes so a user can leave and
-return to a case and still see their work. This is handled in a single React context, not in
-the mock-data JSON.
+return to a case and still see their work. **Every case is independent**: answering a task on
+one case never changes another. This is handled in a single React context, not in the
+mock-data JSON.
 
-- **Store:** `src/context/TaskContext.tsx` — a `TaskProvider` holds all mutable prototype
-  state (task statuses + each task's saved form answers) and exposes it via the `useTasks()`
-  hook. Components read and mutate state only through `useTasks()`; never write to
-  `localStorage` directly from a component.
-- **Persistence:** the whole state object is mirrored to `localStorage` under the key
-  `mas-review-assess-state` on every change, and re-hydrated on load (`loadState`). Hydration
-  merges over `initialState`, so adding a new field is backwards-compatible with older saved
-  state. Corrupt/unavailable storage falls back to `initialState` silently.
-- **Saving a task** calls its context action (e.g. `completeSiteCheck`), which sets that
-  task's status to `Done` and unlocks downstream tasks (e.g. sets `wfdAssessment` and
-  `marinePlanPolicies` from `Cannot start yet` to `To do`). Saved field values are written
-  via per-field setters (e.g. `setSiteCheckField`) so the task form re-populates on revisit.
-- **Reset:** the **Reset prototype data** link on the index page (`src/components/IndexPage.tsx`)
-  calls `resetAll()`, which sets state back to `initialState` (the `useEffect` then clears the
-  persisted copy). This is the supported way for a user to start the prototype afresh.
+- **Store:** `src/context/TaskContext.tsx`. A `TaskProvider` holds all mutable prototype
+  state. Each case's task statuses and answers are a `CaseState`, kept in `cases[caseId]`.
+  Records that are already per case (consultees, transfers, rejections, consultations,
+  extensions) are maps keyed by case reference.
+- **Hooks:** case screens use `useCaseTasks(caseId)`, which returns that case's `CaseState`
+  plus actions bound to the case (e.g. `completeSiteCheck()`, `setSiteCheckField()`). The
+  case list and index page use `useTasks()` for the cross-case maps and `resetAll`. Never
+  write to `localStorage` directly from a component.
+- **Seeds:** `src/context/caseSeeds.ts` sets where each case starts (its statuses and the
+  answers already saved). A case without a seed starts blank (Site check To do). Don't fake
+  a case's stage with `caseId ===` checks in components; seed it instead.
+- **Cases and applications:** `src/utils/cases.ts` maps each case to its application
+  (`teignmouth`, `hayling`, `brixham`, `exmouth`). The application decides its CDP pages,
+  marine plan policies (`policiesForCase`), public notice locations and the applicant answers
+  shown read-only on task forms (`src/utils/applicantAnswers.ts`).
+- **Persistence:** the state is mirrored to `localStorage` under `mas-review-assess-state:v3`
+  on every change and re-hydrated on load (`loadState`). Each saved case is merged over its
+  seed, so adding a field is backwards-compatible. Corrupt or unavailable storage falls back
+  to the seeds silently.
+- **Reset:** **Clear saved data** on the index page calls `resetAll()`, which puts every case
+  back to its seed (in the live app and every frozen iteration).
 
-> Note: `TaskState` / `SiteCheckForm` in `TaskContext.tsx` are currently hand-written per
-> task. When adding a task, extend these types and the `initialState` rather than introducing
-> a second persistence mechanism.
+> When adding a task, extend `TaskState`, `CaseState` and `blankCase()` in `caseSeeds.ts`,
+> and add its actions to `useCaseTasks`, rather than introducing a second persistence
+> mechanism.
 
 ---
 
@@ -178,15 +185,15 @@ and to avoid duplicating the data into D365 — it is rendered as **static HTML 
 When adding a new task type, complete these steps in order:
 
 1. Extend `TaskContext.tsx`: add the task's status (`To do`, `Done` or `Cannot start yet`)
-   to `TaskState`, add a form-answers
-   interface + field to `PersistedState`, seed both in `initialState`, and add the
-   save/setter actions (mirrors `completeSiteCheck` / `setSiteCheckField`). This is what
+   to `TaskState`, add a form-answers interface + field to `CaseState`, seed both in
+   `blankCase()` (and any case seeds that are past the task), and add the save/setter
+   actions to `useCaseTasks` (mirrors `completeSiteCheck` / `setSiteCheckField`). This is what
    makes the answers persist and survive refresh; do not store task state anywhere else.
 2. Create `src/components/tasks/<TaskName>Task.tsx` — the task form component. Read and
-   write its state only through `useTasks()`.
+   write its state only through `useCaseTasks(caseId)`.
 3. Add a route in `App.tsx`: `/receive-assess/cases/:caseId/tasks/<task-slug>`.
-4. Wire the task list item in `TaskList.tsx` to navigate to the route on click
-   (only when status is not `Cannot start yet`).
+4. Add the task's row to `TasksSubgrid.tsx`, in task order. Every row opens; a task that
+   can't start yet opens read-only.
 5. On save, call the task's context action to set status `Done`, unlock any downstream
    tasks, and navigate back to `/receive-assess/cases/:caseId`.
 

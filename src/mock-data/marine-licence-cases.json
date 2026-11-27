@@ -9,39 +9,30 @@
     "notification": ""
   },
   {
-    "reference": "MLA/2026/10002",
-    "project": "Exmouth Marina pontoon replacement",
-    "caseOfficer": "Sam Evans",
-    "status": "Assessment in progress",
-    "timeAtStatus": "8 days",
-    "caseAge": "1",
-    "notification": ""
-  },
-  {
-    "reference": "MLA/2026/10012",
-    "project": "Installation of safety ladders at Brixham Fish Quay",
-    "caseOfficer": "Sam Evans",
-    "status": "Assessment in progress",
-    "timeAtStatus": "8 days",
-    "caseAge": "1",
+    "reference": "MLA/2026/10006",
+    "project": "Hayling Island groyne repairs",
+    "caseOfficer": "James Okafor",
+    "status": "Consultation",
+    "timeAtStatus": "20 days",
+    "caseAge": "34",
     "notification": ""
   },
   {
     "reference": "MLA/2026/10013",
-    "project": "Salcombe Harbour navigation beacon installation",
+    "project": "Installation of safety ladders at Brixham Fish Quay",
     "caseOfficer": "Sam Evans",
-    "status": "Consultation",
-    "timeAtStatus": "8 days",
-    "caseAge": "1",
+    "status": "Assessment in progress",
+    "timeAtStatus": "29 days",
+    "caseAge": "29",
     "notification": ""
   },
   {
     "reference": "MLA/2026/10014",
-    "project": "Installation of floating pontoon, Teignmouth Harbour, Devon",
-    "caseOfficer": "Sam Evans",
-    "status": "Consultation",
-    "timeAtStatus": "8 days",
-    "caseAge": "1",
+    "project": "Exmouth Marina pontoon replacement",
+    "caseOfficer": "Rachel Patel",
+    "status": "Assessment in progress",
+    "timeAtStatus": "22 days",
+    "caseAge": "22",
     "notification": ""
   },
   {
@@ -51,42 +42,6 @@
     "status": "Assessment in progress",
     "timeAtStatus": "8 days",
     "caseAge": "1",
-    "notification": ""
-  },
-  {
-    "reference": "MLA/2026/10003",
-    "project": "Installation of a navigation buoy, Poole Harbour",
-    "caseOfficer": "Rachel Patel",
-    "status": "Assessment in progress",
-    "timeAtStatus": "2 days",
-    "caseAge": "2",
-    "notification": "Message received"
-  },
-  {
-    "reference": "MLA/2026/10004",
-    "project": "Torquay breakwater repair",
-    "caseOfficer": "Gary Whitfield",
-    "status": "Awaiting applicant",
-    "timeAtStatus": "14 days",
-    "caseAge": "16",
-    "notification": ""
-  },
-  {
-    "reference": "MLA/2026/10005",
-    "project": "Plymouth Sound cable laying",
-    "caseOfficer": "",
-    "status": "Awaiting allocation",
-    "timeAtStatus": "1 day",
-    "caseAge": "1",
-    "notification": ""
-  },
-  {
-    "reference": "MLA/2026/10006",
-    "project": "Hayling Island groyne repairs",
-    "caseOfficer": "James Okafor",
-    "status": "Consultation",
-    "timeAtStatus": "20 days",
-    "caseAge": "34",
     "notification": ""
   }
 ]

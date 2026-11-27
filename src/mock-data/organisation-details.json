@@ -448,6 +448,20 @@
     "createdOn": "19/06/2025 14:18"
   },
   {
+    "id": "exe-estuary-marinas-ltd",
+    "name": "Exe Estuary Marinas Ltd",
+    "phone": "01632 960871",
+    "type": "Limited Company (LTD)",
+    "buildingNumber": "",
+    "buildingName": "Marina Office",
+    "street": "Pier Head",
+    "town": "Exmouth",
+    "county": "Devon",
+    "postcode": "EX8 1DU",
+    "country": "United Kingdom of Great Britain and Northern Ireland",
+    "createdOn": "04/11/2026 09:12"
+  },
+  {
     "id": "exeter-city-council",
     "name": "Exeter City Council",
     "phone": "01632 960225",

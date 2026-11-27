@@ -25,12 +25,9 @@ import {
   notificationMessage,
   requiredMessage,
 } from '../../utils/validationMessages';
-import { useTasks } from '../../context/TaskContext';
+import { useCaseTasks } from '../../context/TaskContext';
 import type { WfdForm } from '../../context/TaskContext';
-import { taskStatusForCase } from '../../utils/publicNoticeEvidence';
-import { asset } from '../../utils/asset';
-import { CONSULTATION_CASE_ID } from '../../utils/consultationCase';
-import { HAYLING_WFD } from '../../utils/consultationCaseAnswers';
+import { applicantAnswersFor } from '../../utils/applicantAnswers';
 
 const useStyles = makeStyles({
   page: {
@@ -109,11 +106,6 @@ const useStyles = makeStyles({
 
 const reviewOptions = ['Yes', 'No'];
 
-const ASSESSMENT_DOCUMENT: { fileName: string; href: string } | undefined = {
-  fileName: 'WFD-Exmouth-2026.docx',
-  href: asset('documents/WFD-Exmouth-2026.docx'),
-};
-
 // D365 display names used in the inline and form-level validation messages.
 const FIELD_NAMES: Record<keyof WfdForm, string> = {
   initialConsiderations: 'Record your considerations',
@@ -129,28 +121,19 @@ export default function WfdTask({ caseId }: WfdTaskProps) {
   const navigate = useNavigate();
   const {
     tasks,
-    wfdForm: sharedWfdForm,
+    wfdForm,
     saved,
     setWfdReview,
     setWfdInitialConsiderations,
     markUnsaved,
     completeWfd,
-  } = useTasks();
-  // MLA/2026/10006 shows its own answers while the shared ones are empty.
-  const wfdForm = caseId === CONSULTATION_CASE_ID
-    ? {
-        review: sharedWfdForm.review || HAYLING_WFD.review,
-        initialConsiderations: sharedWfdForm.initialConsiderations || HAYLING_WFD.initialConsiderations,
-      }
-    : sharedWfdForm;
-  // Hayling's assessment, from the GOV.UK prototype (a dead link, as there).
-  const assessmentDocument = caseId === CONSULTATION_CASE_ID
-    ? { fileName: 'hayling-groynes-wfd-assessment.pdf', href: '#' }
-    : ASSESSMENT_DOCUMENT;
+  } = useCaseTasks(caseId);
+  // The applicant's own WFD assessment, uploaded with the application.
+  const assessmentDocument = applicantAnswersFor(caseId).wfdDocument;
   // Gated behind Site check. The record still opens — D365 cannot lock a
   // caseworker out — but it opens read-only: padlocked fields, no Save command.
   const locked =
-    taskStatusForCase(caseId, 'wfdAssessment', tasks.wfdAssessment) === 'Cannot start yet';
+    tasks.wfdAssessment === 'Cannot start yet';
   // Set on a failed save, cleared as soon as the field is given a value.
   const [errors, setErrors] = useState<(keyof WfdForm)[]>([]);
 

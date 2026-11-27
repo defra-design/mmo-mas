@@ -14,7 +14,7 @@ import TaskRow from './TaskRow';
 import TaskValue from './TaskValue';
 import TaskHint from './TaskHint';
 import ExtensionsGrid from './ExtensionsGrid';
-import { useTasks } from '../../context/TaskContext';
+import { useCaseTasks } from '../../context/TaskContext';
 import {
   CONSULTATION_PERIOD_DAYS, CONSULTATION_STARTED, ORIGINAL_CLOSING_DATE, currentClosingDate,
   isoDate, showDate, withNewClosingDates,
@@ -40,7 +40,7 @@ type Props = { caseId: string };
 export default function ExtendClosingDateTask({ caseId }: Props) {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { consultationExtensions } = useTasks();
+  const { consultationExtensions } = useCaseTasks(caseId);
   const extensions = consultationExtensions[caseId] ?? [];
   const extended = extensions.length > 0;
   const closingDate = currentClosingDate(extensions);

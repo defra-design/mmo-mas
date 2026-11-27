@@ -1,0 +1,172 @@
+{
+  "planArea": "South West Marine Plan",
+  "categories": [
+    {
+      "name": "Cross-cutting",
+      "policies": [
+        {
+          "code": "SW-CC-1",
+          "topic": "Climate change",
+          "label": "South West Climate change 1 (SW-CC-1)",
+          "policyInfo": "Proposals that conserve, restore or enhance habitats that provide flood defence or carbon sequestration will be supported. Proposals that may have significant adverse impacts on habitats that provide a flood defence or carbon sequestration ecosystem service must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant d) compensate for significant adverse impacts that cannot be mitigated.",
+          "consideration": [
+            "The ladders are fixed to the face of an existing quay wall inside the harbour. There are no saltmarsh, seagrass or other habitats that provide flood defence or carbon storage at the quay, so none will be affected."
+          ]
+        },
+        {
+          "code": "SW-CC-3",
+          "topic": "Climate change",
+          "label": "South West Climate change 3 (SW-CC-3)",
+          "policyInfo": "Proposals in the south west marine plan areas, and adjacent marine plan areas, that are likely to have significant adverse impacts on coastal change, or on climate change adaptation measures inside and outside of the proposed project areas, should only be supported if they can demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant.",
+          "consideration": [
+            "The ladders sit flat against the quay wall and stand out from it by less than 300 millimetres. They will not change how waves, tides or sediment move in the harbour, and they do not affect the breakwater or any other coastal defence."
+          ]
+        },
+        {
+          "code": "SW-CO-1",
+          "topic": "Co-existence",
+          "label": "South West Co-existence 1 (SW-CO-1)",
+          "policyInfo": "Proposals that optimise the use of space and incorporate opportunities for co-existence and co­ operation with existing activities will be supported. Proposals that may have significant adverse impacts on, or displace, existing activities must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant. If it is not possible to mitigate significant adverse impacts, proposals must state the case for proceeding.",
+          "consideration": [
+            "The ladders take up no extra space in the harbour. They go where the old ladders were removed, or next to existing berths. We will fit one ladder at a time and agree each day's working area with the fish quay users so that boats can still land their catch."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Economic",
+      "policies": [
+        {
+          "code": "SW-INF-1",
+          "topic": "Infrastructure",
+          "label": "South West Infrastructure 1 (SW-INF-1)",
+          "policyInfo": "Proposals for appropriate marine infrastructure which facilitates land-based activities, or land-based infrastructure which facilitates marine activities (including the diversification or regeneration of sustainable marine industries), should be supported.",
+          "consideration": [
+            "The fish quay is the main landing place for one of the biggest fishing fleets in England. Safe ladders at every working berth help crews get on and off their boats at all states of the tide, and keep the quay fit for use."
+          ]
+        },
+        {
+          "code": "SW-PS-1",
+          "topic": "Ports, harbours and shipping",
+          "label": "South West Ports, harbours and shipping 1 (SW-PS-1)",
+          "policyInfo": "In line with the National Policy Statement for Ports, sustainable port and harbour development should be supported. Only proposals demonstrating compatibility with current port and harbour activities will be supported.",
+          "consideration": [
+            "The works support the existing use of the harbour. No berths will be closed for longer than a single tide, and the harbour office will tell users in advance through a notice to mariners."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Environmental",
+      "policies": [
+        {
+          "code": "SW-BIO-1",
+          "topic": "Biodiversity",
+          "label": "South West Biodiversity 1 (SW-BIO-1)",
+          "policyInfo": "Proposals that enhance the distribution of priority habitats and priority species will be supported. Proposals that may have significant adverse impacts on the distribution of priority habitats and priority species must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant d) compensate for significant adverse impacts that cannot be mitigated.",
+          "consideration": [
+            "The quay wall is a man-made structure with a thin cover of seaweed and barnacles. No priority habitats or species are known on this part of the wall. Only the small areas around each fixing will be cleared."
+          ]
+        },
+        {
+          "code": "SW-DIST-1",
+          "topic": "Disturbance",
+          "label": "South West Disturbance 1 (SW-DIST-1)",
+          "policyInfo": "Proposals that may have significant adverse impacts on highly mobile species through disturbance or displacement must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant.",
+          "consideration": [
+            "The works are small, quiet and short. Grey seals are sometimes seen in the outer harbour, but the work area is inside the working fish quay, where boats and machinery are already busy every day. We do not expect any extra disturbance."
+          ]
+        },
+        {
+          "code": "SW-MPA-1",
+          "topic": "Marine protected areas",
+          "label": "South West Marine protected areas 1 (SW-MPA-1)",
+          "policyInfo": "Proposals that support the objectives of marine protected areas and the ecological coherence of the marine protected area network will be supported. Proposals that may have adverse impacts on the objectives of marine protected areas must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate adverse impacts - adverse impacts, with due regard given to statutory advice on an ecologically coherent network.",
+          "consideration": [
+            "Brixham Harbour is close to the Lyme Bay and Torbay Special Area of Conservation and the Torbay Marine Conservation Zone. The works are inside the harbour, on an existing wall, and will not reach either site. See our Habitats Regulations Assessment screening."
+          ]
+        },
+        {
+          "code": "SW-UWN-2",
+          "topic": "Underwater noise",
+          "label": "South West Underwater noise 2 (SW-UWN-2)",
+          "policyInfo": "Proposals that result in the generation of impulsive or non-impulsive noise must demonstrate that they will, in order of preference: a) avoid b) minimise",
+          "consideration": [
+            "Holes for the fixings will be drilled into the wall above the water line at low tide, using hand held electric drills. No piling is needed and no noise will be made underwater."
+          ]
+        },
+        {
+          "code": "SW-WQ-1",
+          "topic": "Water quality",
+          "label": "South West Water quality 1 (SW-WQ-1)",
+          "policyInfo": "Proposals that protect, enhance and restore water quality will be supported.",
+          "consideration": [
+            "Drilling dust will be collected with a vacuum attachment. Resin will be mixed on the quay, away from the edge, and any spills cleaned up with the spill kit kept at the work site. The ladders are marine grade 316 stainless steel and are not painted or treated."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Social",
+      "policies": [
+        {
+          "code": "SW-ACC-1",
+          "topic": "Access",
+          "label": "South West Access 1 (SW-ACC-1)",
+          "policyInfo": "Proposals demonstrating appropriate enhanced and inclusive public access to and within the marine area, including the provision of services for tourism and recreation activities, will be supported. Proposals that may have significant adverse impacts on public access should demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant.",
+          "consideration": [
+            "The new ladders will improve safe access between the water and the quay for fishing crews, and give anyone who falls into the harbour a way to climb out. The public area of the quay will stay open during the works."
+          ]
+        },
+        {
+          "code": "SW-FISH-2",
+          "topic": "Fisheries",
+          "label": "South West Fisheries 2 (SW-FISH-2)",
+          "policyInfo": "Proposals that enhance access for fishing activities should be supported. Proposals that may have significant adverse impacts on access for fishing activities must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant. If it is not possible to mitigate significant adverse impacts, proposals should state the case for proceeding.",
+          "consideration": [
+            "The works are being done for the fishing fleet. We have agreed the ladder positions with the fish quay users and will work around landing times so that no boat is kept from landing its catch."
+          ]
+        },
+        {
+          "code": "SW-HER-1",
+          "topic": "Heritage assets",
+          "label": "South West Heritage assets 1 (SW-HER-1)",
+          "policyInfo": "Proposals that demonstrate they will conserve and enhance the significance of heritage assets will be supported. Where proposals may cause harm to the significance of heritage assets, proponents must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - any harm to the significance of heritage assets. If it is not possible to mitigate, then public benefits for proceeding with the proposal must outweigh the harm to the significance of heritage assets.",
+          "consideration": [
+            "The fish quay is inside the Brixham Conservation Area, but the quay wall itself is not listed. The ladders are a simple modern design like the ones already on the quay, and they can be removed later without damage to the wall."
+          ]
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "filename": "brixham-fish-quay-ladders-hra-screening.pdf",
+      "type": "Habitats Regulations Assessment",
+      "policies": [
+        {
+          "code": "SW-MPA-1",
+          "location": "Section 3, pages 4 to 7"
+        },
+        {
+          "code": "SW-DIST-1",
+          "location": "Section 4, page 8"
+        }
+      ]
+    },
+    {
+      "filename": "brixham-fish-quay-ladders-method-statement.pdf",
+      "type": "Technical or Engineering Report",
+      "policies": [
+        {
+          "code": "SW-UWN-2",
+          "location": "Section 2"
+        },
+        {
+          "code": "SW-WQ-1",
+          "location": "Section 5"
+        }
+      ]
+    }
+  ]
+}
