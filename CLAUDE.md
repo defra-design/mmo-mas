@@ -119,7 +119,7 @@ mock-data JSON.
   answers already saved). A case without a seed starts blank (Site check To do). Don't fake
   a case's stage with `caseId ===` checks in components; seed it instead.
 - **Cases and applications:** `src/utils/cases.ts` maps each case to its application
-  (`teignmouth`, `hayling`, `brixham`, `exmouth`). The application decides its CDP pages,
+  (`teignmouth`, `hayling`, `brixham`, `exmouth`, `dart`). The application decides its CDP pages,
   marine plan policies (`policiesForCase`), public notice locations and the applicant answers
   shown read-only on task forms (`src/utils/applicantAnswers.ts`).
 - **Persistence:** the state is mirrored to `localStorage` under `mas-review-assess-state:v3`

@@ -1,5 +1,9 @@
 // src/utils/consultationCase.ts
-// MLA/2026/10006, Hayling Island groyne repairs: the live case in consultation.
+// A case's consultation dates. Any case can be moved into consultation with the
+// Start consultation task: its consultation starts that day, with the consultee
+// period chosen on Prepare for consultation.
+//
+// MLA/2026/10006, Hayling Island groyne repairs, starts in consultation.
 // Its dates are worked out from today, so it is always mid-consultation when
 // demoed: the consultation started 11 days ago with the 14-day consultee
 // period, so the closing date is 3 days away. The application was submitted
@@ -8,14 +12,15 @@
 // passed and extended scenarios.) The Extend consultee closing date task adds
 // extensions that move the closing date on; in D365 a Power Automate flow
 // updates the case's closing date when an extension is saved.
-import type { ConsultationExtension } from '../context/TaskContext';
+import type { ConsultationExtension, ConsultationExtensionsState, PrepForConsulteeMeta } from '../context/TaskContext';
+import type { ConsultationsState } from './startConsultation';
+import { CONSULTATION_CASE_ID } from './cases';
 
-export { CONSULTATION_CASE_ID } from './cases';
+export { CONSULTATION_CASE_ID };
 export const CONSULTATION_PERIOD_DAYS = 14;
 const TODAY = isoDate(new Date());
 export const CASE_SUBMITTED = addDays(TODAY, -34);
 export const CONSULTATION_STARTED = addDays(TODAY, -11);
-export const ORIGINAL_CLOSING_DATE = addDays(CONSULTATION_STARTED, CONSULTATION_PERIOD_DAYS);
 // Extensions are in 7-day blocks (CIP14).
 export const EXTEND_BY_OPTIONS = ['7 days', '14 days', '21 days', '28 days'];
 
@@ -40,15 +45,45 @@ export function showDate(iso: string) {
   return `${d}/${m}/${y}`;
 }
 
+export interface Consultation {
+  started: string;
+  periodDays: number;
+  originalClosing: string;
+  extensions: ConsultationExtension[];
+  /** The closing date after every extension. */
+  closing: string;
+}
+
+/** A case's consultation, or undefined if it hasn't started. Dates are ISO. */
+export function consultationFor(
+  caseId: string,
+  state: {
+    consultations: ConsultationsState;
+    consultationExtensions: ConsultationExtensionsState;
+    prepForConsulteeMeta: PrepForConsulteeMeta;
+  },
+): Consultation | undefined {
+  const startedAt = state.consultations[caseId]?.startedAt;
+  const hayling = caseId === CONSULTATION_CASE_ID;
+  if (!hayling && !startedAt) return undefined;
+  const started = hayling ? CONSULTATION_STARTED : isoDate(new Date(startedAt!));
+  const periodDays = hayling
+    ? CONSULTATION_PERIOD_DAYS
+    : parseInt(state.prepForConsulteeMeta.consultationPeriod, 10) || CONSULTATION_PERIOD_DAYS;
+  const originalClosing = addDays(started, periodDays);
+  const extensions = state.consultationExtensions[caseId] ?? [];
+  return { started, periodDays, originalClosing, extensions, closing: currentClosingDate(extensions, originalClosing) };
+}
+
 /** Each extension with the closing date it set, in the order they were made. */
-export function withNewClosingDates(extensions: ConsultationExtension[]) {
-  let closing = ORIGINAL_CLOSING_DATE;
+export function withNewClosingDates(extensions: ConsultationExtension[], originalClosing: string) {
+  let closing = originalClosing;
   return extensions.map(extension => {
     closing = addDays(closing, extension.days);
     return { ...extension, newClosingDate: closing };
   });
 }
 
-export function currentClosingDate(extensions: ConsultationExtension[]) {
-  return extensions.reduce((closing, extension) => addDays(closing, extension.days), ORIGINAL_CLOSING_DATE);
+export function currentClosingDate(extensions: ConsultationExtension[], originalClosing: string) {
+  return extensions.reduce((closing, extension) => addDays(closing, extension.days), originalClosing);
 }

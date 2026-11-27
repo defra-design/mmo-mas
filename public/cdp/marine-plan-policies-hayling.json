@@ -5,12 +5,39 @@
       "name": "Cross-cutting",
       "policies": [
         {
+          "code": "S-CC-1",
+          "topic": "Climate change",
+          "label": "South Climate change 1 (S-CC-1)",
+          "policyInfo": "Proposals must consider their contribution to greenhouse gas emissions arising from unintended consequences on other activities. Where such consequences are likely to result in increased greenhouse gas emissions, proposals should demonstrate that they will, in order of preference: a) avoid, b) minimise, c) mitigate unintended consequences on other activities.",
+          "consideration": [
+            "The works do not change how the beach or seafront is used, so they will not lead to more emissions from other activities. The old timber will be recycled rather than sent to landfill."
+          ]
+        },
+        {
+          "code": "S-CC-2",
+          "topic": "Climate change",
+          "label": "South Climate change 2 (S-CC-2)",
+          "policyInfo": "Proposals should demonstrate for the lifetime of the proposal that: 1) they are resilient to the effects of climate change 2) they will not have a significant adverse impact upon climate change adaptation measures elsewhere. In respect of 2) proposals should demonstrate that they will, in order of preference: a) avoid, b) minimise, c) mitigate the significant adverse impacts upon these climate change adaptation measures.",
+          "consideration": [
+            "Greenheart is a very durable hardwood and the new planks and posts are expected to last at least 25 years. Coastal Partners sized the rock at groyne 19 to allow for higher sea levels and bigger storms. Keeping the groynes in place supports the shoreline management plan policy to hold the line on this frontage."
+          ]
+        },
+        {
           "code": "S-CC-3",
           "topic": "Climate change",
           "label": "South Climate change 3 (S-CC-3)",
           "policyInfo": "Proposals in the south marine plan area and adjacent marine plan areas that are likely to have a significant adverse impact on coastal change should not be supported.",
           "consideration": [
             "The groynes have been in place since the 1950s and hold the beach that protects the seafront road and properties behind it. The works keep them at their current length and height, so the way shingle moves along the frontage will not change. The rock at the end of groyne 19 replaces beach that has been lost to scour and is not expected to affect the beaches further east."
+          ]
+        },
+        {
+          "code": "S-CC-4",
+          "topic": "Climate change",
+          "label": "South Climate change 4 (S-CC-4)",
+          "policyInfo": "Proposals that may have a significant adverse impact on habitats that provide a flood defence or carbon sequestration ecosystem service must demonstrate that they will, in order of preference: a) avoid, b) minimise, c) mitigate significant adverse impacts.",
+          "consideration": [
+            "There is no saltmarsh, seagrass or other habitat that provides flood defence or carbon storage on this part of the beach. The vegetated shingle at the top of the beach will be fenced off during the works."
           ]
         },
         {
@@ -37,12 +64,66 @@
           ]
         },
         {
+          "code": "S-AQ-2",
+          "topic": "Aquaculture",
+          "label": "South Aquaculture 2 (S-AQ-2)",
+          "policyInfo": "Proposals that enable the provision of infrastructure for sustainable fisheries and aquaculture and related industries will be supported.",
+          "consideration": [
+            "Not relevant. The works are repairs to coast protection groynes and do not provide or affect any infrastructure for fisheries or aquaculture."
+          ]
+        },
+        {
+          "code": "S-CAB-1",
+          "topic": "Cables",
+          "label": "South Cables 1 (S-CAB-1)",
+          "policyInfo": "Preference should be given to proposals for cable installation where the method of installation is burial. Where burial is not achievable, decisions should take account of protection measures for the cable that may be proposed by the applicant. Where burial or protection measures are not appropriate, proposals should state the case for proceeding without those measures.",
+          "consideration": [
+            "Not relevant. The works do not involve laying any cables."
+          ]
+        },
+        {
+          "code": "S-CAB-2",
+          "topic": "Cables",
+          "label": "South Cables 2 (S-CAB-2)",
+          "policyInfo": "Proposals that have a significant adverse impact on new and existing landfall sites for subsea cables (telecoms, power and interconnectors) should demonstrate that they will, in order of preference: a) avoid, b) minimise, c) mitigate significant adverse impacts, d) if it is not possible to mitigate significant adverse impacts, proposals should state the case for proceeding.",
+          "consideration": [
+            "There are no subsea cable landfalls on this part of the Hayling Island seafront, so the works will not affect any."
+          ]
+        },
+        {
+          "code": "S-DD-2",
+          "topic": "Dredging and disposal",
+          "label": "South Dredging and disposal 2 (S-DD-2)",
+          "policyInfo": "Proposals must identify, where possible, alternative opportunities to minimise the use of dredged waste disposal sites by pursuing re-use opportunities through matching of spoil to suitable sites.",
+          "consideration": [
+            "Not relevant. No dredging is needed and nothing will be disposed of at sea. Beach material dug out around the posts will be put back on the same tide."
+          ]
+        },
+        {
           "code": "S-INF-1",
           "topic": "Infrastructure",
           "label": "South Infrastructure 1 (S-INF-1)",
           "policyInfo": "Appropriate land-based infrastructure which facilitates marine activity (and vice versa) should be supported.",
           "consideration": [
             "The groynes protect the seafront road, the promenade and about 200 properties from erosion and flooding. Keeping them in good condition supports the seafront businesses and the coastal path."
+          ]
+        },
+        {
+          "code": "S-PS-1",
+          "topic": "Ports, harbours and shipping",
+          "label": "South Ports, harbours and shipping 1 (S-PS-1)",
+          "policyInfo": "Proposals that may have a significant adverse impact upon current activity and future opportunity for expansion of port and harbour activities should demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate significant adverse impacts d. if it is not possible to mitigate significant adverse impacts, proposals should state the case for proceeding.",
+          "consideration": [
+            "The works are not in a harbour authority area and are on the open seafront, away from the entrances to Chichester and Langstone Harbours. All plant and materials will come by road, so port and harbour activity will not be affected."
+          ]
+        },
+        {
+          "code": "S-REN-1",
+          "topic": "Renewables",
+          "label": "South Renewables 1 (S-REN-1)",
+          "policyInfo": "Proposals that support the development of supply chains associated with the deployment of renewable energy will be supported.",
+          "consideration": [
+            "Not relevant. The works do not involve renewable energy or its supply chains."
           ]
         }
       ]
@@ -60,12 +141,30 @@
           ]
         },
         {
+          "code": "S-BIO-2",
+          "topic": "Biodiversity",
+          "label": "South Biodiversity 2 (S-BIO-2)",
+          "policyInfo": "Proposals that incorporate features that enhance or facilitate natural habitat and species adaptation, migration and connectivity will be supported.",
+          "consideration": [
+            "The repairs are like for like, so there will be no change to how species move along the shore. The new timber and rock will be colonised by the same seaweeds and barnacles as the existing groynes."
+          ]
+        },
+        {
           "code": "S-BIO-3",
           "topic": "Biodiversity",
           "label": "South Biodiversity 3 (S-BIO-3)",
           "policyInfo": "Proposals that enhance coastal habitats where important in their own right and/or for ecosystem functioning and provision of goods and services will be supported. Proposals must take account of the space required for coastal habitats where important in their own right and/or for ecosystem functioning and provision of goods and services and demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate for net loss of coastal habitat.",
           "consideration": [
             "There will be no loss of coastal habitat. The rock at groyne 19 covers about 40 square metres of beach that is already scoured and has no vegetation. The vegetated shingle at the top of the beach will be fenced off during the works."
+          ]
+        },
+        {
+          "code": "S-BIO-4",
+          "topic": "Biodiversity",
+          "label": "South Biodiversity 4 (S-BIO-4)",
+          "policyInfo": "Proposals that enhance the distribution and net extent of priority habitats should be supported. Proposals must demonstrate that they will avoid reducing the distribution and net extent of priority habitats.",
+          "consideration": [
+            "The works will not reduce the extent of any priority habitat. The vegetated shingle at the top of the beach will be fenced off during the works, and plant will reach the beach along the existing seafront access road."
           ]
         },
         {
@@ -78,12 +177,48 @@
           ]
         },
         {
+          "code": "S-NIS-1",
+          "topic": "Invasive non-native species",
+          "label": "South Invasive non-native species 1 (S-NIS-1)",
+          "policyInfo": "Proposals must put in place appropriate measures to avoid or minimise significant adverse impacts on the marine area that would arise through the introduction and transport of non-indigenous species, particularly when: 1) moving equipment, boats or livestock (for example fish and shellfish) from one water body to another 2) introducing structures suitable for settlement of non-indigenous species, or the spread of invasive non-indigenous species known to exist in the area.",
+          "consideration": [
+            "The plant, timber and rock will all come by road, not by sea, so there is no risk of bringing in non-native species from another water body. Plant will be cleaned before it arrives on site. The new timber and rock replace structures of the same kind, so there is no new surface for non-native species to settle on."
+          ]
+        },
+        {
+          "code": "S-ML-1",
+          "topic": "Marine litter",
+          "label": "South Marine litter 1 (S-ML-1)",
+          "policyInfo": "Public authorities should ensure adequate provision for and removal of beach and marine litter on amenity beaches.",
+          "consideration": [
+            "Not relevant. This policy is for public authorities that manage amenity beaches. The works will not add to beach litter."
+          ]
+        },
+        {
+          "code": "S-ML-2",
+          "topic": "Marine litter",
+          "label": "South Marine litter 2 (S-ML-2)",
+          "policyInfo": "The introduction of litter as a result of proposals should be avoided or minimised where practicable and activities that help reduce marine litter will be supported.",
+          "consideration": [
+            "Old planks, posts, bolts and offcuts will be taken off the beach on the same tide and recycled. Nothing will be left on the beach between tides, and the working area will be checked for litter at the end of each shift."
+          ]
+        },
+        {
           "code": "S-MPA-1",
           "topic": "Marine protected areas",
           "label": "South Marine protected areas 1 (S-MPA-1)",
           "policyInfo": "Proposals that support the objectives of marine protected areas and the ecological coherence of the marine protected area network will be supported. Proposals that may have adverse impacts on the objectives of marine protected areas and the ecological coherence of the marine protected area network must demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate adverse impacts, with due regard given to statutory advice on ecologically coherent network.",
           "consideration": [
             "The site is next to the Chichester and Langstone Harbours SPA and Ramsar site and the Solent Maritime Special Area of Conservation. The works are small scale, like for like and timed to avoid the sensitive period for the protected bird species. See the Habitats Regulations Assessment screening."
+          ]
+        },
+        {
+          "code": "S-UWN-1",
+          "topic": "Underwater noise",
+          "label": "South Underwater noise 1 (S-UWN-1)",
+          "policyInfo": "Proposals generating impulsive sound, must contribute data to the UK Marine Noise Registry as per any currently agreed requirements. Public authorities must take account of any currently agreed targets under the UK Marine Strategy part one descriptor 11.",
+          "consideration": [
+            "Not relevant. The works will not generate impulsive sound. Posts will be driven with a vibrating head at low tide, when the work area is dry."
           ]
         },
         {
@@ -103,6 +238,15 @@
           "consideration": [
             "All plant will use biodegradable hydraulic oil and be refuelled off the beach. Spill kits will be kept on site. The greenheart timber is untreated, so nothing will leach into the water."
           ]
+        },
+        {
+          "code": "S-WQ-2",
+          "topic": "Water quality",
+          "label": "South Water quality 2 (S-WQ-2)",
+          "policyInfo": "Activities that can deliver an improvement to water environment, or enhance habitats and species which can be of benefit to water quality should be supported.",
+          "consideration": [
+            "The works are repairs to keep the groynes working and are not designed to improve water quality. They will not make it worse. See our answer to S-WQ-1 and the WFD assessment."
+          ]
         }
       ]
     },
@@ -119,12 +263,93 @@
           ]
         },
         {
+          "code": "S-ACC-2",
+          "topic": "Access",
+          "label": "South Access 2 (S-ACC-2)",
+          "policyInfo": "Proposals demonstrating enhanced public access to and within the marine area will be supported.",
+          "consideration": [
+            "The works keep public access as it is now. Holding the beach in place means the shingle beach, the promenade and the coastal path stay usable in the long term."
+          ]
+        },
+        {
+          "code": "S-EMP-1",
+          "topic": "Employment",
+          "label": "South Employment 1 (S-EMP-1)",
+          "policyInfo": "Proposals that develop skills related to marine activities, particularly in line with local skills strategies, will be supported.",
+          "consideration": [
+            "The works will be carried out by a local marine civils contractor, which takes on apprentices on its coastal schemes. One apprentice will work on the groyne repairs."
+          ]
+        },
+        {
+          "code": "S-EMP-2",
+          "topic": "Employment",
+          "label": "South Employment 2 (S-EMP-2)",
+          "policyInfo": "Proposals resulting in a net increase to marine related employment will be supported, particularly where they are in line with the skills available in and adjacent to the south marine plan areas.",
+          "consideration": [
+            "The works are short term and will be done by an existing contractor, so there will be no net increase in marine related jobs. Keeping the beach in place supports existing jobs on the seafront."
+          ]
+        },
+        {
+          "code": "S-FISH-1",
+          "topic": "Fisheries",
+          "label": "South Fisheries 1 (S-FISH-1)",
+          "policyInfo": "Proposals that support the diversification of a sustainable fishing industry and or enhance fishing industry resilience to the effects of climate change should be supported.",
+          "consideration": [
+            "Not relevant. The works do not involve the fishing industry."
+          ]
+        },
+        {
+          "code": "S-FISH-2",
+          "topic": "Fisheries",
+          "label": "South Fisheries 2 (S-FISH-2)",
+          "policyInfo": "Proposals that may have significant adverse impacts on access to, or within, sustainable fishing or aquaculture sites must demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate significant adverse impacts d. if it is not possible to mitigate the significant adverse impacts, proposals should state the case for proceeding.",
+          "consideration": [
+            "There are no commercial fishing or aquaculture sites at the groynes. Some sea angling takes place from the groyne ends, and anglers will only be kept out of the working area around the groyne being repaired."
+          ]
+        },
+        {
+          "code": "S-FISH-4",
+          "topic": "Fisheries",
+          "label": "South Fisheries 4 (S-FISH-4)",
+          "policyInfo": "Proposals that enhance essential fish habitat, including spawning, nursery and feeding grounds, and migratory routes should be supported. Proposals must demonstrate that they will, in order of preference: a) avoid, b) minimise, c) mitigate significant adverse impact on essential fish habitat, including, spawning, nursery, feeding grounds and migration routes.",
+          "consideration": [
+            "The works are on the beach that dries at low tide, and are done in the dry, so fish will not be disturbed. The rock at groyne 19 covers about 40 square metres of scoured beach, which is not a spawning or nursery ground."
+          ]
+        },
+        {
           "code": "S-HER-1",
           "topic": "Heritage assets",
           "label": "South Heritage assets 1 (S-HER-1)",
           "policyInfo": "Proposals that may compromise or harm elements contributing to the significance of heritage assets should demonstrate that they will, in order of preference: a. avoid b. minimise c. mitigate compromise or harm If it is not possible to mitigate, the public benefits for proceeding with the proposal must outweigh the compromise or harm to the heritage asset",
           "consideration": [
             "There are no recorded heritage assets on this part of the beach. If any finds are made while digging around the posts, work will stop and we will report them under the Crown Estate protocol for archaeological discoveries."
+          ]
+        },
+        {
+          "code": "S-SOC-1",
+          "topic": "Knowledge, understanding, appreciation and enjoyment",
+          "label": "South Knowledge, understanding, appreciation and enjoyment 1 (S-SOC-1)",
+          "policyInfo": "Proposals that enhance or promote social benefits will be supported. Proposals must demonstrate that they will, in order of preference: a) avoid, b) minimise, c) mitigate significant adverse impacts which result in the displacement of other existing or authorised (but yet to be implemented) activities that generate social benefits.",
+          "consideration": [
+            "The beach and promenade will stay open, so walking, swimming and watersports along the seafront can carry on. We have agreed the dates with the two seafront watersports clubs so their sessions are not displaced."
+          ]
+        },
+        {
+          "code": "S-SCP-1",
+          "topic": "Seascape and landscape",
+          "label": "South Seascape and landscape 1 (S-SCP-1)",
+          "policyInfo": "Proposals that may have a significant adverse impact upon the seascape of an area should only be supported if they demonstrate that they will, in order of preference: avoid minimise mitigate significant adverse impacts if it is not possible to mitigate significant adverse impacts, proposals should state the case for proceeding",
+          "consideration": [
+            "The groynes will look the same as they do now, as the new timber matches the existing sizes. The rock at groyne 19 will mostly be seen only at low tide and is similar to rock already used along the Hayling seafront."
+          ]
+        },
+        {
+          "code": "S-TR-1",
+          "topic": "Tourism and recreation",
+          "label": "South Tourism and recreation 1 (S-TR-1)",
+          "policyInfo": "Proposals supporting, promoting or facilitating tourism and recreation activities, particularly where this creates additional utilisation of related facilities beyond typical usage patterns, should be supported",
+          "consideration": [
+            "The works maintain the beach rather than creating new tourism or recreation facilities. Keeping the groynes in good condition means the beach will keep supporting seafront tourism. See our answer to S-TR-2."
           ]
         },
         {

@@ -12,6 +12,7 @@ import {
   EXMOUTH_WFD_DOCUMENT,
   EXMOUTH_WITHHOLD_REQUEST,
 } from './exmouthCaseAnswers';
+import { DART_PROPOSED_WORKS, DART_WFD_DOCUMENT, DART_WITHHOLD_REQUEST } from './dartCaseAnswers';
 
 export interface ApplicantAnswers {
   proposedWorks: string;
@@ -56,6 +57,11 @@ const answers: Record<Application, ApplicantAnswers> = {
     proposedWorks: EXMOUTH_PROPOSED_WORKS,
     wfdDocument: EXMOUTH_WFD_DOCUMENT,
     withholdRequest: EXMOUTH_WITHHOLD_REQUEST,
+  },
+  dart: {
+    proposedWorks: DART_PROPOSED_WORKS,
+    wfdDocument: DART_WFD_DOCUMENT,
+    withholdRequest: DART_WITHHOLD_REQUEST,
   },
 };
 

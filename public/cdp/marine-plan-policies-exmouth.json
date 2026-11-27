@@ -30,6 +30,24 @@
           "consideration": [
             "The new pontoons use the same footprint as the old ones. We will replace one pontoon arm at a time and move berth holders to visitor berths while their arm is being worked on, so the marina stays open."
           ]
+        },
+        {
+          "code": "SW-CBC-1",
+          "topic": "Cross-border co-operation",
+          "label": "South West Cross-border co-operation 1 (SW-CBC-1)",
+          "policyInfo": "Proposals must consider cross-border impacts throughout the lifetime of the proposed activity. Proposals that impact upon one or more marine plan areas or terrestrial environments must show evidence of the relevant public authorities (including other countries) being consulted and responses considered.",
+          "consideration": [
+            "The marina is in the Exe estuary, which is wholly within the South West marine plan area. The works will have no effect on any other marine plan area."
+          ]
+        },
+        {
+          "code": "SW-CE-1",
+          "topic": "Cumulative effects",
+          "label": "South West Cumulative effects 1 (SW-CE-1)",
+          "policyInfo": "Proposals which may have adverse cumulative effects with other existing, authorised, or reasonably foreseeable proposals must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse cumulative and/or in-combination effects so they are no longer significant.",
+          "consideration": [
+            "The marina's maintenance dredging is done under a separate licence and is not planned for the same winter as the pontoon works. We have checked with the harbour office and are not aware of any other piling or major works in the estuary at the same time."
+          ]
         }
       ]
     },
@@ -37,12 +55,57 @@
       "name": "Economic",
       "policies": [
         {
+          "code": "SW-AQ-2",
+          "topic": "Aquaculture",
+          "label": "South West Aquaculture 2 (SW-AQ-2)",
+          "policyInfo": "Proposals enabling the provision of infrastructure for sustainable aquaculture and related industries will be supported.",
+          "consideration": [
+            "The project does not involve aquaculture. There are no fish or shellfish farms in or next to the marina, and any mud stirred up by piling will stay inside the basin."
+          ]
+        },
+        {
+          "code": "SW-CAB-1",
+          "topic": "Cables",
+          "label": "South West Cables 1 (SW-CAB-1)",
+          "policyInfo": "Preference should be given to proposals for cable installation where the method of protection is burial. Where burial is not achievable, decisions should take account of protection measures for the cable that may be proposed by the applicant. Where burial or protection measures are not appropriate, proposals should state the case for proceeding without those measures.",
+          "consideration": [
+            "The project does not involve laying or maintaining any cables."
+          ]
+        },
+        {
+          "code": "SW-CAB-3",
+          "topic": "Cables",
+          "label": "South West Cables 3 (SW-CAB-3)",
+          "policyInfo": "Where seeking to locate close to existing subsea cables, proposals should demonstrate compatibility with ongoing function, maintenance and decommissioning activities relating to the cable.",
+          "consideration": [
+            "The new piles go in the same positions as the old ones. The electricity and water supplies to the pontoons run along the walkway, not on the seabed. We have checked utility records and there are no subsea cables in the marina basin."
+          ]
+        },
+        {
           "code": "SW-DD-1",
           "topic": "Dredging and disposal",
           "label": "South West Dredging and disposal 1 (SW-DD-1)",
           "policyInfo": "In areas of authorised dredging activity, including those subject to navigational dredging, proposals for other activities will not be supported unless they are compatible with the dredging activity.",
           "consideration": [
             "The marina basin is dredged every few years under a separate licence. The new piles are in the same positions as the old ones and are driven deep enough to allow for future dredging to the current depth."
+          ]
+        },
+        {
+          "code": "SW-DD-2",
+          "topic": "Dredging and disposal",
+          "label": "South West Dredging and disposal 2 (SW-DD-2)",
+          "policyInfo": "Proposals that cause significant adverse impacts on licensed disposal sites should not be supported. Proposals that may have significant adverse impacts on licensed disposal sites must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant. If it is not possible to mitigate the significant adverse impacts, proposals must state the case for proceeding.",
+          "consideration": [
+            "No material will be disposed of at sea, so there will be no effect on any licensed disposal site. The old pontoons and piles will be taken away by road."
+          ]
+        },
+        {
+          "code": "SW-DD-3",
+          "topic": "Dredging and disposal",
+          "label": "South West Dredging and disposal 3 (SW-DD-3)",
+          "policyInfo": "Proposals for the disposal of dredged material must demonstrate that they have been assessed against the waste hierarchy. Where there is the need to identify new dredge disposal sites, including alternative use sites, proposals should be supported if they conform to best practice and guidance.",
+          "consideration": [
+            "No dredged material will be produced by this project. The new piles are driven in, not drilled, so no seabed material is removed."
           ]
         },
         {
@@ -55,12 +118,39 @@
           ]
         },
         {
+          "code": "SW-INF-2",
+          "topic": "Infrastructure",
+          "label": "South West Infrastructure 2 (SW-INF-2)",
+          "policyInfo": "(1) Proposals for alternative development at existing safeguarded landing facilities will not be supported. (2) Proposals adjacent and opposite existing safeguarded landing facilities must demonstrate that they avoid significant adverse impacts on existing safeguarded landing facilities. (3) Proposals for alternative development at existing landing facilities (excluding safeguarded sites) should not be supported unless that facility is",
+          "consideration": [
+            "The project replaces existing marina pontoons in the same layout. It does not need any new land or water space."
+          ]
+        },
+        {
           "code": "SW-PS-1",
           "topic": "Ports, harbours and shipping",
           "label": "South West Ports, harbours and shipping 1 (SW-PS-1)",
           "policyInfo": "In line with the National Policy Statement for Ports, sustainable port and harbour development should be supported. Only proposals demonstrating compatibility with current port and harbour activities will be supported.",
           "consideration": [
             "The marina is outside the main Exe navigation channel. The piling barge will stay inside the basin and will not block the marina entrance. We will agree the timing with the harbour authority and issue a notice to mariners."
+          ]
+        },
+        {
+          "code": "SW-PS-4",
+          "topic": "Ports, harbours and shipping",
+          "label": "South West Ports, harbours and shipping 4 (SW-PS-4)",
+          "policyInfo": "Proposals promoting or facilitating sustainable coastal and/or short sea shipping as an alternative to road, rail or air transport will be supported where appropriate.",
+          "consideration": [
+            "The project has no effect on coastal or short sea shipping. The marina is a leisure marina outside the main Exe navigation channel, and the piling barge will stay inside the basin."
+          ]
+        },
+        {
+          "code": "SW-REN-1",
+          "topic": "Renewables",
+          "label": "South West Renewables 1 (SW-REN-1)",
+          "policyInfo": "Proposals that enable the provision of renewable energy technologies and associated supply chains, will be supported.",
+          "consideration": [
+            "The project does not involve renewable energy and will not affect any renewable energy sites."
           ]
         }
       ]
@@ -69,12 +159,48 @@
       "name": "Environmental",
       "policies": [
         {
+          "code": "SW-AIR-1",
+          "topic": "Air quality",
+          "label": "South West Air quality 1 (SW-AIR-1)",
+          "policyInfo": "Proposals must assess their direct and indirect impacts upon local air quality and emissions of greenhouse gases. Proposals that are likely to result in increased air pollution or increased emissions of greenhouse gases must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - air pollution and/or greenhouse gas emissions in line with current national and local air quality objectives and legal requirements.",
+          "consideration": [
+            "The piling barge, crane and lorries will cause some exhaust emissions while the works take place. These will be short term and small, and engines will be switched off when not in use."
+          ]
+        },
+        {
           "code": "SW-BIO-1",
           "topic": "Biodiversity",
           "label": "South West Biodiversity 1 (SW-BIO-1)",
           "policyInfo": "Proposals that enhance the distribution of priority habitats and priority species will be supported. Proposals that may have significant adverse impacts on the distribution of priority habitats and priority species must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant d) compensate for significant adverse impacts that cannot be mitigated.",
           "consideration": [
             "The basin floor is soft mud, which is common in the estuary. No priority habitats have been found inside the marina. Our ecology survey found no seagrass in or near the basin."
+          ]
+        },
+        {
+          "code": "SW-BIO-2",
+          "topic": "Biodiversity",
+          "label": "South West Biodiversity 2 (SW-BIO-2)",
+          "policyInfo": "Proposals that enhance or facilitate native species or habitat adaptation or connectivity, or native species migration, will be supported. Proposals that may cause significant adverse impacts on native species or habitat adaptation or connectivity, or native species migration, must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant d) compensate for significant adverse impacts that cannot be mitigated.",
+          "consideration": [
+            "The soft mud in the basin will be disturbed only around each pile, which is in the same position as the old one. The animals that live in the mud are common in the estuary and will recolonise quickly."
+          ]
+        },
+        {
+          "code": "SW-BIO-3",
+          "topic": "Biodiversity",
+          "label": "South West Biodiversity 3 (SW-BIO-3)",
+          "policyInfo": "Proposals that conserve, restore or enhance coastal habitats, where important in their own right and/or for ecosystem functioning and provision of ecosystem services, will be supported. Proposals must take account of the space required for coastal habitats, where important in their own right and/or for ecosystem functioning and provision of ecosystem services, and demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate d) compensate for - net habitat loss.",
+          "consideration": [
+            "No coastal habitat will be lost. The new pontoons and piles use the same footprint as the old ones, and the works do not reach the mudflats outside the marina."
+          ]
+        },
+        {
+          "code": "SW-HAB-1",
+          "topic": "Habitats",
+          "label": "South West Habitats 1 (SW-HAB-1)",
+          "policyInfo": "Proposals that incorporate measures to conserve deep sea habitats will be supported. Proposals that may have direct adverse impacts on deep sea habitats must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - direct adverse impacts on deep sea habitats.",
+          "consideration": [
+            "The project will not affect any deep sea habitats. The works are inside a shallow, enclosed marina basin."
           ]
         },
         {
@@ -96,12 +222,66 @@
           ]
         },
         {
+          "code": "SW-INNS-2",
+          "topic": "Invasive non-native species",
+          "label": "South West Invasive non-native species 2 (SW-INNS-2)",
+          "policyInfo": "Public authorities with functions to manage activities that could potentially introduce, transport or spread invasive non-native species should implement adequate biosecurity measures to avoid or minimise the risk of introducing, transporting or spreading invasive non-native species.",
+          "consideration": [
+            "The new pontoons use concrete floats, which are not painted with antifouling. We will check the pontoons for non-native species each year as part of our maintenance, and we will put up Check Clean Dry signs for berth holders and visitors."
+          ]
+        },
+        {
+          "code": "SW-ML-1",
+          "topic": "Marine litter",
+          "label": "South West Marine litter 1 (SW-ML-1)",
+          "policyInfo": "Public authorities must make adequate provision for the prevention, re-use, recycling and disposal of waste to reduce and prevent marine litter. Public authorities should aspire to undertake measures to remove marine litter within their jurisdiction.",
+          "consideration": [
+            "The old timber pontoons will be lifted out whole and taken away by road for recycling. Netting will be used under the walkways while they are being taken apart, so no timber, fixings or packaging fall into the water."
+          ]
+        },
+        {
+          "code": "SW-ML-2",
+          "topic": "Marine litter",
+          "label": "South West Marine litter 2 (SW-ML-2)",
+          "policyInfo": "Proposals that facilitate waste re-use or recycling to reduce or remove marine litter will be supported. Proposals that could potentially increase the amount of marine litter in the marine plan areas must include measures to, in order of preference: a) avoid b) minimise c) mitigate - waste entering the marine environment.",
+          "consideration": [
+            "The project will not add to marine litter. The marina already has bins and a recycling point for berth holders, and these will stay in place during the works."
+          ]
+        },
+        {
           "code": "SW-MPA-1",
           "topic": "Marine protected areas",
           "label": "South West Marine protected areas 1 (SW-MPA-1)",
           "policyInfo": "Proposals that support the objectives of marine protected areas and the ecological coherence of the marine protected area network will be supported. Proposals that may have adverse impacts on the objectives of marine protected areas must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate adverse impacts - adverse impacts, with due regard given to statutory advice on an ecologically coherent network.",
           "consideration": [
             "The marina is next to the Exe Estuary Special Protection Area and Ramsar site, and the Exe Estuary Site of Special Scientific Interest. Our Habitats Regulations Assessment screening concludes there is no likely significant effect, with the timing and noise measures we propose."
+          ]
+        },
+        {
+          "code": "SW-MPA-2",
+          "topic": "Marine protected areas",
+          "label": "South West Marine protected areas 2 (SW-MPA-2)",
+          "policyInfo": "Proposals that enhance a marine protected area’s ability to adapt to climate change, enhancing the resilience of the marine protected area network, will be supported. Proposals that may have adverse impacts on an individual marine protected area’s ability to adapt to the effects of climate change, and so reduce the resilience of the marine protected area network,",
+          "consideration": [
+            "The works will not affect how the Exe Estuary Special Protection Area or Ramsar site adapt to climate change. The new pontoons and piles use the same footprint as the old ones and do not take any intertidal habitat."
+          ]
+        },
+        {
+          "code": "SW-MPA-3",
+          "topic": "Marine protected areas",
+          "label": "South West Marine protected areas 3 (SW-MPA-3)",
+          "policyInfo": "Where statutory advice states that a marine protected area site condition is deteriorating or that features are moving or changing due to climate change, a suitable boundary change to ensure continued protection of the site and coherence of the overall network should be considered.",
+          "consideration": [
+            "The nearest Marine Conservation Zone is the Otter Estuary, about 6 kilometres to the east. Its features are not found in the marina, and there is no way the works could affect it."
+          ]
+        },
+        {
+          "code": "SW-UWN-1",
+          "topic": "Underwater noise",
+          "label": "South West Underwater noise 1 (SW-UWN-1)",
+          "policyInfo": "Proposals that result in the generation of impulsive sound must contribute data to the UK Marine Noise Registry as per any currently agreed requirements. Public authorities must take account of any currently agreed targets under the Marine Strategy Part One Descriptor 11.",
+          "consideration": [
+            "An impact hammer may be needed for the last metre of some piles. This will only be used with a soft start, no more than 2 piles will be driven a day, and piling will only happen on the rising tide. See our underwater noise assessment."
           ]
         },
         {
@@ -127,6 +307,78 @@
     {
       "name": "Social",
       "policies": [
+        {
+          "code": "SW-ACC-1",
+          "topic": "Access",
+          "label": "South West Access 1 (SW-ACC-1)",
+          "policyInfo": "Proposals demonstrating appropriate enhanced and inclusive public access to and within the marine area, including the provision of services for tourism and recreation activities, will be supported. Proposals that may have significant adverse impacts on public access should demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant.",
+          "consideration": [
+            "The new pontoons will be wider and more stable than the old ones, which will make it easier for people with limited mobility to get on and off boats. The water taxi will keep running from the marina during the works."
+          ]
+        },
+        {
+          "code": "SW-EMP-1",
+          "topic": "Employment",
+          "label": "South West Employment 1 (SW-EMP-1)",
+          "policyInfo": "Proposals that result in a net increase in marine-related employment will be supported, particularly where they meet one or more of the following: 1) are aligned with local skills strategies and support the skills available 2) create a diversity of opportunities 3) create employment in locations identified as the most deprived 4) implement new technologies - in, and adjacent to, the south west marine plan areas.",
+          "consideration": [
+            "The marina supports jobs at the boat repair businesses, the water taxi and our own marina staff. Replacing the pontoons protects these jobs. The installation will be done by a South West marine contractor."
+          ]
+        },
+        {
+          "code": "SW-FISH-1",
+          "topic": "Fisheries",
+          "label": "South West Fisheries 1 (SW-FISH-1)",
+          "policyInfo": "Proposals that support a sustainable fishing industry, including the industry's diversification, should be supported.",
+          "consideration": [
+            "The marina is used by leisure boats, not fishing boats. The piling barge will stay inside the basin and will not block the marina entrance, so fishing boats using the estuary will not be affected."
+          ]
+        },
+        {
+          "code": "SW-FISH-2",
+          "topic": "Fisheries",
+          "label": "South West Fisheries 2 (SW-FISH-2)",
+          "policyInfo": "Proposals that enhance access for fishing activities should be supported. Proposals that may have significant adverse impacts on access for fishing activities must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant. If it is not possible to mitigate significant adverse impacts, proposals should state the case for proceeding.",
+          "consideration": [
+            "The works will not affect fisheries management. Some local anglers fish from the marina walls, and they will only be kept away from the area being worked on."
+          ]
+        },
+        {
+          "code": "SW-FISH-3",
+          "topic": "Fisheries",
+          "label": "South West Fisheries 3 (SW-FISH-3)",
+          "policyInfo": "Proposals that enhance essential fish habitat, including spawning, nursery and feeding grounds, and migratory routes, should be supported. Proposals that may have significant adverse impacts on essential fish habitat, including spawning, nursery and feeding grounds, and migratory routes, must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - adverse impacts so they are no longer significant.",
+          "consideration": [
+            "Salmon and sea trout pass through the Exe estuary, but the marina basin is off to the side of the main channel. The vibrating hammer, soft start and limit of 2 piles a day will keep noise low. See our underwater noise assessment."
+          ]
+        },
+        {
+          "code": "SW-HER-1",
+          "topic": "Heritage assets",
+          "label": "South West Heritage assets 1 (SW-HER-1)",
+          "policyInfo": "Proposals that demonstrate they will conserve and enhance the significance of heritage assets will be supported. Where proposals may cause harm to the significance of heritage assets, proponents must demonstrate that they will, in order of preference: a) avoid b) minimise c) mitigate - any harm to the significance of heritage assets. If it is not possible to mitigate, then public benefits for proceeding with the proposal must outweigh the harm to the significance of heritage assets.",
+          "consideration": [
+            "The marina was built in the 1990s in the old Exmouth dock. We have checked the Historic Environment Record and there are no listed structures or recorded wrecks in the basin. The works replace modern pontoons and piles in the same positions."
+          ]
+        },
+        {
+          "code": "SW-SOC-1",
+          "topic": "Knowledge, understanding, appreciation and enjoyment",
+          "label": "South West Knowledge, understanding, appreciation and enjoyment 1 (SW-SOC-1)",
+          "policyInfo": "Those bringing forward proposals should consider and demonstrate how their development shall enhance public knowledge, understanding, appreciation and enjoyment of the marine environment as part of (the design of) the proposal.",
+          "consideration": [
+            "The marina helps people enjoy the estuary through sailing, the water taxi and visits by boat. Safer, more accessible pontoons will make this easier for more people."
+          ]
+        },
+        {
+          "code": "SW-SCP-1",
+          "topic": "Seascape and landscape",
+          "label": "South West Seascape and landscape 1 (SW-SCP-1)",
+          "policyInfo": "Proposals should ensure they are compatible with their surroundings and should not have a significant adverse impact on the character and visual resource of the seascape and landscape of the area. The location, scale and design of proposals should take account of the character, quality and distinctiveness of the seascape and landscape. Proposals that may have a significant adverse impact on the seascape and landscape of the area",
+          "consideration": [
+            "The new pontoons and piles will look much like the old ones and follow the same layout. They will not change the view of the marina or the estuary."
+          ]
+        },
         {
           "code": "SW-TR-1",
           "topic": "Tourism and recreation",
@@ -161,6 +413,14 @@
         {
           "code": "SW-UWN-2",
           "location": "Sections 2 to 4"
+        },
+        {
+          "code": "SW-UWN-1",
+          "location": "Sections 2 to 4"
+        },
+        {
+          "code": "SW-FISH-3",
+          "location": "Section 5"
         }
       ]
     },

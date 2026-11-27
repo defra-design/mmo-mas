@@ -7,6 +7,7 @@ import teignmouthData from '../mock-data/marine-plan-policies.json';
 import haylingData from '../mock-data/marine-plan-policies-hayling.json';
 import brixhamData from '../mock-data/marine-plan-policies-brixham.json';
 import exmouthData from '../mock-data/marine-plan-policies-exmouth.json';
+import dartData from '../mock-data/marine-plan-policies-dart.json';
 import { applicationFor } from './cases';
 import type { Application } from './cases';
 
@@ -49,6 +50,7 @@ const data: Record<Application, RawData> = {
   hayling: haylingData as RawData,
   brixham: brixhamData as RawData,
   exmouth: exmouthData as RawData,
+  dart: dartData as RawData,
 };
 
 // One ordered array per application (category order, then policy order within

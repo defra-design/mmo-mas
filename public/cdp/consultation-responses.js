@@ -1,11 +1,15 @@
-// The Consultation responses tab for MLA/2026/10006, Hayling Island groyne
-// repairs: the consultees' responses and the public's comments as they arrive
-// from CDP, read-only. The application is from the GOV.UK prototype; the
-// consultees, responses and comments are made up for it.
+// The Consultation responses tab: the consultees' responses and the public's
+// comments as they arrive from CDP, read-only. The built-in data is for
+// MLA/2026/10006, Hayling Island groyne repairs. The application is from the
+// GOV.UK prototype; the consultees, responses and comments are made up for it.
 //
-// The case passes in when the consultation started and its consultee closing
-// date on the hash (#started=YYYY-MM-DD&closing=YYYY-MM-DD), as the closing date
-// moves when the caseworker extends it. The case works its dates out from
+// The case passes in when the consultation started, the consultee period in
+// days and its consultee closing date on the hash
+// (#started=YYYY-MM-DD&period=14&closing=YYYY-MM-DD), as the closing date
+// moves when the caseworker extends it. Any other case that has just started
+// consultation also passes its consultees (&consultees=<JSON list of
+// { name, type, asked }>): nobody has responded yet and there are no public
+// comments. The case works its dates out from
 // today, so it is always mid-consultation: started 11 days ago, closing in 3.
 // Responses and comments are dated in days after the start, and only show once
 // that day has come. A consultee who hasn't responded is Overdue once the
@@ -17,7 +21,7 @@
   // stays up for 21 days (LCML v4 site notice page), and public comments close
   // 21 days after it goes up, as on public register v1. The notice is taken as
   // going up the day the consultation starts.
-  var PERIOD_DAYS = 14;
+  var DEFAULT_PERIOD_DAYS = 14;
   var COMMENTS_DAYS = 21;
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
     'August', 'September', 'October', 'November', 'December'];
@@ -149,6 +153,24 @@
     }
   ];
 
+  // A case other than Hayling: its own consultees, with no responses yet.
+  var HAYLING_CONSULTEES = CONSULTEES;
+  var HAYLING_COMMENTS = COMMENTS;
+  function loadCase() {
+    var match = /[#&]consultees=([^&]*)/.exec(location.hash);
+    var passed = null;
+    try { passed = match && JSON.parse(decodeURIComponent(match[1])); } catch (e) { passed = null; }
+    if (Array.isArray(passed)) {
+      CONSULTEES = passed.map(function (c, i) {
+        return { id: 'c' + i, name: c.name, type: c.type, asked: c.asked || '' };
+      });
+      COMMENTS = [];
+    } else {
+      CONSULTEES = HAYLING_CONSULTEES;
+      COMMENTS = HAYLING_COMMENTS;
+    }
+  }
+
   var page = document.getElementById('page');
 
   function esc(s) {
@@ -188,8 +210,12 @@
   function started() {
     return hashDate('started') || addDays(today(), -11);
   }
+  function periodDays() {
+    var match = /[#&]period=(\d+)/.exec(location.hash);
+    return match ? +match[1] : DEFAULT_PERIOD_DAYS;
+  }
   function originalClosing() {
-    return addDays(started(), PERIOD_DAYS);
+    return addDays(started(), periodDays());
   }
   function closing() {
     return hashDate('closing') || originalClosing();
@@ -251,6 +277,7 @@
   }
 
   function table() {
+    if (!CONSULTEES.length) return '<p class="consult__empty">There are no consultees on this case.</p>';
     var rows = CONSULTEES.map(function (c) {
       return '<tr><td><button type="button" class="consult__link" data-go="' + c.id + '">' + esc(c.name) + '</button></td>' +
         '<td>' + esc(c.type) + '</td><td>' + tag(statusOf(c)) + '</td>' +
@@ -279,6 +306,7 @@
   }
 
   function comments(headingTag) {
+    if (!commentsFor().length) return '<p class="consult__empty">No public comments have been received yet.</p>';
     return commentsFor().map(function (c) {
       return '<article class="consult__item">' +
         '<' + headingTag + ' class="consult__item-title">' + esc(c.name) + '</' + headingTag + '>' +
@@ -296,8 +324,10 @@
         (overdue ? '<span class="consult__overdue">Overdue</span>' : '') + '</button>';
     }
     function group(title, type) {
+      var list = CONSULTEES.filter(function (c) { return c.type === type; });
+      if (!list.length) return '';
       return '<div class="mpp__group"><h2 class="mpp__group-title">' + title + '</h2>' +
-        CONSULTEES.filter(function (c) { return c.type === type; }).map(function (c) {
+        list.map(function (c) {
           return link('pane-' + c.id, c.name, statusOf(c) === 'Overdue');
         }).join('') + '</div>';
     }
@@ -340,6 +370,7 @@
   });
 
   function render() {
+    loadCase();
     page.innerHTML = withNav();
     selectPane('pane-overview', false);
     window.scrollTo(0, 0);

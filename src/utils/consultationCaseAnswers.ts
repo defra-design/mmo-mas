@@ -17,7 +17,7 @@ export const HAYLING_WFD: WfdForm = {
   initialConsiderations: 'The applicant’s WFD assessment covers the Solent coastal water body. The works are like for like repairs within the existing groyne footprint, plus about 40 square metres of rock at groyne 19, so deterioration is unlikely. Ask the Environment Agency to confirm the conclusion as part of consultation.',
 };
 
-// One assessment per Hayling policy (South marine plan).
+// One assessment per Hayling policy (all 38 South marine plan policies).
 export const HAYLING_MPP: Record<string, MppAnswer> = {
   'S-CC-3': { outcome: 'Compliant', reason: 'The groynes stay at their current length and height, so longshore movement of shingle will not change. The rock at groyne 19 replaces beach lost to scour.' },
   'S-CO-1': { outcome: 'Compliant', reason: 'The works use the existing groyne footprint and only one groyne is worked on at a time, so the rest of the beach stays open.' },
@@ -32,6 +32,31 @@ export const HAYLING_MPP: Record<string, MppAnswer> = {
   'S-ACC-1': { outcome: 'Compliant', reason: 'The beach and promenade stay open, with a fenced working area of about 30 metres around each groyne.' },
   'S-HER-1': { outcome: 'Consultation required', reason: 'No recorded heritage assets, but ask Historic England to confirm and to comment on the protocol for finds.' },
   'S-TR-2': { outcome: 'Compliant', reason: 'Working outside the school summer holidays keeps disruption to visitors and seafront businesses to a minimum.' },
+  'S-CC-1': { outcome: 'Compliant', reason: 'The works do not change how the seafront is used, so there are no knock-on emissions from other activities.' },
+  'S-CC-2': { outcome: 'Compliant', reason: 'Greenheart has a long design life and the rock at groyne 19 allows for higher sea levels. The works support the hold the line policy for this frontage.' },
+  'S-CC-4': { outcome: 'Compliant', reason: 'No saltmarsh, seagrass or other flood defence or carbon storage habitat at the site. The vegetated shingle will be fenced off.' },
+  'S-AQ-2': { outcome: 'Compliant', reason: 'Not relevant. The works do not provide or affect infrastructure for fisheries or aquaculture.' },
+  'S-CAB-1': { outcome: 'Compliant', reason: 'Not relevant. No cables are being laid.' },
+  'S-CAB-2': { outcome: 'Compliant', reason: 'No subsea cable landfalls on this part of the seafront.' },
+  'S-DD-2': { outcome: 'Compliant', reason: 'Not relevant. No dredging or disposal at sea. Beach material dug out around the posts is put back on the same tide.' },
+  'S-PS-1': { outcome: 'Compliant', reason: 'The site is on the open seafront, outside any harbour authority area, and everything comes by road. No effect on port or harbour activity.' },
+  'S-REN-1': { outcome: 'Compliant', reason: 'Not relevant. The works do not involve renewable energy.' },
+  'S-BIO-2': { outcome: 'Compliant', reason: 'Like for like repairs, so no change to how species move along the shore.' },
+  'S-BIO-4': { outcome: 'Compliant', reason: 'No loss of priority habitat. The vegetated shingle is fenced off and plant uses the existing access road.' },
+  'S-NIS-1': { outcome: 'Compliant', reason: 'Plant and materials come by road, not by sea, and plant is cleaned before it arrives. No new type of surface is introduced.' },
+  'S-ML-1': { outcome: 'Compliant', reason: 'Not relevant. This policy is for public authorities managing amenity beaches.' },
+  'S-ML-2': { outcome: 'Compliant', reason: 'Old timber and fixings are taken off the beach on the same tide and recycled, and nothing is left on the beach between tides.' },
+  'S-UWN-1': { outcome: 'Compliant', reason: 'Not relevant. No impulsive sound, as posts are vibrated in at low tide in the dry.' },
+  'S-WQ-2': { outcome: 'Compliant', reason: 'The works are not designed to improve water quality, but will not make it worse. See S-WQ-1.' },
+  'S-ACC-2': { outcome: 'Compliant', reason: 'Public access stays as it is, and holding the beach in place keeps the promenade and coastal path usable.' },
+  'S-EMP-1': { outcome: 'Compliant', reason: 'The local contractor will have an apprentice working on the repairs.' },
+  'S-EMP-2': { outcome: 'Compliant', reason: 'No net increase in jobs, but the works support existing seafront jobs.' },
+  'S-FISH-1': { outcome: 'Compliant', reason: 'Not relevant. The works do not involve the fishing industry.' },
+  'S-FISH-2': { outcome: 'Consultation required', reason: 'The applicant says there are no fishing or aquaculture sites at the groynes. Ask the Southern IFCA to confirm, including any shellfish beds near groyne 19.' },
+  'S-FISH-4': { outcome: 'Compliant', reason: 'Works are in the dry at low tide, and the rock covers about 40 square metres of scoured beach that is not a spawning or nursery ground.' },
+  'S-SOC-1': { outcome: 'Compliant', reason: 'The beach stays open and the dates have been agreed with the seafront watersports clubs, so their activities are not displaced.' },
+  'S-SCP-1': { outcome: 'Compliant', reason: 'The groynes will look the same as now. The rock at groyne 19 is small and similar to rock already on the seafront.' },
+  'S-TR-1': { outcome: 'Compliant', reason: 'The works maintain the beach rather than adding new facilities, and keep it supporting seafront tourism.' },
 };
 
 const consultee = (id: string, organisation: string, notes = ''): ConsulteeRow => ({

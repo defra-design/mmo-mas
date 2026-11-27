@@ -188,7 +188,9 @@ mirror the real system, these are **static HTML pages embedded in an `<iframe>`*
   with a status, and the Marine plan policies grid underneath. The tasks are, in order: Site
   check, Water Framework Directive, Withholding information, Public notice, Review public
   notice evidence (once the applicant's photos arrive), Prepare for consultation, Start
-  consultation, and Extend consultee closing date (once in consultation). **Every task opens,
+  consultation, and Extend consultee closing date (once in consultation). Starting
+  consultation on any case also adds the Consultation responses tab, showing that case's
+  consultees with no responses yet. **Every task opens,
   whatever its status.**
 - **Gating is read-only, not locked out.** A task still waiting on Site check reads "Cannot
   start yet", but it still opens — as a **read-only** form: a grey padlock notification

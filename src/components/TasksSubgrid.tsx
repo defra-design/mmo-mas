@@ -3,7 +3,7 @@
 // the status in its own right-hand column, matching MarinePlanPoliciesSubgrid.
 // Every case shows its tasks here, on the Tasks tab.
 import { useNavigate } from 'react-router-dom';
-import { CONSULTATION_CASE_ID } from '../utils/cases';
+import { consultationFor } from '../utils/consultationCase';
 import { startConsultationStatus } from '../utils/startConsultation';
 import {
   makeStyles,
@@ -106,7 +106,7 @@ export default function TasksSubgrid({ caseId }: TasksSubgridProps) {
       status: startConsultationStatus(caseId, taskContext),
       slug: 'start-consultation',
     },
-    ...(caseId === CONSULTATION_CASE_ID
+    ...(consultationFor(caseId, taskContext)
       ? [{
           key: 'extendConsultation',
           name: 'Extend consultee closing date',

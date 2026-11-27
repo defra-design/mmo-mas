@@ -41,7 +41,7 @@ import OrganisationLink from './OrganisationLink';
 import TasksSubgrid from './TasksSubgrid';
 import CdpFrame from './CdpFrame';
 import {
-  CASE_SUBMITTED, CONSULTATION_STARTED, currentClosingDate, showDate,
+  CASE_SUBMITTED, consultationFor, showDate,
 } from '../utils/consultationCase';
 import marineCaseDetails from '../mock-data/marine-case-details.json';
 import marineCases from '../mock-data/marine-licence-cases.json';
@@ -334,29 +334,40 @@ function OverflowTabsMenu({
 
 export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const styles = useStyles();
+  const caseTasks = useCaseTasks(caseId);
   const {
     transfers,
     rejections,
     consultations,
+    consultees,
     requestTransferToMcms,
     completeTransferToMcms,
     rejectApplication,
-    consultationExtensions,
-  } = useCaseTasks(caseId);
+  } = caseTasks;
   // A task form can request a specific landing tab via navigation state;
   // otherwise every case opens on its Tasks tab. A ?tab= in the URL does the
   // same for plain links, e.g. a shared link to a case's MPP tab.
   const location = useLocation();
   const navState = location.state as { tab?: string } | null;
   const requestedTab = navState?.tab ?? new URLSearchParams(location.search).get('tab') ?? undefined;
-  // MLA/2026/10006 (Hayling Island groyne repairs) is in consultation, so it
-  // also has the Consultation responses tab. CDP is told when the consultation
-  // started and the case's closing date (it moves when the caseworker extends
-  // it), passed in the hash.
+  // A case in consultation also has the Consultation responses tab. CDP is told
+  // when the consultation started, the period and the closing date (it moves
+  // when the caseworker extends it), passed in the hash. Hayling's responses
+  // are part of its CDP page; any other case passes its consultees, none of
+  // whom has responded yet.
   const consultationCase = caseId === CONSULTATION_CASE_ID;
-  const consultationResponsesSrc =
-    asset('cdp/consultation-responses.html') + `#started=${CONSULTATION_STARTED}&closing=` +
-    currentClosingDate(consultationExtensions[caseId] ?? []);
+  const consultation = consultationFor(caseId, caseTasks);
+  const consultationResponsesSrc = consultation && (
+    asset('cdp/consultation-responses.html') +
+    `#started=${consultation.started}&period=${consultation.periodDays}&closing=${consultation.closing}` +
+    (consultationCase ? '' : '&consultees=' + encodeURIComponent(JSON.stringify(
+      (consultees[caseId] ?? []).map(row => ({
+        name: row.organisation.replace(/\s*\([^)]*\)$/, ''),
+        type: row.consultationType,
+        asked: row.notes,
+      })),
+    )))
+  );
   const [selectedTab, setSelectedTab] = useState(requestedTab ?? 'tasks');
 
   // Which case-action dialog is open, if any. Each dialog owns its own fields and
@@ -375,12 +386,12 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
   const caseTabs = [
     { id: 'tasks', name: 'Tasks' },
     ...tabs.slice(0, 1),
-    ...(consultationCase ? [{ id: 'consultation', name: 'Consultation responses' }] : []),
+    ...(consultation ? [{ id: 'consultation', name: 'Consultation responses' }] : []),
     ...tabs.slice(1),
   ];
   const application = applicationFor(caseId);
   const cdpSrc = selectedTab === 'consultation'
-    ? consultationCase ? consultationResponsesSrc : undefined
+    ? consultationResponsesSrc
     : cdpPage(application, selectedTab);
   // Tabs whose content is React rather than an iframe. These scroll as one body
   // (see contentRowScroll); iframe tabs keep their own inner scroll.
@@ -403,7 +414,8 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
     reference: caseId,
     title: details?.title ?? row?.project ?? 'Marine licence case',
     status: details?.status ?? row?.status ?? 'Allocated',
-    assignedTo: details?.assignedTo ?? row?.caseOfficer ?? 'Unallocated',
+    // A case awaiting allocation has nobody assigned yet.
+    assignedTo: details?.assignedTo || row?.caseOfficer || 'Unallocated',
     caseAge: details?.caseAge ?? row?.caseAge ?? '—',
     applicationType: details?.applicationType ?? 'Marine licence application',
     // MLA/2026/10006's dates are worked out from today (see consultationCase.ts).
@@ -499,7 +511,7 @@ export default function MarineCaseSummary({ caseId }: MarineCaseSummaryProps) {
           </div>
           <div className={styles.metaGroup}>
             {meta.map(m =>
-              m.label === 'Assigned to' ? (
+              m.label === 'Assigned to' && m.value !== 'Unallocated' ? (
                 <div key={m.label} className={styles.assignedItem}>
                   <Avatar
                     name={m.value}

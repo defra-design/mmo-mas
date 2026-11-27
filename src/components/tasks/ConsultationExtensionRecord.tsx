@@ -18,7 +18,7 @@ import TaskValue from './TaskValue';
 import { useCaseTasks } from '../../context/TaskContext';
 import { notificationMessage, requiredMessage } from '../../utils/validationMessages';
 import {
-  EXTEND_BY_OPTIONS, addDays, currentClosingDate, isoDate, showDate, withNewClosingDates,
+  EXTEND_BY_OPTIONS, addDays, consultationFor, isoDate, showDate, withNewClosingDates,
 } from '../../utils/consultationCase';
 
 const LABELS = { days: 'Extend by', reason: 'Reason' };
@@ -41,17 +41,20 @@ export default function ConsultationExtensionRecord({ caseId }: Props) {
   const styles = useStyles();
   const navigate = useNavigate();
   const { extensionId } = useParams<{ extensionId: string }>();
-  const { consultationExtensions, addConsultationExtension } = useCaseTasks(caseId);
-  const extensions = consultationExtensions[caseId] ?? [];
-  const saved = withNewClosingDates(extensions).find(row => row.id === extensionId);
+  const caseTasks = useCaseTasks(caseId);
+  const { addConsultationExtension } = caseTasks;
+  const consultation = consultationFor(caseId, caseTasks);
+  const extensions = consultation?.extensions ?? [];
+  const saved = consultation && withNewClosingDates(extensions, consultation.originalClosing)
+    .find(row => row.id === extensionId);
   const [draft, setDraft] = useState({ days: '', reason: '' });
   const [dirty, setDirty] = useState(false);
   const [errors, setErrors] = useState<Required[]>([]);
   const taskUrl = `/receive-assess/cases/${encodeURIComponent(caseId)}/tasks/extend-closing-date`;
-  const closingDate = currentClosingDate(extensions);
+  const closingDate = consultation?.closing ?? '';
   const days = parseInt(draft.days, 10);
 
-  if (extensionId !== 'new' && !saved) {
+  if (!consultation || (extensionId !== 'new' && !saved)) {
     return <div className={styles.page}>
       <FormCommandBar backTo={taskUrl} />
       <Card className={styles.card}><Title3>Extension not found</Title3></Card>

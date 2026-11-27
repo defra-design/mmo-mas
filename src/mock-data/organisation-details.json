@@ -266,6 +266,20 @@
     "createdOn": "23/02/2025 08:47"
   },
   {
+    "id": "dart-estuary-moorings-ltd",
+    "name": "Dart Estuary Moorings Ltd",
+    "phone": "01632 960544",
+    "type": "Limited Company (LTD)",
+    "buildingNumber": "",
+    "buildingName": "Moorings Office",
+    "street": "South Embankment",
+    "town": "Dartmouth",
+    "county": "Devon",
+    "postcode": "TQ6 9BH",
+    "country": "United Kingdom of Great Britain and Northern Ireland",
+    "createdOn": "25/11/2026 14:05"
+  },
+  {
     "id": "dartford-borough-council",
     "name": "Dartford Borough Council",
     "phone": "01632 960220",
