@@ -6,6 +6,7 @@ import type { CaseState, TaskState } from './TaskContext';
 import {
   CONSULTATION_CASE_ID,
   EVIDENCE_CASE_ID,
+  FRESH_CASE_ID,
   RESUBMISSION_CASE_ID,
 } from '../utils/cases';
 import {
@@ -24,6 +25,7 @@ import {
   BRIXHAM_WFD,
 } from '../utils/brixhamCaseAnswers';
 import { EXMOUTH_SITE_CHECK, EXMOUTH_SITE_NOTICE } from '../utils/exmouthCaseAnswers';
+import { TEIGNMOUTH_SITE_CHECK } from '../utils/teignmouthCaseAnswers';
 import { EVIDENCE_LOCATION_COUNT } from '../components/tasks/publicNoticeEvidenceLocations';
 
 const noReview = () =>
@@ -79,6 +81,24 @@ const allDone: Partial<TaskState> = {
   siteNotice: 'Done',
 };
 
+// Site check has just been done, so every other task is ready to start.
+function siteCheckedCase(): CaseState {
+  const blank = blankCase();
+  return {
+    ...blank,
+    tasks: {
+      ...blank.tasks,
+      siteCheck: 'Done',
+      wfdAssessment: 'To do',
+      marinePlanPolicies: 'To do',
+      prepForConsultee: 'To do',
+      publicRegister: 'To do',
+      siteNotice: 'To do',
+    },
+    siteCheckForm: TEIGNMOUTH_SITE_CHECK,
+  };
+}
+
 // Only Site check and Public notice are done; the photos have come back.
 function evidenceCase(): CaseState {
   const blank = blankCase();
@@ -129,6 +149,7 @@ function consultationCase(): CaseState {
 }
 
 const seeds: Record<string, () => CaseState> = {
+  [FRESH_CASE_ID]: siteCheckedCase,
   [EVIDENCE_CASE_ID]: evidenceCase,
   [RESUBMISSION_CASE_ID]: resubmissionCase,
   [CONSULTATION_CASE_ID]: consultationCase,
