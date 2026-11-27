@@ -29,6 +29,13 @@ function serveSnapshots() {
         const url = (req.url || '').split('?')[0]
         const m = url.match(/^\/(iteration-\d+)(\/.*)?$/)
         if (!m) return next()
+        // A frozen iteration's own front page is the landing page as it was
+        // then; send it to the live one, as server.js does.
+        if (!m[2] || m[2] === '/') {
+          res.statusCode = 302
+          res.setHeader('Location', '/')
+          return res.end()
+        }
 
         const snapDir = path.join(snapshotsDir, m[1])
         if (!fs.existsSync(snapDir)) return next()
