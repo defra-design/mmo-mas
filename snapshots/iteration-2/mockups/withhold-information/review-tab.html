@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Withholding information tab</title>
+    <link rel="stylesheet" href="../../cdp/cdp.css" />
+    <style>[hidden] { display: none !important; }</style>
+  </head>
+  <body>
+    <!-- The applicant's answers as they arrive from CDP. Only the questions the
+         applicant was asked are shown, so each answer hides the rows after it. -->
+    <main class="section section--wide-labels">
+      <h1 class="section__title">Withholding information from the public register</h1>
+
+      <dl class="fields">
+        <div class="field">
+          <dt class="field__label">Do you want to ask us to withhold any information from the public register?</dt>
+          <dd class="field__value" id="asked"></dd>
+        </div>
+
+        <div class="field" id="reason-row">
+          <dt class="field__label">Reason</dt>
+          <dd class="field__value" id="reason"></dd>
+        </div>
+
+        <div class="field" id="commercial">
+          <dt class="field__label">Tell us what you want withheld and why</dt>
+          <dd class="field__value">We would like the fees and financial figures in our activity description withheld. A second operator is expected to bid for a concession in the same harbour next year, and if they can see what we are paying and what we expect to take they can pitch against us. We would also like the pontoon dimensions and fixing method shown on our construction drawing withheld. We spent two years getting this set-up right and we do not want another hire business copying it.</dd>
+        </div>
+
+        <div class="field" id="approval-row">
+          <dt class="field__label">Do you have approval from the Secretary of State for Defence to withhold information for national security reasons?</dt>
+          <dd class="field__value" id="approval"></dd>
+        </div>
+
+        <div class="field" id="security">
+          <dt class="field__label">Tell us what you want withheld</dt>
+          <dd class="field__value">Royal Navy patrol vessels will berth at the outer end of the pontoon overnight. We would like the out-of-hours mooring times in our activity description withheld, along with the positions of the CCTV and access control equipment shown on our construction drawing. We have approval from the Secretary of State for Defence, reference MOD-SOS-2026-0412, dated 3 August 2026.</dd>
+        </div>
+      </dl>
+    </main>
+
+    <script>
+      // Same scenarios as task.html. The answer comes from the bar on tab.html,
+      // which sits outside the case, or from this page's hash.
+      (function () {
+        var SCENARIOS = {
+          none: { reason: null },
+          commercial: { reason: 'Commercial or industrial confidentiality reasons' },
+          security: { reason: 'National security reasons', approval: 'Yes' },
+          'security-none': { reason: 'National security reasons', approval: 'No' }
+        };
+        function byId(id) { return document.getElementById(id); }
+        function show(id, on) { byId(id).hidden = !on; }
+
+        function fromBar() {
+          try {
+            var checked = window.top.document.querySelector('#scenarios [name="scenario"]:checked');
+            return checked && checked.value;
+          } catch (e) { return null; }
+        }
+
+        function apply() {
+          var key = SCENARIOS[location.hash.slice(1)] ? location.hash.slice(1) : fromBar() || 'commercial';
+          var a = SCENARIOS[key];
+          byId('asked').textContent = a.reason ? 'Yes' : 'No';
+          byId('reason').textContent = a.reason || '';
+          byId('approval').textContent = a.approval || '';
+          show('reason-row', !!a.reason);
+          show('commercial', key === 'commercial');
+          show('approval-row', !!a.approval);
+          show('security', a.approval === 'Yes');
+        }
+
+        window.addEventListener('hashchange', apply);
+        apply();
+      })();
+    </script>
+  </body>
+</html>

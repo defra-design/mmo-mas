@@ -1,0 +1,43 @@
+/* DESIGN EXPLORATION (not MVP) — styles for the per-policy supporting documents
+   on the saved review tab copy. Kept here, not in cdp.css, so this page still
+   works once the live review tab no longer shows documents per policy. */
+
+.mpp--sectors .mpp__doc + .mpp__doc {
+  margin-top: 12px;
+}
+
+.mpp--sectors .mpp__doc {
+  padding: 12px;
+}
+
+.mpp--sectors .mpp__doc .doc-link {
+  gap: 2px;
+  line-height: 1.4;
+}
+
+.mpp__doc-rows {
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mpp__doc-row {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--cdp-gap);
+  row-gap: 2px;
+  line-height: 1.4;
+}
+
+.mpp__doc-row dt {
+  flex: 0 0 200px;
+  color: var(--cdp-text-secondary);
+}
+
+.mpp__doc-row dd {
+  flex: 1 1 200px;
+  min-width: 0;
+  margin: 0;
+}
+

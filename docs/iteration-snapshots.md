@@ -5,8 +5,8 @@ snapshot, and how the mechanism works. Audience: whoever runs the freeze (develo
 agent). For the plain-English overview see the
 [Design and development guide](./design-and-development-guide.md#iterations--versioning).
 
-> **The mechanism is built and in use.** Iteration 1 is already frozen at
-> `snapshots/iteration-1/`. This doc is the runbook for freezing the *next* iteration and the
+> **The mechanism is built and in use.** Iterations 1 and 2 are already frozen at
+> `snapshots/iteration-1/` and `snapshots/iteration-2/`. This doc is the runbook for freezing the *next* iteration and the
 > reference for how it all fits together.
 
 ---

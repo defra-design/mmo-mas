@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Other permissions</title>
+    <link rel="stylesheet" href="cdp.css" />
+  </head>
+  <body>
+    <main class="section">
+      <h1 class="section__title">Other permissions</h1>
+      <div class="mpp">
+        <nav class="mpp__nav" aria-label="Other permissions">
+          <button type="button" class="mpp__link" data-target="perm-legal-powers">
+            Special legal powers
+          </button>
+          <button type="button" class="mpp__link" data-target="perm-harbour">
+            Harbour authority
+          </button>
+          <button type="button" class="mpp__link" data-target="perm-authorities">
+            Other authorities
+          </button>
+          <button type="button" class="mpp__link" data-target="perm-consultation">
+            Pre-application consultation
+          </button>
+        </nav>
+
+        <section class="mpp__detail">
+          <div class="perm-pane" id="perm-legal-powers">
+            <h2 class="mpp__detail-title" tabindex="-1">
+              Does your organisation have special legal powers to do any of this project?
+            </h2>
+            <p class="mpp__guidance">
+              <span class="mpp__guidance-label">Application guidance:</span> You can either
+              give permission to others to do the work, or do the work yourself without needing
+              permission from other organisations, for example, if you're a harbour, lighthouse
+              or coastal protection authority.
+            </p>
+            <div class="mpp__box"><p>No</p></div>
+          </div>
+
+          <div class="perm-pane" id="perm-harbour" hidden>
+            <h2 class="mpp__detail-title" tabindex="-1">
+              Are your proposed works located in a harbour authority area?
+            </h2>
+            <p class="mpp__guidance">
+              <span class="mpp__guidance-label">Application guidance:</span> A harbour authority
+              is an organisation with legal powers to manage a harbour, and includes municipal,
+              private and trust ports.
+            </p>
+            <div class="mpp__box"><p>Yes</p></div>
+
+            <h3 class="mpp__followup">Details of the harbour authority.</h3>
+            <div class="mpp__box">
+              <p>
+                Teignmouth Harbour Authority (Teignbridge District Council) We have
+                been in contact with the Harbour Master, Mr R. Pethick, who has
+                confirmed in principle agreement for the proposed pontoon location. A
+                formal harbour authority consent will be sought once marine licence
+                approval is confirmed. A separate concession agreement covering the
+                commercial operation of the pontoon is also being negotiated with the
+                Authority, on the terms set out in our project background. Teignmouth
+                Harbour Commission ref: THC/2026/041
+              </p>
+            </div>
+          </div>
+
+          <div class="perm-pane" id="perm-authorities" hidden>
+            <h2 class="mpp__detail-title" tabindex="-1">
+              Have you applied to, or got permission from, any other authorities in relation to
+              these proposed works?
+            </h2>
+            <div class="mpp__box"><p>Yes</p></div>
+
+            <h3 class="mpp__followup">
+              Details of the organisations, relevant contact details and any reference numbers.
+            </h3>
+            <div class="mpp__box">
+              <p>
+                Teignbridge District Council Planning Department — a pre-application
+                enquiry was made in February 2026 to confirm whether planning
+                permission is required for the pontoon installation. We were advised
+                that planning permission is not required as the works constitute
+                permitted development within the harbour area, however this is
+                subject to confirmation. Contact: planning@teignbridge.gov.uk, ref
+                PA-PRE-2026-00389.
+              </p>
+            </div>
+          </div>
+
+          <div class="perm-pane" id="perm-consultation" hidden>
+            <h2 class="mpp__detail-title" tabindex="-1">
+              Have you consulted with any public groups or organisations before making this
+              application?
+            </h2>
+            <p class="mpp__guidance">
+              <span class="mpp__guidance-label">Application guidance:</span> This could include
+              relevant local groups in the community or organisations, for example, resident
+              committees, local environmental and conservation groups, Companies House or Natural
+              England.
+            </p>
+            <div class="mpp__box"><p>Yes</p></div>
+
+            <h3 class="mpp__followup">Details of who you consulted and what advice they gave.</h3>
+            <div class="mpp__box">
+              <p>
+                We have consulted with the following: • Teignmouth Harbour Authority
+                (Harbour Master) — as above, in principle agreement to the proposed
+                location obtained • Teignmouth Fishing Vessel Association — discussed
+                the proposed pontoon location with the association secretary. No
+                objections raised provided the pontoon does not obstruct access to the
+                fishing quay, which it will not. • Devon Wildlife Trust — contacted by
+                email in March 2026 to flag the project and ask if there were any
+                ecological concerns. No response received to date. • Natural England —
+                pre-application enquiry submitted via the marine pre-application advice
+                service. Response received confirming no objection in principle subject
+                to confirmation that no protected species are present at the
+                installation location.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="other-permissions.js"></script>
+  </body>
+</html>

@@ -20,6 +20,7 @@ const useStyles = makeStyles({
   logo: { height: '80px', maxWidth: '100%', marginBottom: '36px' },
   title: { fontSize: '40px', lineHeight: '1.15', fontWeight: 600, margin: '0 0 20px', maxWidth: '700px', '@media (max-width: 600px)': { fontSize: '32px' } },
   intro: { fontSize: '19px', lineHeight: '1.6', color: '#605e5c', maxWidth: '690px', margin: '0 0 22px' },
+  stage: { marginBottom: '16px' },
   sectionTitle: { fontSize: '24px', lineHeight: '1.3', fontWeight: 600, margin: '0 0 8px' },
   iteration: {
     display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 250px', gap: '40px',
@@ -65,6 +66,25 @@ const playbackUrls: Record<number, string> = {
   2: 'https://defra.sharepoint.com/:p:/r/teams/Team4307/Change%20Delivery%20%20Implementation/MMO%20CHANGE%20PROGRAMME/MPLP%20(Marine%20Planning%20%26%20Licensing%20Programme)/7%20Low%20Complexity%20Marine%20Licences/User%20research/Marine%20Applications%20System%20(internal%20facing%20research)/MAS%20round%203/MAS%20Round%203-%20Usability_testing_playback_deck.pptx?d=w7004debe41d34501b11a61474b0e08af&csf=1&web=1&e=oWUJPf',
 };
 
+// The live app is the iteration in progress; earlier ones are frozen snapshots
+// served under /iteration-N/ (see docs/iteration-snapshots.md).
+const CURRENT_ITERATION = 3;
+
+// Consultation sits across both stages: Iteration 3 picks the case up there.
+const stages = [
+  { id: 'decision', title: 'Make and issue a decision stage', iterations: [3] },
+  { id: 'receive-assess', title: 'Receive and assess stage', iterations: [2, 1] },
+];
+
+const descriptions: Record<number, string> = {
+  3: 'Takes cases through consultation to making and issuing a decision. Every case shares one design and keeps its own answers.',
+  2: 'Develops the assessment journey and includes marine plan policy assessments, consultation preparation, public register decisions, public notice evidence review, and starting and extending a consultation.',
+  1: 'The first application review journey, with the Case list, applicant review tabs, Site check and Water Framework Directive tasks.',
+};
+
+// Iterations whose design overview page exists in public/docs.
+const designOverviews = [1, 2];
+
 export default function IndexPage() {
   const styles = useStyles();
   const { resetAll } = useTasks();
@@ -90,55 +110,58 @@ export default function IndexPage() {
             <Button className={styles.resetButton} appearance="primary" size="large" onClick={handleReset}>Clear saved data</Button>
             <span className={styles.success} role="status">{justReset ? 'Prototype data cleared' : ''}</span>
           </div>
-          <section aria-labelledby="iterations-heading">
-            <h2 id="iterations-heading" className={styles.sectionTitle}>Receive and assess stage</h2>
-            {[2, 1].map(iteration => (
-              <article key={iteration} className={styles.iteration} aria-labelledby={`iteration-${iteration}`}>
-                <div>
-                  <div className={styles.iterationHeading}>
-                    <h3 id={`iteration-${iteration}`} className={styles.iterationTitle}>
-                      {iteration === 2 ? (
-                        <Link className={styles.prototypeLink} to="/receive-assess">Iteration 2</Link>
-                      ) : (
-                        <a className={styles.prototypeLink} href="/iteration-1/receive-assess">Iteration 1</a>
+          {stages.map(stage => (
+            <section key={stage.id} className={styles.stage} aria-labelledby={`${stage.id}-heading`}>
+              <h2 id={`${stage.id}-heading`} className={styles.sectionTitle}>{stage.title}</h2>
+              {stage.iterations.map(iteration => {
+                const current = iteration === CURRENT_ITERATION;
+                return (
+                  <article key={iteration} className={styles.iteration} aria-labelledby={`iteration-${iteration}`}>
+                    <div>
+                      <div className={styles.iterationHeading}>
+                        <h3 id={`iteration-${iteration}`} className={styles.iterationTitle}>
+                          {current ? (
+                            <Link className={styles.prototypeLink} to="/receive-assess">Iteration {iteration}</Link>
+                          ) : (
+                            <a className={styles.prototypeLink} href={`/iteration-${iteration}/receive-assess`}>Iteration {iteration}</a>
+                          )}
+                        </h3>
+                        <Badge className={mergeClasses(styles.status, current ? styles.inProgress : styles.tested)}>
+                          {current ? 'In progress' : 'As usability-tested'}
+                        </Badge>
+                      </div>
+                      <p className={styles.description}>{descriptions[iteration]}</p>
+                      {iteration === 1 && (
+                        <ul className={styles.caseGuidance}>
+                          <li>MLA/2026/1002 is the active case. After completing the tasks, clear the saved data to start again.</li>
+                        </ul>
                       )}
-                    </h3>
-                    <Badge className={mergeClasses(styles.status, iteration === 2 ? styles.inProgress : styles.tested)}>
-                      {iteration === 2 ? 'In progress' : 'As usability-tested'}
-                    </Badge>
-                  </div>
-                  <p className={styles.description}>
-                    {iteration === 2
-                      ? 'Develops the assessment journey with marine plan policy assessments, consultation preparation, public register decisions and public notice evidence review.'
-                      : 'The first application review journey, with the Case list, applicant review tabs, Site check and Water Framework Directive tasks.'}
-                  </p>
-                  {iteration === 1 && (
-                    <ul className={styles.caseGuidance}>
-                      <li>MLA/2026/1002 is the active case. After completing the tasks, clear the saved data to start again.</li>
-                    </ul>
-                  )}
-                  {iteration === 2 && (
-                    <div className={styles.shortcuts}>
-                      <TaskHint title="Shortcuts">
-                        <Link to="/examples/start-consultation">The Start consultation task</Link>
-                        <p>Loads an example with all assessment tasks and marine plan policies Done, and Start consultation To do.</p>
-                      </TaskHint>
+                      {iteration === 2 && (
+                        <div className={styles.shortcuts}>
+                          <TaskHint title="Shortcuts">
+                            <a href="/iteration-2/examples/start-consultation">The Start consultation task</a>
+                            <p>Loads an example with all assessment tasks and marine plan policies Done, and Start consultation To do.</p>
+                          </TaskHint>
+                        </div>
+                      )}
+                      {iteration === 2 && (
+                        <p className={styles.explorations}><a href="/iteration-2/mockups/index.html">Design explorations</a></p>
+                      )}
                     </div>
-                  )}
-                  {iteration === 2 && (
-                    <p className={styles.explorations}><a href={asset('mockups/index.html')}>Design explorations</a></p>
-                  )}
-                </div>
-                <div className={styles.resources}>
-                  <p className={styles.resourceTitle}>Design and research</p>
-                  <a href={asset(`docs/iteration-${iteration}-design-overview.html`)}>Iteration {iteration} – design overview</a>
-                  {playbackUrls[iteration] ? (
-                    <a href={playbackUrls[iteration]} target="_blank" rel="noopener noreferrer">UR playback (opens in a new tab)</a>
-                  ) : <span className={styles.pending}>UR playback link to be added</span>}
-                </div>
-              </article>
-            ))}
-          </section>
+                    <div className={styles.resources}>
+                      <p className={styles.resourceTitle}>Design and research</p>
+                      {designOverviews.includes(iteration) ? (
+                        <a href={asset(`docs/iteration-${iteration}-design-overview.html`)}>Iteration {iteration} – design overview</a>
+                      ) : <span className={styles.pending}>Design overview to be added</span>}
+                      {playbackUrls[iteration] ? (
+                        <a href={playbackUrls[iteration]} target="_blank" rel="noopener noreferrer">UR playback (opens in a new tab)</a>
+                      ) : <span className={styles.pending}>UR playback link to be added</span>}
+                    </div>
+                  </article>
+                );
+              })}
+            </section>
+          ))}
           <section className={styles.guide} aria-labelledby="guide-heading">
             <h2 id="guide-heading" className={styles.sectionTitle}>For designers and developers</h2>
             <a className={styles.guideLink} href="https://github.com/defra-design/mmo-mas/blob/main/docs/design-and-development-guide.md" target="_blank" rel="noopener noreferrer">Design and development guide (opens in a new tab)</a>
